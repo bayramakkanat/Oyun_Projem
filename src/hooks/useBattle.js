@@ -609,9 +609,18 @@ useEffect(() => {
    const unsub = onSnapshot(doc(db, "versus_rooms", code), async (snap) => {
       const data = snap.data();
       if (!data) return;
-      if (phaseRef.current !== "shop") return;
 
-      const currentTurn = turnRef.current;
+if (data.loser) {
+  const iLost = data.loser === role;
+  if (!iLost) {
+    setVictory(true);
+  }
+  return;
+}
+
+if (phaseRef.current !== "shop") return;
+
+const currentTurn = turnRef.current;
 const hostReady = data.hostReadyTurn === currentTurn;
 const guestReady = data.guestReadyTurn === currentTurn;
 const theirReady = role === "host" ? guestReady : hostReady;
@@ -674,7 +683,14 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
       setTimeout(() => {
         const newLives = lives - 1;
         setLives(newLives);
-        if (newLives <= 0) { setOver(true); return; }
+       if (newLives <= 0) {
+  setOver(true);
+  if (gameMode === "versus" && versusRoom) {
+    const { code, role } = versusRoom;
+    updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
+  }
+  return;
+}
         setTurnAndRef(turnRef.current + 1);
         setGold((g) => g + 10);
         const finalTeam = applyEndTurnBuffs(team);
@@ -713,7 +729,14 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
           setBossChallenge(null);
           const newLives = lives - 2;
           setLives(newLives);
-          if (newLives <= 0) { setOver(true); return; }
+         if (newLives <= 0) {
+  setOver(true);
+  if (gameMode === "versus" && versusRoom) {
+    const { code, role } = versusRoom;
+    updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
+  }
+  return;
+}
           setTimeout(() => {
             setTurnAndRef(turnRef.current + 1);
             setGold((g) => g + 10);
@@ -758,7 +781,14 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         const newLives = lives - 1;
         setLives(newLives);
         setLog((l) => [...l, "💀 Yenilgi"]);
-        if (newLives <= 0) { setOver(true); return; }
+       if (newLives <= 0) {
+  setOver(true);
+  if (gameMode === "versus" && versusRoom) {
+    const { code, role } = versusRoom;
+    updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
+  }
+  return;
+}
       }
 
       const newTurn = turn + 1;
