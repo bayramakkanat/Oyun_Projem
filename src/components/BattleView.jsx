@@ -140,12 +140,10 @@ useEffect(() => {
                className="text-base font-black text-green-300 bg-black/80 px-4 py-1.5 rounded-full border-2 border-green-400/80 backdrop-blur-sm shadow-lg shadow-green-500/30 uppercase tracking-wide"
 style={{ textShadow: "0 0 10px rgba(74,222,128,0.8)" }}
               >
-                {user
-                  ? (user.displayName || user.email.split("@")[0])
-                      .split(" ")
-                      .slice(1)
-                      .join(" ") || user.email.split("@")[0]
-                  : "TAKIMIN"}
+              
+                 {user
+  ? user.displayName || user.email.split("@")[0]
+  : "TAKIMIN"}
               </span>
             </div>
             <div className="flex flex-col items-center">

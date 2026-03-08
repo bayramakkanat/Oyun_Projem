@@ -16,7 +16,7 @@ export default function VictoryScreen({
    <div className="min-h-screen text-white flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{background: "radial-gradient(ellipse at top, #1a0533 0%, #0d0d1a 40%, #1a1000 100%)"}}>
       <StarField />
       <div
-       className="relative z-10 max-w-2xl w-full text-center mx-auto"
+     className="relative z-10 max-w-lg w-full text-center mx-auto"
         style={{ animation: "fadeIn 0.5s ease-out" }}
       >
         <div
@@ -66,16 +66,16 @@ export default function VictoryScreen({
             <div className="flex gap-2 justify-center flex-wrap">
               {teamSnapshot.map((pet) => (
                 <div key={pet.id} className="flex-shrink-0">
-                  <Card
-                    a={pet}
-                    onClick={() => {}}
-                    selected={false}
-                    compact={true}
-                    battle={false}
-                    showName={false}
-                    getDesc={getDesc}
-                    mirror={true}
-                  />
+                 <Card
+  a={pet}
+  onClick={() => {}}
+  selected={false}
+  compact={false}
+  battle={true}
+  showName={false}
+  getDesc={getDesc}
+  mirror={true}
+/>
                 </div>
               ))}
             </div>
