@@ -101,6 +101,7 @@ const setTurnAndRef = (newTurn) => {
   const [versusReady, setVersusReady] = useState(false); // bu oyuncu hazır mı
   const [opponentReady, setOpponentReady] = useState(false); // rakip hazır mı
   const lastProcessedStepRef = useRef(-1);
+  const lastBattleIdRef = useRef(null);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [isDebugBattle, setIsDebugBattle] = useState(false);
   const [newlyOpenedSlot, setNewlyOpenedSlot] = useState(null);
@@ -117,6 +118,10 @@ useEffect(() => {
   if (phase === "shop") {
     isPausedRef.current = false;
     setIsPaused(false);
+    if (gameMode === "versus") {
+      setVersusReady(false);
+      setOpponentReady(false);
+    }
   }
 }, [phase]);
 

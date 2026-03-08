@@ -71,6 +71,8 @@ export function useBattle({
   const versusRoomRef = useRef(null);
   const versusUnsubRef = useRef(null);
   const lastBattleIdRef = useRef(null);
+  const phaseRef = useRef(phase);
+useEffect(() => { phaseRef.current = phase; }, [phase]);
 
   // --- FAINT FONKSİYONU ---
   const faint = (d, al, en, isP, killer) => {
@@ -525,8 +527,8 @@ export function useBattle({
     if (versusReady) return;
     if (!versusRoom) return;
     const { code, role } = versusRoom;
-    const readyField = role === "host" ? "hostReady" : "guestReady";
-    const teamKey = role === "host" ? "hostTeam" : "guestTeam";
+   const readyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
+const teamKey = role === "host" ? "hostTeam" : "guestTeam";
     const currentTeam = team
       .filter((x) => x)
       .map((p) => ({
@@ -538,10 +540,9 @@ export function useBattle({
       }));
     try {
       await updateDoc(doc(db, "versus_rooms", code), {
-        [readyField]: true,
-        [teamKey]: currentTeam,
-        readyTurn: turnRef.current,
-      });
+  [readyTurnField]: turnRef.current,
+  [teamKey]: currentTeam,
+});
       setVersusReady(true);
     } catch (err) {
       console.error("Versus hazır hatası:", err);
@@ -589,24 +590,36 @@ export function useBattle({
     setStep(0);
     setPhase("battle");
   };
-
+// --- VERSUS SHOP RESET ---
+useEffect(() => {
+  if (phase !== "shop" || !versusRoom || versusPhase !== "playing") return;
+  const { code, role } = versusRoom;
+  const myReadyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
+  const myTeamField = role === "host" ? "hostTeam" : "guestTeam";
+  updateDoc(doc(db, "versus_rooms", code), {
+    [myReadyTurnField]: null,
+    [myTeamField]: null,
+  }).catch(console.error);
+}, [phase]);
   // --- VERSUS SNAPSHOT LISTENER ---
   useEffect(() => {
     if (!versusRoom || versusPhase !== "playing") return;
     const { code, role } = versusRoom;
 
-    const unsub = onSnapshot(doc(db, "versus_rooms", code), async (snap) => {
+   const unsub = onSnapshot(doc(db, "versus_rooms", code), async (snap) => {
       const data = snap.data();
       if (!data) return;
+      if (phaseRef.current !== "shop") return;
 
-      const hostReady = data.hostReady || false;
-      const guestReady = data.guestReady || false;
-      const theirReady = role === "host" ? guestReady : hostReady;
-      setOpponentReady(theirReady);
+      const currentTurn = turnRef.current;
+const hostReady = data.hostReadyTurn === currentTurn;
+const guestReady = data.guestReadyTurn === currentTurn;
+const theirReady = role === "host" ? guestReady : hostReady;
+setOpponentReady(theirReady);
 
-      if (!hostReady || !guestReady) return;
-      if (!data.hostTeam || !data.guestTeam) return;
-      if (data.readyTurn !== turnRef.current) return;
+if (!hostReady || !guestReady) return;
+if (!data.hostTeam || !data.guestTeam) return;
+if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
 
       if (role === "host" && !data.battleId) {
         const newBattleId = `${code}_${turnRef.current}_${Date.now()}`;
@@ -633,15 +646,17 @@ export function useBattle({
       setArenaOpponent({ userName: opponentName });
       startVersusBattle(myTeam, theirTeam);
 
-      if (role === "host") {
-        setTimeout(() => {
-          updateDoc(doc(db, "versus_rooms", code), {
-            hostReady: false, guestReady: false,
-            hostTeam: null, guestTeam: null,
-            readyTurn: null, battleId: null,
-          });
-        }, 4000);
-      }
+   if (role === "host") {
+  setTimeout(() => {
+    updateDoc(doc(db, "versus_rooms", code), {
+      battleId: null,
+      hostReadyTurn: null,
+      guestReadyTurn: null,
+      hostTeam: null,
+      guestTeam: null,
+    });
+  }, 2000);
+}
     });
 
     versusUnsubRef.current = unsub;
