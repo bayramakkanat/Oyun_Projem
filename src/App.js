@@ -26,10 +26,8 @@ import { useShop } from "./hooks/useShop";
 import { useAuth } from "./hooks/useAuth";
 import { useArena } from "./hooks/useArena";
 import { useEndTurn } from "./hooks/useEndTurn";
+import { useMusic } from "./hooks/useMusic";
 import battleBg from "./battleBg";
-import menuMusic from "./sounds/menu-music.mp3";
-import shopMusic from "./sounds/shop-music.mp3";
-import battleMusic from "./sounds/battle-music.mp3";
 import { spawnParticles, spawnBuffAnimation } from "./utils/animations";
 import { auth, db } from "./firebase";
 
@@ -103,7 +101,6 @@ const setTurnAndRef = (newTurn) => {
   const [versusReady, setVersusReady] = useState(false); // bu oyuncu hazır mı
   const [opponentReady, setOpponentReady] = useState(false); // rakip hazır mı
   const lastProcessedStepRef = useRef(-1);
-  const menuMusicRef = useRef(null);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [isDebugBattle, setIsDebugBattle] = useState(false);
   const [newlyOpenedSlot, setNewlyOpenedSlot] = useState(null);
@@ -122,80 +119,7 @@ useEffect(() => {
     setIsPaused(false);
   }
 }, [phase]);
-  useEffect(() => {
-    const audio = new Audio(menuMusic);
-    audio.loop = true;
-    audio.volume = 0.4;
-    menuMusicRef.current = audio;
-    if (soundEnabled) audio.play().catch(() => {});
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
-  }, []);
 
-  useEffect(() => {
-    if (!menuMusicRef.current) return;
-    if (soundEnabled) {
-      if (!gameStarted) menuMusicRef.current.play().catch(() => {});
-      if (phase === "shop" && gameStarted && shopMusicRef.current)
-        shopMusicRef.current.play().catch(() => {});
-      if (phase === "battle" && gameStarted && battleMusicRef.current)
-        battleMusicRef.current.play().catch(() => {});
-    } else {
-      menuMusicRef.current.pause();
-      if (shopMusicRef.current) shopMusicRef.current.pause();
-      if (battleMusicRef.current) battleMusicRef.current.pause();
-    }
-  }, [soundEnabled]);
-  const shopMusicRef = useRef(null);
-  useEffect(() => {
-    const audio = new Audio(shopMusic);
-    audio.loop = true;
-    audio.volume = 0.4;
-    shopMusicRef.current = audio;
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!shopMusicRef.current || !menuMusicRef.current) return;
-    if (phase === "shop" && gameStarted) {
-      menuMusicRef.current.pause();
-      if (soundEnabled) shopMusicRef.current.play().catch(() => {});
-    } else {
-      shopMusicRef.current.pause();
-      if (soundEnabled && !gameStarted)
-        menuMusicRef.current.play().catch(() => {});
-    }
-  }, [phase, gameStarted, soundEnabled]);
-  const battleMusicRef = useRef(null);
-  useEffect(() => {
-    const music = new Audio(battleMusic);
-    music.loop = true;
-    music.volume = 0.4;
-    battleMusicRef.current = music;
-    return () => {
-      music.pause();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!battleMusicRef.current) return;
-    if (phase === "battle") {
-      if (menuMusicRef.current) menuMusicRef.current.pause();
-      if (shopMusicRef.current) shopMusicRef.current.pause();
-      if (soundEnabled) {
-        battleMusicRef.current.currentTime = 0;
-        battleMusicRef.current.play().catch(() => {});
-      }
-    } else {
-      battleMusicRef.current.pause();
-      battleMusicRef.current.currentTime = 0;
-    }
-  }, [phase, soundEnabled]);
   const [arenaOpponent, setArenaOpponent] = useState(null);
   const [pendingEndTurnAnims, setPendingEndTurnAnims] = useState(false);
   const [shopResetKey, setShopResetKey] = useState(0);
@@ -332,6 +256,7 @@ useEffect(() => {
       return 0;
     }
   };
+  useMusic({ soundEnabled, phase, gameStarted });
   const { saveArenaTeam, fetchArenaOpponent } = useArena({ user, turn });
   useEndTurn({
   phase,
