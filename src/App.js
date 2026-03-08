@@ -21,13 +21,7 @@ import MenuScreen from "./components/MenuScreen";
 import VersusLobby from "./components/VersusLobby";
 import DebugPanel from "./components/DebugPanel";
 import { getDesc } from "./utils/getDesc";
-import {
-  applyPermanentBuffs,
-  genE,
-  applyEndTurnBuffs,
-  appStart,
-  applySummonBuffs,
-} from "./utils/battleUtils";
+import { applyEndTurnBuffs } from "./utils/battleUtils";
 import { playSound, setSoundFlag } from "./hooks/useSound";
 import { useBattle } from "./hooks/useBattle";
 import { useShop } from "./hooks/useShop";
@@ -38,13 +32,7 @@ import battleBg from "./battleBg";
 import menuMusic from "./sounds/menu-music.mp3";
 import shopMusic from "./sounds/shop-music.mp3";
 import battleMusic from "./sounds/battle-music.mp3";
-import {
-  spawnParticles,
-  spawnFloatingText,
-  spawnBuffAnimation,
-  spawnImpact,
-  spawnDeathEffect,
-} from "./utils/animations";
+import { spawnParticles, spawnBuffAnimation } from "./utils/animations";
 import { auth, db } from "./firebase";
 
 import {
@@ -72,7 +60,6 @@ import {
   MAX_STAT,
   WIN_TURN,
 } from "./data/gameData";
-import AuthModal from "./components/AuthModal";
 import SettingsModal from "./components/SettingsModal";
 
 export default function App() {
@@ -443,7 +430,7 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
     if (logR.current) logR.current.scrollTop = logR.current.scrollHeight;
   }, [log]);
 
-  
+
   const reset = () => {
     const cfg =
       DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
