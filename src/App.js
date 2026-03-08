@@ -31,6 +31,7 @@ import {
 import { playSound, setSoundFlag } from "./hooks/useSound";
 import { useBattle } from "./hooks/useBattle";
 import { useShop } from "./hooks/useShop";
+import { useAuth } from "./hooks/useAuth";
 import battleBg from "./battleBg";
 import menuMusic from "./sounds/menu-music.mp3";
 import shopMusic from "./sounds/shop-music.mp3";
@@ -241,110 +242,6 @@ useEffect(() => {
   const [settingsAvatar, setSettingsAvatar] = useState("🐺");
   const [displayName, setDisplayName] = useState("");
 
-  // Firebase Auth Observer
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      if (u) setShowAuthModal(false);
-      setStats(loadStats(u?.uid));
-    });
-    return () => unsub();
-  }, []);
-
-  const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      logError(err, "Google Login");
-      alert("Giriş yapılamadı: " + err.message);
-    }
-  };
-
-  const handleEmailAuth = async (e) => {
-    e.preventDefault();
-    try {
-      if (authMode === "login") {
-        await signInWithEmailAndPassword(auth, authEmail, authPass);
-      } else {
-        // Kullanıcı adı benzersizlik kontrolü
-        const usernameToCheck = authUsername || authEmail.split("@")[0];
-        const usernameDoc = await getDocs(
-          query(
-            collection(db, "usernames"),
-            where("username", "==", usernameToCheck.toLowerCase())
-          )
-        );
-        if (!usernameDoc.empty) {
-          alert("Bu kullanıcı adı zaten alınmış, başka bir isim dene.");
-          return;
-        }
-        const userCred = await createUserWithEmailAndPassword(
-          auth,
-          authEmail,
-          authPass
-        );
-        await updateProfile(userCred.user, {
-          displayName: `${authAvatar} ${usernameToCheck}`,
-        });
-        // Kullanıcı adını Firestore'a kaydet
-        await setDoc(doc(db, "usernames", usernameToCheck.toLowerCase()), {
-          username: usernameToCheck.toLowerCase(),
-          uid: userCred.user.uid,
-          displayName: `${authAvatar} ${usernameToCheck}`,
-        });
-      }
-    } catch (err) {
-      logError(err, "Email Auth");
-      alert("İşlem başarısız: " + err.message);
-    }
-  };
-  const handleLogout = () => signOut(auth);
-  const handleUpdateProfile = async () => {
-    if (!user) return;
-
-    const currentUsername = (user.displayName || "")
-      .split(" ")
-      .slice(1)
-      .join(" ");
-    const finalUsername = settingsUsername.trim() || currentUsername; // ← boşsa mevcut adı kullan
-
-    try {
-      if (finalUsername.toLowerCase() !== currentUsername.toLowerCase()) {
-        const usernameDoc = await getDocs(
-          query(
-            collection(db, "usernames"),
-            where("username", "==", finalUsername.toLowerCase())
-          )
-        );
-        if (!usernameDoc.empty) {
-          alert("Bu kullanıcı adı zaten alınmış, başka bir isim dene.");
-          return;
-        }
-        if (currentUsername) {
-          await setDoc(doc(db, "usernames", currentUsername.toLowerCase()), {
-            deleted: true,
-          });
-        }
-      }
-      const newDisplayName = `${settingsAvatar} ${finalUsername}`;
-      await updateProfile(user, { displayName: newDisplayName });
-      await setDoc(doc(db, "usernames", finalUsername.toLowerCase()), {
-        username: finalUsername.toLowerCase(),
-        uid: user.uid,
-        displayName: newDisplayName,
-      });
-      await user.reload();
-      setUser(auth.currentUser);
-      setDisplayName(newDisplayName);
-      alert("Profil güncellendi!");
-      setShowSettingsModal(false);
-    } catch (err) {
-      logError(err, "Update Profile");
-      alert("Güncelleme başarısız: " + err.message);
-    }
-  };
-
   // --- ARENA (PvP) DATABASE LOGIC ---
   const saveArenaTeam = async (currentTeam, difficulty) => {
     if (!user) return;
@@ -546,6 +443,20 @@ const { battle, startBossBattle, startVersusBattle, versusSetReady } = useBattle
   saveArenaTeam, fetchArenaOpponent,
   difficultyLevel, maxT, teamSlots, difficulty,
   setPGold,
+});
+const { handleGoogleLogin, handleEmailAuth, handleLogout, handleUpdateProfile } = useAuth({
+  authMode,
+  authEmail,
+  authPass,
+  authUsername,
+  authAvatar,
+  settingsUsername,
+  settingsAvatar,
+  setUser,
+  setShowAuthModal,
+  setStats,
+  setDisplayName,
+  setShowSettingsModal,
 });
 const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
   team, setTeam,
@@ -886,7 +797,7 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
           handleEmailAuth={handleEmailAuth}
           handleGoogleLogin={handleGoogleLogin}
           handleLogout={handleLogout}
-          handleUpdateProfile={handleUpdateProfile}
+          handleUpdateProfile={() => handleUpdateProfile(user)}
           onStart={() => {
             if (gameMode === "versus") {
               setVersusPhase("lobby");
