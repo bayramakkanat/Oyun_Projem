@@ -3,10 +3,8 @@ import "./styles.css";
 import {
   logError,
   safeNumber,
-  safeClamp,
   loadStats,
   saveStats,
-  getStatFontSize,
 } from "./utils/helpers";
 import Card from "./components/Card";
 import StarField from "./components/StarField";
@@ -22,7 +20,7 @@ import VersusLobby from "./components/VersusLobby";
 import DebugPanel from "./components/DebugPanel";
 import { getDesc } from "./utils/getDesc";
 import { applyEndTurnBuffs } from "./utils/battleUtils";
-import { playSound, setSoundFlag } from "./hooks/useSound";
+import { playSound } from "./hooks/useSound";
 import { useBattle } from "./hooks/useBattle";
 import { useShop } from "./hooks/useShop";
 import { useAuth } from "./hooks/useAuth";
@@ -63,7 +61,6 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [stats, setStats] = useState(loadStats);
   const [achievementPopup, setAchievementPopup] = useState(null);
-  const [showStats, setShowStats] = useState(false);
   const [gold, setGold] = useState(10);
   const [turn, setTurn] = useState(1);
   const [wins, setWins] = useState(0);
@@ -472,10 +469,6 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
     if (currentWins >= 5) unlockAchievement("five_wins");
     if (currentLives <= 1) unlockAchievement("survivor");
   };
-
-  const getGuideLvl = (tier, idx) => guideLvl[`${tier}-${idx}`] || 1;
-  const setGuideLvlFor = (tier, idx, lvl) =>
-    setGuideLvl((prev) => ({ ...prev, [`${tier}-${idx}`]: lvl }));
 
   useEffect(() => {
     if (victory) {
