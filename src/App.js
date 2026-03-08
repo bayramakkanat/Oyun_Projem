@@ -48,13 +48,8 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import {
-  TIERS,
-  TBG,
-  TBD,
-  TGLOW,
   ABILITY_ICONS,
   DIFFICULTY_CONFIGS,
-  GAME_MODES,
   ACHIEVEMENTS_DEF,
   BOSSES,
   MAX_STAT,
