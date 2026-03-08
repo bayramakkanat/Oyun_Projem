@@ -1,0 +1,1261 @@
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes dropIn {
+  0% {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
+
+  60% {
+    transform: translateY(20px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes swordClash {
+  0% {
+    transform: scale(0) rotate(-45deg);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.5) rotate(0deg);
+    opacity: 1;
+    filter: brightness(2) drop-shadow(0 0 20px white);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes abilityGlow {
+  0% {
+    filter: brightness(1);
+    box-shadow: 0 0 0px transparent;
+  }
+
+  50% {
+    filter: brightness(2);
+    box-shadow: 0 0 30px #fbbf24;
+  }
+
+  100% {
+    filter: brightness(1);
+    box-shadow: 0 0 0px transparent;
+  }
+}
+
+@keyframes bossEntrance {
+  0% {
+    transform: scale(0.5) translateY(-100px);
+    opacity: 0;
+    filter: blur(10px);
+  }
+
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* === TEMEL ANİMASYONLAR === */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(34, 197, 94, 1), 0 0 50px rgba(34, 197, 94, 0.8);
+    transform: scale(1.15);
+  }
+}
+
+@keyframes ability {
+  0% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 0px transparent);
+  }
+
+  50% {
+    transform: scale(1.2);
+    filter: brightness(1.5) drop-shadow(0 0 15px #fbbf24);
+  }
+
+  100% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 0px transparent);
+  }
+}
+
+@keyframes attackLeft {
+  0% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(40px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes attackRight {
+  0% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(-40px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOutLeft {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-50px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeOutRight {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(50px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    transform: translateX(-40px) scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(40px) scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes cardFlip {
+  0% {
+    transform: rotateY(90deg) scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes flyToTeam {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(0, -40px) scale(1.2);
+  }
+
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes particleBurst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--px), var(--py)) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px currentColor);
+  }
+
+  50% {
+    filter: drop-shadow(0 0 20px currentColor);
+  }
+}
+
+@keyframes arenaShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-2px);
+  }
+
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes healthBarPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes hitFlash {
+  0% {
+    background: rgba(255, 0, 0, 0);
+  }
+
+  50% {
+    background: rgba(255, 0, 0, 0.5);
+  }
+
+  100% {
+    background: rgba(255, 0, 0, 0);
+  }
+}
+
+@keyframes scaleAttack {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.3);
+  }
+}
+
+@keyframes victoryBounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-20px) scale(1.2);
+  }
+}
+
+@keyframes tooltipFade {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRightNotif {
+  0% {
+    transform: translateX(100%) translateY(-20px);
+    opacity: 0;
+  }
+
+  70% {
+    transform: translateX(-10px) translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOutUpNotif {
+  0% {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(0) translateY(-20px);
+    opacity: 0;
+  }
+}
+
+@keyframes progressBar {
+  0% {
+    width: 100%;
+  }
+
+  100% {
+    width: 0%;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes impactFlash {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.5) rotate(180deg);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(2) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes deathExplosion {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(2);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-50px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes floatUpRed {
+  0% {
+    transform: translateY(0) scale(0.5);
+    opacity: 0;
+  }
+
+  15% {
+    transform: translateY(-10px) scale(1.3);
+    opacity: 1;
+  }
+
+  60% {
+    transform: translateY(-30px) scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-70px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes floatUpGreen {
+  0% {
+    transform: translateY(0) scale(0.5);
+    opacity: 0;
+  }
+
+  15% {
+    transform: translateY(-10px) scale(1.2);
+    opacity: 1;
+  }
+
+  60% {
+    transform: translateY(-25px) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-60px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* === CLASS'LAR === */
+
+.notification-enter {
+  animation: slideInRightNotif 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+    forwards;
+}
+
+.notification-exit {
+  animation: fadeOutUpNotif 0.3s ease-out forwards;
+}
+
+.log-entry {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.animated-bg {
+  background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #1a1a2e);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+.arena-wood {
+  background: linear-gradient(
+      90deg,
+      rgba(101, 67, 33, 0.1) 1px,
+      transparent 1px
+    ),
+    linear-gradient(rgba(101, 67, 33, 0.1) 1px, transparent 1px),
+    linear-gradient(
+      90deg,
+      rgba(139, 69, 19, 0.05) 0%,
+      rgba(160, 82, 45, 0.05) 100%
+    );
+  background-size: 80px 80px, 80px 80px, 100% 100%;
+}
+
+.arena-wood::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+      circle at 20% 50%,
+      rgba(101, 67, 33, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 60% 70%,
+      rgba(139, 69, 19, 0.2) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 30%,
+      rgba(101, 67, 33, 0.25) 0%,
+      transparent 50%
+    );
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.card-3d {
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-style: preserve-3d;
+}
+
+.card-3d:hover {
+  transform: perspective(1000px) rotateY(5deg) rotateX(3deg) scale(1.1) !important;
+  filter: brightness(1.02) saturate(1.05);
+  z-index: 50;
+}
+
+.card-3d.tier-1:hover {
+  box-shadow: 0 0 15px 4px rgba(156, 163, 175, 0.4) !important;
+}
+
+.card-3d.tier-2:hover {
+  box-shadow: 0 0 15px 4px rgba(34, 197, 94, 0.4) !important;
+}
+
+.card-3d.tier-3:hover {
+  box-shadow: 0 0 15px 4px rgba(59, 130, 246, 0.4) !important;
+}
+
+.card-3d.tier-4:hover {
+  box-shadow: 0 0 15px 4px rgba(168, 85, 247, 0.4) !important;
+}
+
+.card-3d.tier-5:hover {
+  box-shadow: 0 0 15px 4px rgba(239, 68, 68, 0.4) !important;
+}
+
+.card-3d.tier-6:hover {
+  box-shadow: 0 0 15px 4px rgba(251, 146, 60, 0.4) !important;
+}
+
+.impact-effect {
+  position: fixed;
+  font-size: 48px;
+  pointer-events: none;
+  z-index: 1000;
+  animation: impactFlash 0.5s ease-out forwards;
+}
+
+.death-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999;
+  font-size: 32px;
+  animation: deathExplosion 0.8s ease-out forwards;
+  transform: translate(var(--tx, 0), var(--ty, 0));
+}
+
+.card-3d .pet-glow {
+  transition: filter 0.3s ease;
+}
+
+.card-3d.tier-1 .pet-glow {
+  filter: drop-shadow(0 0 6px rgba(156, 163, 175, 0.4));
+}
+
+.card-3d.tier-2 .pet-glow {
+  filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.5));
+}
+
+.card-3d.tier-3 .pet-glow {
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+}
+
+.card-3d.tier-4 .pet-glow {
+  filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.6));
+}
+
+.card-3d.tier-5 .pet-glow {
+  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.6));
+}
+
+.card-3d.tier-6 .pet-glow {
+  filter: drop-shadow(0 0 12px rgba(251, 146, 60, 0.7));
+}
+
+.card-3d:hover .pet-glow {
+  filter: drop-shadow(0 0 8px currentColor) brightness(1.05) !important;
+  /* ← ÇOK YUMUŞAK */
+}
+
+.pet-glow.buffed {
+  animation: glowPulse 0.6s ease-in-out;
+}
+
+/* Buff animasyonu - hedef hayvana doğru uçma */
+@keyframes flyToTarget {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translate(calc(var(--tx) * 0.5), calc(var(--ty) * 0.5))
+      scale(1.5);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* Goril buff animasyonu - etrafında dönen ikonlar */
+@keyframes gorillaBuffSpin {
+  0% {
+    transform: translate(0, 0) scale(0) rotate(0deg);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.5) rotate(180deg);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(0.5) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* === SEVİYE ÇERÇEVELERİ === */
+
+/* 1 Yıldız - Normal (değişiklik yok) */
+
+/* 2 Yıldız - Gümüş Çerçeve */
+.card-3d.level-2:not(.battle-card) {
+  border: 3px solid #c0c0c0 !important;
+  box-shadow: 0 0 12px 2px rgba(192, 192, 192, 0.4) !important;
+}
+
+.card-3d.level-2:not(.battle-card)::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(45deg, #e8e8e8, #a8a8a8, #e8e8e8);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.card-3d.level-2 .pet-glow {
+  filter: drop-shadow(0 0 8px rgba(192, 192, 192, 0.5));
+}
+
+.card-3d.level-3:not(.battle-card) {
+  border: 3px solid #ffd700 !important;
+  box-shadow: 0 0 15px 3px rgba(255, 165, 0, 0.3) !important;
+  animation: goldenGlowSubtle 3s ease-in-out infinite !important;
+}
+
+.card-3d.level-3:not(.battle-card)::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  padding: 3px;
+  background: linear-gradient(45deg, #ffd700, #ffed4e, #ffa500, #ffd700);
+  background-size: 200% 200%;
+  animation: goldenBorderFlow 4s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.card-3d.level-3 .pet-glow {
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+}
+
+/* Altın animasyonlar - daha yumuşak */
+@keyframes goldenGlowSubtle {
+  0%,
+  100% {
+    box-shadow: 0 0 15px 3px rgba(255, 165, 0, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 20px 5px rgba(255, 165, 0, 0.5);
+  }
+}
+
+@keyframes goldenBorderFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Rozet pulse animasyonu (sadece 3 yıldız) */
+@keyframes rozetPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px 2px rgba(255, 165, 0, 0.4);
+  }
+
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px 3px rgba(255, 165, 0, 0.6);
+  }
+}
+
+/* Küçük yıldız yanıp sönme (birleşmeye hazır) */
+@keyframes starTwinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+/* Elmas dönme animasyonu (2 yıldız) */
+@keyframes diamondSpin {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform: rotate(-10deg) scale(1.1);
+  }
+
+  50% {
+    transform: rotate(10deg) scale(1.15);
+  }
+
+  75% {
+    transform: rotate(-10deg) scale(1.1);
+  }
+}
+
+/* Slot açılma animasyonu */
+@keyframes slotUnlock {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+    filter: brightness(0.5);
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+    filter: brightness(2);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+@keyframes lockBreak {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  25% {
+    transform: scale(1.2) rotate(-10deg);
+  }
+
+  50% {
+    transform: scale(1.3) rotate(10deg);
+  }
+
+  75% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  100% {
+    transform: scale(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes slotGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(34, 197, 94, 1);
+  }
+}
+
+/* Kilitli slot titreme animasyonu */
+@keyframes lockShake {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+
+  10% {
+    transform: translateX(-6px) rotate(-5deg);
+  }
+
+  20% {
+    transform: translateX(6px) rotate(5deg);
+  }
+
+  30% {
+    transform: translateX(-6px) rotate(-5deg);
+  }
+
+  40% {
+    transform: translateX(6px) rotate(5deg);
+  }
+
+  50% {
+    transform: translateX(-4px) rotate(-3deg);
+  }
+
+  60% {
+    transform: translateX(4px) rotate(3deg);
+  }
+
+  70% {
+    transform: translateX(-4px) rotate(-3deg);
+  }
+
+  80% {
+    transform: translateX(4px) rotate(3deg);
+  }
+
+  90% {
+    transform: translateX(-2px) rotate(-1deg);
+  }
+}
+
+/* Kilitli slot parlama - tıklanabilir olduğunu gösterir */
+@keyframes lockGlowPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(250, 204, 21, 0.4);
+    border-color: rgba(250, 204, 21, 0.6);
+  }
+
+  50% {
+    box-shadow: 0 0 25px rgba(250, 204, 21, 1), 0 0 50px rgba(250, 204, 21, 0.5);
+    border-color: rgba(250, 204, 21, 1);
+  }
+}
+
+/* Kilitli slot açılınca patlama */
+@keyframes lockOpenBurst {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  30% {
+    transform: scale(1.5) rotate(-15deg);
+    opacity: 1;
+  }
+
+  60% {
+    transform: scale(1.8) rotate(15deg);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: scale(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Slot açıldıktan sonra parlayarak gelen yeni slot */
+@keyframes newSlotAppear {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+    filter: brightness(3);
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+    filter: brightness(2);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+/* Ana menü logo zıplama */
+@keyframes victoryBounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-12px) scale(1.08);
+  }
+}
+
+/* Başarım bildirimi kayma */
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Yeni Kademe ekranı - "YENİ" yazısı nabız gibi atar */
+@keyframes newTierPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 0.85;
+  }
+}
+
+/* Yeni Kademe ekranı - aşağıdan yukarı kayarak gelme */
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Arka plan yüzen partiküller */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  33% {
+    transform: translateY(-20px) rotate(10deg);
+  }
+
+  66% {
+    transform: translateY(-10px) rotate(-10deg);
+  }
+}
+
+/* Responsive — Mobil */
+@media (max-width: 640px) {
+  /* Kartlar daha küçük */
+  .w-32 {
+    width: 5.5rem !important;
+  }
+
+  .h-40 {
+    height: 7rem !important;
+  }
+
+  .text-3xl {
+    font-size: 1.4rem !important;
+  }
+
+  /* Mağaza ve takım yatay kaydırma */
+  .flex.gap-2\.5.justify-center {
+    overflow-x: auto;
+    justify-content: flex-start !important;
+    padding-bottom: 8px;
+  }
+
+  /* Header küçültme */
+  .text-lg {
+    font-size: 0.95rem !important;
+  }
+
+  .font-bold.text-lg {
+    font-size: 0.9rem !important;
+  }
+
+  /* Savaş ekranı */
+  .gap-8 {
+    gap: 1rem !important;
+  }
+}
+
+/* Hata önleme - görünmez elementlerin tıklanmasını engelle */
+[data-pet-id]:not(:hover) {
+  pointer-events: auto;
+}
+
+/* Animasyon sırasında tıklanabilirliği koru */
+.card-3d {
+  pointer-events: auto !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Sayı taşmasını önle */
+.flex.items-center.gap-0\.5 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Konsol hatalarını görsel olarak göster (opsiyonel) */
+.debug-error {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background: red;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  z-index: 9999;
+  font-size: 12px;
+  max-width: 300px;
+  word-break: break-word;
+}
+
+/* Performans iyileştirmeleri */
+.card-3d {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Animasyonları hızlandır */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Lama iyileştirme animasyonu */
+@keyframes healFloat {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-30px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+.heal-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  font-size: 20px;
+  animation: healFloat 0.8s ease-out forwards;
+}
+
+/* === YENİ PREMIUM STİLLER === */
+
+@keyframes slideIn {
+  0% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+}
+
+.premium-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.premium-button::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  transition: 0.8s;
+}
+
+.premium-button:hover::after {
+  left: 120%;
+}
+
+.boss-banner-pulse {
+  animation: bossTitlePulse 2s ease-in-out infinite;
+}
+
+@keyframes bossTitlePulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.5));
+    transform: scale(1);
+  }
+
+  50% {
+    filter: drop-shadow(0 0 15px rgba(239, 68, 68, 1));
+    transform: scale(1.05);
+  }
+}
+
+/* Zorluk kartları için parlatma */
+.diff-card-glow {
+  position: relative;
+}
+
+.diff-card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.diff-card-glow:hover::before {
+  opacity: 1;
+}
+/* === KART TIER PARLAMA EFEKTLERİ === */
+.tier-1:not(.battle-card) { box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 15px rgba(0,0,0,0.5); }
+.tier-2:not(.battle-card) { box-shadow: inset 0 1px 0 rgba(52,211,153,0.2), 0 4px 20px rgba(52,211,153,0.15); }
+.tier-3:not(.battle-card) { box-shadow: inset 0 1px 0 rgba(34,211,238,0.2), 0 4px 20px rgba(34,211,238,0.2); }
+.tier-4:not(.battle-card) { box-shadow: inset 0 1px 0 rgba(232,121,249,0.25), 0 4px 25px rgba(168,85,247,0.25); }
+.tier-5:not(.battle-card) { box-shadow: inset 0 1px 0 rgba(251,113,133,0.25), 0 4px 25px rgba(239,68,68,0.3); }
+.tier-6:not(.battle-card) { box-shadow: inset 0 1px 0 rgba(251,191,36,0.35), 0 4px 30px rgba(251,191,36,0.4), 0 0 60px rgba(251,191,36,0.15); }
+
+.tier-6.card-3d:not(.battle-card) {
+  animation: goldenGlowSubtle 2s ease-in-out infinite;
+}

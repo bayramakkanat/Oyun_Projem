@@ -1,0 +1,2289 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import "./styles.css";
+import {
+  logError,
+  safeNumber,
+  safeClamp,
+  loadStats,
+  saveStats,
+  getStatFontSize,
+} from "./utils/helpers";
+import Card from "./components/Card";
+import StarField from "./components/StarField";
+import BattleView from "./components/BattleView";
+import GuideScreen from "./components/GuideScreen";
+import NewTierScreen from "./components/NewTierScreen";
+import BossOfferScreen from "./components/BossOfferScreen";
+import BossRewardScreen from "./components/BossRewardScreen";
+import VictoryScreen from "./components/VictoryScreen";
+import GameOverScreen from "./components/GameOverScreen";
+import MenuScreen from "./components/MenuScreen";
+import VersusLobby from "./components/VersusLobby";
+import DebugPanel from "./components/DebugPanel";
+import { getDesc } from "./utils/getDesc";
+import {
+  applyPermanentBuffs,
+  genE,
+  applyEndTurnBuffs,
+  appStart,
+  applySummonBuffs,
+} from "./utils/battleUtils";
+import { playSound, setSoundFlag } from "./hooks/useSound";
+import { useBattle } from "./hooks/useBattle";
+import battleBg from "./battleBg";
+import menuMusic from "./sounds/menu-music.mp3";
+import shopMusic from "./sounds/shop-music.mp3";
+import battleMusic from "./sounds/battle-music.mp3";
+import {
+  spawnParticles,
+  spawnFloatingText,
+  spawnBuffAnimation,
+  spawnImpact,
+  spawnDeathEffect,
+} from "./utils/animations";
+import { auth, db } from "./firebase";
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import {
+  collection,
+  addDoc,
+  setDoc,
+  doc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  serverTimestamp,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
+import {
+  TIERS,
+  TBG,
+  TBD,
+  TGLOW,
+  ABILITY_ICONS,
+  DIFFICULTY_CONFIGS,
+  GAME_MODES,
+  ACHIEVEMENTS_DEF,
+  BOSSES,
+  MAX_STAT,
+  WIN_TURN,
+} from "./data/gameData";
+import AuthModal from "./components/AuthModal";
+import SettingsModal from "./components/SettingsModal";
+
+export default function App() {
+  const [gameStarted, setGameStarted] = useState(false);
+  const [menuView, setMenuView] = useState("main"); // "main", "play_setup", "achievements", "stats"
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [stats, setStats] = useState(loadStats);
+  const [achievementPopup, setAchievementPopup] = useState(null);
+  const [showStats, setShowStats] = useState(false);
+  const [gold, setGold] = useState(10);
+  const [turn, setTurn] = useState(1);
+  const [wins, setWins] = useState(0);
+  const [lives, setLives] = useState(5);
+  const [team, setTeam] = useState([null, null, null, null, null, null]);
+  const [shop, setShop] = useState([]);
+  const [phase, setPhase] = useState("shop");
+  const [log, setLog] = useState([]);
+  const [pT, setPT] = useState([]);
+  const [eT, setET] = useState([]);
+  const [step, setStep] = useState(0);
+  const [sel, setSel] = useState(null);
+  const [selI, setSelI] = useState(null);
+  const [over, setOver] = useState(false);
+  const [victory, setVictory] = useState(false);
+  const [rewards, setRewards] = useState([]);
+  const [newTier, setNewTier] = useState(null);
+  const [lastT, setLastT] = useState(1);
+  const [pGold, setPGold] = useState(0);
+  const [showSwordClash, setShowSwordClash] = useState(false);
+  const [guide, setGuide] = useState(false);
+  const [guideLvl, setGuideLvl] = useState({});
+  const [anims, setAnims] = useState({});
+  const [isBattleOver, setIsBattleOver] = useState(false);
+  const [discountNext, setDiscountNext] = useState(false);
+  const [openTiers, setOpenTiers] = useState([1, 2, 3, 4, 5, 6]);
+  const logR = useRef(null);
+  const battleGoldRef = useRef(0);
+  const turnRef = useRef(turn);
+const setTurnAndRef = (newTurn) => {
+  setTurn(newTurn);
+  turnRef.current = newTurn;
+};
+ const [bossChallenge, setBossChallenge] = useState(null); // null, "offer", "battle", "reward"
+  const [bossResult, setBossResult] = useState(null); // "win", "lose"
+  const [bossRewards, setBossRewards] = useState([]);
+   const [gameMode, setGameMode] = useState("standard"); // "standard" | "arena" | "versus"
+  const [versusPhase, setVersusPhase] = useState(null); // null | "lobby" | "playing"
+  const [versusRoom, setVersusRoom] = useState(null); // { code, role, roomData }
+  const [versusReady, setVersusReady] = useState(false); // bu oyuncu hazır mı
+  const [opponentReady, setOpponentReady] = useState(false); // rakip hazır mı
+  const lastProcessedStepRef = useRef(-1);
+  const menuMusicRef = useRef(null);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [isDebugBattle, setIsDebugBattle] = useState(false);
+  const [newlyOpenedSlot, setNewlyOpenedSlot] = useState(null);
+  const [lastError, setLastError] = useState(null);
+  const [difficultyLevel, setDifficultyLevel] = useState(() => {
+    return localStorage.getItem("petgame_difficulty") || "normal";
+  });
+  const battleSpeedRef = useRef(
+    parseFloat(localStorage.getItem("petgame_battle_speed")) || 1
+  );
+  const isPausedRef = useRef(false);
+const [isPaused, setIsPaused] = useState(false);
+useEffect(() => {
+  if (phase === "shop") {
+    isPausedRef.current = false;
+    setIsPaused(false);
+  }
+}, [phase]);
+  useEffect(() => {
+    const audio = new Audio(menuMusic);
+    audio.loop = true;
+    audio.volume = 0.4;
+    menuMusicRef.current = audio;
+    if (soundEnabled) audio.play().catch(() => {});
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!menuMusicRef.current) return;
+    if (soundEnabled) {
+      if (!gameStarted) menuMusicRef.current.play().catch(() => {});
+      if (phase === "shop" && gameStarted && shopMusicRef.current)
+        shopMusicRef.current.play().catch(() => {});
+      if (phase === "battle" && gameStarted && battleMusicRef.current)
+        battleMusicRef.current.play().catch(() => {});
+    } else {
+      menuMusicRef.current.pause();
+      if (shopMusicRef.current) shopMusicRef.current.pause();
+      if (battleMusicRef.current) battleMusicRef.current.pause();
+    }
+  }, [soundEnabled]);
+  const shopMusicRef = useRef(null);
+  useEffect(() => {
+    const audio = new Audio(shopMusic);
+    audio.loop = true;
+    audio.volume = 0.4;
+    shopMusicRef.current = audio;
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!shopMusicRef.current || !menuMusicRef.current) return;
+    if (phase === "shop" && gameStarted) {
+      menuMusicRef.current.pause();
+      if (soundEnabled) shopMusicRef.current.play().catch(() => {});
+    } else {
+      shopMusicRef.current.pause();
+      if (soundEnabled && !gameStarted)
+        menuMusicRef.current.play().catch(() => {});
+    }
+  }, [phase, gameStarted, soundEnabled]);
+  const battleMusicRef = useRef(null);
+  useEffect(() => {
+    const music = new Audio(battleMusic);
+    music.loop = true;
+    music.volume = 0.4;
+    battleMusicRef.current = music;
+    return () => {
+      music.pause();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!battleMusicRef.current) return;
+    if (phase === "battle") {
+      if (menuMusicRef.current) menuMusicRef.current.pause();
+      if (shopMusicRef.current) shopMusicRef.current.pause();
+      if (soundEnabled) {
+        battleMusicRef.current.currentTime = 0;
+        battleMusicRef.current.play().catch(() => {});
+      }
+    } else {
+      battleMusicRef.current.pause();
+      battleMusicRef.current.currentTime = 0;
+    }
+  }, [phase, soundEnabled]);
+  const [arenaOpponent, setArenaOpponent] = useState(null);
+  const [pendingEndTurnAnims, setPendingEndTurnAnims] = useState(false);
+  const [shopResetKey, setShopResetKey] = useState(0);
+
+  // --- MULTIPLAYER STATES ---
+  const [user, setUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPass, setAuthPass] = useState("");
+  const [authMode, setAuthMode] = useState("login");
+  const [authUsername, setAuthUsername] = useState("");
+  const [authAvatar, setAuthAvatar] = useState("🐺");
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [settingsUsername, setSettingsUsername] = useState("");
+  const [settingsAvatar, setSettingsAvatar] = useState("🐺");
+  const [displayName, setDisplayName] = useState("");
+
+  // Firebase Auth Observer
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      if (u) setShowAuthModal(false);
+      setStats(loadStats(u?.uid));
+    });
+    return () => unsub();
+  }, []);
+
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (err) {
+      logError(err, "Google Login");
+      alert("Giriş yapılamadı: " + err.message);
+    }
+  };
+
+  const handleEmailAuth = async (e) => {
+    e.preventDefault();
+    try {
+      if (authMode === "login") {
+        await signInWithEmailAndPassword(auth, authEmail, authPass);
+      } else {
+        // Kullanıcı adı benzersizlik kontrolü
+        const usernameToCheck = authUsername || authEmail.split("@")[0];
+        const usernameDoc = await getDocs(
+          query(
+            collection(db, "usernames"),
+            where("username", "==", usernameToCheck.toLowerCase())
+          )
+        );
+        if (!usernameDoc.empty) {
+          alert("Bu kullanıcı adı zaten alınmış, başka bir isim dene.");
+          return;
+        }
+        const userCred = await createUserWithEmailAndPassword(
+          auth,
+          authEmail,
+          authPass
+        );
+        await updateProfile(userCred.user, {
+          displayName: `${authAvatar} ${usernameToCheck}`,
+        });
+        // Kullanıcı adını Firestore'a kaydet
+        await setDoc(doc(db, "usernames", usernameToCheck.toLowerCase()), {
+          username: usernameToCheck.toLowerCase(),
+          uid: userCred.user.uid,
+          displayName: `${authAvatar} ${usernameToCheck}`,
+        });
+      }
+    } catch (err) {
+      logError(err, "Email Auth");
+      alert("İşlem başarısız: " + err.message);
+    }
+  };
+  const handleLogout = () => signOut(auth);
+  const handleUpdateProfile = async () => {
+    if (!user) return;
+
+    const currentUsername = (user.displayName || "")
+      .split(" ")
+      .slice(1)
+      .join(" ");
+    const finalUsername = settingsUsername.trim() || currentUsername; // ← boşsa mevcut adı kullan
+
+    try {
+      if (finalUsername.toLowerCase() !== currentUsername.toLowerCase()) {
+        const usernameDoc = await getDocs(
+          query(
+            collection(db, "usernames"),
+            where("username", "==", finalUsername.toLowerCase())
+          )
+        );
+        if (!usernameDoc.empty) {
+          alert("Bu kullanıcı adı zaten alınmış, başka bir isim dene.");
+          return;
+        }
+        if (currentUsername) {
+          await setDoc(doc(db, "usernames", currentUsername.toLowerCase()), {
+            deleted: true,
+          });
+        }
+      }
+      const newDisplayName = `${settingsAvatar} ${finalUsername}`;
+      await updateProfile(user, { displayName: newDisplayName });
+      await setDoc(doc(db, "usernames", finalUsername.toLowerCase()), {
+        username: finalUsername.toLowerCase(),
+        uid: user.uid,
+        displayName: newDisplayName,
+      });
+      await user.reload();
+      setUser(auth.currentUser);
+      setDisplayName(newDisplayName);
+      alert("Profil güncellendi!");
+      setShowSettingsModal(false);
+    } catch (err) {
+      logError(err, "Update Profile");
+      alert("Güncelleme başarısız: " + err.message);
+    }
+  };
+
+  // --- ARENA (PvP) DATABASE LOGIC ---
+  const saveArenaTeam = async (currentTeam, difficulty) => {
+    if (!user) return;
+    try {
+      const teamData = currentTeam
+        .filter((p) => p)
+        .map((p) => ({
+          name: p.name,
+          nick: p.nick,
+          atk: p.atk,
+          hp: p.hp,
+          curHp: p.hp,
+          ability: p.ability || "none",
+          tier: p.tier,
+          lvl: p.lvl || 1,
+          exp: p.exp || 0,
+          id: Math.random(),
+          isBossUnit: false,
+        }));
+
+      // Oyuncu başına her tur için tek kayıt — üzerine yaz
+      const docId = `${user.uid}_turn${turn}`;
+      await setDoc(doc(db, "arena_teams", docId), {
+        uid: user.uid,
+        userName: user.displayName || user.email.split("@")[0],
+        team: teamData,
+        difficulty: difficulty,
+        turn: turn,
+        timestamp: serverTimestamp(),
+      });
+      console.log(`✅ Arena takımı kaydedildi! Tur: ${turn}`);
+    } catch (err) {
+      logError(err, "Arena Save");
+    }
+  };
+
+  const fetchArenaOpponent = async (targetDifficulty) => {
+    try {
+      const q = query(
+        collection(db, "arena_teams"),
+        where("turn", "==", turn),
+        limit(30)
+      );
+      const snapshot = await getDocs(q);
+      const teams = snapshot.docs.map((doc) => doc.data());
+
+      if (teams.length === 0) return null;
+
+      // Kendi takımın olmasın
+      const others = teams.filter((t) => t.uid !== user?.uid);
+      const finalPool = others.length > 0 ? others : teams;
+
+      return finalPool[Math.floor(Math.random() * finalPool.length)];
+    } catch (err) {
+      logError(err, "Arena Fetch");
+      return null;
+    }
+  };
+
+  // Global hata yakalayıcı
+  // Resim ön yükleme (düzeltildi - useEffect dışına taşındı)
+  useEffect(() => {
+    const images = [
+      "https://i.ibb.co/LXhW3f9P/ankaboss-removebg.png",
+      "https://i.ibb.co/BVvZ1GnD/Erlik.png",
+      "https://i.ibb.co/MDrgjfTR/Asena-Canva.png",
+    ];
+    images.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
+  // Global hata yakalayıcı
+  useEffect(() => {
+    const errorHandler = (event) => {
+      console.error("Global hata:", event.error);
+      setLastError({
+        message: event.error?.message || "Bilinmeyen hata",
+        stack: event.error?.stack,
+      });
+      setTimeout(() => setLastError(null), 3000);
+    };
+    window.addEventListener("error", errorHandler);
+    return () => window.removeEventListener("error", errorHandler);
+  }, []);
+  const maxT = Math.min(Math.ceil(turn / 2), 6);
+  const currentDiffConfig =
+    DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
+  const diffMult = currentDiffConfig.enemyStatMultiplier;
+  const difficulty = (1 + Math.floor(turn / 3) * 0.2) * diffMult;
+  // ← GÜNCELLENDİ: Tur 9→7 ve Tur 11→9
+  const teamSlots = turn >= 7 ? 6 : turn >= 5 ? 5 : 4;
+  const shopSlots = turn >= 7 ? 5 : turn >= 5 ? 4 : 3;
+
+  useEffect(() => {
+    if (gold >= 15) unlockAchievement("rich");
+  }, [gold]);
+
+  useEffect(() => {
+    localStorage.setItem("petgame_difficulty", difficultyLevel);
+  }, [difficultyLevel]);
+
+  useEffect(() => {
+    localStorage.setItem("petgame_battle_speed", battleSpeedRef.current);
+  }, []);
+  useEffect(() => {
+    turnRef.current = turn;
+  }, [turn]);
+
+  const achievementQueueRef = useRef([]);
+  const achievementShowingRef = useRef(false);
+
+  const showNextAchievement = () => {
+    if (achievementQueueRef.current.length === 0) {
+      achievementShowingRef.current = false;
+      return;
+    }
+    achievementShowingRef.current = true;
+    const def = achievementQueueRef.current.shift();
+    setAchievementPopup(def);
+    playSound("achievement");
+    setTimeout(() => {
+      setAchievementPopup(null);
+      setTimeout(() => showNextAchievement(), 400);
+    }, 3000);
+  };
+
+  const unlockAchievement = (id) => {
+    setStats((prev) => {
+      if (prev.achievements.includes(id)) return prev;
+      const next = { ...prev, achievements: [...prev.achievements, id] };
+      saveStats(next, user?.uid);
+      const def = ACHIEVEMENTS_DEF.find((a) => a.id === id);
+      if (def) {
+        setTimeout(() => {
+          achievementQueueRef.current.push(def);
+          if (!achievementShowingRef.current) showNextAchievement();
+        }, 0);
+      }
+      return next;
+    });
+  };
+
+  const triggerAnim = (id, type) => {
+    setAnims((prev) => ({ ...prev, [id]: type }));
+    setTimeout(
+      () => setAnims((prev) => ({ ...prev, [id]: null })),
+      1000 / battleSpeedRef.current
+    );
+    playSound(type);
+  };
+
+  useEffect(() => {
+    const currentMaxT = Math.min(Math.ceil(turn / 2), 6);
+    if (currentMaxT > lastT && phase === "shop") {
+      setNewTier(currentMaxT);
+      setLastT(currentMaxT);
+    }
+  }, [turn, phase, lastT]);
+
+  const pwr = (a) => {
+    if (!a) return 1;
+    if (a.lvl === 3) return 3;
+    if (a.lvl === 2) return 2;
+    return 1;
+  };
+  const sellP = (a) => Math.ceil(a.lvl + (a.exp >= 1 ? 0.5 : 0));
+  const clampStat = (v) => {
+    try {
+      const num = safeNumber(v, 0);
+      return Math.min(Math.max(num, 0), MAX_STAT);
+    } catch (e) {
+      logError(e, "clampStat");
+      return 0;
+    }
+  };
+
+  const addRew = () => {
+    const rt = Math.min(maxT + 1, 6);
+    const pool = [...TIERS[rt]];
+    const ch = [];
+    const used = new Set();
+    const grpId = Math.random();
+    for (let i = 0; i < 3; i++) {
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * pool.length);
+      } while (used.has(idx) && used.size < pool.length);
+      used.add(idx);
+      ch.push({
+        ...pool[idx],
+        id: Math.random(),
+        lvl: 1,
+        exp: 0,
+        curHp: pool[idx].hp,
+        isR: true,
+        rT: rt,
+        grp: grpId,
+      });
+    }
+    return ch;
+  };
+
+  const merge = (base, add) => {
+    try {
+      if (!base || !add) return { merged: base || add, rewards: [] };
+
+      const baseTotal = safeNumber(base.atk, 0) + safeNumber(base.hp, 0);
+      const addTotal = safeNumber(add.atk, 0) + safeNumber(add.hp, 0);
+
+      let newBase = { ...base };
+      let newAdd = { ...add };
+
+      if (addTotal > baseTotal) {
+        [newBase, newAdd] = [newAdd, newBase];
+      }
+
+      const baseId = newBase.id;
+      const oL = safeNumber(newBase.lvl, 1);
+      let nL = oL;
+      let nE = safeNumber(newBase.exp, 0) + safeNumber(newAdd.exp, 0) + 1;
+
+      while (nE >= 2 && nL < 3) {
+        nL++;
+        nE -= 2;
+      }
+      if (nL >= 3) {
+        nE = 0;
+        unlockAchievement("triple_star");
+      }
+
+      const b = nL - oL + 1;
+      let atkBonus = b;
+      let hpBonus = b;
+
+      if (newBase.ability === "levelup_buff_self" && nL > oL) {
+        const m = pwr({ ...newBase, lvl: nL });
+        atkBonus += m * 2;
+        hpBonus += m * 2;
+      }
+
+      const merged = {
+        ...newBase,
+        lvl: nL,
+        exp: nE,
+        atk: clampStat(safeNumber(newBase.atk, 0) + atkBonus),
+        hp: clampStat(safeNumber(newBase.hp, 0) + hpBonus),
+        curHp: clampStat(safeNumber(newBase.hp, 0) + hpBonus),
+      };
+
+      let newRewards = [];
+      if (nL > oL) {
+        newRewards = addRew();
+        notifyCatOnLevelup(baseId);
+      }
+
+      triggerAnim(baseId, "buff");
+      playSound("buff");
+      spawnParticles(baseId, "buff");
+
+      return { merged, rewards: newRewards };
+    } catch (e) {
+      logError(e, "merge");
+      return { merged: base, rewards: [] };
+    }
+  };
+
+  // ← YENİ FONKSİYON: Bir hayvan seviye atlayınca Kedileri bufflıyor
+  // notifyCatOnLevelup fonksiyonunu TAMAMEN BUNUNLA DEĞİŞTİR
+  const notifyCatOnLevelup = (leveledPetId) => {
+    // Hemen bir efekt tetikle
+    setTimeout(() => {
+      setTeam((prevTeam) => {
+        if (!prevTeam) return prevTeam;
+
+        const newTeam = [...prevTeam];
+        let hasChanges = false;
+
+        // Takımdaki tüm kedileri bul (seviye atlayan hariç)
+        newTeam.forEach((pet, index) => {
+          if (
+            pet &&
+            pet.ability === "friend_levelup_buff" &&
+            pet.id !== leveledPetId
+          ) {
+            const m = pwr(pet); // Kedi seviyesi: 1, 2 veya 3
+            const buffAmount = m; // +1, +2 veya +3
+
+            console.log(
+              `🐱 Kedi ${pet.nick} seviye atlamadan etkilendi! +${buffAmount}/+${buffAmount}`
+            );
+
+            // Kedinin statlarını güncelle
+            newTeam[index] = {
+              ...pet,
+              atk: clampStat((pet.atk || 0) + buffAmount),
+              hp: clampStat((pet.hp || 0) + buffAmount),
+              curHp: clampStat((pet.curHp || 0) + buffAmount),
+            };
+            hasChanges = true;
+
+            // Animasyonları tetikle (biraz gecikmeli)
+            setTimeout(() => {
+              // Kedinin kartını bul
+              const catElement = document.querySelector(
+                `[data-pet-id="${pet.id}"]`
+              );
+              if (catElement) {
+                // Trigger anim
+                triggerAnim(pet.id, "buff");
+                spawnParticles(pet.id, "buff");
+
+                // Floating text göster
+                const rect = catElement.getBoundingClientRect();
+                spawnFloatingText(
+                  `+${buffAmount}`,
+                  rect.left + rect.width / 2,
+                  rect.top - 20,
+                  "buff"
+                );
+
+                // Kedinin etrafında mini partiküller
+                for (let i = 0; i < 5; i++) {
+                  setTimeout(() => {
+                    const particle = document.createElement("div");
+                    particle.textContent = "🐱";
+                    particle.style.position = "fixed";
+                    particle.style.left = `${rect.left + rect.width / 2}px`;
+                    particle.style.top = `${rect.top + rect.height / 2}px`;
+                    particle.style.fontSize = "16px";
+                    particle.style.pointerEvents = "none";
+                    particle.style.zIndex = "1000";
+                    particle.style.setProperty(
+                      "--tx",
+                      `${(Math.random() - 0.5) * 100}px`
+                    );
+                    particle.style.setProperty(
+                      "--ty",
+                      `${-30 - Math.random() * 40}px`
+                    );
+                    particle.style.animation =
+                      "flyToTarget 0.6s ease-out forwards";
+                    document.body.appendChild(particle);
+                    setTimeout(() => particle.remove(), 600);
+                  }, i * 100);
+                }
+              }
+            }, 300 + index * 100);
+          }
+        });
+
+        return hasChanges ? newTeam : prevTeam;
+      });
+    }, 100); // Küçük bir gecikme ile state güncellemesini yap
+  };
+
+  const refresh = () => {
+    const currentFrozen = shop.filter((s) => s.frozen);
+    setDiscountNext(false);
+    const slotsNeeded = shopSlots - currentFrozen.length;
+    const pool = [];
+    for (let t = 1; t <= maxT; t++) {
+      const weight =
+        difficultyLevel === "hard"
+          ? t * 2
+          : difficultyLevel === "easy"
+          ? (maxT - t + 1) * 2
+          : 1;
+      for (let w = 0; w < weight; w++) pool.push(...TIERS[t]);
+    }
+    const s = [];
+    for (let i = 0; i < slotsNeeded; i++) {
+      const a = pool[Math.floor(Math.random() * pool.length)];
+      let cost = a.cost;
+      team.forEach((pet) => {
+        if (pet && pet.ability === "buy_discount_next")
+          cost = Math.max(1, cost - pwr(pet));
+      });
+      if (discountNext) {
+        team.forEach((pet) => {
+          if (pet && pet.ability === "shop_discount") {
+            const level = pwr(pet);
+            const discountPercent =
+              level === 1 ? 0.33 : level === 2 ? 0.66 : 0.99;
+            cost = Math.max(1, Math.floor(cost * (1 - discountPercent)));
+          }
+        });
+      }
+      s.push({
+        ...a,
+        id: Math.random(),
+        lvl: 1,
+        exp: 0,
+        curHp: a.hp,
+        frozen: false,
+        cost,
+      });
+    }
+    if (discountNext) setDiscountNext(false);
+    const newShop = [...currentFrozen, ...s];
+    setShop(newShop);
+
+    // Birleşebilir hayvan varsa özel ses çal
+    const hasMergeable = newShop.some((shopPet) =>
+      team.some(
+        (t) =>
+          t && t.name === shopPet.name && t.tier === shopPet.tier && t.lvl < 3
+      )
+    );
+    if (hasMergeable) {
+      setTimeout(() => playSound("levelup"), 300);
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, [turn, shopSlots, shopResetKey]);
+
+  const toggleFreeze = (a) => {
+    const willFreeze = !shop.find((s) => s.id === a.id)?.frozen;
+    if (willFreeze) playSound("freeze");
+    setShop(shop.map((s) => (s.id === a.id ? { ...s, frozen: !s.frozen } : s)));
+  };
+
+  const buy = (a, slot) => {
+    if (a.ability.includes("fire")) spawnParticles(a.id, "fire");
+    else if (a.ability.includes("shield") || a.ability.includes("tank"))
+      spawnParticles(a.id, "shield");
+    else if (a.ability.includes("heal")) spawnParticles(a.id, "heal");
+    else if (a.ability.includes("buff")) spawnParticles(a.id, "buff");
+    else spawnParticles(a.id, "attack");
+
+   const applyBuyBuffs = (nt, newPetIndex) => {
+      nt.forEach((pet, idx) => {
+        if (pet && pet.ability === "buy_buff_random" && idx !== newPetIndex) {
+          const m = pwr(pet);
+          const allies = nt.filter((t, i) => t && i !== idx);
+          if (allies.length > 0) {
+            const target = allies[Math.floor(Math.random() * allies.length)];
+            const targetId = target.id;
+            if (targetId) {
+              spawnBuffAnimation(pet.id, targetId, m, "buff", triggerAnim);
+              setTimeout(() => {
+                setTeam((prev) => {
+                  const updated = [...prev];
+                  const tIdx = updated.findIndex((t) => t && t.id === targetId);
+                  if (tIdx !== -1) {
+                    updated[tIdx] = {
+                      ...updated[tIdx],
+                      atk: clampStat(updated[tIdx].atk + m),
+                      hp: clampStat(updated[tIdx].hp + m),
+                      curHp: clampStat(updated[tIdx].curHp + m),
+                    };
+                  }
+                  return updated;
+                });
+              }, 800);
+            }
+          }
+        }
+      });
+      nt.forEach((pet, idx) => {
+        if (pet && pet.ability === "buy_buff_behind") {
+          const m = pwr(pet);
+          if (idx > 0 && nt[idx - 1]) {
+            const behindId = nt[idx - 1].id;
+            spawnBuffAnimation(pet.id, behindId, m, "buff");
+            setTimeout(() => {
+              setTeam((prev) => {
+                const updated = [...prev];
+                const tIdx = updated.findIndex((t) => t && t.id === behindId);
+                if (tIdx !== -1) {
+                  updated[tIdx] = {
+                    ...updated[tIdx],
+                    atk: clampStat(updated[tIdx].atk + m),
+                    hp: clampStat(updated[tIdx].hp + m),
+                    curHp: clampStat(updated[tIdx].curHp + m),
+                  };
+                }
+                return updated;
+              });
+            }, 800);
+          }
+        }
+      });
+    };
+
+    if (!a.isR && gold < a.cost) return;
+    if (a.tier >= 5) unlockAchievement("lion_heart");
+    if (a.name === "🐉") unlockAchievement("dragon");
+    const nt = [...team];
+
+    if (
+      nt[slot] &&
+      nt[slot].name === a.name &&
+      nt[slot].tier === a.tier &&
+      nt[slot].lvl < 3
+    ) {
+      const { merged, rewards: newRewards } = merge(nt[slot], a);
+      nt[slot] = merged;
+      setTeam(nt);
+      if (!a.isR) {
+        setGold((g) => g - a.cost);
+        setShop(shop.filter((x) => x.id !== a.id));
+        if (merged.ability === "shop_discount") setDiscountNext(true);
+        if (newRewards.length > 0)
+          setRewards((prev) => [...prev, ...newRewards]);
+      } else {
+        setRewards((prev) => [
+          ...prev.filter((x) => x.grp !== a.grp),
+          ...newRewards,
+        ]);
+      }
+      applyBuyBuffs(nt, slot);
+      setTeam(nt);
+      setSel(null);
+      return;
+    }
+
+    if (nt[slot] !== null) return;
+    nt[slot] = {
+      ...a,
+      lvl: a.lvl || 1,
+      exp: a.exp || 0,
+      curHp: a.curHp || a.hp,
+      isR: undefined,
+      rT: undefined,
+      grp: undefined,
+    };
+    if (!a.isR) {
+      setGold((g) => g - a.cost);
+      setShop(shop.filter((x) => x.id !== a.id));
+    } else {
+      setRewards(rewards.filter((x) => x.grp !== a.grp));
+    }
+    if (a.ability === "shop_discount") setDiscountNext(true);
+    applyBuyBuffs(nt, slot);
+    setTeam(nt);
+    // Kalan mağazada birleşebilir hayvan varsa ses çal
+    const remainingShop = shop.filter((x) => x.id !== a.id);
+    const stillMergeable = remainingShop.some((shopPet) =>
+      nt.some(
+        (t) =>
+          t && t.name === shopPet.name && t.tier === shopPet.tier && t.lvl < 3
+      )
+    );
+    if (stillMergeable) {
+      setTimeout(() => playSound("levelup"), 400);
+    }
+    setSel(null);
+  };
+
+  const mergeT = (fi, ti) => {
+    const nt = [...team];
+    const f = nt[fi];
+    const t = nt[ti];
+    if (f && t && f.name === t.name && f.tier === t.tier) {
+      if (t.lvl === 3 || f.lvl === 3) {
+        [nt[fi], nt[ti]] = [nt[ti], nt[fi]];
+        setTeam(nt);
+        setSelI(null);
+        return true;
+      }
+      if (t.lvl < 3) {
+        const { merged, rewards: newRewards } = merge(t, f);
+        nt[ti] = merged;
+        nt[fi] = null;
+        setTeam(nt);
+        if (newRewards.length > 0)
+          setRewards((prev) => [...prev, ...newRewards]);
+        setSelI(null);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const sell = (i) => {
+    if (!team[i]) return;
+    const pet = team[i];
+    let goldGain = sellP(pet);
+    const nt = [...team];
+    if (pet.ability === "sell_gold") goldGain += pwr(pet);
+
+    if (pet.ability === "sell_buff_friend") {
+      const allies = nt.filter((t, idx) => t && idx !== i);
+      if (allies.length > 0) {
+        const m = pwr(pet);
+        const targets = [...allies]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, Math.min(m, allies.length));
+        const raccoonElement = document.querySelector(
+          `[data-pet-id="${pet.id}"]`
+        );
+        const raccoonRect = raccoonElement
+          ? raccoonElement.getBoundingClientRect()
+          : null;
+        targets.forEach((target, index) => {
+          const targetIdx = nt.findIndex((t) => t && t.id === target.id);
+          if (targetIdx !== -1) {
+            setTimeout(() => {
+              const targetElement = document.querySelector(
+                `[data-pet-id="${nt[targetIdx].id}"]`
+              );
+              if (targetElement && raccoonRect) {
+                const targetRect = targetElement.getBoundingClientRect();
+                ["⚔️", "❤️"].forEach((icon, iconIndex) => {
+                  setTimeout(() => {
+                    const particle = document.createElement("div");
+                    particle.textContent = icon;
+                    particle.style.position = "fixed";
+                    particle.style.left = `${
+                      raccoonRect.left + raccoonRect.width / 2
+                    }px`;
+                    particle.style.top = `${
+                      raccoonRect.top + raccoonRect.height / 2
+                    }px`;
+                    particle.style.fontSize = "24px";
+                    particle.style.pointerEvents = "none";
+                    particle.style.zIndex = "1000";
+                    particle.style.setProperty(
+                      "--tx",
+                      `${
+                        targetRect.left +
+                        targetRect.width / 2 -
+                        raccoonRect.left -
+                        raccoonRect.width / 2
+                      }px`
+                    );
+                    particle.style.setProperty(
+                      "--ty",
+                      `${
+                        targetRect.top +
+                        targetRect.height / 2 -
+                        raccoonRect.top -
+                        raccoonRect.height / 2
+                      }px`
+                    );
+                    particle.style.animation =
+                      "flyToTarget 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards";
+                    document.body.appendChild(particle);
+                    setTimeout(() => {
+                      const rect = targetElement.getBoundingClientRect();
+                      spawnFloatingText(
+                        "+1",
+                        rect.left + rect.width / 2,
+                        rect.top,
+                        "buff"
+                      );
+                      triggerAnim(nt[targetIdx].id, "buff");
+                    }, 700);
+                    setTimeout(() => particle.remove(), 800);
+                  }, iconIndex * 150);
+                });
+              }
+            }, index * 200);
+            setTimeout(() => {
+              nt[targetIdx] = {
+                ...nt[targetIdx],
+                atk: clampStat(nt[targetIdx].atk + m),
+                hp: clampStat(nt[targetIdx].hp + m),
+                curHp: clampStat(nt[targetIdx].curHp + m),
+              };
+            }, index * 200 + 800);
+          }
+        });
+        nt[i] = null;
+        setTeam(nt);
+        setGold((g) => g + goldGain);
+        setSelI(null);
+        return;
+      }
+    }
+
+    if (pet.ability === "sell_heal_team") {
+      const m = pwr(pet);
+      const healAmount = m * 2;
+
+      console.log("🦙 Lama satıldı! +" + healAmount + " HP tüm takıma");
+
+      // Lama'nın pozisyonunu bul
+      const lamaElement = document.querySelector(`[data-pet-id="${pet.id}"]`);
+      const lamaRect = lamaElement ? lamaElement.getBoundingClientRect() : null;
+
+      // Takımdaki tüm hayvanlara buff ver (Lama hariç)
+      team.forEach((ally, idx) => {
+        if (ally && idx !== i) {
+          // Animasyon: Lama'dan hedefe uçan efekt
+          if (lamaRect) {
+            setTimeout(() => {
+              const targetElement = document.querySelector(
+                `[data-pet-id="${ally.id}"]`
+              );
+              if (targetElement) {
+                const targetRect = targetElement.getBoundingClientRect();
+
+                // Uçan kalpler
+                for (let k = 0; k < 3; k++) {
+                  setTimeout(() => {
+                    const heart = document.createElement("div");
+                    heart.textContent = "💚";
+                    heart.style.position = "fixed";
+                    heart.style.left = `${
+                      lamaRect.left + lamaRect.width / 2
+                    }px`;
+                    heart.style.top = `${lamaRect.top + lamaRect.height / 2}px`;
+                    heart.style.fontSize = "20px";
+                    heart.style.pointerEvents = "none";
+                    heart.style.zIndex = "1000";
+                    heart.style.setProperty(
+                      "--tx",
+                      `${
+                        targetRect.left +
+                        targetRect.width / 2 -
+                        lamaRect.left -
+                        lamaRect.width / 2
+                      }px`
+                    );
+                    heart.style.setProperty(
+                      "--ty",
+                      `${
+                        targetRect.top +
+                        targetRect.height / 2 -
+                        lamaRect.top -
+                        lamaRect.height / 2
+                      }px`
+                    );
+                    heart.style.animation =
+                      "flyToTarget 0.6s ease-out forwards";
+                    document.body.appendChild(heart);
+                    setTimeout(() => heart.remove(), 600);
+                  }, k * 100);
+                }
+              }
+            }, idx * 150);
+          }
+
+          // Hedefe floating text göster
+          setTimeout(() => {
+            const targetEl = document.querySelector(
+              `[data-pet-id="${ally.id}"]`
+            );
+            if (targetEl) {
+              const rect = targetEl.getBoundingClientRect();
+              spawnFloatingText(
+                `+${healAmount} HP`,
+                rect.left + rect.width / 2,
+                rect.top - 10,
+                "heal"
+              );
+              triggerAnim(ally.id, "buff");
+            }
+          }, idx * 150 + 300);
+        }
+      });
+
+      // State güncellemesi (mevcut kodun devamı)
+      const updatedNt = [...team];
+      team.forEach((ally, idx) => {
+        if (ally && idx !== i) {
+          updatedNt[idx] = {
+            ...ally,
+            hp: clampStat((ally.hp || 0) + healAmount),
+            curHp: clampStat((ally.curHp || 0) + healAmount),
+          };
+        }
+      });
+      updatedNt[i] = null;
+
+      // State'leri güncelle
+      setTeam(updatedNt);
+      setGold((g) => g + goldGain);
+      setSelI(null);
+
+      // Lama'nın kendisi için de animasyon
+      setTimeout(() => {
+        spawnParticles(pet.id, "heal");
+      }, 100);
+
+      return; // Önemli: Burada return et, aşağıdaki kodlar çalışmasın
+    }
+
+    if (pet.ability === "sell_buff_shop") {
+      const m = pwr(pet);
+      // ← DÜZELTME: Mağazadaki hayvanlara uçan partiküller göster
+      const petEl = document.querySelector(`[data-pet-id="${pet.id}"]`);
+      const petRect = petEl ? petEl.getBoundingClientRect() : null;
+      setShop((prevShop) => {
+        const updated = prevShop.map((shopPet) => {
+          if (!shopPet) return shopPet;
+          return {
+            ...shopPet,
+            atk: clampStat(shopPet.atk + m),
+            hp: clampStat(shopPet.hp + m),
+            curHp: clampStat(shopPet.curHp + m),
+          };
+        });
+        // Mağazadaki kartlara partiküller gönder (DOM id olmadığı için pozisyon tahmini)
+        if (petRect) {
+          updated.forEach((shopPet, sIdx) => {
+            if (!shopPet) return;
+            setTimeout(() => {
+              ["⚔️", "❤️"].forEach((icon, iconIndex) => {
+                setTimeout(() => {
+                  const particle = document.createElement("div");
+                  particle.textContent = icon;
+                  particle.style.position = "fixed";
+                  particle.style.left = `${petRect.left + petRect.width / 2}px`;
+                  particle.style.top = `${petRect.top + petRect.height / 2}px`;
+                  particle.style.fontSize = "20px";
+                  particle.style.pointerEvents = "none";
+                  particle.style.zIndex = "1000";
+                  // Mağaza kartları solda, tahmini hedef pozisyon
+                  const shopCards = document.querySelectorAll(".card-3d");
+                  const targetCard = shopCards[sIdx];
+                  const targetRect = targetCard
+                    ? targetCard.getBoundingClientRect()
+                    : null;
+                  const targetX = targetRect
+                    ? targetRect.left + targetRect.width / 2
+                    : 120 + sIdx * 140;
+                  const targetY = targetRect
+                    ? targetRect.top + targetRect.height / 2
+                    : 200;
+                  particle.style.setProperty(
+                    "--tx",
+                    `${targetX - petRect.left}px`
+                  );
+                  particle.style.setProperty(
+                    "--ty",
+                    `${targetY - petRect.top}px`
+                  );
+                  particle.style.animation =
+                    "flyToTarget 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards";
+                  document.body.appendChild(particle);
+                  setTimeout(() => particle.remove(), 700);
+                }, iconIndex * 100);
+              });
+            }, sIdx * 150);
+          });
+        }
+        spawnParticles(pet.id, "buff");
+        return updated;
+      });
+      nt[i] = null;
+      setTeam(nt);
+      setGold((g) => g + goldGain);
+      setSelI(null);
+      return;
+    }
+
+    nt[i] = null;
+    setTeam(nt);
+    setGold((g) => g + goldGain);
+    setSelI(null);
+  };
+
+  const swap = (a, b) => {
+    const nt = [...team];
+    [nt[a], nt[b]] = [nt[b], nt[a]];
+    setTeam(nt);
+    setSelI(null);
+  };
+const { battle, startBossBattle, startVersusBattle, versusSetReady } = useBattle({
+  phase, setPhase,
+  step, setStep,
+  pT, setPT, eT, setET,
+  log, setLog,
+  team, setTeam,
+  lives, setLives,
+  wins, setWins,
+  turn, gold, setGold,
+  isBattleOver, setIsBattleOver,
+  bossChallenge, setBossChallenge, setBossResult, setBossRewards,
+  gameMode, isDebugBattle, setIsDebugBattle,setPGold,setRewards,
+  setOver, setVictory, setGameStarted, setShowDebugPanel,
+  setNewTier, setLastT, lastT,
+  setNewlyOpenedSlot, setPendingEndTurnAnims, setShowSwordClash,
+  setArenaOpponent, setVersusReady, setOpponentReady,
+  versusReady, versusRoom, versusPhase,
+  battleSpeedRef, isPausedRef, battleGoldRef, lastProcessedStepRef,
+  turnRef, setTurnAndRef,
+  triggerAnim, clampStat, pwr, unlockAchievement, playSound,
+  spawnBuffAnimation,
+  saveArenaTeam, fetchArenaOpponent,
+  difficultyLevel, maxT, teamSlots, difficulty,
+  setPGold,
+});
+
+  const isBossTurn = [5, 10, 15].includes(turn) && gameMode === "standard";
+
+  const offerBoss = () => {
+    setBossChallenge("offer");
+  };
+
+  const acceptBoss = () => {
+    setBossChallenge("battle");
+    startBossBattle();
+  };
+
+  const declineBoss = () => {
+    setBossChallenge(null);
+    battle();
+  };
+
+  useEffect(() => {
+    if (logR.current) logR.current.scrollTop = logR.current.scrollHeight;
+  }, [log]);
+  useEffect(() => {
+    if (phase !== "shop" || !pendingEndTurnAnims) return;
+
+    const timer = setTimeout(() => {
+      const currentTeam = team;
+      currentTeam.forEach((a, i) => {
+        if (!a) return;
+        const m = pwr(a);
+
+        if (a.ability === "end_heal_one") {
+          const allies = currentTeam.filter((t, idx) => t && idx !== i);
+          if (allies.length > 0) {
+            const randomAlly =
+              allies[Math.floor(Math.random() * allies.length)];
+            const tIdx = currentTeam.findIndex(
+              (t) => t && t.id === randomAlly.id
+            );
+            if (tIdx !== -1) {
+              // Animasyon başlar
+              spawnBuffAnimation(a.id, currentTeam[tIdx].id, m, "heal");
+              // 700ms sonra (partiküller hedefe ulaşınca) stat güncellenir
+              setTimeout(() => {
+                setTeam((prev) => {
+                  const nt = [...prev];
+                  const idx = nt.findIndex(
+                    (t) => t && t.id === currentTeam[tIdx].id
+                  );
+                  if (idx !== -1) {
+                    nt[idx] = {
+                      ...nt[idx],
+                      hp: clampStat(nt[idx].hp + m),
+                      curHp: clampStat(nt[idx].curHp + m),
+                    };
+                  }
+                  return nt;
+                });
+              }, 700);
+            }
+          }
+        }
+
+        if (a.ability === "end_team_buff") {
+          const targets = currentTeam
+            .slice(0, i)
+            .filter((x) => x)
+            .slice(-2);
+          targets.forEach((t, tLoopIdx) => {
+            const tIdx = currentTeam.findIndex((x) => x && x.id === t.id);
+            if (tIdx !== -1) {
+              setTimeout(() => {
+                spawnBuffAnimation(a.id, currentTeam[tIdx].id, m * 2, "buff");
+                setTimeout(() => {
+                  setTeam((prev) => {
+                    const nt = [...prev];
+                    const idx = nt.findIndex(
+                      (x) => x && x.id === currentTeam[tIdx].id
+                    );
+                    if (idx !== -1) {
+                      nt[idx] = {
+                        ...nt[idx],
+                        atk: clampStat(nt[idx].atk + m * 2),
+                        hp: clampStat(nt[idx].hp + m * 2),
+                        curHp: clampStat(nt[idx].curHp + m * 2),
+                      };
+                    }
+                    return nt;
+                  });
+                }, 700);
+              }, tLoopIdx * 400);
+            }
+          });
+        }
+
+        if (a.ability === "end_all") {
+          currentTeam.forEach((t, j) => {
+            if (t) {
+              setTimeout(() => {
+                spawnBuffAnimation(a.id, t.id, m * 3, "heal");
+                setTimeout(() => {
+                  setTeam((prev) => {
+                    const nt = [...prev];
+                    const idx = nt.findIndex((x) => x && x.id === t.id);
+                    if (idx !== -1) {
+                      nt[idx] = {
+                        ...nt[idx],
+                        hp: clampStat(nt[idx].hp + m * 3),
+                        curHp: clampStat(nt[idx].curHp + m * 3),
+                      };
+                    }
+                    return nt;
+                  });
+                }, 700);
+              }, j * 250);
+            }
+          });
+        }
+
+        if (a.ability === "end_buff_ahead") {
+          const targets = currentTeam
+            .slice(i + 1)
+            .filter((x) => x)
+            .slice(0, 3);
+          targets.forEach((t, tLoopIdx) => {
+            const tIdx = currentTeam.findIndex((x) => x && x.id === t.id);
+            if (tIdx !== -1) {
+              setTimeout(() => {
+                spawnBuffAnimation(a.id, currentTeam[tIdx].id, m * 2, "buff");
+                setTimeout(() => {
+                  setTeam((prev) => {
+                    const nt = [...prev];
+                    const idx = nt.findIndex(
+                      (x) => x && x.id === currentTeam[tIdx].id
+                    );
+                    if (idx !== -1) {
+                      nt[idx] = {
+                        ...nt[idx],
+                        atk: clampStat(nt[idx].atk + m * 2),
+                        hp: clampStat(nt[idx].hp + m * 2),
+                        curHp: clampStat(nt[idx].curHp + m * 2),
+                      };
+                    }
+                    return nt;
+                  });
+                }, 700);
+              }, tLoopIdx * 400);
+            }
+          });
+        }
+
+        if (a.ability === "end_self_buff") {
+          spawnParticles(a.id, "buff");
+          triggerAnim(a.id, "buff");
+          setTimeout(() => {
+            setTeam((prev) => {
+              const nt = [...prev];
+              const idx = nt.findIndex((x) => x && x.id === a.id);
+              if (idx !== -1) {
+                nt[idx] = {
+                  ...nt[idx],
+                  atk: clampStat(nt[idx].atk + m * 3),
+                  hp: clampStat(nt[idx].hp + m * 3),
+                  curHp: clampStat(nt[idx].curHp + m * 3),
+                };
+              }
+              return nt;
+            });
+          }, 700);
+        }
+      });
+
+      setPendingEndTurnAnims(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [phase, pendingEndTurnAnims]);
+
+  const reset = () => {
+    const cfg =
+      DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
+    setGold(cfg.startingGold);
+    setTurnAndRef(1);
+    setWins(0);
+    setLives(cfg.startingLives);
+    setTeam([null, null, null, null, null, null]);
+    setShop([]);
+    setShopResetKey((k) => k + 1);
+    setPhase("shop");
+    setOver(false);
+    setVictory(false);
+    setRewards([]);
+    setNewTier(null);
+    setLastT(1);
+    setPGold(0);
+    setGuideLvl({});
+    setAnims({});
+    setBossChallenge(null);
+    setBossResult(null);
+    setBossRewards([]);
+    lastProcessedStepRef.current = -1;
+    setIsBattleOver(false);
+    playSound("shop_open");
+  };
+
+  const updateStatsOnEnd = (won, currentTurn, currentWins, currentLives) => {
+    setStats((prev) => {
+      const next = {
+        ...prev,
+        totalGames: prev.totalGames + 1,
+        totalWins: prev.totalWins + (won ? 1 : 0),
+        bestTurn: Math.max(prev.bestTurn, currentTurn),
+        bestWins: Math.max(prev.bestWins, currentWins),
+      };
+      saveStats(next, user?.uid);
+      return next;
+    });
+    unlockAchievement("first_game");
+    if (won) unlockAchievement("first_win");
+    if (won && currentTurn >= WIN_TURN) unlockAchievement("champion");
+    if (won && currentLives === 5) unlockAchievement("perfect");
+    if (currentWins >= 5) unlockAchievement("five_wins");
+    if (currentLives <= 1) unlockAchievement("survivor");
+  };
+
+  const getGuideLvl = (tier, idx) => guideLvl[`${tier}-${idx}`] || 1;
+  const setGuideLvlFor = (tier, idx, lvl) =>
+    setGuideLvl((prev) => ({ ...prev, [`${tier}-${idx}`]: lvl }));
+
+  useEffect(() => {
+    if (victory) {
+      playSound("victory");
+      updateStatsOnEnd(true, turn, wins, lives);
+    }
+  }, [victory]);
+  useEffect(() => {
+    if (over) {
+      playSound("defeat");
+      updateStatsOnEnd(false, turn, wins, lives);
+    }
+  }, [over]);
+  if (gameMode === "versus" && versusPhase === "lobby") {
+    return (
+      <VersusLobby
+        user={user}
+        onRoomReady={(roomInfo) => {
+          setVersusRoom(roomInfo);
+          setVersusPhase("playing");
+          reset();
+          setGameStarted(true);
+          setTimeout(() => {
+            lastBattleIdRef.current = null;
+          }, 100);
+        }}
+        onCancel={() => {
+          setVersusPhase(null);
+          setVersusRoom(null);
+        }}
+      />
+    );
+  }
+  if (!gameStarted) {
+    return (
+      <>
+        {showDebugPanel && (
+          <DebugPanel
+            onClose={() => setShowDebugPanel(false)}
+            onStartBattle={(playerTeam, enemyTeam) => {
+              setShowDebugPanel(false);
+              setIsDebugBattle(true);
+              isPausedRef.current = false;
+              setIsPaused(false);
+              setIsBattleOver(false);
+              lastProcessedStepRef.current = -1;
+              setRewards([]);
+              battleGoldRef.current = 0;
+              const pt = [...playerTeam].map((x) => ({ ...x, curHp: x.hp }));
+              const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
+              setET(et);
+              setPT(pt);
+              setLog(["🧪 DEBUG SAVAŞI BAŞLADI"]);
+              setStep(0);
+              setPGold(0);
+              setPhase("battle");
+              setGameStarted(true);
+            }}
+          />
+        )}
+        <MenuScreen
+          menuView={menuView}
+          setMenuView={setMenuView}
+          soundEnabled={soundEnabled}
+          setSoundEnabled={setSoundEnabled}
+          stats={stats}
+          difficultyLevel={difficultyLevel}
+          setDifficultyLevel={setDifficultyLevel}
+          gameMode={gameMode}
+          setGameMode={setGameMode}
+          user={user}
+          displayName={displayName}
+          achievementPopup={achievementPopup}
+          showAuthModal={showAuthModal}
+          setShowAuthModal={setShowAuthModal}
+          showSettingsModal={showSettingsModal}
+          setShowSettingsModal={setShowSettingsModal}
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          authEmail={authEmail}
+          setAuthEmail={setAuthEmail}
+          authPass={authPass}
+          setAuthPass={setAuthPass}
+          authUsername={authUsername}
+          setAuthUsername={setAuthUsername}
+          authAvatar={authAvatar}
+          setAuthAvatar={setAuthAvatar}
+          settingsUsername={settingsUsername}
+          setSettingsUsername={setSettingsUsername}
+          settingsAvatar={settingsAvatar}
+          setSettingsAvatar={setSettingsAvatar}
+          handleEmailAuth={handleEmailAuth}
+          handleGoogleLogin={handleGoogleLogin}
+          handleLogout={handleLogout}
+          handleUpdateProfile={handleUpdateProfile}
+          onStart={() => {
+            if (gameMode === "versus") {
+              setVersusPhase("lobby");
+            } else {
+              reset();
+              setGameStarted(true);
+              unlockAchievement("first_game");
+              playSound("shop_open");
+            }
+          }}
+          onDebug={() => setShowDebugPanel(true)}
+        />
+      </>
+    );
+  }
+  if (victory) {
+    return (
+      <VictoryScreen
+        wins={wins}
+        lives={lives}
+        team={team}
+        perfectRun={
+          lives === (DIFFICULTY_CONFIGS[difficultyLevel]?.startingLives || 5)
+        }
+        onRestart={reset}
+        onMenu={() => {
+          reset();
+          setGameStarted(false);
+        }}
+      />
+    );
+  }
+
+  if (over) {
+    return (
+      <GameOverScreen
+        turn={turn}
+        wins={wins}
+        stats={stats}
+        team={team}
+        onRestart={reset}
+        onMenu={() => {
+          reset();
+          setGameStarted(false);
+        }}
+      />
+    );
+  }
+ if (bossChallenge === "offer" && gameMode === "standard") {
+    return (
+      <BossOfferScreen
+        boss={BOSSES[turn]}
+        onAccept={acceptBoss}
+        onDecline={declineBoss}
+      />
+    );
+  }
+
+  if (bossChallenge === "reward" && gameMode === "standard") {
+    const goToShop = () => {
+      setBossChallenge(null);
+      setBossResult(null);
+      setBossRewards([]);
+      const newTurn = turn + 1;
+      setTurnAndRef(newTurn);
+      setGold((g) => g + 10);
+      const finalTeam = applyEndTurnBuffs(team);
+      setTeam(finalTeam);
+      setPendingEndTurnAnims(true);
+      setPhase("shop");
+    };
+    return (
+      <BossRewardScreen
+        boss={BOSSES[turn]}
+        bossRewards={bossRewards}
+        teamFull={team.filter((x) => x).length >= teamSlots}
+        onSelectReward={(a) => {
+          setRewards((prev) => [...prev, { ...a, isR: true }]);
+          goToShop();
+        }}
+        onSkip={goToShop}
+      />
+    );
+  }
+  if (guide) {
+    return (
+      <GuideScreen
+        onClose={() => setGuide(false)}
+        openTiers={openTiers}
+        setOpenTiers={setOpenTiers}
+        guideLvl={guideLvl}
+        setGuideLvl={setGuideLvl}
+      />
+    );
+  }
+
+  if (newTier) {
+    return (
+      <NewTierScreen
+        newTier={newTier}
+        onContinue={() => {
+          setNewTier(null);
+          setPhase("shop");
+        }}
+      />
+    );
+  }
+
+  const empty = team.filter((x) => x === null).length;
+  const hasR = rewards.length > 0;
+
+  return (
+   <div className="min-h-screen text-white p-2" style={{
+  backgroundImage: `url(${battleBg})`,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+  backgroundAttachment: "fixed",
+}}>
+      <StarField />
+      {showDebugPanel && (
+        <DebugPanel
+          onClose={() => setShowDebugPanel(false)}
+          onStartBattle={(playerTeam, enemyTeam) => {
+            setShowDebugPanel(false);
+            setIsDebugBattle(true);
+            isPausedRef.current = false;
+setIsPaused(false);
+            setIsBattleOver(false);
+            lastProcessedStepRef.current = -1;
+            setRewards([]);
+            battleGoldRef.current = 0;
+           const pt = [...playerTeam].map((x) => ({ ...x, curHp: x.hp }));
+const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
+            setET(et);
+            setPT(pt);
+            setLog(["🧪 DEBUG SAVAŞI BAŞLADI"]);
+            setStep(0);
+            setPGold(0);
+            setPhase("battle");
+          }}
+        />
+      )}
+      {/* HATA GÖSTERİCİ */}
+      {lastError && (
+        <div className="fixed top-4 left-4 z-[9999] bg-red-900 border-2 border-red-500 rounded-lg p-3 max-w-md shadow-2xl">
+          <div className="font-bold text-red-300 mb-1">⚠️ Bir Hata Oluştu</div>
+          <div className="text-sm text-white">{lastError.message}</div>
+          <button
+            onClick={() => setLastError(null)}
+            className="mt-2 px-2 py-1 bg-red-700 rounded text-xs hover:bg-red-600"
+          >
+            Kapat
+          </button>
+        </div>
+      )}
+      {achievementPopup && (
+        <div
+          className="fixed top-6 right-6 z-50 bg-gradient-to-br from-yellow-900 to-orange-900 border-2 border-yellow-400 rounded-xl p-4 shadow-2xl flex items-center gap-3"
+          style={{ animation: "slideIn 0.3s ease-out" }}
+        >
+          <span className="text-3xl">{achievementPopup.icon}</span>
+          <div>
+            <div className="text-yellow-300 font-bold text-sm">
+              Başarım Kazandın!
+            </div>
+            <div className="text-white font-bold">{achievementPopup.name}</div>
+          </div>
+        </div>
+      )}
+      <div className="max-w-4xl mx-auto">
+     <div className="flex justify-between items-center mb-3 bg-gray-800/60 px-4 py-2 rounded-xl shadow-lg border border-gray-600/40">
+         <div className="flex items-center gap-2">
+  {/* Tur */}
+ <div className="flex items-center gap-1 bg-white/15 border border-white/30 px-3 py-1 rounded-xl">
+    <span className="text-[10px] text-gray-200 uppercase tracking-widest font-black">TUR</span>
+    <span className="text-white font-black text-sm">{turn}</span>
+    <span className="text-gray-300 text-[10px] font-bold">/{WIN_TURN}</span>
+  </div>
+  {/* Kademe */}
+  <div className="flex items-center gap-1 bg-purple-500/15 border border-purple-400/25 px-3 py-1 rounded-xl">
+    <span className="text-[10px] text-purple-300 uppercase tracking-widest font-black">K</span>
+    <span className="text-purple-200 font-black text-sm">{maxT}</span>
+  </div>
+  {/* Çarpan */}
+  <div className="flex items-center gap-1 bg-orange-500/15 border border-orange-400/25 px-3 py-1 rounded-xl">
+    <span className="text-orange-300 font-black text-sm">x{difficulty.toFixed(1)}</span>
+  </div>
+  {/* Zorluk */}
+  <div className={`flex items-center gap-1 px-3 py-1 rounded-xl border font-black text-sm ${
+    difficultyLevel === "easy"
+      ? "bg-green-500/15 border-green-400/25 text-green-300"
+      : difficultyLevel === "hard"
+      ? "bg-red-500/15 border-red-400/25 text-red-300"
+      : "bg-yellow-500/15 border-yellow-400/25 text-yellow-300"
+  }`}>
+    {DIFFICULTY_CONFIGS[difficultyLevel]?.label || "😐 Orta"}
+  </div>
+  {/* Boss uyarısı */}
+  {BOSSES[turn + 1] && gameMode === "standard" && (
+    <span className="text-[11px] px-2 py-1 bg-gradient-to-r from-red-600 to-red-900 rounded-xl border border-red-500 font-black animate-bounce shadow-[0_0_15px_rgba(239,68,68,0.6)]">
+      🔥 {BOSSES[turn + 1].emoji} BOSS!
+    </span>
+  )}
+  {/* Rehber */}
+  <button
+    onClick={() => setGuide(true)}
+    className="px-2 py-1 bg-gray-700/80 rounded-lg text-sm hover:bg-gray-600 transition-all border border-white/10"
+    title="Kademe Rehberi"
+  >
+    🗺️
+  </button>
+</div>          <div className="flex gap-3 font-bold">
+          <span title="Altın" className="bg-yellow-500/20 border border-yellow-500/40 px-2 py-1 rounded-lg text-yellow-300 font-black cursor-help">💰 {gold}</span>
+<span title="Can" className="bg-red-500/20 border border-red-500/40 px-2 py-1 rounded-lg text-red-300 font-black cursor-help">❤️ {lives}</span>
+<span title="Zafer" className="bg-green-500/20 border border-green-500/40 px-2 py-1 rounded-lg text-green-300 font-black cursor-help">✓ {wins}</span>
+            <span
+              className="text-purple-300 flex items-center gap-1"
+              title="Takım Gücü"
+            >
+              ⚡
+              {(() => {
+                const myPower = team
+                  .filter((x) => x)
+                  .reduce((sum, pet) => sum + pet.atk + pet.hp, 0);
+                return <span className="text-purple-300">{myPower}</span>;
+              })()}
+            </span>
+           <button
+              title={soundEnabled ? "Sesi Kapat" : "Sesi Aç"}
+              onClick={() => setSoundEnabled((s) => !s)}
+             className="px-2 py-1 bg-gray-700/80 rounded-lg text-sm hover:bg-gray-600 transition-all border border-white/10"
+            >
+              {soundEnabled ? "🔊" : "🔇"}
+            </button>
+            <button
+              onClick={() => {
+                reset();
+                setGameStarted(false);
+              }}
+             className="px-2 py-1 bg-gray-700/80 rounded-lg text-sm hover:bg-gray-600 transition-all border border-white/10"
+              title="Ana Menü"
+            >
+              🏠
+            </button>
+          </div>
+        </div>
+
+        {phase === "shop" ? (
+          <>
+      <div className="bg-black/60 rounded-[2.5rem] p-4 mb-4 border border-white/10 shadow-2xl relative group/shop">
+              {/* Shop Gradient Glow */}
+           <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 flex items-center justify-between">
+  <span className="text-yellow-300/90">🛒 HAYVAN MAĞAZASI</span>
+  <span className="text-blue-300/80 font-bold px-2 py-1 bg-blue-500/10 border border-blue-400/20 rounded-lg">
+  SAĞ TIK = ❄️ DONDUR
+</span>
+</div>
+          <div className="flex gap-2.5 justify-center items-end">
+                {shop.map((a, idx) => (
+                  <div
+                    key={a.id}
+                   className="flex flex-col items-center flex-shrink-0 gap-1 justify-end"
+                  >
+                    <div
+                      className={`relative transition-all duration-300 ${
+                        a.frozen
+                          ? "ring-2 ring-blue-400 shadow-lg shadow-blue-400/50"
+                          : team.some(
+                              (t) =>
+                                t &&
+                                t.name === a.name &&
+                                t.tier === a.tier &&
+                                t.lvl < 3
+                            )
+                          ? ""
+                          : ""
+                      } ${
+                        gold < a.cost
+                          ? "opacity-60 grayscale cursor-not-allowed"
+                          : "hover:scale-105 cursor-pointer"
+                      }`}
+                      style={
+                        !a.frozen &&
+                        team.some(
+                          (t) =>
+                            t &&
+                            t.name === a.name &&
+                            t.tier === a.tier &&
+                            t.lvl < 3
+                        )
+                          ? { animation: "glowPulse 1.5s ease-in-out infinite" }
+                          : {}
+                      }
+                      onClick={() => setSel(sel?.id === a.id ? null : a)}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        toggleFreeze(a);
+                      }}
+                      onTouchStart={(e) => {
+                        const timer = setTimeout(() => {
+                          toggleFreeze(a);
+                        }, 500);
+                        e.currentTarget._longPressTimer = timer;
+                      }}
+                      onTouchEnd={(e) => {
+                        clearTimeout(e.currentTarget._longPressTimer);
+                      }}
+                      onTouchMove={(e) => {
+                        clearTimeout(e.currentTarget._longPressTimer);
+                      }}
+                    >
+                      <Card
+                        a={a}
+                        anim={anims[a.id]}
+                        onClick={() => {}}
+                        selected={sel?.id === a.id}
+                        showName={false}
+                        getDesc={getDesc}
+                        shop={shop}
+                        team={team}
+                        mirror={true}
+                      />
+                     {a.frozen && (
+                        <div className="absolute -top-1 -left-1 text-xl">
+                          ❄️
+                        </div>
+                      )}
+                      {sel?.id === a.id && (
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white z-[60]">
+                          <span className="text-white text-xs font-black">✓</span>
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-sm text-yellow-300 font-bold">
+                      {a.cost}💰
+                    </span>
+                  </div>
+                ))}
+                {shopSlots < 4 && (
+                  <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 h-[180px] justify-end">
+                    <div className="w-28 h-36 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center">
+                    <span className="text-2xl">
+                        🔒
+                      </span>
+                      <span className="text-[10px] font-black tracking-tighter mt-1 text-yellow-400 uppercase">
+                        Tur 5
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold opacity-0">0💰</span>
+                  </div>
+                )}
+                {shopSlots < 5 && (
+                  <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 h-[180px] justify-end">
+                    <div className="w-28 h-36 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center">
+                     <span className="text-2xl">
+                        🔒
+                      </span>
+                      <span className="text-[10px] font-black tracking-tighter mt-1 text-yellow-400 uppercase">
+                        Tur 7
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold opacity-0">0💰</span>
+                  </div>
+                )}
+               <div className="flex flex-col items-center flex-shrink-0 gap-1 h-[180px] justify-end">
+                  <button
+                    onClick={() => {
+                      const unfrozen = shop.filter((s) => !s.frozen);
+                      if (unfrozen.length === 0 || gold >= 1) {
+                        if (unfrozen.length > 0) setGold((g) => g - 1);
+                        refresh();
+                        playSound("refresh");
+                      }
+                    }}
+                    disabled={
+                      gold < 1 && shop.filter((s) => !s.frozen).length > 0
+                    }
+                  className="w-28 h-36 rounded-2xl bg-transparent disabled:opacity-40 flex flex-col items-center justify-center hover:bg-white/5 transition-all border-2 border-dashed border-white/10 group/roll"
+                  >
+                    <span className="text-3xl group-hover/roll:rotate-180 transition-transform duration-500">
+                      🔄
+                    </span>
+                    <span className="text-xs font-black mt-2">
+                      {shop.filter((s) => !s.frozen).length === 0
+                        ? "BEDAVA"
+                        : "1 💰"}
+                    </span>
+                  </button>
+                  <span className="text-[10px] text-blue-400 font-black tracking-widest uppercase">
+                    YENİLE
+                  </span>
+                </div>
+              </div>
+            </div>
+            {sel && (
+              <div className="fixed right-4 top-1/2 -translate-y-1/2 z-50 w-72 bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-purple-500 rounded-2xl p-4 shadow-2xl backdrop-blur-sm">
+                {/* Kapat butonu */}
+                <button
+                  onClick={() => setSel(null)}
+                  className="absolute top-2 right-2 text-gray-400 hover:text-white text-xl"
+                >
+                  ✕
+                </button>
+                {/* Hayvan büyük görünüm */}
+                <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-700">
+                  <span className="text-6xl">{sel.name}</span>
+                  <div>
+                    <div className="text-white font-black text-lg">
+                      {sel.nick}
+                    </div>
+                    <div className="text-gray-400 text-sm">
+                      Kademe {sel.tier}
+                    </div>
+                    <div className="flex gap-2 mt-1">
+                      <span className="bg-orange-600/80 px-2 py-0.5 rounded-full text-xs font-bold">
+                        ⚔️ {sel.atk}
+                      </span>
+                      <span className="bg-green-600/80 px-2 py-0.5 rounded-full text-xs font-bold">
+                        ❤️ {sel.hp}
+                      </span>
+                      <span className="bg-yellow-600/80 px-2 py-0.5 rounded-full text-xs font-bold">
+                        💰 {sel.cost}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                {/* Seviye bazlı beceriler */}
+                <div className="flex flex-col gap-2">
+                  {[1, 2, 3].map((lvl) => (
+                    <div
+                      key={lvl}
+                      className={`rounded-xl p-2.5 border ${
+                        lvl === 1
+                          ? "border-gray-500 bg-gray-800/60"
+                          : lvl === 2
+                          ? "border-blue-500/60 bg-blue-900/20"
+                          : "border-yellow-500/60 bg-yellow-900/20"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm">
+                          {lvl === 1 ? "⭐" : lvl === 2 ? "💎" : "👑"}
+                        </span>
+                        <span
+                          className={`text-xs font-bold ${
+                            lvl === 1
+                              ? "text-gray-300"
+                              : lvl === 2
+                              ? "text-blue-300"
+                              : "text-yellow-300"
+                          }`}
+                        >
+                          {lvl === 1
+                            ? "1. Seviye"
+                            : lvl === 2
+                            ? "2. Seviye"
+                            : "3. Seviye (MAX)"}
+                        </span>
+                        <span className="ml-auto text-xs text-gray-400">
+                          ⚔️{sel.atk + lvl - 1} ❤️{sel.hp + lvl - 1}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-200 leading-relaxed">
+                        {ABILITY_ICONS[sel.ability]}{" "}
+                        {getDesc({ ...sel, lvl }, lvl)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Satın al butonu */}
+                <button
+                  onClick={() => {
+                    const emptySlot = team.findIndex(
+                      (x) => x === null && team.indexOf(x) < teamSlots
+                    );
+                    const validSlot = team.findIndex(
+                      (x, i) => x === null && i < teamSlots
+                    );
+                    if (validSlot !== -1 && gold >= sel.cost)
+                      buy(sel, validSlot);
+                  }}
+                  disabled={
+                    gold < sel.cost ||
+                    team.slice(0, teamSlots).every((x) => x !== null)
+                  }
+                  className="mt-3 w-full py-2 bg-gradient-to-br from-green-600 to-green-800 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl font-bold hover:from-green-500 hover:to-green-700 transition-all border border-green-400 text-sm"
+                >
+                  {gold < sel.cost
+                    ? `💰 Yeterli altın yok (${sel.cost} gerekli)`
+                    : team.slice(0, teamSlots).every((x) => x !== null)
+                    ? "❌ Takım dolu"
+                    : `✅ Satın Al (${sel.cost}💰)`}
+                </button>
+              </div>
+            )}
+            {hasR && (
+              <div className="bg-gradient-to-br from-yellow-900/60 to-orange-900/60 border-2 border-yellow-500 rounded-xl p-3 mb-3 backdrop-blur-sm shadow-xl">
+                <div className="text-sm text-yellow-300 mb-2 font-bold">
+                  🎁 Seviye Ödülü (1 seç!){" "}
+                  {empty === 0 && (
+                    <span className="text-red-400">- Slot boşalt!</span>
+                  )}
+                </div>
+                <div className="flex gap-3 justify-center flex-wrap">
+                 {rewards.map((a) => (
+  <div
+    key={a.id}
+    className="flex flex-col items-center relative"
+    onClick={() => setSel(sel?.id === a.id ? null : a)}
+  >
+    <div className="relative">
+      <Card
+        a={a}
+        anim={anims[a.id]}
+        onClick={() => {}}
+        selected={sel?.id === a.id}
+        showName={false}
+        getDesc={getDesc}
+        shop={shop}
+        team={team}
+        mirror={true}
+      />
+      {sel?.id === a.id && (
+        <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white z-[60]">
+          <span className="text-white text-xs font-black">✓</span>
+        </div>
+      )}
+    </div>
+    <span className="text-xs text-green-300 font-bold mt-1">
+      K{a.rT}
+    </span>
+  </div>
+))}
+                </div>
+              </div>
+            )}
+
+       <div className="bg-black/60 rounded-[2.5rem] p-4 mb-3 border border-white/10 shadow-2xl relative overflow-visible">
+            <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-4">
+                <span className="text-yellow-300/90">⚔️ SAVAŞ TAKIMI</span>
+                {sel && <span className="text-yellow-300"> - Slot seç</span>}
+              </div>
+            <div className="flex gap-2.5 justify-center px-1 py-3">
+                {team.map((a, i) => {
+                  // ← GÜNCELLENDİ: Tur 7 ve Tur 9
+                  const isLocked =
+                    (i === 4 && turn < 5) || (i === 5 && turn < 7);
+                  const lockedTurn = i === 4 ? 5 : 7;
+                  const isJustOpened =
+                    (i === 4 && newlyOpenedSlot === "shop_4_team_4") ||
+                    (i === 5 && newlyOpenedSlot === "shop_5_team_5");
+
+                  if (isJustOpened) {
+                    return (
+                      <div
+                        key={i}
+                        className="flex flex-col items-center flex-shrink-0"
+                      >
+                        <button
+                          onClick={() => {
+                            if (sel) buy(sel, i);
+                            else if (selI !== null) swap(selI, i);
+                          }}
+                          className="w-28 h-36 rounded-2xl border-2 border-green-500/50 text-green-400 text-3xl transition-all bg-green-500/10 backdrop-blur-md flex flex-col items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.2)]"
+                          style={{
+                            animation:
+                              "slotUnlock 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                          }}
+                        >
+                          <span
+                            style={{
+                              animation: "lockBreak 0.8s ease-out forwards",
+                              display: "inline-block",
+                            }}
+                          >
+                            🔓
+                          </span>
+                          <span className="text-[10px] uppercase font-black tracking-widest mt-2">
+                            Açıldı!
+                          </span>
+                        </button>
+                      </div>
+                    );
+                  }
+                 if (isLocked) {
+                    return (
+                      <div
+  key={i}
+  className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40"
+>
+  <div className="w-28 h-36 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center">
+    <span className="text-2xl">
+      🔒
+    </span>
+    <span className="text-[10px] font-black tracking-tighter mt-1 text-yellow-400 uppercase">
+      Tur {lockedTurn}
+    </span>
+  </div>
+</div>
+                    );
+                  }
+                  return a ? (
+                    <div
+                      key={a.id}
+                      onClick={() => {
+                        if (sel) buy(sel, i);
+                        else if (selI !== null && selI !== i) {
+                          if (!mergeT(selI, i)) swap(selI, i);
+                        } else setSelI(selI === i ? null : i);
+                      }}
+                      className="flex flex-col items-center flex-shrink-0"
+                    >
+                      <div className="relative group">
+                        <Card
+                          a={a}
+                          anim={anims[a.id]}
+                          selected={selI === i}
+                          onSell={() => sell(i)}
+                          onClick={() => {}}
+                          showName={false}
+                          getDesc={getDesc}
+                          mirror={true}
+                        />
+                        {selI === i && (
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full border-2 border-black z-20 flex items-center justify-center text-[8px] font-black text-black">
+                            ✓
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      key={i}
+                      className="flex flex-col items-center flex-shrink-0"
+                    >
+                      <button
+                        onClick={() => {
+                          if (sel) buy(sel, i);
+                          else if (selI !== null) swap(selI, i);
+                        }}
+                       className={`w-28 h-36 rounded-2xl border-2 border-dashed transition-all flex items-center justify-center group/slot
+${
+  sel || selI !== null
+    ? "border-green-400/70 bg-green-500/5 text-green-400/50 hover:border-green-400 hover:bg-green-500/10 hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
+    : "border-white/10 text-white/10 bg-transparent hover:border-white/30 hover:text-white/30 hover:scale-105 active:scale-95"
+}`}
+                      >
+                        <span className="group-hover/slot:rotate-90 transition-transform duration-300">
+                          +
+                        </span>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="text-xs text-gray-400 text-center mt-2 flex justify-between px-8"></div>
+            </div>
+
+            {isBossTurn && bossChallenge === null ? (
+              <div className="flex gap-4 mt-2">
+                <button
+                  onClick={offerBoss}
+                  disabled={team.filter((x) => x).length === 0}
+                  className="flex-1 group relative py-4 bg-gradient-to-br from-orange-600 to-red-800 disabled:opacity-40 rounded-2xl font-black text-lg tracking-tight hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_40px_rgba(234,88,12,0.3)] overflow-hidden"
+                >
+                  <div className="relative z-10 flex items-center justify-center gap-2">
+                    🔥 BOSS MEYDAN OKUMASI
+                  </div>
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+                <button
+                  onClick={battle}
+                  disabled={
+                    team.filter((x) => x).length === 0 || phase === "battle"
+                  }
+                  className="flex-1 group relative py-4 bg-gradient-to-br from-green-600 to-emerald-800 disabled:opacity-40 rounded-2xl font-black text-lg tracking-tight hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_40px_rgba(22,163,74,0.3)] overflow-hidden"
+                >
+                  <div className="relative z-10 flex items-center justify-center gap-2">
+                    ⚔️ NORMAL SAVAŞ
+                  </div>
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={battle}
+                disabled={
+                  team.filter((x) => x).length === 0 ||
+                  phase === "battle" ||
+                  (gameMode === "versus" && versusReady)
+                }
+          className="w-full group relative py-5 mt-2 bg-gray-800/60 disabled:cursor-not-allowed rounded-2xl font-black text-2xl tracking-tighter hover:scale-[1.01] hover:bg-gray-700/70 hover:border-gray-500/60 active:scale-95 transition-all duration-200 border-2 border-gray-600/40 text-gray-300 overflow-hidden"
+              >
+              <div className="relative z-10 flex items-center justify-center gap-3">
+  {team.filter((x) => x).length === 0
+   ? <><span className="text-4xl">🐾</span><span>ÖNCE TAKIMINA HAYVAN EKLE!</span></>
+                    : gameMode === "versus" && versusReady
+                    ? `⏳ Rakip Bekleniyor... ${opponentReady ? "✓" : ""}`
+                    : gameMode === "versus"
+                    ? "✅ Hazırım!"
+                    : "⚔️ SAVAŞI BAŞLAT"}
+                </div>
+               <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+              </button>
+            )}
+          </>
+        ) : (
+          <BattleView
+            turn={turn}
+            gold={gold}
+            lives={lives}
+            wins={wins}
+            pT={pT}
+            eT={eT}
+            log={log}
+            step={step}
+            anims={anims}
+            bossChallenge={bossChallenge}
+            arenaOpponent={arenaOpponent}
+            battleSpeedRef={battleSpeedRef}
+            isPaused={isPaused}
+onPauseToggle={() => {
+  isPausedRef.current = !isPausedRef.current;
+  setIsPaused((p) => !p);
+}}
+            user={user}
+          />
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,10 @@
+- [x] Proje hazırlığı ve temel React kurulumu
+- [x] Oyun mekanikleri ve hayvan yeteneklerinin kodlanması
+- [x] Görsel efektler ve 3D tasarım uygulamaları
+- [x] Firebase Authentication (Google/Email) entegrasyonu
+- [x] Arena (Asenkron PvP) modu temelinin atılması
+- [x] Proje klasöründeki redundant (kopya) dosyaların temizlenmesi
+- [ ] Firebase Config (API Key) bilgilerinin tanımlanması
+- [ ] Versus (Canlı PvP) modunun aktifleştirilmesi
+- [ ] Matchmaking (Eşleştirme) sisteminin iyileştirilmesi
+- [ ] App.js dosyasının modüllere bölünmesi (Refactoring)
