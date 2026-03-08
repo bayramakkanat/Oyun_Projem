@@ -45,24 +45,14 @@ import {
   spawnDeathEffect,
 } from "./utils/animations";
 import { auth, db } from "./firebase";
-import {
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile,
-} from "firebase/auth";
+
 import {
   collection,
-  addDoc,
   setDoc,
   doc,
   getDocs,
   query,
   where,
-  orderBy,
   limit,
   serverTimestamp,
   onSnapshot,
