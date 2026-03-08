@@ -986,7 +986,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
               </div>
             )}
             {hasR && (
-              <div className="bg-gradient-to-br from-yellow-900/60 to-orange-900/60 border-2 border-yellow-500 rounded-xl p-3 mb-3 backdrop-blur-sm shadow-xl">
+              <div className="bg-gradient-to-br from-yellow-900/60 to-orange-900/60 border-2 border-yellow-500 rounded-xl p-3 mb-3 shadow-xl">
                 <div className="text-sm text-yellow-300 mb-2 font-bold">
                   🎁 Seviye Ödülü (1 seç!){" "}
                   {empty === 0 && (
