@@ -8,18 +8,24 @@ export function useMusic({ soundEnabled, phase, gameStarted }) {
   const shopMusicRef = useRef(null);
   const battleMusicRef = useRef(null);
 
-  // Menu müziği başlat
+   // Menu müziği başlat
   useEffect(() => {
     const audio = new Audio(menuMusic);
     audio.loop = true;
     audio.volume = 0.4;
     menuMusicRef.current = audio;
-    if (soundEnabled) audio.play().catch(() => {});
+    if (soundEnabled && !gameStarted) {
+      const playOnInteraction = () => {
+        audio.play().catch(() => {});
+        document.removeEventListener('click', playOnInteraction);
+      };
+      document.addEventListener('click', playOnInteraction);
+    }
     return () => {
       audio.pause();
       audio.currentTime = 0;
     };
-  }, []); 
+  }, []);
 
   // Ses açma/kapama
   useEffect(() => {
@@ -73,15 +79,19 @@ export function useMusic({ soundEnabled, phase, gameStarted }) {
     };
   }, []);
 
-  // Battle müzik geçişi
+   // Battle müzik geçişi
   useEffect(() => {
     if (!battleMusicRef.current) return;
     if (phase === "battle") {
       if (menuMusicRef.current) menuMusicRef.current.pause();
       if (shopMusicRef.current) shopMusicRef.current.pause();
       if (soundEnabled) {
-        battleMusicRef.current.currentTime = 0;
-        battleMusicRef.current.play().catch(() => {});
+        const playBattleMusic = () => {
+          battleMusicRef.current.currentTime = 0;
+          battleMusicRef.current.play().catch(() => {});
+          document.removeEventListener('click', playBattleMusic);
+        };
+        document.addEventListener('click', playBattleMusic);
       }
     } else {
       battleMusicRef.current.pause();
