@@ -19,7 +19,7 @@ export function useMusic({ soundEnabled, phase, gameStarted }) {
       audio.pause();
       audio.currentTime = 0;
     };
-  }, []);
+  }, []); 
 
   // Ses açma/kapama
   useEffect(() => {
