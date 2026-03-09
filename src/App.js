@@ -682,8 +682,8 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
   <div className="flex items-center gap-1 bg-orange-500/15 border border-orange-400/25 px-3 py-1 rounded-xl">
     <span className="text-orange-300 font-black text-sm">x{difficulty.toFixed(1)}</span>
   </div>
-  {/* Zorluk */}
-  <div className={`flex items-center gap-1 px-3 py-1 rounded-xl border font-black text-sm ${
+ {/* Zorluk */}
+  {gameMode === "standard" && <div className={`flex items-center gap-1 px-3 py-1 rounded-xl border font-black text-sm ${
     difficultyLevel === "easy"
       ? "bg-green-500/15 border-green-400/25 text-green-300"
       : difficultyLevel === "hard"
@@ -691,7 +691,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
       : "bg-yellow-500/15 border-yellow-400/25 text-yellow-300"
   }`}>
     {DIFFICULTY_CONFIGS[difficultyLevel]?.label || "😐 Orta"}
-  </div>
+  </div>}
   {/* Boss uyarısı */}
   {BOSSES[turn + 1] && gameMode === "standard" && (
     <span className="text-[11px] px-2 py-1 bg-gradient-to-r from-red-600 to-red-900 rounded-xl border border-red-500 font-black animate-bounce shadow-[0_0_15px_rgba(239,68,68,0.6)]">
@@ -776,18 +776,22 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
                           ? "opacity-60 grayscale cursor-not-allowed"
                           : "hover:scale-105 cursor-pointer"
                       }`}
-                      style={
-                        !a.frozen &&
-                        team.some(
-                          (t) =>
-                            t &&
-                            t.name === a.name &&
-                            t.tier === a.tier &&
-                            t.lvl < 3
-                        )
-                          ? { animation: "glowPulse 1.5s ease-in-out infinite" }
-                          : {}
-                      }
+                     style={
+  !a.frozen &&
+  team.some(
+    (t) =>
+      t &&
+      t.name === a.name &&
+      t.tier === a.tier &&
+      t.lvl < 3
+  )
+ ? { 
+    boxShadow: "0 0 12px rgba(168, 85, 247, 0.7), 0 0 24px rgba(168, 85, 247, 0.3)",
+    outline: "2px solid rgba(168, 85, 247, 0.6)",
+    borderRadius: "1rem"
+  }
+    : {}
+}
                       onClick={() => setSel(sel?.id === a.id ? null : a)}
                       onContextMenu={(e) => {
                         e.preventDefault();

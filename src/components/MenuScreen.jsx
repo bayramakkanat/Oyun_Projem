@@ -240,10 +240,10 @@ export default function MenuScreen({
             <h2 className="text-4xl font-black mb-8 bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
               SAVAŞ AYARLARI
             </h2>
-            <div className="mb-8">
-              <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-4">
-                Zorluk Seviyesi
-              </div>
+          {gameMode === "standard" && <div className="mb-8">
+  <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-4">
+    Zorluk Seviyesi
+  </div>
               <div className="grid grid-cols-3 gap-3">
                 {Object.entries(DIFFICULTY_CONFIGS).map(([key, cfg]) => (
                   <button
@@ -279,8 +279,8 @@ export default function MenuScreen({
                   {currentDiffConfig.startingGold} ALTIN | x
                   {currentDiffConfig.enemyStatMultiplier} GÜÇ
                 </span>
-              </div>
-            </div>
+             </div>
+            </div>}
             <div className="mb-10">
               <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-4">
                 Savaş Modu
@@ -293,10 +293,13 @@ export default function MenuScreen({
                     <button
                       key={key}
                       disabled={!mode.available}
-                      onClick={() => {
-                        if (isLocked) setShowAuthModal(true);
-                        else if (mode.available) setGameMode(key);
-                      }}
+                     onClick={() => {
+  if (isLocked) setShowAuthModal(true);
+  else if (mode.available) {
+    setGameMode(key);
+    if (key !== "standard") setDifficultyLevel("normal");
+  }
+}}
                       className={`relative w-full p-4 rounded-2xl border-2 transition-all flex items-center gap-4 ${
                         isSelected && mode.available
                           ? "bg-white border-white translate-x-1"
