@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import menuMusic from "../sounds/menu-music.mp3";
-import shopMusic from "../sounds/shop-music.mp3";
-import battleMusic from "../sounds/battle-music.mp3";
+const menuMusic = "/sounds/menu-music.mp3";
+const shopMusic = "/sounds/shop-music.mp3";
+const battleMusic = "/sounds/battle-music.mp3";
 
 export function useMusic({ soundEnabled, phase, gameStarted }) {
   const menuMusicRef = useRef(null);
