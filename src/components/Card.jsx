@@ -224,9 +224,7 @@ function Card({
         )}
         <div className="flex flex-col items-center gap-0">
           <img
-            src={`https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u${a.name
-              .codePointAt(0)
-              .toString(16)}.svg`}
+            src={`/images/animals/${a.img}`}
             alt={a.nick}
             className={`pet-glow ${
               compact ? "w-12 h-12" : "w-16 h-16"

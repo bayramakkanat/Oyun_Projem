@@ -8,6 +8,7 @@ export const TIERS = {
       cost: 3,
       ability: "faint_buff",
       tier: 1,
+      img: "ant.png",
     },
     {
       name: "🐟",
@@ -17,6 +18,7 @@ export const TIERS = {
       cost: 3,
       ability: "none",
       tier: 1,
+      img: "fish.png",
     },
     {
       name: "🐛",
@@ -26,6 +28,7 @@ export const TIERS = {
       cost: 3,
       ability: "start_buff",
       tier: 1,
+      img: "caterpillar.png",
     },
     {
       name: "🦆",
@@ -35,6 +38,7 @@ export const TIERS = {
       cost: 3,
       ability: "end_heal_one",
       tier: 1,
+      img: "duck.png",
     },
     {
       name: "🐱",
@@ -44,6 +48,7 @@ export const TIERS = {
       cost: 3,
       ability: "friend_levelup_buff",
       tier: 1,
+      img: "cat.png",
     },
     {
       name: "🐝",
@@ -53,6 +58,7 @@ export const TIERS = {
       cost: 3,
       ability: "sell_gold",
       tier: 1,
+      img: "bee.png",
     },
     {
       name: "🦗",
@@ -62,6 +68,7 @@ export const TIERS = {
       cost: 3,
       ability: "end_gain_gold",
       tier: 1,
+      img: "cricket.png",
     },
     {
       name: "🐌",
@@ -71,6 +78,7 @@ export const TIERS = {
       cost: 3,
       ability: "start_team_shield",
       tier: 1,
+      img: "snail.png",
     },
     {
       name: "🦋",
@@ -80,6 +88,7 @@ export const TIERS = {
       cost: 3,
       ability: "levelup_buff_self",
       tier: 1,
+      img: "butterfly.png",
     },
   ],
   2: [
