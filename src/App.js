@@ -665,83 +665,87 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
         </div>
       )}
       <div className="max-w-4xl mx-auto">
-     <div className="flex justify-between items-center mb-3 bg-gray-800/60 px-4 py-2 rounded-xl shadow-lg border border-gray-600/40">
-         <div className="flex items-center gap-2">
-  {/* Tur */}
- <div className="flex items-center gap-1 bg-white/15 border border-white/30 px-3 py-1 rounded-xl">
-    <span className="text-[10px] text-gray-200 uppercase tracking-widest font-black">TUR</span>
-    <span className="text-white font-black text-sm">{turn}</span>
-    <span className="text-gray-300 text-[10px] font-bold">/{WIN_TURN}</span>
-  </div>
-  {/* Kademe */}
-  <div className="flex items-center gap-1 bg-purple-500/15 border border-purple-400/25 px-3 py-1 rounded-xl">
-    <span className="text-[10px] text-purple-300 uppercase tracking-widest font-black">K</span>
-    <span className="text-purple-200 font-black text-sm">{maxT}</span>
-  </div>
-  {/* Çarpan */}
-  <div className="flex items-center gap-1 bg-orange-500/15 border border-orange-400/25 px-3 py-1 rounded-xl">
-    <span className="text-orange-300 font-black text-sm">x{difficulty.toFixed(1)}</span>
-  </div>
- {/* Zorluk */}
-  {gameMode === "standard" && <div className={`flex items-center gap-1 px-3 py-1 rounded-xl border font-black text-sm ${
-    difficultyLevel === "easy"
-      ? "bg-green-500/15 border-green-400/25 text-green-300"
-      : difficultyLevel === "hard"
-      ? "bg-red-500/15 border-red-400/25 text-red-300"
-      : "bg-yellow-500/15 border-yellow-400/25 text-yellow-300"
-  }`}>
-    {DIFFICULTY_CONFIGS[difficultyLevel]?.label || "😐 Orta"}
-  </div>}
-  {/* Boss uyarısı */}
-  {BOSSES[turn + 1] && gameMode === "standard" && (
-    <span className="text-[11px] px-2 py-1 bg-gradient-to-r from-red-600 to-red-900 rounded-xl border border-red-500 font-black animate-bounce shadow-[0_0_15px_rgba(239,68,68,0.6)]">
-      🔥 {BOSSES[turn + 1].emoji} BOSS!
-    </span>
-  )}
-  {/* Rehber */}
-  <button
-    onClick={() => setGuide(true)}
-    className="px-2 py-1 bg-gray-700/80 rounded-lg text-sm hover:bg-gray-600 transition-all border border-white/10"
-    title="Kademe Rehberi"
-  >
-    🗺️
-  </button>
-</div>          <div className="flex gap-3 font-bold">
-          <span title="Altın" className="bg-yellow-500/20 border border-yellow-500/40 px-2 py-1 rounded-lg text-yellow-300 font-black cursor-help">💰 {gold}</span>
-<span title="Can" className="bg-red-500/20 border border-red-500/40 px-2 py-1 rounded-lg text-red-300 font-black cursor-help">❤️ {lives}</span>
-<span title="Zafer" className="bg-green-500/20 border border-green-500/40 px-2 py-1 rounded-lg text-green-300 font-black cursor-help">✓ {wins}</span>
-            <span
-              className="text-purple-300 flex items-center gap-1"
-              title="Takım Gücü"
-            >
-              ⚡
-              {(() => {
-                const myPower = team
-                  .filter((x) => x)
-                  .reduce((sum, pet) => sum + pet.atk + pet.hp, 0);
-                return <span className="text-purple-300">{myPower}</span>;
-              })()}
-            </span>
-           <button
-              title={soundEnabled ? "Sesi Kapat" : "Sesi Aç"}
-              onClick={() => setSoundEnabled((s) => !s)}
-             className="px-2 py-1 bg-gray-700/80 rounded-lg text-sm hover:bg-gray-600 transition-all border border-white/10"
-            >
-              {soundEnabled ? "🔊" : "🔇"}
-            </button>
-            <button
-              onClick={() => {
-                reset();
-                setGameStarted(false);
-              }}
-             className="px-2 py-1 bg-gray-700/80 rounded-lg text-sm hover:bg-gray-600 transition-all border border-white/10"
-              title="Ana Menü"
-            >
-              🏠
-            </button>
-          </div>
+    <div className="flex justify-between items-center mb-3 px-1">
+  {/* SOL: Tur / Kademe / Zorluk / Boss */}
+  <div className="flex items-center gap-2 flex-wrap">
+    {/* Tur */}
+    <div className="flex flex-col items-center bg-gray-900/80 border border-white/20 px-3 py-1.5 rounded-2xl shadow-inner min-w-[52px]">
+      <span className="text-[9px] text-gray-400 uppercase tracking-widest font-black">TUR</span>
+      <span className="text-white font-black text-base leading-none">{turn}<span className="text-gray-500 text-[10px] font-bold">/{WIN_TURN}</span></span>
+    </div>
+    {/* Kademe */}
+    <div className="flex flex-col items-center bg-purple-900/60 border border-purple-400/30 px-3 py-1.5 rounded-2xl shadow-inner min-w-[52px]">
+      <span className="text-[9px] text-purple-300 uppercase tracking-widest font-black">KADEME</span>
+      <span className="text-purple-100 font-black text-base leading-none">{"⭐".repeat(maxT)}</span>
+    </div>
+    {/* Zorluk */}
+    {gameMode === "standard" && (
+      <div className={`flex flex-col items-center px-3 py-1.5 rounded-2xl border shadow-inner min-w-[52px] ${
+        difficultyLevel === "easy" ? "bg-green-900/60 border-green-400/30" :
+        difficultyLevel === "hard" ? "bg-red-900/60 border-red-400/30" :
+        "bg-yellow-900/60 border-yellow-400/30"
+      }`}>
+        <span className={`text-[9px] uppercase tracking-widest font-black ${
+          difficultyLevel === "easy" ? "text-green-300" :
+          difficultyLevel === "hard" ? "text-red-300" : "text-yellow-300"
+        }`}>ZORLUK</span>
+        <span className="font-black text-sm leading-none text-white">{DIFFICULTY_CONFIGS[difficultyLevel]?.label || "😐 Orta"}</span>
+      </div>
+    )}
+    {/* Boss Uyarısı */}
+    {BOSSES[turn + 1] && gameMode === "standard" && (
+      <div className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-red-900/80 to-orange-900/80 border border-red-500/60 rounded-2xl shadow-[0_0_12px_rgba(239,68,68,0.4)] animate-pulse">
+        <span className="text-base">{BOSSES[turn + 1].emoji}</span>
+        <div className="flex flex-col leading-none">
+          <span className="text-[9px] text-red-300 font-black uppercase tracking-widest">Sonraki</span>
+          <span className="text-red-100 font-black text-xs">BOSS!</span>
         </div>
+      </div>
+    )}
+    {/* Rehber */}
+    <button
+      onClick={() => setGuide(true)}
+      className="p-2 bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30"
+      title="Kademe Rehberi"
+    >🗺️</button>
+  </div>
 
+  {/* SAĞ: Altın / Can / Zafer / Güç / Butonlar */}
+  <div className="flex items-center gap-2">
+    {/* Altın */}
+    <div className="flex flex-col items-center bg-yellow-900/60 border border-yellow-500/40 px-3 py-1.5 rounded-2xl min-w-[48px]">
+      <span className="text-[9px] text-yellow-400 uppercase tracking-widest font-black">ALTIN</span>
+      <span className="text-yellow-200 font-black text-base leading-none">💰{gold}</span>
+    </div>
+    {/* Can */}
+    <div className="flex flex-col items-center bg-red-900/60 border border-red-500/40 px-3 py-1.5 rounded-2xl min-w-[48px]">
+      <span className="text-[9px] text-red-400 uppercase tracking-widest font-black">CAN</span>
+      <span className="text-red-200 font-black text-base leading-none">❤️{lives}</span>
+    </div>
+    {/* Zafer */}
+    <div className="flex flex-col items-center bg-green-900/60 border border-green-500/40 px-3 py-1.5 rounded-2xl min-w-[48px]">
+      <span className="text-[9px] text-green-400 uppercase tracking-widest font-black">ZAFERLEr</span>
+      <span className="text-green-200 font-black text-base leading-none">✓{wins}</span>
+    </div>
+    {/* Güç */}
+    <div className="flex flex-col items-center bg-purple-900/60 border border-purple-500/40 px-3 py-1.5 rounded-2xl min-w-[48px]">
+      <span className="text-[9px] text-purple-400 uppercase tracking-widest font-black">GÜÇ</span>
+      <span className="text-purple-200 font-black text-base leading-none">⚡{team.filter(x=>x).reduce((s,p)=>s+p.atk+p.hp,0)}</span>
+    </div>
+    {/* Ses */}
+    <button
+      title={soundEnabled ? "Sesi Kapat" : "Sesi Aç"}
+      onClick={() => setSoundEnabled(s => !s)}
+      className="p-2 bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30"
+    >{soundEnabled ? "🔊" : "🔇"}</button>
+    {/* Menü */}
+    <button
+      onClick={() => { reset(); setGameStarted(false); }}
+      className="p-2 bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30"
+      title="Ana Menü"
+    >🏠</button>
+  </div>
+</div>
         {phase === "shop" ? (
           <>
       <div className="bg-black/60 rounded-[2.5rem] p-4 mb-4 border border-white/10 shadow-2xl relative group/shop">
