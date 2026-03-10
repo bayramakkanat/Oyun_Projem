@@ -1049,10 +1049,16 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             finalP[0].atk = Math.max(1, finalP[0].atk - 10 * m);
             if (finalP.length > 1) finalP[1].atk = Math.max(1, finalP[1].atk - 10 * m);
           }
-          if (a.ability === "start_fire") {
-            finalP.forEach((x) => { x.curHp -= 6 * m; });
-            finalE[i].atk = clampStat(finalE[i].atk + 4 * m);
-          }
+         if (a.ability === "start_fire") {
+  for (let fi = 0; fi < 20; fi++) {
+    const aliveTargets = finalP.filter((x) => x.curHp > 0);
+    if (aliveTargets.length === 0) break;
+    const target = aliveTargets[Math.floor(Math.random() * aliveTargets.length)];
+    const tIdx = finalP.findIndex((x) => x.id === target.id);
+    if (tIdx !== -1) finalP[tIdx].curHp -= 1;
+  }
+  finalE[i].atk = clampStat(finalE[i].atk + 4 * m);
+}
           if (a.ability === "start_poison" && finalP.length > 0) {
             finalP[0].atk = Math.max(1, finalP[0].atk - m * 2);
           }
@@ -1085,7 +1091,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
           const m = pwr(a);
           if (a.ability === "start_dmg") setLog((l) => [...l, `💥 Düşman ${a.nick} → Takıma ${2 * m} hasar`]);
           if (a.ability === "start_snipe") setLog((l) => [...l, `🎯 Düşman ${a.nick} → ${finalP[finalP.length > 1 ? finalP.length - 1 : 0]?.nick || "Arka birim"}'e ${3 * m} hasar`]);
-          if (a.ability === "start_fire") setLog((l) => [...l, `🐉 Düşman ${a.nick} → Tüm takıma ${6 * m} hasar`]);
+         if (a.ability === "start_fire") setLog((l) => [...l, `🔥 Düşman ${a.nick} → 20 alev topu takıma dağıldı!`]);
           if (a.ability === "start_fear") setLog((l) => [...l, `😱 Düşman ${a.nick} → ${finalP[0]?.nick || ""}${finalP.length > 1 ? ` ve ${finalP[1]?.nick}` : ""} -${10 * m} ATK`]);
           if (a.ability === "start_poison") setLog((l) => [...l, `🐍 Düşman ${a.nick} → Ön birime -${m * 2} ATK`]);
           if (a.ability === "start_multi_snipe") setLog((l) => [...l, `🦑 Düşman ${a.nick} → ${m + 1} birime ${8 * m} hasar`]);
