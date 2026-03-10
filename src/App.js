@@ -676,18 +676,18 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
     {/* Kademe */}
    <div className="flex flex-col items-center bg-purple-900/60 border border-purple-400/30 px-3 py-1.5 rounded-2xl shadow-inner">
   <span className="text-[9px] text-purple-300 uppercase tracking-widest font-black mb-1">KADEME</span>
-  <div className="flex gap-0.5">
-    {[1,2,3,4,5,6].map(i => (
-      <span
-        key={i}
-        className={i <= maxT ? "text-sm" : "text-sm opacity-20 grayscale"}
-        style={i === maxT ? {
-          animation: "tierUnlock 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-          display: "inline-block"
-        } : {}}
-      >⭐</span>
-    ))}
-  </div>
+<div className="flex gap-0.5">
+  {[1,2,3,4,5,6].map(i => (
+    <span
+      key={i}
+      className={i <= maxT ? "text-sm" : "text-sm opacity-20 grayscale"}
+      style={i === maxT ? {
+        animation: "tierUnlock 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+        display: "inline-block"
+      } : {}}
+    >⭐</span>
+  ))}
+</div>
 </div>
     {/* Zorluk */}
     {gameMode === "standard" && (

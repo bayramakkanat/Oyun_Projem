@@ -33,25 +33,34 @@ export function useMusic({ soundEnabled, phase, gameStarted }) {
   }, []);
 
   // Müzik geçişlerini yönet
-  useEffect(() => {
+ useEffect(() => {
     const menu = menuMusicRef.current;
     const shop = shopMusicRef.current;
     const battle = battleMusicRef.current;
     if (!menu || !shop || !battle) return;
 
-    menu.pause();
-    shop.pause();
-    battle.pause();
-
-    if (!soundEnabled) return;
+    if (!soundEnabled) {
+      menu.pause();
+      shop.pause();
+      battle.pause();
+      return;
+    }
 
     if (!gameStarted) {
-      menu.play().catch(() => {});
+      shop.pause();
+      battle.pause();
+      if (menu.paused) menu.play().catch(() => {});
     } else if (phase === "battle") {
-      battle.currentTime = 0;
-      battle.play().catch(() => {});
+      menu.pause();
+      shop.pause();
+      if (battle.paused) {
+        battle.currentTime = 0;
+        battle.play().catch(() => {});
+      }
     } else if (phase === "shop") {
-      shop.play().catch(() => {});
+      menu.pause();
+      battle.pause();
+      if (shop.paused) shop.play().catch(() => {});
     }
   }, [soundEnabled, phase, gameStarted]);
 }
