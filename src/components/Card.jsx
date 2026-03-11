@@ -89,8 +89,8 @@ function Card({
     >
       <img
         src="https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u2694.svg"
-        width={size}
-        height={size}
+       width={size + 4}
+  height={size + 4}
         style={{
           position: "absolute",
           opacity: 0.25,
@@ -184,8 +184,8 @@ function Card({
             ? "w-20 h-28 pt-2 pb-1"
             : tall
             ? "w-28 h-40 pt-3 pb-4"
-            : "w-28 h-36 pt-3 pb-2"
-       } rounded-xl flex flex-col items-center justify-around ${battle ? "bg-transparent border-0 shadow-none" : `bg-gradient-to-br ${TBG[a.tier]} border-2 ${TBD[a.tier]} backdrop-blur-md shadow-xl`} ${
+          : "w-32 h-40 pt-1 pb-1"
+      } rounded-xl flex flex-col items-center justify-around ${(battle || a.img) ? "bg-transparent border-0 shadow-none" : `bg-gradient-to-br ${TBG[a.tier]} border-2 ${TBD[a.tier]} backdrop-blur-md shadow-xl`} ${
           battle
             ? ""
             : `${
@@ -222,37 +222,39 @@ function Card({
             {a.lvl === 2 ? "💎" : "👑"}
           </div>
         )}
-        <div className="flex flex-col items-center gap-0">
-          <img
-            src={`/images/animals/${a.img}`}
-            alt={a.nick}
-            className={`pet-glow ${
-              compact ? "w-12 h-12" : "w-16 h-16"
-            } drop-shadow-2xl object-contain`}
-           style={(mirror && !a.flip) || (!mirror && a.flip) ? { transform: "scaleX(-1)" } : {}}
-            onError={(e) => {
-              e.target.style.display = "none";
-              e.target.nextSibling.style.display = "inline";
-            }}
-          />
-          <span
-            className={`pet-glow ${
-              compact ? "text-2xl" : "text-4xl"
-            } drop-shadow-2xl hidden`}
-          >
-            {a.name}
-          </span>
+       <div className="flex flex-col items-center gap-0 -mt-1">
+         <img
+  src={a.img ? `/images/animals/${a.img}` : `https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u${a.name.codePointAt(0).toString(16)}.svg`}
+  alt={a.nick}
+  className={`pet-glow drop-shadow-2xl object-contain ${
+    a.img
+     ? compact ? "w-16 h-16" : "w-24 h-24"
+      : compact ? "w-12 h-12" : "w-16 h-16"
+  }`}
+  style={(mirror && !a.flip) || (!mirror && a.flip) ? { transform: "scaleX(-1)" } : {}}
+  onError={(e) => {
+    e.target.style.display = "none";
+    e.target.nextSibling.style.display = "inline";
+  }}
+/>
+<span
+  className={`pet-glow ${
+    compact ? "text-2xl" : "text-4xl"
+  } drop-shadow-2xl hidden`}
+>
+  {a.name}
+</span>
           {!compact && showName && (
             <span className="text-[10px] text-gray-300 font-semibold -mt-1 text-center px-0.5 leading-tight max-w-[90px]">
               {a.nick}
             </span>
           )}
         </div>
-        {!compact && (
-          <span className="text-[10px] text-yellow-400 font-black tracking-[0.2em] mt-1 bg-black/20 px-2 py-0.5 rounded-full border border-yellow-500/20">
-            {st}
-          </span>
-        )}
+       {!compact && (
+  <span className="text-[10px] text-yellow-400 font-black tracking-[0.2em] bg-black/20 px-2 py-0.5 rounded-full border border-yellow-500/20">
+    {st}
+  </span>
+)}
         <div className="flex gap-1 items-center z-20">
           <SwordStat value={a.atk} />
           <HeartStat value={displayHp} />

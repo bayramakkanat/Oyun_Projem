@@ -854,7 +854,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
                 ))}
                 {shopSlots < 4 && (
                   <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 h-[180px] justify-end">
-                    <div className="w-28 h-36 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center">
+                    <div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center">
                     <span className="text-2xl">
                         🔒
                       </span>
@@ -867,7 +867,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
                 )}
                 {shopSlots < 5 && (
                   <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 h-[180px] justify-end">
-                    <div className="w-28 h-36 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center">
+                    <div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center">
                      <span className="text-2xl">
                         🔒
                       </span>
@@ -891,7 +891,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
                     disabled={
                       gold < 1 && shop.filter((s) => !s.frozen).length > 0
                     }
-                  className="w-28 h-36 rounded-2xl bg-transparent disabled:opacity-40 flex flex-col items-center justify-center hover:bg-white/5 transition-all border-2 border-dashed border-white/10 group/roll"
+                  className="w-32 h-40 rounded-2xl bg-transparent disabled:opacity-40 flex flex-col items-center justify-center hover:bg-white/5 transition-all border-2 border-dashed border-white/10 group/roll"
                   >
                     <span className="text-3xl group-hover/roll:rotate-180 transition-transform duration-500">
                       🔄
@@ -919,7 +919,16 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
                 </button>
                 {/* Hayvan büyük görünüm */}
                 <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-700">
-                  <span className="text-6xl">{sel.name}</span>
+                 {sel.img ? (
+  <img
+    src={`/images/animals/${sel.img}`}
+    alt={sel.nick}
+    className="w-16 h-16 object-contain drop-shadow-2xl"
+    style={!sel.flip ? { transform: "scaleX(-1)" } : {}}
+  />
+) : (
+  <span className="text-6xl">{sel.name}</span>
+)}
                   <div>
                     <div className="text-white font-black text-lg">
                       {sel.nick}
@@ -1077,7 +1086,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
                             if (sel) buy(sel, i);
                             else if (selI !== null) swap(selI, i);
                           }}
-                          className="w-28 h-36 rounded-2xl border-2 border-green-500/50 text-green-400 text-3xl transition-all bg-green-500/10 backdrop-blur-md flex flex-col items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.2)]"
+                          className="w-32 h-40 rounded-2xl border-2 border-green-500/50 text-green-400 text-3xl transition-all bg-green-500/10 backdrop-blur-md flex flex-col items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.2)]"
                           style={{
                             animation:
                               "slotUnlock 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
@@ -1104,7 +1113,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
   key={i}
   className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40"
 >
-  <div className="w-28 h-36 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center">
+  <div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center">
     <span className="text-2xl">
       🔒
     </span>
@@ -1154,7 +1163,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
                           if (sel) buy(sel, i);
                           else if (selI !== null) swap(selI, i);
                         }}
-                       className={`w-28 h-36 rounded-2xl border-2 border-dashed transition-all flex items-center justify-center group/slot
+                       className={`w-32 h-40 rounded-2xl border-2 border-dashed transition-all flex items-center justify-center group/slot
 ${
   sel || selI !== null
     ? "border-green-400/70 bg-green-500/5 text-green-400/50 hover:border-green-400 hover:bg-green-500/10 hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
