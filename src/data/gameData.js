@@ -102,6 +102,7 @@ export const TIERS = {
       cost: 3,
       ability: "start_tank",
       tier: 2,
+      img: "crab.png",
     },
     {
       name: "🦎",
@@ -111,6 +112,7 @@ export const TIERS = {
       cost: 3,
       ability: "start_dmg",
       tier: 2,
+      img: "lizard.png",
     },
     {
       name: "🐀",
@@ -120,6 +122,7 @@ export const TIERS = {
       cost: 3,
       ability: "atk_buff",
       tier: 2,
+      img: "mouse.png",
     },
     {
       name: "🦔",
@@ -129,6 +132,7 @@ export const TIERS = {
       cost: 3,
       ability: "faint_dmg",
       tier: 2,
+      img: "hedgehog.png",
     },
     {
       name: "🐍",
@@ -138,6 +142,7 @@ export const TIERS = {
       cost: 3,
       ability: "start_poison",
       tier: 2,
+      img: "snake.png",
     },
     {
       name: "🦘",
@@ -147,6 +152,7 @@ export const TIERS = {
       cost: 3,
       ability: "friend_summon",
       tier: 2,
+      img: "kangaroo.png",
     },
     {
       name: "🦝",
@@ -156,6 +162,7 @@ export const TIERS = {
       cost: 3,
       ability: "sell_buff_friend",
       tier: 2,
+      img: "raccoon.png",
     },
     {
       name: "🐇",
@@ -165,6 +172,7 @@ export const TIERS = {
       cost: 3,
       ability: "sell_buff_shop",
       tier: 2,
+      img: "rabbit.png",
     },
     {
       name: "🦫",
@@ -174,6 +182,7 @@ export const TIERS = {
       cost: 3,
       ability: "shop_discount",
       tier: 2,
+      img: "beaver.png",
     },
   ],
   3: [

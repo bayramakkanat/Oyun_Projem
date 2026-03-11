@@ -1164,16 +1164,16 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
                           if (sel) buy(sel, i);
                           else if (selI !== null) swap(selI, i);
                         }}
-                       className={`w-32 h-40 rounded-2xl border-2 border-dashed transition-all flex items-center justify-center group/slot
+                       className={`w-32 h-40 rounded-2xl transition-all flex items-center justify-center group/slot
 ${
   sel || selI !== null
-    ? "border-green-400/70 bg-green-500/5 text-green-400/50 hover:border-green-400 hover:bg-green-500/10 hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
-    : "border-white/10 text-white/10 bg-transparent hover:border-white/30 hover:text-white/30 hover:scale-105 active:scale-95"
+    ? "border-2 border-dashed border-green-400/70 bg-green-500/5 text-green-400/50 hover:border-green-400 hover:bg-green-500/10 hover:scale-105 active:scale-95"
+    : "border-0 bg-transparent hover:scale-105 active:scale-95"
 }`}
                       >
-                        <span className="group-hover/slot:rotate-90 transition-transform duration-300">
-                          +
-                        </span>
+                       <span className={`transition-transform duration-300 ${sel || selI !== null ? "group-hover/slot:rotate-90 text-green-400/50" : "text-white/20 text-xs"}`}>
+  +
+</span>
                       </button>
                     </div>
                   );
