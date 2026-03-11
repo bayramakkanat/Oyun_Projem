@@ -338,11 +338,12 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       });
       lg.push(`💨 ${d.nick} → Tüm takıma +${buff}/+${buff}`);
     }
-    if (d.ability === "faint_summon") {
+   if (d.ability === "faint_summon") {
       const newSummon = {
         name: "🥚", nick: "Yavru",
         atk: 4 * m, hp: 4 * m, curHp: 4 * m,
         ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
+        img: "baby_crocodile.png",
       };
       lg.push(`🥚 ${d.nick} → ${4 * m}/${4 * m} yavru çağırdı`);
       sm.push(newSummon);
@@ -402,13 +403,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         }
         if (a.ability === "friend_summon" && !a.isSummon) {
           if (!a.summonCount) a.summonCount = 0;
-          if (a.summonCount < 3) {
+         if (a.summonCount < 3) {
             const am = pwr(a);
             const newSummon = {
               name: "🦘", nick: "Yavru",
               atk: am * 2, hp: am * 3, curHp: am * 3,
               ability: "none", tier: 1, lvl: 1, exp: 0,
               id: Math.random(), isSummon: true,
+              img: "joey.png",
             };
             a.summonCount++;
             const buffedSummons = applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });

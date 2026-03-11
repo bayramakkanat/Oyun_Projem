@@ -50,7 +50,6 @@ export const TIERS = {
       ability: "friend_levelup_buff",
       tier: 1,
       img: "cat.png",
-      flip: true,
     },
     {
       name: "🐝",
@@ -81,6 +80,7 @@ export const TIERS = {
       ability: "start_team_shield",
       tier: 1,
       img: "snail.png",
+      flip: true,
     },
     {
       name: "🦋",
@@ -143,7 +143,6 @@ export const TIERS = {
       ability: "start_poison",
       tier: 2,
       img: "snake.png",
-      flip: true,
     },
     {
       name: "🦘",
@@ -219,7 +218,6 @@ export const TIERS = {
       ability: "friend_faint",
       tier: 3,
       img: "wolf.png",
-      flip: true,
     },
     {
       name: "🦩",
@@ -262,7 +260,6 @@ export const TIERS = {
       ability: "buy_buff_random",
       tier: 3,
       img: "otter.png",
-      flip: true,
     },
     {
       name: "🦨",
@@ -283,7 +280,6 @@ export const TIERS = {
       ability: "faint_buff_self",
       tier: 3,
       img: "badger.png",
-      flip: true,
     },
   ],
  4: [
@@ -478,7 +474,7 @@ export const TIERS = {
       flip: true,
     },
   ],
-  6: [
+ 6: [
     {
       name: "🐉",
       nick: "Ejderha",
@@ -487,6 +483,8 @@ export const TIERS = {
       cost: 7,
       ability: "start_fire",
       tier: 6,
+      img: "dragon.png",
+      flip: true,
     },
     {
       name: "🦖",
@@ -496,6 +494,8 @@ export const TIERS = {
       cost: 7,
       ability: "devour",
       tier: 6,
+      img: "trex.png",
+      flip: true,
     },
     {
       name: "🐋",
@@ -505,6 +505,8 @@ export const TIERS = {
       cost: 7,
       ability: "faint_wave",
       tier: 6,
+      img: "whale.png",
+      flip: true,
     },
     {
       name: "🦤",
@@ -514,6 +516,8 @@ export const TIERS = {
       cost: 7,
       ability: "summon_retrigger",
       tier: 6,
+      img: "dodo.png",
+      flip: true,
     },
     {
       name: "🐧",
@@ -523,6 +527,8 @@ export const TIERS = {
       cost: 7,
       ability: "weaken_strong",
       tier: 6,
+      img: "penguin.png",
+      flip: true,
     },
     {
       name: "🦌",
@@ -532,6 +538,8 @@ export const TIERS = {
       cost: 7,
       ability: "stag_combo",
       tier: 6,
+      img: "deer.png",
+      flip: true,
     },
     {
       name: "🦭",
@@ -541,6 +549,8 @@ export const TIERS = {
       cost: 7,
       ability: "kill_heal_team",
       tier: 6,
+      img: "seal.png",
+      flip: true,
     },
     {
       name: "🦑",
@@ -550,6 +560,8 @@ export const TIERS = {
       cost: 7,
       ability: "start_multi_snipe",
       tier: 6,
+      img: "squid.png",
+      flip: true,
     },
     {
       name: "🐙",
@@ -559,6 +571,8 @@ export const TIERS = {
       cost: 7,
       ability: "faint_duplicate",
       tier: 6,
+      img: "octopus.png",
+      flip: true,
     },
   ],
 };
@@ -770,7 +784,7 @@ export const BOSSES = {
     color: "from-orange-900 via-red-900 to-yellow-900",
     border: "border-orange-500",
     glow: "rgba(249,115,22,0.6)",
-    image: "https://i.ibb.co/LXhW3f9P/ankaboss-removebg.png",
+   image: "/images/animals/phoenix.png",
     intro: "Küllerinden doğan ölümsüz kuş...",
     intro2: "Anka, alevlerini üzerinize salmaya geliyor!",
     team: [
