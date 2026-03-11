@@ -28,7 +28,8 @@ export const TIERS = {
       cost: 3,
       ability: "start_buff",
       tier: 1,
-      img: "caterpillar.png",
+      img: "tirtil.png",
+      flip: true,
     },
     {
       name: "🦆",
@@ -60,7 +61,6 @@ export const TIERS = {
       ability: "sell_gold",
       tier: 1,
       img: "bee.png",
-      flip: true,
     },
     {
       name: "🦗",
