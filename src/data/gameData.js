@@ -143,6 +143,7 @@ export const TIERS = {
       ability: "start_poison",
       tier: 2,
       img: "snake.png",
+      flip: true,
     },
     {
       name: "🦘",
@@ -163,6 +164,7 @@ export const TIERS = {
       ability: "sell_buff_friend",
       tier: 2,
       img: "raccoon.png",
+      flip: true,
     },
     {
       name: "🐇",
@@ -173,6 +175,7 @@ export const TIERS = {
       ability: "sell_buff_shop",
       tier: 2,
       img: "rabbit.png",
+      flip: true,
     },
     {
       name: "🦫",
