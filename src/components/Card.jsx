@@ -190,10 +190,10 @@ function Card({
             ? ""
             : `${
                 selected
-                  ? "ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50"
-                  : close && !compact
-                  ? "ring-4 ring-green-400"
-                  : ""
+  ? ""
+  : close && !compact
+  ? ""
+  : ""
               }`
         } ${
           battle

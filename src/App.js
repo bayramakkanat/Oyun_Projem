@@ -801,8 +801,6 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
       t.lvl < 3
   )
  ? { 
-    boxShadow: "0 0 12px rgba(168, 85, 247, 0.7), 0 0 24px rgba(168, 85, 247, 0.3)",
-    outline: "2px solid rgba(168, 85, 247, 0.6)",
     borderRadius: "1rem"
   }
     : {}
