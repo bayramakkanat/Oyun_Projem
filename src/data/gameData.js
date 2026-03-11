@@ -389,6 +389,8 @@ export const TIERS = {
       cost: 6,
       ability: "start_fear",
       tier: 5,
+      img: "lion.png",
+      flip: true,
     },
     {
       name: "🐘",
@@ -398,6 +400,8 @@ export const TIERS = {
       cost: 6,
       ability: "hurt_dmg",
       tier: 5,
+      img: "elephant.png",
+      flip: true,
     },
     {
       name: "🦏",
@@ -407,6 +411,7 @@ export const TIERS = {
       cost: 6,
       ability: "start_trample",
       tier: 5,
+      img: "rhino.png",
     },
     {
       name: "🐻",
@@ -416,6 +421,8 @@ export const TIERS = {
       cost: 6,
       ability: "summon_buff",
       tier: 5,
+      img: "bear.png",
+      flip: true,
     },
     {
       name: "🦍",
@@ -425,6 +432,7 @@ export const TIERS = {
       cost: 6,
       ability: "end_self_buff",
       tier: 5,
+      img: "gorilla.png",
     },
     {
       name: "🐆",
@@ -434,6 +442,8 @@ export const TIERS = {
       cost: 6,
       ability: "cheetah_faint",
       tier: 5,
+      img: "cheetah.png",
+      flip: true,
     },
     {
       name: "🐅",
@@ -443,6 +453,7 @@ export const TIERS = {
       cost: 6,
       ability: "kill_fear_all",
       tier: 5,
+      img: "tiger.png",
     },
     {
       name: "🦣",
@@ -452,6 +463,8 @@ export const TIERS = {
       cost: 6,
       ability: "start_freeze_enemy",
       tier: 5,
+      img: "mammoth.png",
+      flip: true,
     },
     {
       name: "🐫",
@@ -461,6 +474,8 @@ export const TIERS = {
       cost: 6,
       ability: "buy_buff_behind",
       tier: 5,
+      img: "camel.png",
+      flip: true,
     },
   ],
   6: [
