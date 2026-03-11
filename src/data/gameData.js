@@ -198,6 +198,7 @@ export const TIERS = {
       ability: "faint_shield",
       tier: 3,
       img: "turtle.png",
+      flip: true,
     },
     {
       name: "🦉",
@@ -218,6 +219,7 @@ export const TIERS = {
       ability: "friend_faint",
       tier: 3,
       img: "wolf.png",
+      flip: true,
     },
     {
       name: "🦩",
@@ -228,6 +230,7 @@ export const TIERS = {
       ability: "end_team_buff",
       tier: 3,
       img: "flamingo.png",
+      flip: true,
     },
     {
       name: "🐗",
@@ -238,6 +241,7 @@ export const TIERS = {
       ability: "start_charge",
       tier: 3,
       img: "boar.png",
+      flip: true,
     },
     {
       name: "🦙",
@@ -258,6 +262,7 @@ export const TIERS = {
       ability: "buy_buff_random",
       tier: 3,
       img: "otter.png",
+      flip: true,
     },
     {
       name: "🦨",
@@ -278,9 +283,10 @@ export const TIERS = {
       ability: "faint_buff_self",
       tier: 3,
       img: "badger.png",
+      flip: true,
     },
   ],
-  4: [
+ 4: [
     {
       name: "🦈",
       nick: "Köpekbalığı",
@@ -289,6 +295,7 @@ export const TIERS = {
       cost: 5,
       ability: "kill_buff",
       tier: 4,
+      img: "shark.png",
     },
     {
       name: "🐊",
@@ -298,6 +305,7 @@ export const TIERS = {
       cost: 5,
       ability: "faint_summon",
       tier: 4,
+      img: "crocodile.png",
     },
     {
       name: "🦅",
@@ -307,6 +315,7 @@ export const TIERS = {
       cost: 5,
       ability: "start_all_perm",
       tier: 4,
+      img: "eagle.png",
     },
     {
       name: "🐃",
@@ -316,6 +325,7 @@ export const TIERS = {
       cost: 5,
       ability: "hurt_buff",
       tier: 4,
+      img: "buffalo.png",
     },
     {
       name: "🦚",
@@ -325,6 +335,7 @@ export const TIERS = {
       cost: 5,
       ability: "end_all",
       tier: 4,
+      img: "peacock.png",
     },
     {
       name: "🦛",
@@ -334,6 +345,7 @@ export const TIERS = {
       cost: 5,
       ability: "faint_copy",
       tier: 4,
+      img: "hippo.png",
     },
     {
       name: "🦬",
@@ -343,6 +355,8 @@ export const TIERS = {
       cost: 5,
       ability: "hurt_team_buff",
       tier: 4,
+      img: "bison.png",
+      flip: true,
     },
     {
       name: "🦒",
@@ -352,6 +366,7 @@ export const TIERS = {
       cost: 5,
       ability: "end_buff_ahead",
       tier: 4,
+      img: "giraffe.png",
     },
     {
       name: "🦓",
@@ -361,6 +376,8 @@ export const TIERS = {
       cost: 5,
       ability: "buy_discount_next",
       tier: 4,
+      img: "zebra.png",
+      flip: true,
     },
   ],
   5: [
