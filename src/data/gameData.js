@@ -188,7 +188,7 @@ export const TIERS = {
       img: "beaver.png",
     },
   ],
-  3: [
+ 3: [
     {
       name: "🐢",
       nick: "Kaplumbağa",
@@ -197,6 +197,7 @@ export const TIERS = {
       cost: 4,
       ability: "faint_shield",
       tier: 3,
+      img: "turtle.png",
     },
     {
       name: "🦉",
@@ -206,6 +207,7 @@ export const TIERS = {
       cost: 4,
       ability: "start_snipe",
       tier: 3,
+      img: "owl.png",
     },
     {
       name: "🐺",
@@ -215,6 +217,7 @@ export const TIERS = {
       cost: 4,
       ability: "friend_faint",
       tier: 3,
+      img: "wolf.png",
     },
     {
       name: "🦩",
@@ -224,6 +227,7 @@ export const TIERS = {
       cost: 4,
       ability: "end_team_buff",
       tier: 3,
+      img: "flamingo.png",
     },
     {
       name: "🐗",
@@ -233,6 +237,7 @@ export const TIERS = {
       cost: 4,
       ability: "start_charge",
       tier: 3,
+      img: "boar.png",
     },
     {
       name: "🦙",
@@ -242,6 +247,7 @@ export const TIERS = {
       cost: 4,
       ability: "sell_heal_team",
       tier: 3,
+      img: "llama.png",
     },
     {
       name: "🦦",
@@ -251,6 +257,7 @@ export const TIERS = {
       cost: 4,
       ability: "buy_buff_random",
       tier: 3,
+      img: "otter.png",
     },
     {
       name: "🦨",
@@ -260,6 +267,7 @@ export const TIERS = {
       cost: 4,
       ability: "hurt_weaken_attacker",
       tier: 3,
+      img: "skunk.png",
     },
     {
       name: "🦡",
@@ -269,6 +277,7 @@ export const TIERS = {
       cost: 4,
       ability: "faint_buff_self",
       tier: 3,
+      img: "badger.png",
     },
   ],
   4: [
