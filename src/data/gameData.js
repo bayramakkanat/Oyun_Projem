@@ -29,7 +29,6 @@ export const TIERS = {
       ability: "start_buff",
       tier: 1,
       img: "tirtil.png",
-      flip: true,
     },
     {
       name: "🦆",
@@ -40,6 +39,7 @@ export const TIERS = {
       ability: "end_heal_one",
       tier: 1,
       img: "duck.png",
+      flip: true,
     },
     {
       name: "🐱",
