@@ -692,20 +692,12 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
 ))}
 </div>
 </div>
-    {/* Zorluk */}
-    {gameMode === "standard" && (
-      <div className={`flex flex-col items-center px-3 py-1.5 rounded-2xl border shadow-inner min-w-[52px] ${
-        difficultyLevel === "easy" ? "bg-green-900/60 border-green-400/30" :
-        difficultyLevel === "hard" ? "bg-red-900/60 border-red-400/30" :
-        "bg-yellow-900/60 border-yellow-400/30"
-      }`}>
-        <span className={`text-[9px] uppercase tracking-widest font-black ${
-          difficultyLevel === "easy" ? "text-green-300" :
-          difficultyLevel === "hard" ? "text-red-300" : "text-yellow-300"
-        }`}>ZORLUK</span>
-        <span className="font-black text-sm leading-none text-white">{DIFFICULTY_CONFIGS[difficultyLevel]?.label || "😐 Orta"}</span>
-      </div>
-    )}
+{/* Rehber */}
+    <button
+      onClick={() => setGuide(true)}
+      className="p-2 bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30"
+      title="Kademe Rehberi"
+    >🗺️</button>
     {/* Boss Uyarısı */}
     {BOSSES[turn + 1] && gameMode === "standard" && (
       <div className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-red-900/80 to-orange-900/80 border border-red-500/60 rounded-2xl shadow-[0_0_12px_rgba(239,68,68,0.4)] animate-pulse">
@@ -716,12 +708,6 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
         </div>
       </div>
     )}
-    {/* Rehber */}
-    <button
-      onClick={() => setGuide(true)}
-      className="p-2 bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30"
-      title="Kademe Rehberi"
-    >🗺️</button>
   </div>
 
   {/* SAĞ: Altın / Can / Zafer / Güç / Butonlar */}
@@ -738,13 +724,8 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
     </div>
     {/* Zafer */}
     <div className="flex flex-col items-center bg-green-900/60 border border-green-500/40 px-3 py-1.5 rounded-2xl min-w-[48px]">
-      <span className="text-[9px] text-green-400 uppercase tracking-widest font-black">ZAFERLEr</span>
+     <span className="text-[9px] text-green-400 uppercase tracking-widest font-black">ZAFER</span>
       <span className="text-green-200 font-black text-base leading-none">✓{wins}</span>
-    </div>
-    {/* Güç */}
-    <div className="flex flex-col items-center bg-purple-900/60 border border-purple-500/40 px-3 py-1.5 rounded-2xl min-w-[48px]">
-      <span className="text-[9px] text-purple-400 uppercase tracking-widest font-black">GÜÇ</span>
-      <span className="text-purple-200 font-black text-base leading-none">⚡{team.filter(x=>x).reduce((s,p)=>s+p.atk+p.hp,0)}</span>
     </div>
     {/* Ses */}
     <button
