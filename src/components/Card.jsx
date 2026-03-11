@@ -208,14 +208,6 @@ function Card({
   ...animStyle
 }}
       >
-        {!compact && a.lvl >= 2 && (
-          <div
-            className="absolute top-1 right-1 z-10 text-2xl"
-            style={{ animation: "diamondSpin 3s ease-in-out infinite" }}
-          >
-            {a.lvl === 2 ? "💎" : "👑"}
-          </div>
-        )}
        <div className="flex flex-col items-center gap-0 -mt-1">
          <img
   src={a.img ? `/images/animals/${a.img}` : `https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u${a.name.codePointAt(0).toString(16)}.svg`}
