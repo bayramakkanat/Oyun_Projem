@@ -49,6 +49,7 @@ export const TIERS = {
       ability: "friend_levelup_buff",
       tier: 1,
       img: "cat.png",
+      flip: true,
     },
     {
       name: "🐝",
@@ -59,6 +60,7 @@ export const TIERS = {
       ability: "sell_gold",
       tier: 1,
       img: "bee.png",
+      flip: true,
     },
     {
       name: "🦗",
