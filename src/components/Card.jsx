@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TBG, TBD, TGLOW, ABILITY_ICONS } from "../data/gameData";
+import { TBG, TBD, ABILITY_ICONS } from "../data/gameData";
 import { getDesc as getDescUtil } from "../utils/getDesc";
 
 const getStatFontSize = (value, isCompact) => {
@@ -52,11 +52,7 @@ function Card({
       animation: "shake 0.5s",
       background: "linear-gradient(135deg, rgba(239,68,68,0.2), transparent)",
     };
-  if (anim === "buff")
-    animStyle = {
-      animation: "glow 0.4s",
-      boxShadow: "0 0 12px 2px rgba(34,197,94,0.4)",
-    };
+
   if (anim === "attackLeft")
     animStyle = { animation: "attackLeft 0.8s ease-in-out" };
   if (anim === "attackRight")
@@ -195,24 +191,22 @@ function Card({
   ? ""
   : ""
               }`
-        } ${
-          battle
-            ? ""
-            : `cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:brightness-110 ${
-                TGLOW[a.tier]
-              }`
-        } relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-t before:from-black/50 before:via-transparent before:to-white/5 before:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-white/10 after:to-transparent after:pointer-events-none after:rounded-xl`}
+      } ${
+  battle
+    ? ""
+    : "cursor-pointer transition-all duration-300"
+} relative`}
         onClick={onClick}
         style={{
-          ...animStyle,
-          ...(battle
-            ? {}
-            : !compact && !isFlipped
-            ? { opacity: 0, transform: "rotateY(90deg)" }
-            : isFlipped
-            ? { animation: "cardFlip 0.6s ease-out forwards" }
-            : {}),
-        }}
+  ...(battle
+    ? {}
+    : !compact && !isFlipped
+    ? { opacity: 0, transform: "rotateY(90deg)" }
+    : isFlipped
+    ? {}
+    : {}),
+  ...animStyle
+}}
       >
         {!compact && a.lvl >= 2 && (
           <div
