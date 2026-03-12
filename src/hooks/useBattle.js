@@ -1112,13 +1112,11 @@ await delay(500);
 if (isCancelled) return;
       }
       // Standart Savaş Turu
-      if (step === 0) return;
-      let p = [...pT].filter((x) => x.curHp > 0);
-      let e = [...eT].filter((x) => x.curHp > 0);
-      if (p.length === 0 && pT.length === 0) { setIsBattleOver(true); return; }
-      if (e.length === 0 && eT.length === 0) { setIsBattleOver(true); return; }
-      if (p.length === 0 || e.length === 0) {
-  setStep((s) => s + 1);
+     if (step === 0) return;
+let p = [...pT].filter((x) => x.curHp > 0);
+let e = [...eT].filter((x) => x.curHp > 0);
+if (p.length === 0 || e.length === 0) {
+  setIsBattleOver(true);
   return;
 }
 
