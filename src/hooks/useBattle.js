@@ -1375,7 +1375,7 @@ if (p.length === 0 || e.length === 0) {
   p[0].atk = clampStat(p[0].atk + atkGain);
   p[0].hp = clampStat(p[0].hp + hpGain);
   p[0].curHp = clampStat(p[0].curHp + hpGain);
- spawnProjectile(a.id, e[0].id, "devour");
+ spawnProjectile(e[0].id, a.id, "devour");
   triggerAnim(a.id, "buff");
         setLog((l) => [...l, `👹 ${a.nick} -> +${atkGain}/+${hpGain}`]);
         await delay(500);
