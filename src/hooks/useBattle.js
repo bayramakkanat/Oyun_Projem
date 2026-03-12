@@ -860,7 +860,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         let pp = [...pT];
         let ee = [...eT];
 
-        // 1. Geyik (Stag Combo) - Global Buff
+        // 1. Geyik (Stag Combo) - Global Buff - sıra önemli değil
         for (let i = 0; i < pp.length; i++) {
           if (pp[i]?.ability === "stag_combo") {
             const pet = pp[i];
@@ -870,8 +870,20 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             setTeam((prevTeam) =>
               prevTeam.map((p) => p ? { ...p, atk: clampStat(p.atk + 2 * m), hp: clampStat(p.hp + 2 * m), curHp: clampStat(p.curHp + 2 * m) } : p)
             );
-            setLog((l) => [...l, `🦌 ${pet.nick} -> Takıma +${2 * m}/+${2 * m} KALICI`]);
+            setLog((l) => [...l, `🦌 ${pet.nick} -> Takima +${2 * m}/+${2 * m} KALICI`]);
             setPT([...pp]);
+            await delay(1000);
+            if (isCancelled) return;
+          }
+        }
+        for (let i = 0; i < ee.length; i++) {
+          if (ee[i]?.ability === "stag_combo") {
+            const pet = ee[i];
+            triggerAnim(pet.id, "ability");
+            const m = pwr(pet);
+            ee = ee.map((a) => a ? { ...a, atk: clampStat(a.atk + 2 * m), hp: clampStat(a.hp + 2 * m), curHp: clampStat(a.curHp + 2 * m) } : a);
+            setLog((l) => [...l, `🦌 Düsman ${pet.nick} -> Düsman takimina +${2 * m}/+${2 * m} KALICI`]);
+            setET([...ee]);
             await delay(1000);
             if (isCancelled) return;
           }
@@ -884,247 +896,212 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             triggerAnim(a.id, "ability");
             if (a.tempAtk) pp[i].atk += a.tempAtk;
             if (a.tempHp) pp[i].curHp += a.tempHp;
-            setLog((l) => [...l, `✨ ${a.nick} +${a.tempAtk || 0} ATK / +${a.tempHp || 0} HP (Geçici)`]);
+            setLog((l) => [...l, `✨ ${a.nick} +${a.tempAtk || 0} ATK / +${a.tempHp || 0} HP (Gecici)`]);
             setPT([...pp]);
             await delay(800);
             if (isCancelled) return;
           }
         }
 
-        // 3. Sıralı 'Takım At Başı' Yetenekleri
+        // 3. Kendi buff yetenekleri (sıra önemli değil, animasyon hızlı)
+        const selfBuffAbilities = ["start_buff", "start_team_shield", "start_all_perm", "start_trample", "start_charge", "start_tank"];
+        
         for (let i = 0; i < pp.length; i++) {
           const a = pp[i];
-          if (!a) continue;
+          if (!a || !selfBuffAbilities.includes(a.ability)) continue;
           const m = pwr(a);
-          let triggered = false;
-
-          if (a.ability === "start_buff") {
-            pp[i].atk += m;
-            setLog((l) => [...l, `⚡ ${a.nick} -> +${m} ATK (Savaş Başı)`]);
-            triggered = true;
-          } else if (a.ability === "start_team_shield") {
-            pp = pp.map((x) => x ? { ...x, hp: clampStat(x.hp + m), curHp: clampStat(x.curHp + m) } : x);
-            setLog((l) => [...l, `🛡️ ${a.nick} -> Tüm takıma +${m} HP`]);
-            triggered = true;
-          } else if (a.ability === "start_all_perm") {
+          if (a.ability === "start_buff") { pp[i].atk += m; setLog((l) => [...l, `⚡ ${a.nick} -> +${m} ATK`]); }
+          else if (a.ability === "start_team_shield") { pp = pp.map((x) => x ? { ...x, hp: clampStat(x.hp + m), curHp: clampStat(x.curHp + m) } : x); setLog((l) => [...l, `🛡️ ${a.nick} -> Tüm takima +${m} HP`]); }
+          else if (a.ability === "start_all_perm") {
             const buffAmount = 2 * m;
             pp = pp.map((x) => x ? { ...x, atk: clampStat(x.atk + buffAmount) } : x);
             setTeam((prevTeam) => prevTeam.map((pet) => pet ? { ...pet, atk: clampStat(pet.atk + buffAmount) } : pet));
             pp.forEach((x) => { if (x) triggerAnim(x.id, "buff"); });
-            spawnParticles(a.id, "buff");
-            setLog((l) => [...l, `🦅 ${a.nick} -> Tüm takıma +${2 * m} ATK KALICI`]);
-            triggered = true;
-         } else if (a.ability === "start_snipe" && ee.length > 0) {
-            const targetIdx = ee.length > 1 ? ee.length - 1 : 0;
-            ee[targetIdx].curHp -= 3 * m;
-            spawnProjectile(a.id, ee[targetIdx].id, "start_snipe");
-            triggerAnim(ee[targetIdx].id, "damage");
-            setLog((l) => [...l, `🎯 ${a.nick} -> ${ee[targetIdx].nick} e ${3 * m} hasar (arka)`]);
-            triggered = true;
-          } else if (a.ability === "start_multi_snipe" && ee.length > 0) {
-            const targetCount = Math.min(m + 1, ee.length);
-            for (let j = 0; j < targetCount; j++) {
-              const aliveEe = ee.filter((x) => x && x.curHp > 0);
-              if (aliveEe.length > 0) {
-                const rndIdx = Math.floor(Math.random() * aliveEe.length);
-                const target = aliveEe[rndIdx];
-                if (target && target.nick) {
-                  target.curHp -= 8 * m;
-                  spawnProjectile(a.id, target.id, "start_multi_snipe");
-                  triggerAnim(target.id, "damage");
-                  setLog((l) => [...l, `🦑 ${a.nick} -> ${target.nick} e ${8 * m} hasar`]);
-                }
-              }
-            }
-            triggered = true;
-         } else if (a.ability === "start_fear" && ee.length > 0) {
-            ee[0].atk = Math.max(1, ee[0].atk - 10 * m);
-            spawnProjectile(a.id, ee[0].id, "start_fear");
-            triggerAnim(ee[0].id, "damage");
-            if (ee.length > 1) {
-              ee[1].atk = Math.max(1, ee[1].atk - 10 * m);
-              spawnProjectile(a.id, ee[1].id, "start_fear");
-              triggerAnim(ee[1].id, "damage");
-            }
-            const fearTargets = ee.length > 1 ? `${ee[0].nick} ve ${ee[1].nick}` : ee[0].nick;
-            setLog((l) => [...l, `🦁 ${a.nick} -> ${fearTargets} -${10 * m} ATK!`]);
-            triggered = true;
-         } else if (a.ability === "start_fire" && ee.length > 0) {
-            ee = ee.map((x) => ({ ...x, curHp: x.curHp - 6 * m }));
-            ee.forEach((x) => {
+            setLog((l) => [...l, `🦅 ${a.nick} -> Tüm takima +${2 * m} ATK KALICI`]);
+          }
+          else if (a.ability === "start_trample") { pp[i].atk += 5 * m; pp[i].trample = true; setLog((l) => [...l, `🦏 ${a.nick} -> +${5 * m} ATK (ciğneme)`]); }
+          else if (a.ability === "start_charge") { pp[i].curHp += 2 * m; setLog((l) => [...l, `🐗 ${a.nick} -> +${2 * m} HP`]); }
+          else if (a.ability === "start_tank") { pp[i].curHp += 3 * m; setLog((l) => [...l, `🦀 ${a.nick} -> +${3 * m} HP`]); }
+          triggerAnim(a.id, "ability");
+          spawnParticles(a.id, "buff");
+          setPT([...pp]);
+          await delay(600);
+          if (isCancelled) return;
+        }
+        for (let i = 0; i < ee.length; i++) {
+          const a = ee[i];
+          if (!a || !selfBuffAbilities.includes(a.ability)) continue;
+          const m = pwr(a);
+          if (a.ability === "start_buff") { ee[i].atk += m; setLog((l) => [...l, `⚡ Düsman ${a.nick} -> +${m} ATK`]); }
+          else if (a.ability === "start_team_shield") { ee = ee.map((x) => x ? { ...x, hp: clampStat(x.hp + m), curHp: clampStat(x.curHp + m) } : x); setLog((l) => [...l, `🛡️ Düsman ${a.nick} -> Tüm takima +${m} HP`]); }
+          else if (a.ability === "start_all_perm") { ee = ee.map((x) => x ? { ...x, atk: clampStat(x.atk + 2 * m) } : x); setLog((l) => [...l, `🦅 Düsman ${a.nick} -> Tüm takima +${2 * m} ATK`]); }
+          else if (a.ability === "start_trample") { ee[i].atk += 5 * m; ee[i].trample = true; setLog((l) => [...l, `🦏 Düsman ${a.nick} -> +${5 * m} ATK`]); }
+          else if (a.ability === "start_charge") { ee[i].curHp += 2 * m; setLog((l) => [...l, `🐗 Düsman ${a.nick} -> +${2 * m} HP`]); }
+          else if (a.ability === "start_tank") { ee[i].curHp += 3 * m; setLog((l) => [...l, `🦀 Düsman ${a.nick} -> +${3 * m} HP`]); }
+          triggerAnim(a.id, "ability");
+          spawnParticles(a.id, "buff");
+          setET([...ee]);
+          await delay(600);
+          if (isCancelled) return;
+        }
+
+        // 4. Saldırı yetenekleri - ATK'ya göre sıralı, birleşik
+        const attackAbilities = ["start_fire", "start_fear", "start_snipe", "start_multi_snipe", "start_dmg", "start_poison", "start_freeze_enemy", "weaken_strong"];
+        
+        // Her iki takımdan saldırı yeteneği olan hayvanları topla
+        let attackers = [];
+        pp.forEach((a, idx) => {
+          if (a && attackAbilities.includes(a.ability)) {
+            attackers.push({ pet: a, isPlayer: true, idx });
+          }
+        });
+        ee.forEach((a, idx) => {
+          if (a && attackAbilities.includes(a.ability)) {
+            attackers.push({ pet: a, isPlayer: false, idx });
+          }
+        });
+
+        // ATK'ya göre sırala (yüksek önce), eşitse HP'ye göre, eşitse pozisyona göre
+        attackers.sort((x, y) => {
+          if (y.pet.atk !== x.pet.atk) return y.pet.atk - x.pet.atk;
+          if (y.pet.curHp !== x.pet.curHp) return y.pet.curHp - x.pet.curHp;
+          return x.idx - y.idx;
+        });
+
+        // Sırayla çalıştır
+        for (const { pet: a, isPlayer } of attackers) {
+          const m = pwr(a);
+          const targets = isPlayer ? ee : pp;
+          const allies = isPlayer ? pp : ee;
+          if (targets.length === 0) continue;
+
+          triggerAnim(a.id, "ability");
+          
+          if (a.ability === "start_fire") {
+            // Alan hasarı - tüm hedeflere
+            const dmg = 6 * m;
+            targets.forEach((x) => {
+              x.curHp -= dmg;
               spawnProjectile(a.id, x.id, "start_fire");
               triggerAnim(x.id, "damage");
             });
-            setLog((l) => [...l, `🐉 ${a.nick} -> Tüm düşmanlara ${6 * m} hasar`]);
-            triggered = true;
-          } else if (a.ability === "start_trample") {
-            pp[i].atk += 5 * m;
-            pp[i].trample = true;
-            setLog((l) => [...l, `🦏 ${a.nick} -> +${5 * m} ATK (çiğneme aktif)`]);
-            triggered = true;
-          } else if (a.ability === "start_charge") {
-            pp[i].curHp += 2 * m;
-            setLog((l) => [...l, `🐗 ${a.nick} -> +${2 * m} HP`]);
-            triggered = true;
-          } else if (a.ability === "start_tank") {
-            pp[i].curHp += 3 * m;
-            setLog((l) => [...l, `🦀 ${a.nick} -> +${3 * m} HP (tank)`]);
-            triggered = true;
-          } else if (a.ability === "start_dmg" && ee.length > 0) {
-            const aliveEe = ee.filter((x) => x && x.curHp > 0);
-            if (aliveEe.length > 0) {
-              const target = aliveEe[Math.floor(Math.random() * aliveEe.length)];
-              if (target && target.nick) {
-               target.curHp -= 2 * m;
-                spawnProjectile(a.id, target.id, "start_dmg");
-                triggerAnim(target.id, "damage");
-                setLog((l) => [...l, `💥 ${a.nick} -> ${target.nick} e ${2 * m} hasar`]);
+            setLog((l) => [...l, `🐉 ${isPlayer ? "" : "Düsman "}${a.nick} -> Tüm ${isPlayer ? "düsmanlara" : "takima"} ${dmg} hasar`]);
+            await delay(800);
+
+          } else if (a.ability === "start_fear") {
+            // İlk 2 düşmanı zayıflat
+            targets[0].atk = Math.max(1, targets[0].atk - 10 * m);
+            spawnProjectile(a.id, targets[0].id, "start_fear");
+            triggerAnim(targets[0].id, "damage");
+            if (targets.length > 1) {
+              targets[1].atk = Math.max(1, targets[1].atk - 10 * m);
+              spawnProjectile(a.id, targets[1].id, "start_fear");
+              triggerAnim(targets[1].id, "damage");
+            }
+            const fearT = targets.length > 1 ? `${targets[0].nick} ve ${targets[1].nick}` : targets[0].nick;
+            setLog((l) => [...l, `🦁 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${fearT} -${10 * m} ATK`]);
+            await delay(800);
+
+          } else if (a.ability === "start_snipe") {
+            // En arkadaki hedefe
+            const targetIdx = targets.length > 1 ? targets.length - 1 : 0;
+            targets[targetIdx].curHp -= 3 * m;
+            spawnProjectile(a.id, targets[targetIdx].id, "start_snipe");
+            triggerAnim(targets[targetIdx].id, "damage");
+            setLog((l) => [...l, `🎯 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${targets[targetIdx].nick} e ${3 * m} hasar`]);
+            await delay(800);
+
+          } else if (a.ability === "start_multi_snipe") {
+            // Birden fazla hedefe
+            const targetCount = Math.min(m + 1, targets.length);
+            for (let j = 0; j < targetCount; j++) {
+              const alive = targets.filter((x) => x.curHp > 0);
+              if (alive.length > 0) {
+                const t = alive[Math.floor(Math.random() * alive.length)];
+                t.curHp -= 8 * m;
+                spawnProjectile(a.id, t.id, "start_multi_snipe");
+                triggerAnim(t.id, "damage");
+                setLog((l) => [...l, `🦑 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${8 * m} hasar`]);
+                await delay(400);
               }
             }
-            triggered = true;
-          } else if (a.ability === "start_poison" && ee.length > 0) {
-            ee[0].atk = Math.max(1, ee[0].atk - m * 2);
-            setLog((l) => [...l, `🐍 ${a.nick} -> Ön düşmana -${m * 2} ATK`]);
-            triggered = true;
-          } else if (a.ability === "start_freeze_enemy" && ee.length > 0) {
-            const reduction = (m * 30) / 100;
-            ee[0].atk = Math.max(1, Math.floor(ee[0].atk * (1 - reduction)));
-            triggerAnim(ee[0].id, "damage");
-            if (ee.length > 1) {
-              ee[ee.length - 1].atk = Math.max(1, Math.floor(ee[ee.length - 1].atk * (1 - reduction)));
-              triggerAnim(ee[ee.length - 1].id, "damage");
+
+          } else if (a.ability === "start_dmg") {
+            // Rastgele bir hedefe
+            const alive = targets.filter((x) => x.curHp > 0);
+            if (alive.length > 0) {
+              const t = alive[Math.floor(Math.random() * alive.length)];
+              t.curHp -= 2 * m;
+              spawnProjectile(a.id, t.id, "start_dmg");
+              triggerAnim(t.id, "damage");
+              setLog((l) => [...l, `💥 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${2 * m} hasar`]);
+              await delay(800);
             }
-            setLog((l) => [...l, `🦣 ${a.nick} -> Ön ve arka düşmanı %${m * 30} yavaşlattı`]);
-            triggered = true;
-          } else if (a.ability === "weaken_strong" && ee.length > 0) {
+
+          } else if (a.ability === "start_poison") {
+            // Öndeki düşmanı zayıflat
+            targets[0].atk = Math.max(1, targets[0].atk - m * 2);
+            spawnProjectile(a.id, targets[0].id, "start_poison");
+            triggerAnim(targets[0].id, "damage");
+            setLog((l) => [...l, `🐍 ${isPlayer ? "" : "Düsman "}${a.nick} -> On düsmana -${m * 2} ATK`]);
+            await delay(800);
+
+          } else if (a.ability === "start_freeze_enemy") {
+            // Ön ve arka düşmanı yavaşlat
+            const reduction = (m * 30) / 100;
+            targets[0].atk = Math.max(1, Math.floor(targets[0].atk * (1 - reduction)));
+            spawnProjectile(a.id, targets[0].id, "start_freeze_enemy");
+            triggerAnim(targets[0].id, "damage");
+            if (targets.length > 1) {
+              targets[targets.length - 1].atk = Math.max(1, Math.floor(targets[targets.length - 1].atk * (1 - reduction)));
+              spawnProjectile(a.id, targets[targets.length - 1].id, "start_freeze_enemy");
+              triggerAnim(targets[targets.length - 1].id, "damage");
+            }
+            setLog((l) => [...l, `🦣 ${isPlayer ? "" : "Düsman "}${a.nick} -> On ve arka düsmani %${m * 30} yavaslatti`]);
+            await delay(800);
+
+          } else if (a.ability === "weaken_strong") {
+            // En güçlü düşmanı zayıflat
             let mxI = 0, mxP = 0;
-            ee.forEach((en, idx) => {
+            targets.forEach((en, idx) => {
               if (en.atk + en.curHp > mxP) { mxP = en.atk + en.curHp; mxI = idx; }
             });
             const r = (25 * m) / 100;
-            ee[mxI].atk = Math.max(1, Math.floor(ee[mxI].atk * (1 - r)));
-            ee[mxI].curHp = Math.max(1, Math.floor(ee[mxI].curHp * (1 - r)));
-            triggerAnim(ee[mxI].id, "damage");
-            setLog((l) => [...l, `🐧 ${a.nick} -> ${ee[mxI].nick}'i %${25 * m} zayıflattı`]);
-            triggered = true;
+            targets[mxI].atk = Math.max(1, Math.floor(targets[mxI].atk * (1 - r)));
+            targets[mxI].curHp = Math.max(1, Math.floor(targets[mxI].curHp * (1 - r)));
+            spawnProjectile(a.id, targets[mxI].id, "weaken_strong");
+            triggerAnim(targets[mxI].id, "damage");
+            setLog((l) => [...l, `🐧 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${targets[mxI].nick} i %${25 * m} zayiflatti`]);
+            await delay(800);
           }
 
-          if (triggered) {
-            triggerAnim(a.id, "ability");
-            spawnParticles(a.id, "buff");
+          // Ölenleri temizle
+          if (isPlayer) {
             ee = ee.filter((x) => x.curHp > 0);
-            setPT([...pp]);
-            setET([...ee]);
-            await delay(1000);
-            if (isCancelled) return;
+          } else {
+            pp = pp.filter((x) => x.curHp > 0);
           }
+          setPT([...pp]);
+          setET([...ee]);
+          if (isCancelled) return;
         }
 
-        // 4. Düşman savaş başı yetenekleri
-        let finalP = [...pp];
-        let finalE = [...ee];
-
-        finalE.forEach((a, i) => {
+        // Düşman buff yetenekleri (start_fire ile ATK buff alan ejderha için)
+        ee.forEach((a, i) => {
           const m = pwr(a);
-          if (a.ability === "stag_combo") {
-            const buff = 2 * m;
-            finalE.forEach((x, j) => {
-              finalE[j].atk = clampStat(finalE[j].atk + buff);
-              finalE[j].hp = clampStat(finalE[j].hp + buff);
-              finalE[j].curHp = clampStat(finalE[j].curHp + buff);
-            });
-            setLog((l) => [...l, `🦌 Düşman ${a.nick} -> Düşman takımına +${buff}/+${buff} KALICI`]);
-          }
-          if (a.ability === "start_buff") finalE[i].atk += m;
-          if (a.ability === "start_team_shield") {
-            finalE.forEach((x, j) => {
-              finalE[j].hp = clampStat(finalE[j].hp + m);
-              finalE[j].curHp = clampStat(finalE[j].curHp + m);
-            });
-          }
-          if (a.ability === "start_tank") finalE[i].curHp += 3 * m;
-          if (a.ability === "start_charge") finalE[i].curHp += 2 * m;
-          if (a.ability === "start_trample") { finalE[i].atk += 5 * m; finalE[i].trample = true; }
-          if (a.ability === "start_all_perm") {
-            finalE.forEach((x, j) => { finalE[j].atk = clampStat(finalE[j].atk + 2 * m); });
-          }
-          if (a.ability === "start_dmg" && finalP.length > 0) {
-            const t = Math.floor(Math.random() * finalP.length);
-            finalP[t].curHp -= 2 * m;
-          }
-          if (a.ability === "start_snipe" && finalP.length > 0) {
-            const t = finalP.length > 1 ? finalP.length - 1 : 0;
-            finalP[t].curHp -= 3 * m;
-          }
-          if (a.ability === "start_fear" && finalP.length > 0) {
-            finalP[0].atk = Math.max(1, finalP[0].atk - 10 * m);
-            if (finalP.length > 1) finalP[1].atk = Math.max(1, finalP[1].atk - 10 * m);
-          }
-         if (a.ability === "start_fire") {
-  for (let fi = 0; fi < 20; fi++) {
-    const aliveTargets = finalP.filter((x) => x.curHp > 0);
-    if (aliveTargets.length === 0) break;
-    const target = aliveTargets[Math.floor(Math.random() * aliveTargets.length)];
-    const tIdx = finalP.findIndex((x) => x.id === target.id);
-    if (tIdx !== -1) finalP[tIdx].curHp -= 1;
-  }
-  finalE[i].atk = clampStat(finalE[i].atk + 4 * m);
-}
-          if (a.ability === "start_poison" && finalP.length > 0) {
-            finalP[0].atk = Math.max(1, finalP[0].atk - m * 2);
-          }
-          if (a.ability === "start_freeze_enemy" && finalP.length > 0) {
-            const reduction = (m * 30) / 100;
-            finalP[0].atk = Math.max(1, Math.floor(finalP[0].atk * (1 - reduction)));
-            if (finalP.length > 1)
-              finalP[finalP.length - 1].atk = Math.max(1, Math.floor(finalP[finalP.length - 1].atk * (1 - reduction)));
-          }
-          if (a.ability === "start_multi_snipe" && finalP.length > 0) {
-            const targetCount = Math.min(m + 1, finalP.length);
-            for (let j = 0; j < targetCount; j++) {
-              const rndIdx = Math.floor(Math.random() * finalP.length);
-              finalP[rndIdx].curHp -= 8 * m;
-            }
-          }
-          if (a.ability === "weaken_strong" && finalP.length > 0) {
-            let mxI = 0, mxP = 0;
-            finalP.forEach((en, idx) => {
-              if (en.atk + en.curHp > mxP) { mxP = en.atk + en.curHp; mxI = idx; }
-            });
-            const r = (25 * m) / 100;
-            finalP[mxI].atk = Math.max(1, Math.floor(finalP[mxI].atk * (1 - r)));
-            finalP[mxI].curHp = Math.max(1, Math.floor(finalP[mxI].curHp * (1 - r)));
+          if (a.ability === "start_fire") {
+            ee[i].atk = clampStat(ee[i].atk + 4 * m);
           }
         });
 
-        // Düşman savaş başı logları
-        finalE.forEach((a) => {
-          const m = pwr(a);
-          if (a.ability === "start_dmg") setLog((l) => [...l, `💥 Düşman ${a.nick} -> Takıma ${2 * m} hasar`]);
-          if (a.ability === "start_snipe") setLog((l) => [...l, `🎯 Düşman ${a.nick} -> ${finalP[finalP.length > 1 ? finalP.length - 1 : 0]?.nick || "Arka birim"}'e ${3 * m} hasar`]);
-         if (a.ability === "start_fire") setLog((l) => [...l, `🔥 Düşman ${a.nick} -> 20 alev topu takıma dağıldı!`]);
-          if (a.ability === "start_fear") setLog((l) => [...l, `😱 Düşman ${a.nick} -> ${finalP[0]?.nick || ""}${finalP.length > 1 ? ` ve ${finalP[1]?.nick}` : ""} -${10 * m} ATK`]);
-          if (a.ability === "start_poison") setLog((l) => [...l, `🐍 Düşman ${a.nick} -> Ön birime -${m * 2} ATK`]);
-          if (a.ability === "start_multi_snipe") setLog((l) => [...l, `🦑 Düşman ${a.nick} -> ${m + 1} birime ${8 * m} hasar`]);
-          if (a.ability === "start_freeze_enemy") setLog((l) => [...l, `🦣 Düşman ${a.nick} -> Ön ve arka birimi %${m * 30} yavaşlattı`]);
-          if (a.ability === "weaken_strong") setLog((l) => [...l, `🐧 Düşman ${a.nick} -> En güçlü birimi %${25 * m} zayıflattı`]);
-          if (a.ability === "start_buff") setLog((l) => [...l, `⚡ Düşman ${a.nick} -> Kendine +${m} ATK`]);
-          if (a.ability === "start_team_shield") setLog((l) => [...l, `🛡️ Düşman ${a.nick} -> Düşman takımına +${m} HP`]);
-          if (a.ability === "start_tank") setLog((l) => [...l, `🦀 Düşman ${a.nick} -> +${3 * m} HP`]);
-          if (a.ability === "start_charge") setLog((l) => [...l, `🐗 Düşman ${a.nick} -> +${2 * m} HP`]);
-          if (a.ability === "start_trample") setLog((l) => [...l, `🦏 Düşman ${a.nick} -> +${5 * m} ATK (çiğneme)`]);
-          if (a.ability === "start_all_perm") setLog((l) => [...l, `🦅 Düşman ${a.nick} -> Düşman takımına +${2 * m} ATK`]);
-        });
-
-        finalE = finalE.filter((x) => x.curHp > 0);
-        finalP = finalP.filter((x) => x.curHp > 0);
-        setPT(finalP);
-        setET(finalE);
+        pp = pp.filter((x) => x.curHp > 0);
+        ee = ee.filter((x) => x.curHp > 0);
+        setPT([...pp]);
+        setET([...ee]);
         setStep((s) => s + 1);
         await delay(500);
         if (isCancelled) return;
       }
-
       // Standart Savaş Turu
       if (step === 0) return;
       let p = [...pT].filter((x) => x.curHp > 0);
