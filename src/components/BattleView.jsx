@@ -167,7 +167,7 @@ style={{ textShadow: "0 0 10px rgba(74,222,128,0.8)" }}
           <div className="flex flex-row items-center justify-center w-full max-w-5xl gap-4">
             {/* Oyuncu takımı (SOLDA) */}
             <div className="flex items-center justify-start flex-nowrap flex-row-reverse min-h-[160px] pb-4 relative z-20 w-[45%] pr-4 gap-1 sm:gap-2">
-             {pT.filter((a) => a.curHp > 0).map((a, idx) => {
+             {pT.map((a, idx) => {
                 const healthPercent = Math.max(0, (a.curHp / a.hp) * 100);
                 return (
                   <div
@@ -238,14 +238,14 @@ animation: step === 0
 
             {/* Düşman takımı (SAĞDA) */}
             <div className="flex items-center justify-start flex-nowrap min-h-[160px] pb-6 relative z-20 w-[45%] pl-4 gap-1 sm:gap-2">
-              {[...eT].filter((a) => a.curHp > 0).map((a, idx) => {
+             {[...eT].map((a, idx) => {
                 const isFront = idx === 0;
                 const healthPercent = Math.max(0, (a.curHp / a.hp) * 100);
                 return (
                   <div
                     key={a.id}
                     className="flex flex-col items-center transition-all duration-500 ease-out"
-                    style={{ zIndex: 50 - idx }}
+                   style={{ zIndex: 50 - idx, opacity: a.curHp <= 0 ? 0 : 1, transition: "opacity 0.3s ease-out" }}
                   >
                     <div className="flex flex-col items-center mb-2 gap-0.5">
                      <div className="w-16 h-3 bg-black/30 rounded-full overflow-hidden">
