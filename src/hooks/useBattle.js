@@ -1099,13 +1099,17 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
           }
         });
 
-        pp = pp.filter((x) => x.curHp > 0);
-        ee = ee.filter((x) => x.curHp > 0);
-        setPT([...pp]);
-        setET([...ee]);
-        setStep((s) => s + 1);
-        await delay(500);
-        if (isCancelled) return;
+       pp = pp.filter((x) => x.curHp > 0);
+ee = ee.filter((x) => x.curHp > 0);
+setPT([...pp]);
+setET([...ee]);
+if (pp.length === 0 || ee.length === 0) {
+  setStep((s) => s + 1);
+  return;
+}
+setStep((s) => s + 1);
+await delay(500);
+if (isCancelled) return;
       }
       // Standart Savaş Turu
       if (step === 0) return;
