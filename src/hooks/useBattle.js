@@ -1092,7 +1092,13 @@ triggerAnim(snipeTarget.id, "damage");
           setET([...ee]);
           if (isCancelled) return;
         }
-
+// Oyuncu ejderhası ATK buff
+pp.forEach((a, i) => {
+  const m = pwr(a);
+  if (a.ability === "start_fire") {
+    pp[i].atk = clampStat(pp[i].atk + 4 * m);
+  }
+});
         // Düşman buff yetenekleri (start_fire ile ATK buff alan ejderha için)
         ee.forEach((a, i) => {
           const m = pwr(a);
