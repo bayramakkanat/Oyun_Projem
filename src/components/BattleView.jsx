@@ -290,20 +290,16 @@ style={{ textShadow: "0 0 10px rgba(74,222,128,0.8)" }}
                               }}
                             />
                           </div>
-                          <div className="flex gap-1.5 items-center mt-1 z-20">
-                            <div className="flex items-center gap-0.5 px-2 py-1 bg-orange-600/90 rounded-full border border-orange-400 shadow-sm">
-                              <span className="text-sm">⚔️</span>
-                              <span className="text-xs font-bold text-white">
-                                {a.atk}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-0.5 px-2 py-1 bg-green-600/90 rounded-full border border-green-400 shadow-sm">
-                              <span className="text-sm">❤️</span>
-                              <span className="text-xs font-bold text-white">
-                                {Math.max(0, a.curHp ?? 0)}
-                              </span>
-                            </div>
-                          </div>
+                         <div className="flex gap-1 items-center mt-1 z-20">
+  <div style={{ position: "relative", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <img src="https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u2694.svg" width={48} height={48} style={{ position: "absolute", opacity: 0.25, filter: "brightness(0) invert(1)" }} alt="atk" />
+    <span style={{ position: "relative", zIndex: 2, color: "#ef4444", fontSize: "18px", fontWeight: "900", textShadow: "0 0 8px rgba(0,0,0,0.9)" }}>{a.atk}</span>
+  </div>
+  <div style={{ position: "relative", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <img src="https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u1f6e1.svg" width={44} height={44} style={{ position: "absolute", opacity: 0.25, filter: "brightness(0) invert(1)" }} alt="hp" />
+    <span style={{ position: "relative", zIndex: 2, color: "#4ade80", fontSize: "18px", fontWeight: "900", textShadow: "0 0 8px rgba(0,0,0,0.9)" }}>{Math.max(0, a.curHp ?? 0)}</span>
+  </div>
+</div>
                         </div>
                       ) : (
                         <Card

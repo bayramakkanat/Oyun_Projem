@@ -147,7 +147,7 @@ useEffect(() => {
   // Resim ön yükleme (düzeltildi - useEffect dışına taşındı)
   useEffect(() => {
     const images = [
-      "https://i.ibb.co/LXhW3f9P/ankaboss-removebg.png",
+      "/images/animals/phoenix.png",
       "https://i.ibb.co/BVvZ1GnD/Erlik.png",
       "https://i.ibb.co/MDrgjfTR/Asena-Canva.png",
     ];
