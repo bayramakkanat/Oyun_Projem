@@ -89,15 +89,15 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         const i = Math.floor(Math.random() * al.length);
         al[i].atk = clampStat(al[i].atk + m);
         al[i].curHp = clampStat(al[i].curHp + m);
-        lg.push(`💀 Düşman ${d.nick} → ${al[i].nick} e +${m}/+${m}`);
+        lg.push(`💀 Düşman ${d.nick} -> ${al[i].nick} e +${m}/+${m}`);
       }
       if (d.ability === "faint_dmg" && en.length > 0) {
         en.forEach((x) => { x.curHp -= m * 2; });
-        lg.push(`☠️ Düşman ${d.nick} → Oyuncu takımına ${m * 2} hasar`);
+        lg.push(`☠️ Düşman ${d.nick} -> Oyuncu takımına ${m * 2} hasar`);
       }
       if (d.ability === "faint_shield" && al.length > 0) {
         al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
-        lg.push(`🛡️ Düşman ${d.nick} → Düşman takımına +${2 * m} HP`);
+        lg.push(`🛡️ Düşman ${d.nick} -> Düşman takımına +${2 * m} HP`);
       }
       if (d.ability === "faint_rage") {
         const buff = 8 * m;
@@ -105,11 +105,11 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           x.atk = clampStat(x.atk + buff);
           x.curHp = clampStat(x.curHp + buff);
         });
-        lg.push(`😡 Düşman ${d.nick} → Düşman takımına +${buff}/+${buff}`);
+        lg.push(`😡 Düşman ${d.nick} -> Düşman takımına +${buff}/+${buff}`);
       }
       if (d.ability === "faint_wave") {
         en.forEach((x) => { x.curHp -= 9 * m; });
-        lg.push(`🌊 Düşman ${d.nick} → Oyuncu takımına ${9 * m} hasar`);
+        lg.push(`🌊 Düşman ${d.nick} -> Oyuncu takımına ${9 * m} hasar`);
       }
       if (d.ability === "cheetah_faint") {
         const buff = 8 * m;
@@ -117,10 +117,10 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           x.atk = clampStat(x.atk + buff);
           x.curHp = clampStat(x.curHp + buff);
         });
-        lg.push(`💨 Düşman ${d.nick} → Düşman takımına +${buff}/+${buff}`);
+        lg.push(`💨 Düşman ${d.nick} -> Düşman takımına +${buff}/+${buff}`);
       }
       if (d.ability === "faint_gold") {
-        lg.push(`💰 Düşman ${d.nick} → +${m} altın (oyuncuya etkisi yok)`);
+        lg.push(`💰 Düşman ${d.nick} -> +${m} altın (oyuncuya etkisi yok)`);
       }
       if (d.ability === "stag_combo" && al.length > 0) {
         const buff = 2 * m;
@@ -128,7 +128,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           pet.atk = clampStat(pet.atk + buff);
           pet.curHp = clampStat(pet.curHp + buff);
         });
-        lg.push(`🦌 Düşman ${d.nick} → Düşman takımına +${buff}/+${buff} KALICI`);
+        lg.push(`🦌 Düşman ${d.nick} -> Düşman takımına +${buff}/+${buff} KALICI`);
       }
       if (d.ability === "faint_buff_self" && al.length > 0) {
         al.forEach((pet) => {
@@ -137,25 +137,25 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
             pet.curHp = clampStat(pet.curHp + 2 * m);
           }
         });
-        lg.push(`🦡 Düşman ${d.nick} → Kendine +${2 * m}/+${2 * m} kalıcı`);
+        lg.push(`🦡 Düşman ${d.nick} -> Kendine +${2 * m}/+${2 * m} kalıcı`);
       }
       if (d.ability === "start_trample" && al.length > 0) {
         const buff = 5 * m;
         al[0].atk = clampStat(al[0].atk + buff);
         al[0].trample = true;
-        lg.push(`🦏 Düşman ${d.nick} → +${buff} ATK (çiğneme aktif)`);
+        lg.push(`🦏 Düşman ${d.nick} -> +${buff} ATK (çiğneme aktif)`);
       }
       if (d.ability === "hurt_buff" && al.length > 0) {
         const buff = 4 * m;
         al[0].atk = clampStat(al[0].atk + buff);
-        lg.push(`🐃 Düşman ${d.nick} → +${buff} ATK (hasar aldı)`);
+        lg.push(`🐃 Düşman ${d.nick} -> +${buff} ATK (hasar aldı)`);
       }
       if (d.ability === "hurt_team_buff" && al.length > 0) {
         al.forEach((pet) => {
           pet.atk = clampStat(pet.atk + 3 * m);
           pet.curHp = clampStat(pet.curHp + 3 * m);
         });
-        lg.push(`🦬 Düşman ${d.nick} → Takıma +${3 * m}/+${3 * m}`);
+        lg.push(`🦬 Düşman ${d.nick} -> Takıma +${3 * m}/+${3 * m}`);
       }
       if (d.ability === "faint_summon") {
         const newSummon = {
@@ -165,7 +165,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         };
         applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
         sm.push(newSummon);
-        lg.push(`🥚 Düşman ${d.nick} → ${4 * m}/${4 * m} yavru çağırdı`);
+        lg.push(`🥚 Düşman ${d.nick} -> ${4 * m}/${4 * m} yavru çağırdı`);
       }
       if (d.ability === "faint_copy" && al.length > 0) {
         const i = Math.floor(Math.random() * al.length);
@@ -174,14 +174,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         const hpGain = Math.floor(d.hp * pct);
         al[i].atk = clampStat(al[i].atk + atkGain);
         al[i].curHp = clampStat(al[i].curHp + hpGain);
-        lg.push(`📋 Düşman ${d.nick} → ${al[i].nick} e +${atkGain}/+${hpGain} kopyalandı`);
+        lg.push(`📋 Düşman ${d.nick} -> ${al[i].nick} e +${atkGain}/+${hpGain} kopyalandı`);
       }
       al.forEach((a) => {
         if (a.ability === "friend_faint") {
           const am = pwr(a);
           a.atk = clampStat(a.atk + 2 * am);
           a.curHp = clampStat(a.curHp + 2 * am);
-          lg.push(`🐺 Düşman ${a.nick} → +${2 * am}/+${2 * am} (dost öldü)`);
+          lg.push(`🐺 Düşman ${a.nick} -> +${2 * am}/+${2 * am} (dost öldü)`);
         }
         if (a.ability === "friend_summon" && !a.isSummon) {
           if (!a.summonCount) a.summonCount = 0;
@@ -196,7 +196,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
             a.summonCount++;
             applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
             sm.push(newSummon);
-            lg.push(`🦘 Düşman ${a.nick} → yavru çağırdı (${a.summonCount}/3)`);
+            lg.push(`🦘 Düşman ${a.nick} -> yavru çağırdı (${a.summonCount}/3)`);
           }
         }
       });
@@ -204,13 +204,13 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         const km = pwr(killer);
         killer.atk = clampStat(killer.atk + 3 * km);
         killer.curHp = clampStat(killer.curHp + 3 * km);
-        lg.push(`🦈 Düşman ${killer.nick} → öldürdü, +${3 * km}/+${3 * km}`);
+        lg.push(`🦈 Düşman ${killer.nick} -> öldürdü, +${3 * km}/+${3 * km}`);
       }
       if (killer && killer.ability === "devour") {
         const pct = (30 + 10 * pwr(killer)) / 100;
         killer.atk = clampStat(killer.atk + Math.floor(d.atk * pct));
         killer.curHp = clampStat(killer.curHp + Math.floor((d.hp || d.curHp) * pct));
-        lg.push(`👹 Düşman ${killer.nick} → yuttu, stat kazandı`);
+        lg.push(`👹 Düşman ${killer.nick} -> yuttu, stat kazandı`);
       }
       if (killer && killer.ability === "kill_fear_all" && al.length > 0) {
         const km = pwr(killer);
@@ -218,7 +218,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           x.atk = Math.max(1, x.atk - 5 * km);
           x.curHp = Math.max(0, x.curHp - 5 * km);
         });
-        lg.push(`😱 Düşman ${killer.nick} → Oyuncu takımına -${5 * km}/-${5 * km}`);
+        lg.push(`😱 Düşman ${killer.nick} -> Oyuncu takımına -${5 * km}/-${5 * km}`);
       }
       al.forEach((ally) => {
         if (ally && ally.ability === "summon_retrigger") {
@@ -228,15 +228,15 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               const i = Math.floor(Math.random() * al.length);
               al[i].atk = clampStat(al[i].atk + m);
               al[i].curHp = clampStat(al[i].curHp + m);
-              lg.push(`🦤 Düşman Dodo → ${d.nick} efekti tekrar! ${al[i].nick} e +${m}/+${m}`);
+              lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! ${al[i].nick} e +${m}/+${m}`);
             }
             if (d.ability === "faint_dmg") {
               en.forEach((x) => { x.curHp -= m * 2; });
-              lg.push(`🦤 Düşman Dodo → ${d.nick} efekti tekrar! Oyuncu takımına ${m * 2} hasar`);
+              lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Oyuncu takımına ${m * 2} hasar`);
             }
             if (d.ability === "faint_shield") {
               al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
-              lg.push(`🦤 Düşman Dodo → ${d.nick} efekti tekrar! Takıma +${2 * m} HP`);
+              lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Takıma +${2 * m} HP`);
             }
             if (d.ability === "faint_rage" || d.ability === "cheetah_faint") {
               const buff = 8 * m;
@@ -244,11 +244,11 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
                 x.atk = clampStat(x.atk + buff);
                 x.curHp = clampStat(x.curHp + buff);
               });
-              lg.push(`🦤 Düşman Dodo → ${d.nick} efekti tekrar! Takıma +${buff}/+${buff}`);
+              lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Takıma +${buff}/+${buff}`);
             }
             if (d.ability === "faint_wave") {
               en.forEach((x) => { x.curHp -= 9 * m; });
-              lg.push(`🦤 Düşman Dodo → ${d.nick} efekti tekrar! Oyuncu takımına ${9 * m} hasar`);
+              lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Oyuncu takımına ${9 * m} hasar`);
             }
             if (d.ability === "faint_summon") {
               const extraSummon = {
@@ -258,7 +258,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               };
               applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
               sm.push(extraSummon);
-              lg.push(`🦤 Düşman Dodo → ${d.nick} efekti tekrar! Ekstra yavru ${4 * m}/${4 * m}`);
+              lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Ekstra yavru ${4 * m}/${4 * m}`);
             }
           }
         }
@@ -269,7 +269,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           ...al[i], id: Math.random(), curHp: al[i].hp,
           ability: al[i].ability === "faint_duplicate" ? "none" : al[i].ability,
         });
-        lg.push(`🐙 Düşman ${d.nick} → ${al[i].nick} kopyalandı`);
+        lg.push(`🐙 Düşman ${d.nick} -> ${al[i].nick} kopyalandı`);
       }
       return { lg, sm, gG: 0 };
     }
@@ -279,7 +279,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       const i = Math.floor(Math.random() * al.length);
       al[i].atk = clampStat(al[i].atk + m);
       al[i].curHp = clampStat(al[i].curHp + m);
-      lg.push(`💀 ${d.nick} → ${al[i].nick} e +${m}/+${m}`);
+      lg.push(`💀 ${d.nick} -> ${al[i].nick} e +${m}/+${m}`);
     }
     if (d.ability === "faint_copy" && al.length > 0) {
       const i = Math.floor(Math.random() * al.length);
@@ -291,15 +291,15 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       al[i].tempAtk += atkGain;
       al[i].tempHp += hpGain;
       al[i].curHp = clampStat(al[i].curHp + hpGain);
-      lg.push(`🦛 ${d.nick} → ${al[i].nick} e +${atkGain}/+${hpGain} (geçici)`);
+      lg.push(`🦛 ${d.nick} -> ${al[i].nick} e +${atkGain}/+${hpGain} (geçici)`);
     }
     if (d.ability === "faint_dmg") {
       en.forEach((x) => { x.curHp -= m * 2; });
-      lg.push(`☠️ ${d.nick} → Tüm düşmanlara ${m * 2} hasar`);
+      lg.push(`☠️ ${d.nick} -> Tüm düşmanlara ${m * 2} hasar`);
     }
     if (d.ability === "faint_shield") {
       al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
-      lg.push(`🛡️ ${d.nick} → Tüm takıma +${2 * m} HP`);
+      lg.push(`🛡️ ${d.nick} -> Tüm takıma +${2 * m} HP`);
     }
     if (d.ability === "faint_rage") {
       const buff = 8 * m;
@@ -308,7 +308,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         x.hp = clampStat(x.hp + buff);
         x.curHp = clampStat(x.curHp + buff);
       });
-      lg.push(`🐻 ${d.nick} öldü → Tüm takıma +${buff}/+${buff}`);
+      lg.push(`🐻 ${d.nick} öldü -> Tüm takıma +${buff}/+${buff}`);
     }
     if (d.ability === "faint_buff_self" && isP) {
       const m2 = pwr(d);
@@ -324,11 +324,11 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
             : pet
         )
       );
-      lg.push(`🦡 ${d.nick} → Kendine +${2 * m2}/+${2 * m2} kalıcı`);
+      lg.push(`🦡 ${d.nick} -> Kendine +${2 * m2}/+${2 * m2} kalıcı`);
     }
     if (d.ability === "faint_wave") {
       en.forEach((x) => { x.curHp -= 9 * m; });
-      lg.push(`🌊 ${d.nick} → Tüm düşmanlara ${9 * m} hasar`);
+      lg.push(`🌊 ${d.nick} -> Tüm düşmanlara ${9 * m} hasar`);
     }
     if (d.ability === "cheetah_faint") {
       const buff = 8 * m;
@@ -337,7 +337,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         x.hp = clampStat(x.hp + buff);
         x.curHp = clampStat(x.curHp + buff);
       });
-      lg.push(`💨 ${d.nick} → Tüm takıma +${buff}/+${buff}`);
+      lg.push(`💨 ${d.nick} -> Tüm takıma +${buff}/+${buff}`);
     }
    if (d.ability === "faint_summon") {
       const newSummon = {
@@ -346,7 +346,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
         img: "baby_crocodile.png",
       };
-      lg.push(`🥚 ${d.nick} → ${4 * m}/${4 * m} yavru çağırdı`);
+      lg.push(`🥚 ${d.nick} -> ${4 * m}/${4 * m} yavru çağırdı`);
       sm.push(newSummon);
       setTimeout(() => {
         const buffedSummon = { ...newSummon };
@@ -360,11 +360,11 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         x.atk = Math.max(1, x.atk - 5 * km);
         x.curHp = Math.max(0, x.curHp - 5 * km);
       });
-      lg.push(`🐯 ${killer.nick} → Tüm düşmanlara -${5 * km}/-${5 * km}`);
+      lg.push(`🐯 ${killer.nick} -> Tüm düşmanlara -${5 * km}/-${5 * km}`);
     }
     if (d.ability === "faint_gold" && isP) {
       gG = m;
-      lg.push(`💰 ${d.nick} → +${m} altın`);
+      lg.push(`💰 ${d.nick} -> +${m} altın`);
     }
     if (d.ability === "stag_combo") {
       const m2 = pwr(d);
@@ -392,7 +392,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
             : pet;
         })
       );
-      lg.push(`🦌 ${d.nick} → Takıma +${2 * m2}/+${2 * m2} KALICI (ölünce)`);
+      lg.push(`🦌 ${d.nick} -> Takıma +${2 * m2}/+${2 * m2} KALICI (ölünce)`);
     }
     if (isP) {
       al.forEach((a) => {
@@ -400,7 +400,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           const am = pwr(a);
           a.atk = clampStat(a.atk + 2 * am);
           a.curHp = clampStat(a.curHp + 2 * am);
-          lg.push(`🐺 ${a.nick} → +${2 * am}/+${2 * am}`);
+          lg.push(`🐺 ${a.nick} -> +${2 * am}/+${2 * am}`);
         }
         if (a.ability === "friend_summon" && !a.isSummon) {
           if (!a.summonCount) a.summonCount = 0;
@@ -416,7 +416,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
             a.summonCount++;
             const buffedSummons = applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
             sm.push(...buffedSummons);
-            lg.push(`🦘 ${a.nick} → yavru çağırdı (${a.summonCount}/3)`);
+            lg.push(`🦘 ${a.nick} -> yavru çağırdı (${a.summonCount}/3)`);
           }
         }
       });
@@ -427,7 +427,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         ...al[i], id: Math.random(), curHp: al[i].hp,
         ability: al[i].ability === "faint_duplicate" ? "none" : al[i].ability,
       });
-      lg.push(`🐙 ${d.nick} → ${al[i].nick} kopyalandı`);
+      lg.push(`🐙 ${d.nick} -> ${al[i].nick} kopyalandı`);
     }
     if (isP) {
       al.forEach((ally) => {
@@ -438,15 +438,15 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               const i = Math.floor(Math.random() * al.length);
               al[i].atk = clampStat(al[i].atk + m);
               al[i].curHp = clampStat(al[i].curHp + m);
-              lg.push(`🦤 Dodo → ${d.nick} efekti tekrar! ${al[i].nick} e +${m}/+${m}`);
+              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! ${al[i].nick} e +${m}/+${m}`);
             }
             if (d.ability === "faint_dmg") {
               en.forEach((x) => { x.curHp -= m * 2; });
-              lg.push(`🦤 Dodo → ${d.nick} efekti tekrar! Tüm düşmanlara ${m * 2} hasar`);
+              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Tüm düşmanlara ${m * 2} hasar`);
             }
             if (d.ability === "faint_shield") {
               al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
-              lg.push(`🦤 Dodo → ${d.nick} efekti tekrar! Takıma +${2 * m} HP`);
+              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Takıma +${2 * m} HP`);
             }
             if (d.ability === "faint_rage" || d.ability === "cheetah_faint") {
               const buff = 8 * m;
@@ -454,11 +454,11 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
                 x.atk = clampStat(x.atk + buff);
                 x.curHp = clampStat(x.curHp + buff);
               });
-              lg.push(`🦤 Dodo → ${d.nick} efekti tekrar! Takıma +${buff}/+${buff}`);
+              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Takıma +${buff}/+${buff}`);
             }
             if (d.ability === "faint_wave") {
               en.forEach((x) => { x.curHp -= 9 * m; });
-              lg.push(`🦤 Dodo → ${d.nick} efekti tekrar! Tüm düşmanlara ${9 * m} hasar`);
+              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Tüm düşmanlara ${9 * m} hasar`);
             }
             if (d.ability === "faint_copy" && al.length > 0) {
               const i = Math.floor(Math.random() * al.length);
@@ -467,7 +467,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               const hpGain = Math.floor(d.hp * pct);
               al[i].atk = clampStat(al[i].atk + atkGain);
               al[i].curHp = clampStat(al[i].curHp + hpGain);
-              lg.push(`🦤 Dodo → ${d.nick} efekti tekrar! ${al[i].nick} e +${atkGain}/+${hpGain}`);
+              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! ${al[i].nick} e +${atkGain}/+${hpGain}`);
             }
             if (d.ability === "faint_summon") {
               const extraSummon = {
@@ -477,7 +477,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               };
               applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
               sm.push(extraSummon);
-              lg.push(`🦤 Dodo → ${d.nick} efekti tekrar! Ekstra yavru ${4 * m}/${4 * m}`);
+              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Ekstra yavru ${4 * m}/${4 * m}`);
             }
           }
         }
@@ -870,7 +870,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             setTeam((prevTeam) =>
               prevTeam.map((p) => p ? { ...p, atk: clampStat(p.atk + 2 * m), hp: clampStat(p.hp + 2 * m), curHp: clampStat(p.curHp + 2 * m) } : p)
             );
-            setLog((l) => [...l, `🦌 ${pet.nick} → Takıma +${2 * m}/+${2 * m} KALICI`]);
+            setLog((l) => [...l, `🦌 ${pet.nick} -> Takıma +${2 * m}/+${2 * m} KALICI`]);
             setPT([...pp]);
             await delay(1000);
             if (isCancelled) return;
@@ -900,11 +900,11 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
 
           if (a.ability === "start_buff") {
             pp[i].atk += m;
-            setLog((l) => [...l, `⚡ ${a.nick} → +${m} ATK (Savaş Başı)`]);
+            setLog((l) => [...l, `⚡ ${a.nick} -> +${m} ATK (Savaş Başı)`]);
             triggered = true;
           } else if (a.ability === "start_team_shield") {
             pp = pp.map((x) => x ? { ...x, hp: clampStat(x.hp + m), curHp: clampStat(x.curHp + m) } : x);
-            setLog((l) => [...l, `🛡️ ${a.nick} → Tüm takıma +${m} HP`]);
+            setLog((l) => [...l, `🛡️ ${a.nick} -> Tüm takıma +${m} HP`]);
             triggered = true;
           } else if (a.ability === "start_all_perm") {
             const buffAmount = 2 * m;
@@ -912,14 +912,14 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             setTeam((prevTeam) => prevTeam.map((pet) => pet ? { ...pet, atk: clampStat(pet.atk + buffAmount) } : pet));
             pp.forEach((x) => { if (x) triggerAnim(x.id, "buff"); });
             spawnParticles(a.id, "buff");
-            setLog((l) => [...l, `🦅 ${a.nick} → Tüm takıma +${2 * m} ATK KALICI`]);
+            setLog((l) => [...l, `🦅 ${a.nick} -> Tüm takıma +${2 * m} ATK KALICI`]);
             triggered = true;
          } else if (a.ability === "start_snipe" && ee.length > 0) {
             const targetIdx = ee.length > 1 ? ee.length - 1 : 0;
             ee[targetIdx].curHp -= 3 * m;
             spawnProjectile(a.id, ee[targetIdx].id, "start_snipe");
             triggerAnim(ee[targetIdx].id, "damage");
-            setLog((l) => [...l, `🎯 ${a.nick} → ${ee[targetIdx].nick} e ${3 * m} hasar (arka)`]);
+            setLog((l) => [...l, `🎯 ${a.nick} -> ${ee[targetIdx].nick} e ${3 * m} hasar (arka)`]);
             triggered = true;
           } else if (a.ability === "start_multi_snipe" && ee.length > 0) {
             const targetCount = Math.min(m + 1, ee.length);
@@ -932,7 +932,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
                   target.curHp -= 8 * m;
                   spawnProjectile(a.id, target.id, "start_multi_snipe");
                   triggerAnim(target.id, "damage");
-                  setLog((l) => [...l, `🦑 ${a.nick} → ${target.nick} e ${8 * m} hasar`]);
+                  setLog((l) => [...l, `🦑 ${a.nick} -> ${target.nick} e ${8 * m} hasar`]);
                 }
               }
             }
@@ -947,7 +947,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
               triggerAnim(ee[1].id, "damage");
             }
             const fearTargets = ee.length > 1 ? `${ee[0].nick} ve ${ee[1].nick}` : ee[0].nick;
-            setLog((l) => [...l, `🦁 ${a.nick} → ${fearTargets} -${10 * m} ATK!`]);
+            setLog((l) => [...l, `🦁 ${a.nick} -> ${fearTargets} -${10 * m} ATK!`]);
             triggered = true;
          } else if (a.ability === "start_fire" && ee.length > 0) {
             ee = ee.map((x) => ({ ...x, curHp: x.curHp - 6 * m }));
@@ -955,20 +955,20 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
               spawnProjectile(a.id, x.id, "start_fire");
               triggerAnim(x.id, "damage");
             });
-            setLog((l) => [...l, `🐉 ${a.nick} → Tüm düşmanlara ${6 * m} hasar`]);
+            setLog((l) => [...l, `🐉 ${a.nick} -> Tüm düşmanlara ${6 * m} hasar`]);
             triggered = true;
           } else if (a.ability === "start_trample") {
             pp[i].atk += 5 * m;
             pp[i].trample = true;
-            setLog((l) => [...l, `🦏 ${a.nick} → +${5 * m} ATK (çiğneme aktif)`]);
+            setLog((l) => [...l, `🦏 ${a.nick} -> +${5 * m} ATK (çiğneme aktif)`]);
             triggered = true;
           } else if (a.ability === "start_charge") {
             pp[i].curHp += 2 * m;
-            setLog((l) => [...l, `🐗 ${a.nick} → +${2 * m} HP`]);
+            setLog((l) => [...l, `🐗 ${a.nick} -> +${2 * m} HP`]);
             triggered = true;
           } else if (a.ability === "start_tank") {
             pp[i].curHp += 3 * m;
-            setLog((l) => [...l, `🦀 ${a.nick} → +${3 * m} HP (tank)`]);
+            setLog((l) => [...l, `🦀 ${a.nick} -> +${3 * m} HP (tank)`]);
             triggered = true;
           } else if (a.ability === "start_dmg" && ee.length > 0) {
             const aliveEe = ee.filter((x) => x && x.curHp > 0);
@@ -978,13 +978,13 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
                target.curHp -= 2 * m;
                 spawnProjectile(a.id, target.id, "start_dmg");
                 triggerAnim(target.id, "damage");
-                setLog((l) => [...l, `💥 ${a.nick} → ${target.nick} e ${2 * m} hasar`]);
+                setLog((l) => [...l, `💥 ${a.nick} -> ${target.nick} e ${2 * m} hasar`]);
               }
             }
             triggered = true;
           } else if (a.ability === "start_poison" && ee.length > 0) {
             ee[0].atk = Math.max(1, ee[0].atk - m * 2);
-            setLog((l) => [...l, `🐍 ${a.nick} → Ön düşmana -${m * 2} ATK`]);
+            setLog((l) => [...l, `🐍 ${a.nick} -> Ön düşmana -${m * 2} ATK`]);
             triggered = true;
           } else if (a.ability === "start_freeze_enemy" && ee.length > 0) {
             const reduction = (m * 30) / 100;
@@ -994,7 +994,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
               ee[ee.length - 1].atk = Math.max(1, Math.floor(ee[ee.length - 1].atk * (1 - reduction)));
               triggerAnim(ee[ee.length - 1].id, "damage");
             }
-            setLog((l) => [...l, `🦣 ${a.nick} → Ön ve arka düşmanı %${m * 30} yavaşlattı`]);
+            setLog((l) => [...l, `🦣 ${a.nick} -> Ön ve arka düşmanı %${m * 30} yavaşlattı`]);
             triggered = true;
           } else if (a.ability === "weaken_strong" && ee.length > 0) {
             let mxI = 0, mxP = 0;
@@ -1005,7 +1005,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             ee[mxI].atk = Math.max(1, Math.floor(ee[mxI].atk * (1 - r)));
             ee[mxI].curHp = Math.max(1, Math.floor(ee[mxI].curHp * (1 - r)));
             triggerAnim(ee[mxI].id, "damage");
-            setLog((l) => [...l, `🐧 ${a.nick} → ${ee[mxI].nick}'i %${25 * m} zayıflattı`]);
+            setLog((l) => [...l, `🐧 ${a.nick} -> ${ee[mxI].nick}'i %${25 * m} zayıflattı`]);
             triggered = true;
           }
 
@@ -1033,7 +1033,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
               finalE[j].hp = clampStat(finalE[j].hp + buff);
               finalE[j].curHp = clampStat(finalE[j].curHp + buff);
             });
-            setLog((l) => [...l, `🦌 Düşman ${a.nick} → Düşman takımına +${buff}/+${buff} KALICI`]);
+            setLog((l) => [...l, `🦌 Düşman ${a.nick} -> Düşman takımına +${buff}/+${buff} KALICI`]);
           }
           if (a.ability === "start_buff") finalE[i].atk += m;
           if (a.ability === "start_team_shield") {
@@ -1100,20 +1100,20 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         // Düşman savaş başı logları
         finalE.forEach((a) => {
           const m = pwr(a);
-          if (a.ability === "start_dmg") setLog((l) => [...l, `💥 Düşman ${a.nick} → Takıma ${2 * m} hasar`]);
-          if (a.ability === "start_snipe") setLog((l) => [...l, `🎯 Düşman ${a.nick} → ${finalP[finalP.length > 1 ? finalP.length - 1 : 0]?.nick || "Arka birim"}'e ${3 * m} hasar`]);
-         if (a.ability === "start_fire") setLog((l) => [...l, `🔥 Düşman ${a.nick} → 20 alev topu takıma dağıldı!`]);
-          if (a.ability === "start_fear") setLog((l) => [...l, `😱 Düşman ${a.nick} → ${finalP[0]?.nick || ""}${finalP.length > 1 ? ` ve ${finalP[1]?.nick}` : ""} -${10 * m} ATK`]);
-          if (a.ability === "start_poison") setLog((l) => [...l, `🐍 Düşman ${a.nick} → Ön birime -${m * 2} ATK`]);
-          if (a.ability === "start_multi_snipe") setLog((l) => [...l, `🦑 Düşman ${a.nick} → ${m + 1} birime ${8 * m} hasar`]);
-          if (a.ability === "start_freeze_enemy") setLog((l) => [...l, `🦣 Düşman ${a.nick} → Ön ve arka birimi %${m * 30} yavaşlattı`]);
-          if (a.ability === "weaken_strong") setLog((l) => [...l, `🐧 Düşman ${a.nick} → En güçlü birimi %${25 * m} zayıflattı`]);
-          if (a.ability === "start_buff") setLog((l) => [...l, `⚡ Düşman ${a.nick} → Kendine +${m} ATK`]);
-          if (a.ability === "start_team_shield") setLog((l) => [...l, `🛡️ Düşman ${a.nick} → Düşman takımına +${m} HP`]);
-          if (a.ability === "start_tank") setLog((l) => [...l, `🦀 Düşman ${a.nick} → +${3 * m} HP`]);
-          if (a.ability === "start_charge") setLog((l) => [...l, `🐗 Düşman ${a.nick} → +${2 * m} HP`]);
-          if (a.ability === "start_trample") setLog((l) => [...l, `🦏 Düşman ${a.nick} → +${5 * m} ATK (çiğneme)`]);
-          if (a.ability === "start_all_perm") setLog((l) => [...l, `🦅 Düşman ${a.nick} → Düşman takımına +${2 * m} ATK`]);
+          if (a.ability === "start_dmg") setLog((l) => [...l, `💥 Düşman ${a.nick} -> Takıma ${2 * m} hasar`]);
+          if (a.ability === "start_snipe") setLog((l) => [...l, `🎯 Düşman ${a.nick} -> ${finalP[finalP.length > 1 ? finalP.length - 1 : 0]?.nick || "Arka birim"}'e ${3 * m} hasar`]);
+         if (a.ability === "start_fire") setLog((l) => [...l, `🔥 Düşman ${a.nick} -> 20 alev topu takıma dağıldı!`]);
+          if (a.ability === "start_fear") setLog((l) => [...l, `😱 Düşman ${a.nick} -> ${finalP[0]?.nick || ""}${finalP.length > 1 ? ` ve ${finalP[1]?.nick}` : ""} -${10 * m} ATK`]);
+          if (a.ability === "start_poison") setLog((l) => [...l, `🐍 Düşman ${a.nick} -> Ön birime -${m * 2} ATK`]);
+          if (a.ability === "start_multi_snipe") setLog((l) => [...l, `🦑 Düşman ${a.nick} -> ${m + 1} birime ${8 * m} hasar`]);
+          if (a.ability === "start_freeze_enemy") setLog((l) => [...l, `🦣 Düşman ${a.nick} -> Ön ve arka birimi %${m * 30} yavaşlattı`]);
+          if (a.ability === "weaken_strong") setLog((l) => [...l, `🐧 Düşman ${a.nick} -> En güçlü birimi %${25 * m} zayıflattı`]);
+          if (a.ability === "start_buff") setLog((l) => [...l, `⚡ Düşman ${a.nick} -> Kendine +${m} ATK`]);
+          if (a.ability === "start_team_shield") setLog((l) => [...l, `🛡️ Düşman ${a.nick} -> Düşman takımına +${m} HP`]);
+          if (a.ability === "start_tank") setLog((l) => [...l, `🦀 Düşman ${a.nick} -> +${3 * m} HP`]);
+          if (a.ability === "start_charge") setLog((l) => [...l, `🐗 Düşman ${a.nick} -> +${2 * m} HP`]);
+          if (a.ability === "start_trample") setLog((l) => [...l, `🦏 Düşman ${a.nick} -> +${5 * m} ATK (çiğneme)`]);
+          if (a.ability === "start_all_perm") setLog((l) => [...l, `🦅 Düşman ${a.nick} -> Düşman takımına +${2 * m} ATK`]);
         });
 
         finalE = finalE.filter((x) => x.curHp > 0);
@@ -1167,12 +1167,12 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
       if (a.trample && e[0].curHp <= 0 && e.length > 1) {
         const excess = Math.abs(e[0].curHp);
         e[1].curHp -= excess;
-        lg.push(`🦏 ${a.nick} → Arka düşmana ${excess} hasar (çiğneme)`);
+        lg.push(`🦏 ${a.nick} -> Arka düşmana ${excess} hasar (çiğneme)`);
       }
       if (d.trample && p[0].curHp <= 0 && p.length > 1) {
         const excess = Math.abs(p[0].curHp);
         p[1].curHp -= excess;
-        lg.push(`🦏 Düşman ${d.nick} → Arka oyuncu birimine ${excess} hasar (çiğneme)`);
+        lg.push(`🦏 Düşman ${d.nick} -> Arka oyuncu birimine ${excess} hasar (çiğneme)`);
       }
 
       triggerAnim(a.id, "damage");
@@ -1186,20 +1186,20 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
       if (a.ability === "atk_buff" && p[0].curHp > 0) {
         p[0].atk = clampStat(p[0].atk + pwr(a));
         triggerAnim(a.id, "buff");
-        setLog((l) => [...l, `💪 ${a.nick} → +${pwr(a)} ATK`]);
+        setLog((l) => [...l, `💪 ${a.nick} -> +${pwr(a)} ATK`]);
         await delay(500);
       }
       if (a.ability === "start_charge" && p[0].curHp > 0) {
         p[0].atk = clampStat(p[0].atk + 2 * pwr(a));
         triggerAnim(a.id, "buff");
-        setLog((l) => [...l, `🐗 ${a.nick} → +${2 * pwr(a)} ATK`]);
+        setLog((l) => [...l, `🐗 ${a.nick} -> +${2 * pwr(a)} ATK`]);
         await delay(500);
       }
       if (a.ability === "hurt_buff" && p[0].curHp > 0 && dD > 0) {
         const buff = 4 * pwr(a);
         p[0].atk = clampStat(p[0].atk + buff);
         triggerAnim(a.id, "buff");
-        setLog((l) => [...l, `🐃 ${a.nick} → +${buff} ATK`]);
+        setLog((l) => [...l, `🐃 ${a.nick} -> +${buff} ATK`]);
         await delay(500);
       }
       if (a.ability === "hurt_team_buff" && p[0].curHp > 0 && dD > 0) {
@@ -1211,7 +1211,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             triggerAnim(pet.id, "buff");
           }
         });
-        setLog((l) => [...l, `🦬 ${a.nick} hasar aldı → Takıma +${3 * pwr(a)}/+${3 * pwr(a)}`]);
+        setLog((l) => [...l, `🦬 ${a.nick} hasar aldı -> Takıma +${3 * pwr(a)}/+${3 * pwr(a)}`]);
         await delay(500);
       }
       if (a.ability === "hurt_dmg" && p[0].curHp > 0 && dD > 0 && e.length > 0) {
@@ -1222,7 +1222,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
           const damage = 9 * pwr(a);
           e[targetIdx].curHp -= damage;
           triggerAnim(e[targetIdx].id, "damage");
-          setLog((l) => [...l, `🐘 ${a.nick} → ${e[targetIdx].nick} e ${damage} hasar`]);
+          setLog((l) => [...l, `🐘 ${a.nick} -> ${e[targetIdx].nick} e ${damage} hasar`]);
           await delay(600);
         }
       }
@@ -1236,7 +1236,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
           const damage = 9 * pwr(d);
           p[targetIdx].curHp -= damage;
           triggerAnim(p[targetIdx].id, "damage");
-          setLog((l) => [...l, `🐘 Düşman ${d.nick} → ${p[targetIdx].nick} e ${damage} hasar`]);
+          setLog((l) => [...l, `🐘 Düşman ${d.nick} -> ${p[targetIdx].nick} e ${damage} hasar`]);
           await delay(600);
         }
       }
@@ -1245,14 +1245,14 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         const weakenPercent = wm === 1 ? 0.33 : wm === 2 ? 0.66 : 0.99;
         e[0].atk = Math.max(1, Math.floor(e[0].atk * (1 - weakenPercent)));
         triggerAnim(e[0].id, "damage");
-        setLog((l) => [...l, `🦨 ${a.nick} → ${e[0].nick} -%${weakenPercent * 100} ATK`]);
+        setLog((l) => [...l, `🦨 ${a.nick} -> ${e[0].nick} -%${weakenPercent * 100} ATK`]);
         await delay(500);
       }
       if (a.ability === "kill_buff" && e[0].curHp <= 0) {
         p[0].atk = clampStat(p[0].atk + 3 * pwr(a));
         p[0].curHp = clampStat(p[0].curHp + 3 * pwr(a));
         triggerAnim(a.id, "buff");
-        setLog((l) => [...l, `🦈 ${a.nick} → +${3 * pwr(a)}/+${3 * pwr(a)}`]);
+        setLog((l) => [...l, `🦈 ${a.nick} -> +${3 * pwr(a)}/+${3 * pwr(a)}`]);
         await delay(500);
       }
       if (a.ability === "kill_heal_team" && e[0].curHp <= 0) {
@@ -1270,7 +1270,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             return alive ? { ...pet, atk: clampStat(pet.atk + 3 * m), hp: clampStat(pet.hp + 3 * m), curHp: clampStat(pet.curHp + 3 * m) } : pet;
           })
         );
-        setLog((l) => [...l, `🦭 ${a.nick} → Takıma +${3 * pwr(a)}/+${3 * pwr(a)} KALICI`]);
+        setLog((l) => [...l, `🦭 ${a.nick} -> Takıma +${3 * pwr(a)}/+${3 * pwr(a)} KALICI`]);
         await delay(800);
       }
       if (a.ability === "kill_fear_all" && e[0].curHp <= 0 && p[0].id === a.id) {
@@ -1280,7 +1280,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
           enemy.curHp = Math.max(0, enemy.curHp - 5 * m);
           triggerAnim(enemy.id, "damage");
         });
-        setLog((l) => [...l, `😱 ${a.nick} → Tüm düşmanlara -${5 * m}/-${5 * m}`]);
+        setLog((l) => [...l, `😱 ${a.nick} -> Tüm düşmanlara -${5 * m}/-${5 * m}`]);
         await delay(500);
       }
       if (d.ability === "devour" && p[0].curHp <= 0) {
@@ -1291,14 +1291,14 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         e[0].hp = clampStat(e[0].hp + hpGainD);
         e[0].curHp = clampStat(e[0].curHp + hpGainD);
         triggerAnim(d.id, "buff");
-        setLog((l) => [...l, `👹 Düşman ${d.nick} → +${atkGainD}/+${hpGainD}`]);
+        setLog((l) => [...l, `👹 Düşman ${d.nick} -> +${atkGainD}/+${hpGainD}`]);
         await delay(500);
       }
       if (d.ability === "kill_buff" && p[0].curHp <= 0) {
         e[0].atk = clampStat(e[0].atk + 3 * pwr(d));
         e[0].curHp = clampStat(e[0].curHp + 3 * pwr(d));
         triggerAnim(d.id, "buff");
-        setLog((l) => [...l, `🦈 Düşman ${d.nick} → +${3 * pwr(d)}/+${3 * pwr(d)}`]);
+        setLog((l) => [...l, `🦈 Düşman ${d.nick} -> +${3 * pwr(d)}/+${3 * pwr(d)}`]);
         await delay(500);
       }
       if (d.ability === "kill_heal_team" && p[0].curHp <= 0) {
@@ -1309,7 +1309,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             triggerAnim(pet.id, "buff");
           }
         });
-        setLog((l) => [...l, `🦭 Düşman ${d.nick} → Takıma +${3 * km}/+${3 * km} KALICI`]);
+        setLog((l) => [...l, `🦭 Düşman ${d.nick} -> Takıma +${3 * km}/+${3 * km} KALICI`]);
         await delay(800);
       }
       if (d.ability === "kill_fear_all" && p[0].curHp <= 0) {
@@ -1319,20 +1319,20 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
           pet.curHp = Math.max(0, pet.curHp - 5 * kfm);
           triggerAnim(pet.id, "damage");
         });
-        setLog((l) => [...l, `😱 Düşman ${d.nick} → Oyuncu takımına -${5 * kfm}/-${5 * kfm}`]);
+        setLog((l) => [...l, `😱 Düşman ${d.nick} -> Oyuncu takımına -${5 * kfm}/-${5 * kfm}`]);
         await delay(500);
       }
       if (d.ability === "atk_buff" && e[0].curHp > 0) {
         e[0].atk = clampStat(e[0].atk + pwr(d));
         triggerAnim(d.id, "buff");
-        setLog((l) => [...l, `💪 Düşman ${d.nick} → +${pwr(d)} ATK`]);
+        setLog((l) => [...l, `💪 Düşman ${d.nick} -> +${pwr(d)} ATK`]);
         await delay(500);
       }
       if (d.ability === "hurt_buff" && e[0].curHp > 0 && aD > 0) {
         const hbuff = 4 * pwr(d);
         e[0].atk = clampStat(e[0].atk + hbuff);
         triggerAnim(d.id, "buff");
-        setLog((l) => [...l, `🐃 Düşman ${d.nick} → +${hbuff} ATK`]);
+        setLog((l) => [...l, `🐃 Düşman ${d.nick} -> +${hbuff} ATK`]);
         await delay(500);
       }
       if (d.ability === "hurt_team_buff" && e[0].curHp > 0 && aD > 0) {
@@ -1344,7 +1344,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             triggerAnim(pet.id, "buff");
           }
         });
-        setLog((l) => [...l, `🦬 Düşman ${d.nick} hasar aldı → Takıma +${3 * pwr(d)}/+${3 * pwr(d)}`]);
+        setLog((l) => [...l, `🦬 Düşman ${d.nick} hasar aldı -> Takıma +${3 * pwr(d)}/+${3 * pwr(d)}`]);
         await delay(500);
       }
       if (d.ability === "hurt_weaken_attacker" && e[0].curHp > 0 && aD > 0 && p[0]) {
@@ -1352,13 +1352,13 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         const weakenPct = hwm === 1 ? 0.33 : hwm === 2 ? 0.66 : 0.99;
         p[0].atk = Math.max(1, Math.floor(p[0].atk * (1 - weakenPct)));
         triggerAnim(p[0].id, "damage");
-        setLog((l) => [...l, `🦨 Düşman ${d.nick} → ${p[0].nick} -%${weakenPct * 100} ATK`]);
+        setLog((l) => [...l, `🦨 Düşman ${d.nick} -> ${p[0].nick} -%${weakenPct * 100} ATK`]);
         await delay(500);
       }
       if (d.ability === "start_charge" && e[0].curHp > 0) {
         e[0].atk = clampStat(e[0].atk + 2 * pwr(d));
         triggerAnim(d.id, "buff");
-        setLog((l) => [...l, `🐗 Düşman ${d.nick} → +${2 * pwr(d)} ATK`]);
+        setLog((l) => [...l, `🐗 Düşman ${d.nick} -> +${2 * pwr(d)} ATK`]);
         await delay(500);
       }
       if (a.ability === "devour" && e[0].curHp <= 0) {
@@ -1369,7 +1369,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         p[0].hp = clampStat(p[0].hp + hpGain);
         p[0].curHp = clampStat(p[0].curHp + hpGain);
         triggerAnim(a.id, "buff");
-        setLog((l) => [...l, `👹 ${a.nick} → +${atkGain}/+${hpGain}`]);
+        setLog((l) => [...l, `👹 ${a.nick} -> +${atkGain}/+${hpGain}`]);
         await delay(500);
       }
 
