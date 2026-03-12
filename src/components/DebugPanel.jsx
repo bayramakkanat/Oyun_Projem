@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TIERS } from "../data/gameData";
+import { TIERS, BOSSES } from "../data/gameData";
 
 // Tüm hayvanları düz liste olarak al
 const ALL_ANIMALS = Object.values(TIERS).flat();
@@ -74,44 +74,11 @@ const SCENARIOS = [
       { nick: "Aslan", name: "🦁", atk: 12, hp: 30, curHp: 30, ability: "start_fear", tier: 5, lvl: 1, exp: 0 },
     ],
   },
- {
-  id: "boss_anka",
-  label: "🔥 Boss: Anka",
-  desc: "Anka Boss savaşı — tur 5 boss takımı",
-  bossTurn: 5,
-  player: [
-    { nick: "Gergedan", name: "🦏", atk: 14, hp: 10, curHp: 10, ability: "start_trample", tier: 5, lvl: 2, exp: 0 },
-    { nick: "Aslan", name: "🦁", atk: 12, hp: 10, curHp: 10, ability: "start_fear", tier: 5, lvl: 1, exp: 0 },
-    { nick: "Kaplumbağa", name: "🐢", atk: 2, hp: 6, curHp: 6, ability: "faint_shield", tier: 3, lvl: 2, exp: 0 },
-  ],
-  enemy: [
-    { nick: "Anka", name: "🔥", atk: 28, hp: 38, curHp: 38, ability: "start_fire", tier: 4, lvl: 3, exp: 0, isBossUnit: true, isRebornBoss: true, reborn: false, rebornAtk: 20 },
-  ],
-},
-{
-  id: "boss_erlik",
-  label: "🌑 Boss: Erlik Han",
-  desc: "Erlik Han Boss savaşı — tur 10 boss takımı",
-  bossTurn: 10,
-  player: [
-    { nick: "Ejderha", name: "🐉", atk: 18, hp: 16, curHp: 16, ability: "start_fire", tier: 6, lvl: 3, exp: 0 },
-    { nick: "Ahtapot", name: "🐙", atk: 14, hp: 19, curHp: 19, ability: "faint_duplicate", tier: 6, lvl: 2, exp: 0 },
-    { nick: "Aslan", name: "🦁", atk: 12, hp: 10, curHp: 10, ability: "start_fear", tier: 5, lvl: 2, exp: 0 },
-    { nick: "Kaplumbağa", name: "🐢", atk: 2, hp: 6, curHp: 6, ability: "faint_shield", tier: 3, lvl: 2, exp: 0 },
-  ],
-  enemy: [
-    { nick: "Erlik Han", name: "🌑", atk: 32, hp: 45, curHp: 45, ability: "faint_dmg", tier: 6, lvl: 3, exp: 0, isBossUnit: true, isCurseBoss: true },
-    { nick: "Kara Ruh", name: "👤", atk: 25, hp: 30, curHp: 30, ability: "faint_rage", tier: 4, lvl: 3, exp: 0 },
-    { nick: "Kara Ruh", name: "👤", atk: 20, hp: 25, curHp: 25, ability: "friend_faint", tier: 4, lvl: 3, exp: 0 },
-    { nick: "Gölge Savaşçı", name: "💀", atk: 20, hp: 25, curHp: 25, ability: "faint_buff", tier: 3, lvl: 2, exp: 0 },
-    { nick: "Gölge Savaşçı", name: "💀", atk: 20, hp: 25, curHp: 25, ability: "faint_dmg", tier: 3, lvl: 2, exp: 0 },
-  ],
-},
-{
-  id: "boss_asena",
-  label: "🐺 Boss: Asena",
-  desc: "Asena Boss savaşı — tur 15 boss takımı",
-  bossTurn: 15,
+ ...Object.entries(BOSSES).map(([turn, boss]) => ({
+  id: `boss_${boss.name.toLowerCase()}`,
+  label: `${boss.emoji} Boss: ${boss.name}`,
+  desc: `${boss.title} — Tur ${turn} boss savaşı`,
+  bossTurn: parseInt(turn),
   player: [
     { nick: "Ejderha", name: "🐉", atk: 18, hp: 16, curHp: 16, ability: "start_fire", tier: 6, lvl: 3, exp: 0 },
     { nick: "Balina", name: "🐋", atk: 14, hp: 22, curHp: 22, ability: "faint_wave", tier: 6, lvl: 3, exp: 0 },
@@ -119,15 +86,8 @@ const SCENARIOS = [
     { nick: "Gergedan", name: "🦏", atk: 14, hp: 10, curHp: 10, ability: "start_trample", tier: 5, lvl: 3, exp: 0 },
     { nick: "Kaplumbağa", name: "🐢", atk: 2, hp: 6, curHp: 6, ability: "faint_shield", tier: 3, lvl: 3, exp: 0 },
   ],
-  enemy: [
-    { nick: "Öncü Kurt", name: "🐺", atk: 25, hp: 30, curHp: 30, ability: "faint_buff", tier: 3, lvl: 2, exp: 0 },
-    { nick: "Öncü Kurt", name: "🐺", atk: 25, hp: 30, curHp: 30, ability: "faint_buff", tier: 3, lvl: 2, exp: 0 },
-    { nick: "Savaşçı Kurt", name: "🐺", atk: 35, hp: 42, curHp: 42, ability: "friend_faint", tier: 4, lvl: 3, exp: 0 },
-    { nick: "Koruyucu Kurt", name: "🐺", atk: 35, hp: 42, curHp: 42, ability: "faint_rage", tier: 4, lvl: 3, exp: 0 },
-    { nick: "Elit Kurt", name: "🐺", atk: 45, hp: 55, curHp: 55, ability: "cheetah_faint", tier: 5, lvl: 3, exp: 0 },
-    { nick: "Asena", name: "🐺", atk: 75, hp: 95, curHp: 95, ability: "friend_summon", tier: 6, lvl: 3, exp: 0, isBossUnit: true, isPackBoss: true },
-  ],
-},
+  enemy: boss.team.map(u => ({ ...u, curHp: u.hp })),
+})),
   {
     id: "dragon_fire",
     label: "🐉 Ejderha Ateşi",

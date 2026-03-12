@@ -454,7 +454,14 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
               setLog(["🧪 DEBUG SAVAŞI BAŞLADI"]);
               setStep(0);
               setPGold(0);
-              if (bossTurn) { setTurnAndRef(bossTurn); setBossChallenge("battle"); } else { setBossChallenge(null); }
+             if (bossTurn) { 
+  setTurnAndRef(bossTurn); 
+  setBossChallenge("battle"); 
+  setLastT(Math.min(Math.ceil(bossTurn / 2), 6));
+  setNewTier(null);
+} else { 
+  setBossChallenge(null); 
+}
               setPhase("battle");
               setGameStarted(true);
             }}
@@ -634,7 +641,14 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
             setLog(["🧪 DEBUG SAVAŞI BAŞLADI"]);
             setStep(0);
             setPGold(0);
-            if (bossTurn) { setTurnAndRef(bossTurn); setBossChallenge("battle"); } else { setBossChallenge(null); }
+           if (bossTurn) { 
+  setTurnAndRef(bossTurn); 
+  setBossChallenge("battle"); 
+  setLastT(Math.min(Math.ceil(bossTurn / 2), 6));
+  setNewTier(null);
+} else { 
+  setBossChallenge(null); 
+}
             setPhase("battle");
           }}
         />
