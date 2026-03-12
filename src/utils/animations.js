@@ -176,7 +176,7 @@ export const spawnProjectile = (fromPetId, toPetId, ability, onImpact) => {
   const endX = toRect.left + toRect.width / 2;
   const endY = toRect.top + toRect.height / 2;
 
-  const emoji = ABILITY_PROJECTILES[ability] || ABILITY_PROJECTILES.default;
+ const emoji = (ability && ABILITY_PROJECTILES[ability]) || ABILITY_PROJECTILES.default;
 
   const projectile = document.createElement("div");
   projectile.textContent = emoji;
