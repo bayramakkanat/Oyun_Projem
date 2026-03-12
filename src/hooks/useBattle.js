@@ -1480,12 +1480,12 @@ if (p.length === 0 || e.length === 0) {
         return;
       }
 
-      if (newP.length > 0 && newP[0].id !== oldAId) triggerAnim(newP[0].id, "slideInLeft");
-      if (newE.length > 0 && newE[0].id !== oldDId) triggerAnim(newE[0].id, "slideInRight");
+     if (newP.length > 0 && newP[0].id !== oldAId) triggerAnim(newP[0].id, "slideInLeft");
+if (newE.length > 0 && newE[0].id !== oldDId) triggerAnim(newE[0].id, "slideInRight");
 
-      await delay(100);
-      setPT(newP);
-      setET(newE);
+await delay(150);
+setPT(newP);
+setET(newE);
       setStep((s) => s + 1);
     }, 300);
 
