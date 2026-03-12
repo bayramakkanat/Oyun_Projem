@@ -408,10 +408,10 @@ export default function DebugPanel({ onStartBattle, onClose }) {
                             animal={a}
                             onRemove={() => removeAnimal(a.id, "player")}
                             onLvlChange={(l) => changeLvl(a.id, l, "player")}
-                           onMoveUp={() => moveAnimal(a.id, "down", "player")}
+                          onMoveUp={() => moveAnimal(a.id, "down", "player")}
 onMoveDown={() => moveAnimal(a.id, "up", "player")}
-                            isFirst={realIdx === 0}
-                            isLast={realIdx === playerTeam.length - 1}
+isFirst={realIdx === playerTeam.length - 1}
+isLast={realIdx === 0}
                             flip={true}
                           />
                         );
