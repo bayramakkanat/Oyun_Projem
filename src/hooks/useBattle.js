@@ -704,7 +704,8 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
       return;
     }
 
-    if (pT.length === 0 || eT.length === 0) {
+   if (pT.length === 0 || eT.length === 0) {
+      if (isDebugBattle) return;
       setIsBattleOver(true);
       const won = eT.length === 0 && pT.length > 0;
 
