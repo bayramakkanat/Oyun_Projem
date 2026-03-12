@@ -1279,13 +1279,14 @@ if (p.length === 0 || e.length === 0) {
         setLog((l) => [...l, `🦭 ${a.nick} -> Takıma +${3 * pwr(a)}/+${3 * pwr(a)} KALICI`]);
         await delay(800);
       }
-      if (a.ability === "kill_fear_all" && e[0].curHp <= 0 && p[0].id === a.id) {
-        const m = pwr(a);
-        e.forEach((enemy) => {
-          enemy.atk = Math.max(1, enemy.atk - 5 * m);
-          enemy.curHp = Math.max(0, enemy.curHp - 5 * m);
-          triggerAnim(enemy.id, "damage");
-        });
+     if (a.ability === "kill_fear_all" && e[0].curHp <= 0 && p[0].id === a.id) {
+  const m = pwr(a);
+  e.forEach((enemy) => {
+    enemy.atk = Math.max(1, enemy.atk - 5 * m);
+    enemy.curHp = Math.max(0, enemy.curHp - 5 * m);
+    spawnProjectile(a.id, enemy.id, "kill_fear_all");
+    triggerAnim(enemy.id, "damage");
+  });
         setLog((l) => [...l, `😱 ${a.nick} -> Tüm düşmanlara -${5 * m}/-${5 * m}`]);
         await delay(500);
       }
@@ -1367,14 +1368,15 @@ if (p.length === 0 || e.length === 0) {
         setLog((l) => [...l, `🐗 Düşman ${d.nick} -> +${2 * pwr(d)} ATK`]);
         await delay(500);
       }
-      if (a.ability === "devour" && e[0].curHp <= 0) {
-        const pct = (30 + 10 * pwr(a)) / 100;
-        const atkGain = Math.floor(e[0].atk * pct);
-        const hpGain = Math.floor((e[0].hp || e[0].curHp) * pct);
-        p[0].atk = clampStat(p[0].atk + atkGain);
-        p[0].hp = clampStat(p[0].hp + hpGain);
-        p[0].curHp = clampStat(p[0].curHp + hpGain);
-        triggerAnim(a.id, "buff");
+     if (a.ability === "devour" && e[0].curHp <= 0) {
+  const pct = (30 + 10 * pwr(a)) / 100;
+  const atkGain = Math.floor(e[0].atk * pct);
+  const hpGain = Math.floor((e[0].hp || e[0].curHp) * pct);
+  p[0].atk = clampStat(p[0].atk + atkGain);
+  p[0].hp = clampStat(p[0].hp + hpGain);
+  p[0].curHp = clampStat(p[0].curHp + hpGain);
+  spawnProjectile(e[0].id, a.id, "devour");
+  triggerAnim(a.id, "buff");
         setLog((l) => [...l, `👹 ${a.nick} -> +${atkGain}/+${hpGain}`]);
         await delay(500);
       }
