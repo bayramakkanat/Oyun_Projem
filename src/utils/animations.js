@@ -231,7 +231,7 @@ export const spawnProjectile = (fromPetId, toPetId, ability, onImpact, arc = fal
 
   if (arc) {
     // Yay atışı - canvas benzeri quadratic bezier ile
-    const steps = 30;
+    const steps = 60;
     const arcHeight = -Math.min(120, distance * 0.5);
     let currentStep = 0;
 
@@ -244,7 +244,7 @@ export const spawnProjectile = (fromPetId, toPetId, ability, onImpact, arc = fal
       filter: drop-shadow(0 0 8px white) drop-shadow(0 0 16px rgba(255,200,50,0.9));
       transition: none;
     `;
-
+const stepDuration = duration / steps;
     const animate = () => {
       if (currentStep > steps) {
         projectile.remove();
@@ -314,10 +314,10 @@ export const spawnProjectile = (fromPetId, toPetId, ability, onImpact, arc = fal
       }
 
       currentStep++;
-      requestAnimationFrame(animate);
+     setTimeout(animate, stepDuration);
     };
 
-    requestAnimationFrame(animate);
+   setTimeout(animate, stepDuration);
 
   } else {
     // Düz atış - orijinal sistem
