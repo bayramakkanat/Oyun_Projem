@@ -176,42 +176,93 @@ export const spawnProjectile = (fromPetId, toPetId, ability, onImpact) => {
   const endX = toRect.left + toRect.width / 2;
   const endY = toRect.top + toRect.height / 2;
 
- const emoji = (ability && ABILITY_PROJECTILES[ability]) || ABILITY_PROJECTILES.default;
+  const emoji = (ability && ABILITY_PROJECTILES[ability]) || ABILITY_PROJECTILES.default;
+  const dx = endX - startX;
+  const dy = endY - startY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const duration = Math.max(400, Math.min(800, distance * 1.2));
 
+  // Ana projectile
   const projectile = document.createElement("div");
   projectile.textContent = emoji;
   projectile.style.cssText = `
     position: fixed;
     left: ${startX}px;
     top: ${startY}px;
-    font-size: 28px;
+    font-size: 32px;
     pointer-events: none;
     z-index: 9999;
     transform: translate(-50%, -50%);
-    --tx: ${endX - startX}px;
-    --ty: ${endY - startY}px;
-    animation: projectileFly 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    filter: drop-shadow(0 0 8px white) drop-shadow(0 0 16px rgba(255,200,50,0.9));
+    --tx: ${dx}px;
+    --ty: ${dy}px;
+    animation: projectileFly ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   `;
-
   document.body.appendChild(projectile);
+
+  // Parlak iz partikülleri
+  const trailCount = 6;
+  for (let i = 0; i < trailCount; i++) {
+    setTimeout(() => {
+      const progress = i / trailCount;
+      const trailX = startX + dx * progress;
+      const trailY = startY + dy * progress;
+      const trail = document.createElement("div");
+      trail.textContent = emoji;
+      trail.style.cssText = `
+        position: fixed;
+        left: ${trailX}px;
+        top: ${trailY}px;
+        font-size: ${20 - i * 2}px;
+        pointer-events: none;
+        z-index: 9998;
+        transform: translate(-50%, -50%);
+        opacity: ${0.6 - i * 0.08};
+        filter: drop-shadow(0 0 6px rgba(255,200,50,0.8));
+        animation: trailFade 0.4s ease-out forwards;
+      `;
+      document.body.appendChild(trail);
+      setTimeout(() => trail.remove(), 400);
+    }, (duration / trailCount) * i);
+  }
 
   setTimeout(() => {
     projectile.remove();
-    // Çarpışma efekti
+
+    // Çarpışma efekti - büyük ve parlak
     const impact = document.createElement("div");
     impact.textContent = "💥";
     impact.style.cssText = `
       position: fixed;
       left: ${endX}px;
       top: ${endY}px;
-      font-size: 32px;
+      font-size: 48px;
       pointer-events: none;
       z-index: 9999;
       transform: translate(-50%, -50%);
-      animation: impactBurst 0.4s ease-out forwards;
+      filter: drop-shadow(0 0 12px rgba(255,100,0,0.9));
+      animation: impactBurst 0.5s ease-out forwards;
     `;
     document.body.appendChild(impact);
-    setTimeout(() => impact.remove(), 400);
+
+    // Parlama halkası
+    const ring = document.createElement("div");
+    ring.style.cssText = `
+      position: fixed;
+      left: ${endX}px;
+      top: ${endY}px;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,200,50,0.9);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      animation: impactRing 0.5s ease-out forwards;
+    `;
+    document.body.appendChild(ring);
+
+    setTimeout(() => { impact.remove(); ring.remove(); }, 500);
     if (onImpact) onImpact();
-  }, 350);
+  }, duration);
 };

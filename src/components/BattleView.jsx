@@ -195,9 +195,13 @@ style={{ textShadow: "0 0 10px rgba(74,222,128,0.8)" }}
                         transition: "all 0.4s cubic-bezier(0.23, 1, 0.32, 1)",
                         filter:
                           anims[a.id] === "damage"
-                            ? "brightness(2) drop-shadow(0 0 15px white)"
-                            : "none",
-                      animation: step === 0 ? "dropIn 0.8s ease-out both" : "none",
+  ? "brightness(2) drop-shadow(0 0 15px white)"
+  : "none",
+animation: step === 0 
+  ? "dropIn 0.8s ease-out both" 
+  : anims[a.id] === "attackLeft" 
+  ? "lungeLeft 0.4s ease-out" 
+  : "none",
                         animationDelay: step === 0 ? `${idx * 0.15}s` : "0s",
                       }}
                     >
@@ -263,9 +267,13 @@ style={{ textShadow: "0 0 10px rgba(74,222,128,0.8)" }}
                         transition: "all 0.4s cubic-bezier(0.23, 1, 0.32, 1)",
                         filter:
                           anims[a.id] === "damage"
-                            ? "brightness(2) drop-shadow(0 0 15px white)"
-                            : "none",
-                      animation: step === 0 ? "dropIn 0.8s ease-out both" : "none",
+  ? "brightness(2) drop-shadow(0 0 15px white)"
+  : "none",
+animation: step === 0 
+  ? "dropIn 0.8s ease-out both" 
+  : anims[a.id] === "attackRight" 
+  ? "lungeRight 0.4s ease-out" 
+  : "none",
                         animationDelay: step === 0 ? `${idx * 0.15}s` : "0s",
                       }}
                     >
