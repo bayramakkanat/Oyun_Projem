@@ -1430,12 +1430,16 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
           const winner = newE.length === 0 && newP.length > 0 ? "🎉 SEN KAZANDIN!" : newP.length === 0 && newE.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
           setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
          setTimeout(() => {
-            setIsBattleOver(false);
-            lastProcessedStepRef.current = -1;
-            setPhase("shop");
-            setGameStarted(false);
-            setShowDebugPanel(true);
-          }, 4000);
+  setIsBattleOver(false);
+  lastProcessedStepRef.current = -1;
+  setPT([]);
+  setET([]);
+  setStep(0);
+  setLog([]);
+  setPhase("shop");
+  setGameStarted(false);
+  setTimeout(() => setShowDebugPanel(true), 50);
+}, 4000);
           return;
         }
         setStep((s) => s + 1);
