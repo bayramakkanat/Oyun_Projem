@@ -438,7 +438,7 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
         {showDebugPanel && (
           <DebugPanel
             onClose={() => setShowDebugPanel(false)}
-            onStartBattle={(playerTeam, enemyTeam) => {
+           onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
               setShowDebugPanel(false);
               setIsDebugBattle(true);
               isPausedRef.current = false;
@@ -454,6 +454,7 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
               setLog(["🧪 DEBUG SAVAŞI BAŞLADI"]);
               setStep(0);
               setPGold(0);
+              if (bossTurn) { setTurnAndRef(bossTurn); setBossChallenge("battle"); } else { setBossChallenge(null); }
               setPhase("battle");
               setGameStarted(true);
             }}
@@ -617,7 +618,7 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
       {showDebugPanel && (
         <DebugPanel
           onClose={() => setShowDebugPanel(false)}
-          onStartBattle={(playerTeam, enemyTeam) => {
+         onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
             setShowDebugPanel(false);
             setIsDebugBattle(true);
             isPausedRef.current = false;
@@ -633,6 +634,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
             setLog(["🧪 DEBUG SAVAŞI BAŞLADI"]);
             setStep(0);
             setPGold(0);
+            if (bossTurn) { setTurnAndRef(bossTurn); setBossChallenge("battle"); } else { setBossChallenge(null); }
             setPhase("battle");
           }}
         />
