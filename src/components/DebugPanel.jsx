@@ -253,6 +253,7 @@ export default function DebugPanel({ onStartBattle, onClose }) {
   const [searchE, setSearchE] = useState("");
   const [filterTier, setFilterTier] = useState(0);
   const [addTarget, setAddTarget] = useState("player"); // "player" | "enemy"
+  const [activeBossTurn, setActiveBossTurn] = useState(null);
 
   const filteredAnimals = ALL_ANIMALS.filter((a) => {
     const matchSearch = addTarget === "player"
@@ -281,6 +282,7 @@ export default function DebugPanel({ onStartBattle, onClose }) {
       });
     setPlayerTeam(withIds(scenario.player));
     setEnemyTeam(withIds(scenario.enemy));
+    setActiveBossTurn(scenario.bossTurn || null);
     setActiveTab("manual");
   };
 
@@ -596,7 +598,7 @@ export default function DebugPanel({ onStartBattle, onClose }) {
             <button
               onClick={() => {
                 if (!canStart) return;
-               onStartBattle(playerTeam, enemyTeam, activeScenario?.bossTurn);
+              onStartBattle(playerTeam, enemyTeam, activeBossTurn);
               }}
               disabled={!canStart}
               className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 disabled:opacity-30 disabled:cursor-not-allowed hover:from-purple-500 hover:to-pink-500 rounded-xl text-sm font-black text-white transition-all shadow-lg shadow-purple-900/50 active:scale-95"
