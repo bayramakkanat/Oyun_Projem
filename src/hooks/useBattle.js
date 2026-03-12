@@ -1006,7 +1006,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             // En arkadaki hedefe
             const targetIdx = targets.length > 1 ? targets.length - 1 : 0;
             targets[targetIdx].curHp -= 3 * m;
-            spawnProjectile(a.id, targets[targetIdx].id, "start_snipe");
+           spawnProjectile(a.id, targets[targetIdx].id, "start_snipe", null, true);
             triggerAnim(targets[targetIdx].id, "damage");
             setLog((l) => [...l, `🎯 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${targets[targetIdx].nick} e ${3 * m} hasar`]);
             await delay(800);
@@ -1019,7 +1019,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
               if (alive.length > 0) {
                 const t = alive[Math.floor(Math.random() * alive.length)];
                 t.curHp -= 8 * m;
-                spawnProjectile(a.id, t.id, "start_multi_snipe");
+               spawnProjectile(a.id, t.id, "start_multi_snipe", null, true);
                 triggerAnim(t.id, "damage");
                 setLog((l) => [...l, `🦑 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${8 * m} hasar`]);
                 await delay(400);
@@ -1032,7 +1032,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             if (alive.length > 0) {
               const t = alive[Math.floor(Math.random() * alive.length)];
               t.curHp -= 2 * m;
-              spawnProjectile(a.id, t.id, "start_dmg");
+             spawnProjectile(a.id, t.id, "start_dmg", null, true);
               triggerAnim(t.id, "damage");
               setLog((l) => [...l, `💥 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${2 * m} hasar`]);
               await delay(800);
