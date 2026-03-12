@@ -195,7 +195,7 @@ export const ABILITY_PROJECTILES = {
   start_dmg: "💥",
   faint_dmg: "💀",
   hurt_dmg: "💢",
-  devour: "👹",
+ devour: "💚",
   start_trample: "💨",
   kill_buff: "🩸",
   start_fear: "😱",
