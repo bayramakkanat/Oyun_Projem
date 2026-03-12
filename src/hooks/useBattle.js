@@ -1010,8 +1010,10 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
   if (aliveTargets.length === 0) continue;
   const snipeTarget = aliveTargets[aliveTargets.length - 1];
             snipeTarget.curHp -= 3 * m;
-            spawnProjectile(a.id, snipeTarget.id, "start_snipe", null, true);
-            triggerAnim(snipeTarget.id, "damage");
+setTimeout(() => {
+  spawnProjectile(a.id, snipeTarget.id, "start_snipe", null, true);
+}, 100);
+triggerAnim(snipeTarget.id, "damage");
             setLog((l) => [...l, `🎯 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${snipeTarget.nick} e ${3 * m} hasar`]);
             await delay(1200);
 
