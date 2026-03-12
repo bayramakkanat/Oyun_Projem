@@ -1368,7 +1368,7 @@ if (p.length === 0 || e.length === 0) {
         setLog((l) => [...l, `🐗 Düşman ${d.nick} -> +${2 * pwr(d)} ATK`]);
         await delay(500);
       }
-     if (a.ability === "devour" && e[0].curHp <= 0) {
+    if (a.ability === "devour" && e[0].curHp <= 0 && p[0].curHp > 0) {
   const pct = (30 + 10 * pwr(a)) / 100;
   const atkGain = Math.floor(e[0].atk * pct);
   const hpGain = Math.floor((e[0].hp || e[0].curHp) * pct);
