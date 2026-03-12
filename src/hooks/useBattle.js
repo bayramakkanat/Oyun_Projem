@@ -1432,6 +1432,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
          setTimeout(() => {
             setIsBattleOver(false);
             lastProcessedStepRef.current = -1;
+            setPhase("shop");
             setGameStarted(false);
             setShowDebugPanel(true);
           }, 4000);
