@@ -1004,10 +1004,11 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             setLog((l) => [...l, `🦁 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${fearT} -${10 * m} ATK`]);
             await delay(1200);
 
-         } else if (a.ability === "start_snipe") {
-            const aliveTargets = targets.filter((x) => x.curHp > 0);
-            if (aliveTargets.length === 0) continue;
-            const snipeTarget = aliveTargets[aliveTargets.length - 1];
+        } else if (a.ability === "start_snipe") {
+  const currentTargets = isPlayer ? ee : pp;
+  const aliveTargets = currentTargets.filter((x) => x.curHp > 0);
+  if (aliveTargets.length === 0) continue;
+  const snipeTarget = aliveTargets[aliveTargets.length - 1];
             snipeTarget.curHp -= 3 * m;
             spawnProjectile(a.id, snipeTarget.id, "start_snipe", null, true);
             triggerAnim(snipeTarget.id, "damage");
@@ -1029,11 +1030,12 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
               }
             }
 
-          } else if (a.ability === "start_dmg") {
-            // Rastgele bir hedefe
-            const alive = targets.filter((x) => x.curHp > 0);
-            if (alive.length > 0) {
-              const t = alive[Math.floor(Math.random() * alive.length)];
+         } else if (a.ability === "start_dmg") {
+  const currentTargets = isPlayer ? ee : pp;
+  const alive = currentTargets.filter((x) => x.curHp > 0);
+  if (alive.length === 0) continue;
+  {
+    const t = alive[Math.floor(Math.random() * alive.length)];
               t.curHp -= 2 * m;
              spawnProjectile(a.id, t.id, "start_dmg", null, true);
               triggerAnim(t.id, "damage");
