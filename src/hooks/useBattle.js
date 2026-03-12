@@ -986,7 +986,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
               triggerAnim(x.id, "damage");
             });
             setLog((l) => [...l, `🐉 ${isPlayer ? "" : "Düsman "}${a.nick} -> Tüm ${isPlayer ? "düsmanlara" : "takima"} ${dmg} hasar`]);
-            await delay(800);
+            await delay(1400);
 
           } else if (a.ability === "start_fear") {
             // İlk 2 düşmanı zayıflat
@@ -1000,7 +1000,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             }
             const fearT = targets.length > 1 ? `${targets[0].nick} ve ${targets[1].nick}` : targets[0].nick;
             setLog((l) => [...l, `🦁 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${fearT} -${10 * m} ATK`]);
-            await delay(800);
+            await delay(1200);
 
           } else if (a.ability === "start_snipe") {
             // En arkadaki hedefe
@@ -1009,7 +1009,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
            spawnProjectile(a.id, targets[targetIdx].id, "start_snipe", null, true);
             triggerAnim(targets[targetIdx].id, "damage");
             setLog((l) => [...l, `🎯 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${targets[targetIdx].nick} e ${3 * m} hasar`]);
-            await delay(800);
+           await delay(1200);
 
           } else if (a.ability === "start_multi_snipe") {
             // Birden fazla hedefe
@@ -1022,7 +1022,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
                spawnProjectile(a.id, t.id, "start_multi_snipe", null, true);
                 triggerAnim(t.id, "damage");
                 setLog((l) => [...l, `🦑 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${8 * m} hasar`]);
-                await delay(400);
+                await delay(700);
               }
             }
 
@@ -1035,7 +1035,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
              spawnProjectile(a.id, t.id, "start_dmg", null, true);
               triggerAnim(t.id, "damage");
               setLog((l) => [...l, `💥 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${2 * m} hasar`]);
-              await delay(800);
+              await delay(1200);
             }
 
           } else if (a.ability === "start_poison") {
@@ -1044,7 +1044,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             spawnProjectile(a.id, targets[0].id, "start_poison");
             triggerAnim(targets[0].id, "damage");
             setLog((l) => [...l, `🐍 ${isPlayer ? "" : "Düsman "}${a.nick} -> On düsmana -${m * 2} ATK`]);
-            await delay(800);
+            await delay(1200);
 
           } else if (a.ability === "start_freeze_enemy") {
             // Ön ve arka düşmanı yavaşlat
@@ -1058,7 +1058,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
               triggerAnim(targets[targets.length - 1].id, "damage");
             }
             setLog((l) => [...l, `🦣 ${isPlayer ? "" : "Düsman "}${a.nick} -> On ve arka düsmani %${m * 30} yavaslatti`]);
-            await delay(800);
+            await delay(1200);
 
           } else if (a.ability === "weaken_strong") {
             // En güçlü düşmanı zayıflat
@@ -1072,7 +1072,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             spawnProjectile(a.id, targets[mxI].id, "weaken_strong");
             triggerAnim(targets[mxI].id, "damage");
             setLog((l) => [...l, `🐧 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${targets[mxI].nick} i %${25 * m} zayiflatti`]);
-            await delay(800);
+            await delay(1200);
           }
 
           // Ölenleri temizle

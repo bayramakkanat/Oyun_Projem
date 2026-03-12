@@ -127,19 +127,63 @@ export const spawnDeathEffect = (petId) => {
   const rect = element.getBoundingClientRect();
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
-  const particles = ["💀", "💨", "✨", "💫"];
-  for (let i = 0; i < 6; i++) {
+
+  // Karartma efekti
+  const flash = document.createElement("div");
+  flash.style.cssText = `
+    position: fixed;
+    left: ${centerX}px;
+    top: ${centerY}px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,50,50,0.8) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%) scale(0);
+    animation: deathFlash 0.6s ease-out forwards;
+  `;
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 600);
+
+  // Partiküller
+  const particles = ["💀", "💨", "✨", "💫", "🩸"];
+  for (let i = 0; i < 8; i++) {
     const particle = document.createElement("div");
     particle.textContent = particles[i % particles.length];
-    particle.className = "death-particle";
-    const angle = (Math.PI * 2 * i) / 6;
-    particle.style.left = `${centerX}px`;
-    particle.style.top = `${centerY}px`;
-    particle.style.setProperty("--tx", `${Math.cos(angle) * 80}px`);
-    particle.style.setProperty("--ty", `${Math.sin(angle) * 80}px`);
+    const angle = (Math.PI * 2 * i) / 8;
+    const distance = 60 + Math.random() * 40;
+    particle.style.cssText = `
+      position: fixed;
+      left: ${centerX}px;
+      top: ${centerY}px;
+      font-size: ${20 + Math.random() * 16}px;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      --tx: ${Math.cos(angle) * distance}px;
+      --ty: ${Math.sin(angle) * distance}px;
+      animation: deathParticle 0.9s ease-out forwards;
+    `;
     document.body.appendChild(particle);
-    setTimeout(() => particle.remove(), 800);
+    setTimeout(() => particle.remove(), 900);
   }
+
+  // Büyük X efekti
+  const skull = document.createElement("div");
+  skull.textContent = "💀";
+  skull.style.cssText = `
+    position: fixed;
+    left: ${centerX}px;
+    top: ${centerY - 30}px;
+    font-size: 48px;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%) scale(0);
+    animation: deathSkull 1s ease-out forwards;
+  `;
+  document.body.appendChild(skull);
+  setTimeout(() => skull.remove(), 1000);
 };
 export const ABILITY_PROJECTILES = {
   start_fire: "🔥",
