@@ -141,3 +141,77 @@ export const spawnDeathEffect = (petId) => {
     setTimeout(() => particle.remove(), 800);
   }
 };
+export const ABILITY_PROJECTILES = {
+  start_fire: "🔥",
+  start_poison: "☠️",
+  start_snipe: "🎯",
+  start_multi_snipe: "🎯",
+  faint_wave: "🌊",
+  start_freeze_enemy: "❄️",
+  start_dmg: "💥",
+  faint_dmg: "💀",
+  hurt_dmg: "💢",
+  devour: "👹",
+  start_trample: "💨",
+  kill_buff: "🩸",
+  start_fear: "😱",
+  kill_fear_all: "😱",
+  cheetah_faint: "💨",
+  default: "⚔️",
+};
+
+export const spawnProjectile = (fromPetId, toPetId, ability, onImpact) => {
+  const fromEl = document.querySelector(`[data-pet-id="${fromPetId}"]`);
+  const toEl = document.querySelector(`[data-pet-id="${toPetId}"]`);
+  if (!fromEl || !toEl) {
+    if (onImpact) onImpact();
+    return;
+  }
+
+  const fromRect = fromEl.getBoundingClientRect();
+  const toRect = toEl.getBoundingClientRect();
+
+  const startX = fromRect.left + fromRect.width / 2;
+  const startY = fromRect.top + fromRect.height / 2;
+  const endX = toRect.left + toRect.width / 2;
+  const endY = toRect.top + toRect.height / 2;
+
+  const emoji = ABILITY_PROJECTILES[ability] || ABILITY_PROJECTILES.default;
+
+  const projectile = document.createElement("div");
+  projectile.textContent = emoji;
+  projectile.style.cssText = `
+    position: fixed;
+    left: ${startX}px;
+    top: ${startY}px;
+    font-size: 28px;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    --tx: ${endX - startX}px;
+    --ty: ${endY - startY}px;
+    animation: projectileFly 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  `;
+
+  document.body.appendChild(projectile);
+
+  setTimeout(() => {
+    projectile.remove();
+    // Çarpışma efekti
+    const impact = document.createElement("div");
+    impact.textContent = "💥";
+    impact.style.cssText = `
+      position: fixed;
+      left: ${endX}px;
+      top: ${endY}px;
+      font-size: 32px;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      animation: impactBurst 0.4s ease-out forwards;
+    `;
+    document.body.appendChild(impact);
+    setTimeout(() => impact.remove(), 400);
+    if (onImpact) onImpact();
+  }, 350);
+};
