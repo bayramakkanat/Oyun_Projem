@@ -914,9 +914,10 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             spawnParticles(a.id, "buff");
             setLog((l) => [...l, `🦅 ${a.nick} → Tüm takıma +${2 * m} ATK KALICI`]);
             triggered = true;
-          } else if (a.ability === "start_snipe" && ee.length > 0) {
+         } else if (a.ability === "start_snipe" && ee.length > 0) {
             const targetIdx = ee.length > 1 ? ee.length - 1 : 0;
             ee[targetIdx].curHp -= 3 * m;
+            spawnProjectile(a.id, ee[targetIdx].id, "start_snipe");
             triggerAnim(ee[targetIdx].id, "damage");
             setLog((l) => [...l, `🎯 ${a.nick} → ${ee[targetIdx].nick} e ${3 * m} hasar (arka)`]);
             triggered = true;
@@ -929,25 +930,31 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
                 const target = aliveEe[rndIdx];
                 if (target && target.nick) {
                   target.curHp -= 8 * m;
+                  spawnProjectile(a.id, target.id, "start_multi_snipe");
                   triggerAnim(target.id, "damage");
                   setLog((l) => [...l, `🦑 ${a.nick} → ${target.nick} e ${8 * m} hasar`]);
                 }
               }
             }
             triggered = true;
-          } else if (a.ability === "start_fear" && ee.length > 0) {
+         } else if (a.ability === "start_fear" && ee.length > 0) {
             ee[0].atk = Math.max(1, ee[0].atk - 10 * m);
+            spawnProjectile(a.id, ee[0].id, "start_fear");
             triggerAnim(ee[0].id, "damage");
             if (ee.length > 1) {
               ee[1].atk = Math.max(1, ee[1].atk - 10 * m);
+              spawnProjectile(a.id, ee[1].id, "start_fear");
               triggerAnim(ee[1].id, "damage");
             }
             const fearTargets = ee.length > 1 ? `${ee[0].nick} ve ${ee[1].nick}` : ee[0].nick;
             setLog((l) => [...l, `🦁 ${a.nick} → ${fearTargets} -${10 * m} ATK!`]);
             triggered = true;
-          } else if (a.ability === "start_fire" && ee.length > 0) {
+         } else if (a.ability === "start_fire" && ee.length > 0) {
             ee = ee.map((x) => ({ ...x, curHp: x.curHp - 6 * m }));
-            ee.forEach((x) => triggerAnim(x.id, "damage"));
+            ee.forEach((x) => {
+              spawnProjectile(a.id, x.id, "start_fire");
+              triggerAnim(x.id, "damage");
+            });
             setLog((l) => [...l, `🐉 ${a.nick} → Tüm düşmanlara ${6 * m} hasar`]);
             triggered = true;
           } else if (a.ability === "start_trample") {
@@ -968,7 +975,8 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             if (aliveEe.length > 0) {
               const target = aliveEe[Math.floor(Math.random() * aliveEe.length)];
               if (target && target.nick) {
-                target.curHp -= 2 * m;
+               target.curHp -= 2 * m;
+                spawnProjectile(a.id, target.id, "start_dmg");
                 triggerAnim(target.id, "damage");
                 setLog((l) => [...l, `💥 ${a.nick} → ${target.nick} e ${2 * m} hasar`]);
               }
