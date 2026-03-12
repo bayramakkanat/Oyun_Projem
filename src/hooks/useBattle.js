@@ -989,27 +989,29 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
             await delay(1400);
 
           } else if (a.ability === "start_fear") {
-            // İlk 2 düşmanı zayıflat
-            targets[0].atk = Math.max(1, targets[0].atk - 10 * m);
-            spawnProjectile(a.id, targets[0].id, "start_fear");
-            triggerAnim(targets[0].id, "damage");
-            if (targets.length > 1) {
-              targets[1].atk = Math.max(1, targets[1].atk - 10 * m);
-              spawnProjectile(a.id, targets[1].id, "start_fear");
-              triggerAnim(targets[1].id, "damage");
+            const aliveTargets = targets.filter((x) => x.curHp > 0);
+            if (aliveTargets.length === 0) continue;
+            aliveTargets[0].atk = Math.max(1, aliveTargets[0].atk - 10 * m);
+            spawnProjectile(a.id, aliveTargets[0].id, "start_fear");
+            triggerAnim(aliveTargets[0].id, "damage");
+            if (aliveTargets.length > 1) {
+              aliveTargets[1].atk = Math.max(1, aliveTargets[1].atk - 10 * m);
+              spawnProjectile(a.id, aliveTargets[1].id, "start_fear");
+              triggerAnim(aliveTargets[1].id, "damage");
             }
             const fearT = targets.length > 1 ? `${targets[0].nick} ve ${targets[1].nick}` : targets[0].nick;
             setLog((l) => [...l, `🦁 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${fearT} -${10 * m} ATK`]);
             await delay(1200);
 
-          } else if (a.ability === "start_snipe") {
-            // En arkadaki hedefe
-            const targetIdx = targets.length > 1 ? targets.length - 1 : 0;
-            targets[targetIdx].curHp -= 3 * m;
-           spawnProjectile(a.id, targets[targetIdx].id, "start_snipe", null, true);
-            triggerAnim(targets[targetIdx].id, "damage");
-            setLog((l) => [...l, `🎯 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${targets[targetIdx].nick} e ${3 * m} hasar`]);
-           await delay(1200);
+         } else if (a.ability === "start_snipe") {
+            const aliveTargets = targets.filter((x) => x.curHp > 0);
+            if (aliveTargets.length === 0) continue;
+            const snipeTarget = aliveTargets[aliveTargets.length - 1];
+            snipeTarget.curHp -= 3 * m;
+            spawnProjectile(a.id, snipeTarget.id, "start_snipe", null, true);
+            triggerAnim(snipeTarget.id, "damage");
+            setLog((l) => [...l, `🎯 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${snipeTarget.nick} e ${3 * m} hasar`]);
+            await delay(1200);
 
           } else if (a.ability === "start_multi_snipe") {
             // Birden fazla hedefe
