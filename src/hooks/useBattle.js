@@ -1137,8 +1137,6 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
 
      triggerAnim(a.id, "attackLeft");
       triggerAnim(d.id, "attackRight");
-      spawnProjectile(a.id, d.id, a.ability);
-      spawnProjectile(d.id, a.id, d.ability);
       await delay(2000);
       if (isCancelled) return;
 
