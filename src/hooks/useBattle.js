@@ -1117,7 +1117,10 @@ if (isCancelled) return;
       let e = [...eT].filter((x) => x.curHp > 0);
       if (p.length === 0 && pT.length === 0) { setIsBattleOver(true); return; }
       if (e.length === 0 && eT.length === 0) { setIsBattleOver(true); return; }
-      if (p.length === 0 || e.length === 0) return;
+      if (p.length === 0 || e.length === 0) {
+  setStep((s) => s + 1);
+  return;
+}
 
       let lg = [];
       const a = p[0];
