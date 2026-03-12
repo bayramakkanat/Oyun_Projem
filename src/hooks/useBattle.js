@@ -1104,7 +1104,24 @@ ee = ee.filter((x) => x.curHp > 0);
 setPT([...pp]);
 setET([...ee]);
 if (pp.length === 0 || ee.length === 0) {
-  setStep((s) => s + 1);
+  setIsBattleOver(true);
+  if (isDebugBattle) {
+    setIsDebugBattle(false);
+    const winner = ee.length === 0 && pp.length > 0 ? "🎉 SEN KAZANDIN!" : pp.length === 0 && ee.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
+    setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
+    setTimeout(() => {
+      setIsBattleOver(false);
+      lastProcessedStepRef.current = -1;
+      setPT([]);
+      setET([]);
+      setStep(0);
+      setLog([]);
+      setPhase("shop");
+      setGameStarted(false);
+      setTimeout(() => setShowDebugPanel(true), 50);
+    }, 4000);
+    return;
+  }
   return;
 }
 setStep((s) => s + 1);
