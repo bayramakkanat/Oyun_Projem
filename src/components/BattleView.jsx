@@ -212,7 +212,7 @@ animation: step === 0
   selected={false}
   compact={false}
   battle={true}
-  mirror={false}
+ mirror={true}
 />
                     </div>
                   </div>
@@ -311,7 +311,7 @@ animation: step === 0
                         </div>
                       ) : (
                        <Card
-a={{ ...a, curHp: a.curHp, flip: a.flip || false }}
+a={{ ...a, curHp: a.curHp }}
   anim={anims[a.id]}
   onClick={() => {}}
   selected={false}
