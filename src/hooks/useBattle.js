@@ -788,10 +788,15 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
       }
       if (gameMode === "arena") saveArenaTeam(updatedTeam, difficultyLevel);
 
-      if (turn >= WIN_TURN) {
-        setTimeout(() => setVictory(true), 500);
-        return;
-      }
+     if (turn >= WIN_TURN) {
+  if (gameMode === "arena") {
+    setLives((l) => l + 1);
+    setLog((lg) => [...lg, `♾️ ${WIN_TURN}. tura ulaştın! +1 can ile devam ediyorsun...`]);
+  } else {
+    setTimeout(() => setVictory(true), 500);
+    return;
+  }
+}
       if (draw) {
         setLog((l) => [...l, "🤝 Berabere"]);
       } else if (!won) {
