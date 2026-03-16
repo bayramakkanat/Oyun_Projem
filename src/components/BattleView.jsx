@@ -317,7 +317,7 @@ animation: step === 0
                           selected={false}
                           compact={false}
                           battle={true}
-                          mirror={true}
+                          mirror={false}
                         />
                       )}
                     </div>
