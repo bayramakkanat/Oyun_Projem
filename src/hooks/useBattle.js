@@ -580,7 +580,7 @@ et = [...opponentData.team].reverse().map((p) => {
   const animalData = allAnimals.find((a) => a.name === p.name);
   return {
     ...p,
-    image: p.image || animalData?.image || null,
+    img: p.img || animalData?.img || null,
     id: Math.random(),
     curHp: p.hp,
   };
