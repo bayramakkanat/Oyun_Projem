@@ -25,6 +25,7 @@ import { useBattle } from "./hooks/useBattle";
 import { useShop } from "./hooks/useShop";
 import { useAuth } from "./hooks/useAuth";
 import { useArena } from "./hooks/useArena";
+import { calcArenaXP, getRank } from "./utils/helpers";
 import { useEndTurn } from "./hooks/useEndTurn";
 import { useMusic } from "./hooks/useMusic";
 import battleBg from "./battleBg";
@@ -262,7 +263,7 @@ useEffect(() => {
     }
   };
   useMusic({ soundEnabled, phase, gameStarted });
-  const { saveArenaTeam, fetchArenaOpponent } = useArena({ user, turn });
+  const { saveArenaTeam, fetchArenaOpponent, updateLeaderboard } = useArena({ user, turn });
   useEndTurn({
   phase,
   pendingEndTurnAnims,
@@ -401,17 +402,25 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
   };
 
   useEffect(() => {
-    if (victory) {
-      playSound("victory");
-      updateStatsOnEnd(true, turn, wins, lives);
+  if (victory) {
+    playSound("victory");
+    updateStatsOnEnd(true, turn, wins, lives);
+    if (gameMode === "arena") {
+      const isNewBestTurn = turn > (stats.bestTurn || 0);
+      updateLeaderboard({ won: true, isNewBestTurn });
     }
-  }, [victory]);
-  useEffect(() => {
-    if (over) {
-      playSound("defeat");
-      updateStatsOnEnd(false, turn, wins, lives);
+  }
+}, [victory]);
+useEffect(() => {
+  if (over) {
+    playSound("defeat");
+    updateStatsOnEnd(false, turn, wins, lives);
+    if (gameMode === "arena") {
+      const isNewBestTurn = turn > (stats.bestTurn || 0);
+      updateLeaderboard({ won: false, isNewBestTurn });
     }
-  }, [over]);
+  }
+}, [over]);
   if (gameMode === "versus" && versusPhase === "lobby") {
     return (
       <VersusLobby
