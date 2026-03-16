@@ -205,15 +205,15 @@ animation: step === 0
                         animationDelay: step === 0 ? `${idx * 0.15}s` : "0s",
                       }}
                     >
-                      <Card
-                        a={{ ...a, curHp: a.curHp }}
-                        anim={anims[a.id]}
-                        onClick={() => {}}
-                        selected={false}
-                        compact={false}
-                        battle={true}
-                        mirror={true}
-                      />
+                     <Card
+  a={{ ...a, curHp: a.curHp }}
+  anim={anims[a.id]}
+  onClick={() => {}}
+  selected={false}
+  compact={false}
+  battle={true}
+  mirror={false}
+/>
                     </div>
                   </div>
                 );
