@@ -1,3 +1,4 @@
+import { TIERS } from "../data/gameData";
 import {
   collection,
   setDoc,
@@ -19,20 +20,24 @@ export function useArena({ user, turn }) {
     try {
       const teamData = currentTeam
         .filter((p) => p)
-       .map((p) => ({
-  name: p.name,
-  nick: p.nick,
-  atk: p.atk,
-  hp: p.hp,
-  curHp: p.hp,
-  ability: p.ability || "none",
-  tier: p.tier,
-  lvl: p.lvl || 1,
-  exp: p.exp || 0,
-  image: p.image || null,
-  id: Math.random(),
-  isBossUnit: false,
-}));
+      .map((p) => {
+  const allAnimals = Object.values(TIERS).flat();
+  const animalData = allAnimals.find((a) => a.name === p.name);
+  return {
+    name: p.name,
+    nick: p.nick,
+    atk: p.atk,
+    hp: p.hp,
+    curHp: p.hp,
+    ability: p.ability || "none",
+    tier: p.tier,
+    lvl: p.lvl || 1,
+    exp: p.exp || 0,
+    image: p.image || animalData?.image || null,
+    id: Math.random(),
+    isBossUnit: false,
+  };
+});
 
       const docId = `${user.uid}_turn${turn}`;
       await setDoc(doc(db, "arena_teams", docId), {
