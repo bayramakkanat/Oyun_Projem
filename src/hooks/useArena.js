@@ -34,6 +34,7 @@ export function useArena({ user, turn }) {
     lvl: p.lvl || 1,
     exp: p.exp || 0,
     img: p.img || animalData?.img || null,
+    flip: p.flip || animalData?.flip || false,
     id: Math.random(),
     isBossUnit: false,
   };
