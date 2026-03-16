@@ -352,6 +352,7 @@ export const TIERS = {
       ability: "hurt_team_buff",
       tier: 4,
       img: "bison.png",
+      flip: true,
     },
     {
       name: "🦒",
