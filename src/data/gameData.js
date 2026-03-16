@@ -123,6 +123,7 @@ export const TIERS = {
       ability: "atk_buff",
       tier: 2,
       img: "mouse.png",
+      flip: true,
     },
     {
       name: "🦔",
@@ -163,7 +164,6 @@ export const TIERS = {
       ability: "sell_buff_friend",
       tier: 2,
       img: "raccoon.png",
-      flip: true,
     },
     {
       name: "🐇",
@@ -352,7 +352,6 @@ export const TIERS = {
       ability: "hurt_team_buff",
       tier: 4,
       img: "bison.png",
-      flip: true,
     },
     {
       name: "🦒",
@@ -418,7 +417,6 @@ export const TIERS = {
       ability: "summon_buff",
       tier: 5,
       img: "bear.png",
-      flip: true,
     },
     {
       name: "🦍",
@@ -561,7 +559,6 @@ export const TIERS = {
       ability: "start_multi_snipe",
       tier: 6,
       img: "squid.png",
-      flip: true,
     },
     {
       name: "🐙",
