@@ -217,7 +217,7 @@ function Card({
      ? compact ? "w-16 h-16" : "w-24 h-24"
       : compact ? "w-12 h-12" : "w-16 h-16"
   }`}
-  style={(mirror && !a.flip) || (!mirror && a.flip) ? { transform: "scaleX(-1)" } : {}}
+ style={mirror && !a.flip ? { transform: "scaleX(-1)" } : {}}
   onError={(e) => {
     e.target.style.display = "none";
     e.target.nextSibling.style.display = "inline";

@@ -700,6 +700,13 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         const newLives = lives - 1;
         setLives(newLives);
        if (newLives <= 0) {
+  if (gameMode === "arena") {
+    const xpBreakdown = [{ label: `${turn} Tur × 2 XP`, xp: turn * 2 }, { label: `${wins} Zafer × 5 XP`, xp: wins * 5 }];
+    const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
+    updateLeaderboard({ won: false, isNewBestTurn: false });
+    setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord: false, xpBreakdown });
+    return;
+  }
   setOver(true);
   if (gameMode === "versus" && versusRoom) {
     const { code, role } = versusRoom;
@@ -747,6 +754,13 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
           const newLives = lives - 2;
           setLives(newLives);
          if (newLives <= 0) {
+  if (gameMode === "arena") {
+    const xpBreakdown = [{ label: `${turn} Tur × 2 XP`, xp: turn * 2 }, { label: `${wins} Zafer × 5 XP`, xp: wins * 5 }];
+    const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
+    updateLeaderboard({ won: false, isNewBestTurn: false });
+    setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord: false, xpBreakdown });
+    return;
+  }
   setOver(true);
   if (gameMode === "versus" && versusRoom) {
     const { code, role } = versusRoom;
