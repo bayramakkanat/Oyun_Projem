@@ -483,6 +483,13 @@ export default function MenuScreen({
               </div>
             </div>
           </div>
+       )}
+
+        {menuView === "leaderboard" && (
+          <LeaderboardScreen
+            onBack={() => setMenuView("main")}
+            user={user}
+          />
         )}
       </div>
 
