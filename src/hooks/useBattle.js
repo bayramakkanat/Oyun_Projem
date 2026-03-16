@@ -575,9 +575,16 @@ const teamKey = role === "host" ? "hostTeam" : "guestTeam";
       const opponentData = await fetchArenaOpponent(difficultyLevel);
       if (opponentData) {
         setArenaOpponent(opponentData);
-        et = [...opponentData.team].reverse().map((p) => ({
-          ...p, id: Math.random(), curHp: p.hp,
-        }));
+       const allAnimals = Object.values(TIERS).flat();
+et = [...opponentData.team].reverse().map((p) => {
+  const animalData = allAnimals.find((a) => a.name === p.name);
+  return {
+    ...p,
+    image: p.image || animalData?.image || null,
+    id: Math.random(),
+    curHp: p.hp,
+  };
+});
       } else {
         et = genE(turn, maxT, teamSlots, difficulty, difficultyLevel);
         setArenaOpponent({ userName: "AI Komutan" });
