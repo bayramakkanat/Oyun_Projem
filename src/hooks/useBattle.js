@@ -164,7 +164,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
   name: "🥚", nick: "Düş.Yavru",
   atk: 4 * m, hp: 4 * m, curHp: 4 * m,
   ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
-  img: "baby_crocodile.png", flip: true,
+  img: "baby_crocodile.png", flip: false,
 };
         applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
         sm.push(newSummon);
@@ -195,7 +195,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
   atk: am * 2, hp: am * 3, curHp: am * 3,
   ability: "none", tier: 1, lvl: 1, exp: 0,
   id: Math.random(), isSummon: true,
-  img: "joey.png", flip: true,
+  img: "joey.png", flip: false,
 };
             a.summonCount++;
             applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
@@ -259,7 +259,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
   name: "🥚", nick: "Düş.Yavru",
   atk: 4 * m, hp: 4 * m, curHp: 4 * m,
   ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
-  img: "baby_crocodile.png", flip: true,
+  img: "baby_crocodile.png", flip: false,
 };
               applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
               sm.push(extraSummon);
@@ -475,10 +475,11 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! ${al[i].nick} e +${atkGain}/+${hpGain}`);
             }
             if (d.ability === "faint_summon") {
-              const extraSummon = {
+             const extraSummon = {
                 name: "🥚", nick: "Yavru",
                 atk: 4 * m, hp: 4 * m, curHp: 4 * m,
                 ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
+                img: "baby_crocodile.png", flip: false,
               };
               applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
               sm.push(extraSummon);
