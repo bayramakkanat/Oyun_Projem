@@ -66,8 +66,9 @@ export function useArena({ user, turn }) {
 
       if (teams.length === 0) return null;
 
-      const others = teams.filter((t) => t.uid !== user?.uid);
-      const finalPool = others.length > 0 ? others : teams;
+     const others = teams.filter((t) => t.uid !== user?.uid);
+if (others.length === 0) return null;
+const finalPool = others;
 
       return finalPool[Math.floor(Math.random() * finalPool.length)];
     } catch (err) {

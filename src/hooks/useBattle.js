@@ -60,7 +60,9 @@ export function useBattle({
   spawnBuffAnimation,
   // Harici async fonksiyonlar
   saveArenaTeam,
-  fetchArenaOpponent,
+fetchArenaOpponent,
+updateLeaderboard,
+setArenaResult,
   // Hesaplanan değerler
   difficultyLevel,
   maxT,
@@ -795,7 +797,18 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         const newLives = lives - 1;
         setLives(newLives);
         setLog((l) => [...l, "💀 Yenilgi"]);
-       if (newLives <= 0) {
+      if (newLives <= 0) {
+  if (gameMode === "arena") {
+    const isNewRecord = false;
+    const xpBreakdown = [
+      { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
+      { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
+    ];
+    const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
+    updateLeaderboard({ won: false, isNewBestTurn: isNewRecord });
+    setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
+    return;
+  }
   setOver(true);
   if (gameMode === "versus" && versusRoom) {
     const { code, role } = versusRoom;
