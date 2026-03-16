@@ -158,11 +158,12 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         lg.push(`🦬 Düşman ${d.nick} -> Takıma +${3 * m}/+${3 * m}`);
       }
       if (d.ability === "faint_summon") {
-        const newSummon = {
-          name: "🥚", nick: "Düş.Yavru",
-          atk: 4 * m, hp: 4 * m, curHp: 4 * m,
-          ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
-        };
+       const newSummon = {
+  name: "🥚", nick: "Düş.Yavru",
+  atk: 4 * m, hp: 4 * m, curHp: 4 * m,
+  ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
+  img: "baby_crocodile.png", flip: true,
+};
         applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
         sm.push(newSummon);
         lg.push(`🥚 Düşman ${d.nick} -> ${4 * m}/${4 * m} yavru çağırdı`);
@@ -188,11 +189,12 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           if (a.summonCount < 3) {
             const am = pwr(a);
             const newSummon = {
-              name: "🦘", nick: "Düş.Yavru",
-              atk: am * 2, hp: am * 3, curHp: am * 3,
-              ability: "none", tier: 1, lvl: 1, exp: 0,
-              id: Math.random(), isSummon: true,
-            };
+  name: "🦘", nick: "Düş.Yavru",
+  atk: am * 2, hp: am * 3, curHp: am * 3,
+  ability: "none", tier: 1, lvl: 1, exp: 0,
+  id: Math.random(), isSummon: true,
+  img: "joey.png", flip: true,
+};
             a.summonCount++;
             applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
             sm.push(newSummon);
@@ -251,11 +253,12 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Oyuncu takımına ${9 * m} hasar`);
             }
             if (d.ability === "faint_summon") {
-              const extraSummon = {
-                name: "🥚", nick: "Düş.Yavru",
-                atk: 4 * m, hp: 4 * m, curHp: 4 * m,
-                ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
-              };
+             const extraSummon = {
+  name: "🥚", nick: "Düş.Yavru",
+  atk: 4 * m, hp: 4 * m, curHp: 4 * m,
+  ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
+  img: "baby_crocodile.png", flip: true,
+};
               applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
               sm.push(extraSummon);
               lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Ekstra yavru ${4 * m}/${4 * m}`);
