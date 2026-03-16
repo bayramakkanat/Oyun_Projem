@@ -7,6 +7,7 @@ import {
   ACHIEVEMENTS_DEF,
 } from "../data/gameData";
 import { auth } from "../firebase";
+import LeaderboardScreen from "./LeaderboardScreen";
 
 export default function MenuScreen({
   menuView,
@@ -183,26 +184,35 @@ export default function MenuScreen({
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
               </button>
-              <div className="grid grid-cols-2 gap-4 w-full">
-                <button
-                  onClick={() => setMenuView("achievements")}
-                  className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
-                >
-                  <span className="text-2xl">🏆</span>
-                  <span className="text-xs uppercase tracking-widest opacity-60">
-                    Başarımlar
-                  </span>
-                </button>
-                <button
-                  onClick={() => setMenuView("stats")}
-                  className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
-                >
-                  <span className="text-2xl">📊</span>
-                  <span className="text-xs uppercase tracking-widest opacity-60">
-                    İstatistikler
-                  </span>
-                </button>
-              </div>
+             <div className="grid grid-cols-3 gap-4 w-full">
+  <button
+    onClick={() => setMenuView("achievements")}
+    className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
+  >
+    <span className="text-2xl">🏆</span>
+    <span className="text-xs uppercase tracking-widest opacity-60">
+      Başarımlar
+    </span>
+  </button>
+  <button
+    onClick={() => setMenuView("leaderboard")}
+    className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
+  >
+    <span className="text-2xl">🏅</span>
+    <span className="text-xs uppercase tracking-widest opacity-60">
+      Sıralama
+    </span>
+  </button>
+  <button
+    onClick={() => setMenuView("stats")}
+    className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
+  >
+    <span className="text-2xl">📊</span>
+    <span className="text-xs uppercase tracking-widest opacity-60">
+      İstatistikler
+    </span>
+  </button>
+</div>
               <button
                 onClick={() => setSoundEnabled((s) => !s)}
                 className="py-3 bg-black/20 rounded-2xl text-xs font-bold text-gray-400 hover:text-white transition-colors"
