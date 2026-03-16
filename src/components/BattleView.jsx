@@ -311,7 +311,7 @@ animation: step === 0
                         </div>
                       ) : (
                        <Card
-  a={{ ...a, curHp: a.curHp, flip: !a.flip }}
+  a={{ ...a, curHp: a.curHp, flip: !(a.flip === true) }}
   anim={anims[a.id]}
   onClick={() => {}}
   selected={false}
