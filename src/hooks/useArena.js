@@ -33,7 +33,7 @@ export function useArena({ user, turn }) {
     tier: p.tier,
     lvl: p.lvl || 1,
     exp: p.exp || 0,
-    image: p.image || animalData?.image || null,
+    img: p.img || animalData?.img || null,
     id: Math.random(),
     isBossUnit: false,
   };
