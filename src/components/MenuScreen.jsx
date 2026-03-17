@@ -8,6 +8,7 @@ import {
 } from "../data/gameData";
 import { auth } from "../firebase";
 import LeaderboardScreen from "./LeaderboardScreen";
+import CollectionScreen from "./CollectionScreen";
 
 export default function MenuScreen({
   menuView,
@@ -201,6 +202,15 @@ export default function MenuScreen({
     <span className="text-2xl">🏅</span>
     <span className="text-xs uppercase tracking-widest opacity-60">
       Sıralama
+    </span>
+  </button>
+  <button
+    onClick={() => setMenuView("collection")}
+    className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
+  >
+    <span className="text-2xl">📖</span>
+    <span className="text-xs uppercase tracking-widest opacity-60">
+      Koleksiyon
     </span>
   </button>
   <button
@@ -489,6 +499,12 @@ export default function MenuScreen({
           <LeaderboardScreen
             onBack={() => setMenuView("main")}
             user={user}
+          />
+        )}
+        {menuView === "collection" && (
+          <CollectionScreen
+            onClose={() => setMenuView("main")}
+            userId={user?.uid}
           />
         )}
       </div>
