@@ -12,8 +12,7 @@ export default function LeaderboardScreen({ onBack, user }) {
       try {
         const q = query(
           collection(db, "arena_leaderboard"),
-         orderBy("bestTurn", "desc"),
-orderBy("xp", "desc"),
+          orderBy("xp", "desc"),
           limit(20)
         );
         const snap = await getDocs(q);
