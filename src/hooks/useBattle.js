@@ -703,7 +703,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
  if (gameMode === "arena") {
     updateLeaderboard({ won: false }).then((result) => {
       const isNewRecord = result?.isNewRecord || false;
-     const losses = (turn - 1) - wins;
+     const losses = turn - wins;
 const xpBreakdown = [
   { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
   { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
@@ -765,7 +765,7 @@ const xpBreakdown = [
  if (gameMode === "arena") {
     updateLeaderboard({ won: false }).then((result) => {
       const isNewRecord = result?.isNewRecord || false;
-     const losses = (turn - 1) - wins;
+     const losses = turn - wins;
 const xpBreakdown = [
   { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
   { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
@@ -837,7 +837,7 @@ const xpBreakdown = [
 if (gameMode === "arena") {
     updateLeaderboard({ won: false }).then((result) => {
       const isNewRecord = result?.isNewRecord || false;
-     const losses = (turn - 1) - wins;
+     const losses = turn - wins;
 const xpBreakdown = [
   { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
   { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
