@@ -71,9 +71,9 @@ export const getRank = (xp) => {
 };
 
 export const calcArenaXP = ({ won, turn, isNewBestTurn }) => {
-  let xp = 10; // maç oynamak
-  if (won) xp += 25; // kazanmak
-  xp += 15 * turn; // tura ulaşmak
-  if (isNewBestTurn) xp += 100; // ilk kez bu tura ulaşmak
-  return xp;
+  let xp = 2; // tura katılım
+  if (won) xp += 5; // turu kazanmak
+  else xp -= 2; // turu kaybetmek
+  if (isNewBestTurn) xp += 50; // rekor kırma bonusu
+  return Math.max(0, xp); // negatife düşmesin
 };
