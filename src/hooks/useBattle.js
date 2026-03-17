@@ -65,12 +65,13 @@ fetchArenaOpponent,
 updateLeaderboard,
 setArenaResult,
   // Hesaplanan değerler
-  difficultyLevel,
+ difficultyLevel,
   maxT,
   teamSlots,
   difficulty,
   setPGold,
   setRewards,
+  user,
 }) {
   const versusRoomRef = useRef(null);
   const versusUnsubRef = useRef(null);
@@ -821,7 +822,7 @@ const xpBreakdown = [
 
       // Koleksiyon istatistiklerini güncelle (sadece Arena'da)
       if (gameMode === "arena") {
-        const collection = loadCollection(null);
+        const collection = loadCollection(user?.uid);
         updatedTeam.forEach((pet) => {
           if (!pet) return;
           const key = pet.nick;
@@ -836,7 +837,7 @@ const xpBreakdown = [
           if (data.unlocked) data.task3 = true;
           collection[key] = data;
         });
-        saveCollection(collection, null);
+        saveCollection(collection, user?.uid);
       }
 
      if (turn >= WIN_TURN) {
