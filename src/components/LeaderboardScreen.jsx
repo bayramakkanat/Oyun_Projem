@@ -12,7 +12,8 @@ export default function LeaderboardScreen({ onBack, user }) {
       try {
         const q = query(
           collection(db, "arena_leaderboard"),
-          orderBy("xp", "desc"),
+         orderBy("bestTurn", "desc"),
+orderBy("xp", "desc"),
           limit(20)
         );
         const snap = await getDocs(q);
@@ -70,7 +71,7 @@ export default function LeaderboardScreen({ onBack, user }) {
                     {p.userName} {isMe && <span className="text-[10px] text-yellow-500">(Sen)</span>}
                   </div>
                   <div className="text-[10px] text-gray-500 uppercase tracking-widest">
-                    {rank.name} • Tur {p.bestTurn} • {p.totalWins} Zafer
+                    {rank.name} • En Yüksek Tur: {p.bestTurn}
                   </div>
                 </div>
                 <div className="text-right">
