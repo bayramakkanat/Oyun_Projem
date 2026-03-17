@@ -701,15 +701,16 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         setLives(newLives);
        if (newLives <= 0) {
  if (gameMode === "arena") {
-    const result = await updateLeaderboard({ won: false });
-    const isNewRecord = result?.isNewRecord || false;
-    const xpBreakdown = [
-      { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
-      { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
-      ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
-    ];
-    const earnedXP = result?.earnedXP || xpBreakdown.reduce((s, x) => s + x.xp, 0);
-    setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
+    updateLeaderboard({ won: false }).then((result) => {
+      const isNewRecord = result?.isNewRecord || false;
+      const xpBreakdown = [
+        { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
+        { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
+        ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
+      ];
+      const earnedXP = result?.earnedXP || xpBreakdown.reduce((s, x) => s + x.xp, 0);
+      setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
+    });
     return;
   }
   setOver(true);
@@ -760,15 +761,16 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
           setLives(newLives);
          if (newLives <= 0) {
  if (gameMode === "arena") {
-    const result = await updateLeaderboard({ won: false });
-    const isNewRecord = result?.isNewRecord || false;
-    const xpBreakdown = [
-      { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
-      { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
-      ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
-    ];
-    const earnedXP = result?.earnedXP || xpBreakdown.reduce((s, x) => s + x.xp, 0);
-    setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
+    updateLeaderboard({ won: false }).then((result) => {
+      const isNewRecord = result?.isNewRecord || false;
+      const xpBreakdown = [
+        { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
+        { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
+        ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
+      ];
+      const earnedXP = result?.earnedXP || xpBreakdown.reduce((s, x) => s + x.xp, 0);
+      setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
+    });
     return;
   }
   setOver(true);
@@ -829,15 +831,16 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         setLog((l) => [...l, "💀 Yenilgi"]);
       if (newLives <= 0) {
 if (gameMode === "arena") {
-    const result = await updateLeaderboard({ won: false });
-    const isNewRecord = result?.isNewRecord || false;
-    const xpBreakdown = [
-      { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
-      { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
-      ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
-    ];
-    const earnedXP = result?.earnedXP || xpBreakdown.reduce((s, x) => s + x.xp, 0);
-    setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
+    updateLeaderboard({ won: false }).then((result) => {
+      const isNewRecord = result?.isNewRecord || false;
+      const xpBreakdown = [
+        { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
+        { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
+        ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
+      ];
+      const earnedXP = result?.earnedXP || xpBreakdown.reduce((s, x) => s + x.xp, 0);
+      setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
+    });
     return;
   }
   setOver(true);
