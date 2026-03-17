@@ -10,6 +10,7 @@ import { auth } from "../firebase";
 import LeaderboardScreen from "./LeaderboardScreen";
 import CollectionScreen from "./CollectionScreen";
 import TasksScreen from "./TasksScreen";
+import ProfileScreen from "./ProfileScreen";
 
 export default function MenuScreen({
   menuView,
@@ -75,7 +76,7 @@ export default function MenuScreen({
       {/* Üst Bar */}
       <div className="absolute top-6 right-6 z-20">
         {user ? (
-          <div className="flex items-center gap-3 bg-black/40 p-2 pl-4 rounded-full border border-white/10 backdrop-blur-xl">
+         <div className="flex items-center gap-3 bg-black/40 p-2 pl-4 rounded-full border border-white/10 backdrop-blur-xl cursor-pointer hover:bg-black/60 transition-all" onClick={() => setMenuView("profile")}>
             <div className="flex flex-col items-end">
               <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                 Oyuncu
@@ -518,6 +519,15 @@ export default function MenuScreen({
             <TasksScreen
               onClose={() => setMenuView("main")}
               userId={user?.uid}
+            />
+          </div>
+        )}
+        {menuView === "profile" && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <ProfileScreen
+              onClose={() => setMenuView("main")}
+              user={user}
+              stats={stats}
             />
           </div>
         )}
