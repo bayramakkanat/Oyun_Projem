@@ -71,7 +71,13 @@ export function useArena({ user, turn }) {
 if (others.length === 0) return null;
 const finalPool = others;
 
-      return finalPool[Math.floor(Math.random() * finalPool.length)];
+      const chosen = finalPool[Math.floor(Math.random() * finalPool.length)];
+const allAnimals = Object.values(TIERS).flat();
+chosen.team = chosen.team.map((p) => {
+  const animalData = allAnimals.find((a) => a.name === p.name);
+  return { ...p, flip: p.flip !== undefined ? p.flip : (animalData?.flip || false) };
+});
+return chosen;
     } catch (err) {
       logError(err, "Arena Fetch");
       return null;
