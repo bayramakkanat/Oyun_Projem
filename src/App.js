@@ -16,6 +16,7 @@ import BossRewardScreen from "./components/BossRewardScreen";
 import VictoryScreen from "./components/VictoryScreen";
 import GameOverScreen from "./components/GameOverScreen";
 import MenuScreen from "./components/MenuScreen";
+import CollectionScreen from "./components/CollectionScreen";
 import VersusLobby from "./components/VersusLobby";
 import DebugPanel from "./components/DebugPanel";
 import { getDesc } from "./utils/getDesc";
@@ -130,6 +131,7 @@ useEffect(() => {
   const [arenaOpponent, setArenaOpponent] = useState(null);
   const [pendingEndTurnAnims, setPendingEndTurnAnims] = useState(false);
   const [shopResetKey, setShopResetKey] = useState(0);
+  const [showCollection, setShowCollection] = useState(false);
 
   // --- MULTIPLAYER STATES ---
   const [user, setUser] = useState(null);
@@ -648,6 +650,14 @@ if (arenaResult) {
       />
     );
   }
+  if (showCollection) {
+    return (
+      <CollectionScreen
+        onClose={() => setShowCollection(false)}
+        userId={user?.uid}
+      />
+    );
+  }
   if (guide) {
     return (
       <GuideScreen
@@ -776,6 +786,11 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
       className="p-2 bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30"
       title="Kademe Rehberi"
     >🗺️</button>
+    <button
+      onClick={() => setShowCollection(true)}
+      className="p-2 bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30"
+      title="Koleksiyon Defteri"
+    >📖</button>
     {/* Boss Uyarısı */}
     {BOSSES[turn + 1] && gameMode === "standard" && (
       <div className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-red-900/80 to-orange-900/80 border border-red-500/60 rounded-2xl shadow-[0_0_12px_rgba(239,68,68,0.4)] animate-pulse">

@@ -8,6 +8,7 @@ import {
   applyEndTurnBuffs,
   applySummonBuffs,
 } from "../utils/battleUtils";
+import { loadCollection, saveCollection, getDefaultAnimalData } from "../utils/helpers";
 import {
   spawnParticles,
   spawnFloatingText,
@@ -812,11 +813,31 @@ const xpBreakdown = [
       });
       setTeam(updatedTeam);
 
-      if (won) {
+     if (won) {
         setWins((w) => w + 1);
         setLog((l) => [...l, "🎉 ZAFER!"]);
       }
       if (gameMode === "arena") saveArenaTeam(updatedTeam, difficultyLevel);
+
+      // Koleksiyon istatistiklerini güncelle (sadece Arena'da)
+      if (gameMode === "arena") {
+        const collection = loadCollection(null);
+        updatedTeam.forEach((pet) => {
+          if (!pet) return;
+          const key = pet.nick;
+          const data = collection[key] || getDefaultAnimalData();
+          data.used += 1;
+          if (won) data.wins += 1;
+          if (pet.lvl > data.maxLvl) data.maxLvl = pet.lvl;
+          if (pet.lvl === 3) data.unlocked = true;
+          // Görev kontrolleri
+          if (data.used >= 3) data.task1 = true;
+          if (data.wins >= 5) data.task2 = true;
+          if (data.unlocked) data.task3 = true;
+          collection[key] = data;
+        });
+        saveCollection(collection, null);
+      }
 
      if (turn >= WIN_TURN) {
   if (gameMode === "arena") {
