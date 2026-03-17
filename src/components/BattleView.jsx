@@ -1,5 +1,4 @@
 import { useRef, useEffect } from "react";
-import battleBg from "../battleBg";
 import Card from "./Card";
 import StarField from "./StarField";
 import { BOSSES } from "../data/gameData";
@@ -31,7 +30,7 @@ useEffect(() => {
     <div
       className="fixed inset-0 z-40 flex flex-col overflow-hidden"
       style={{
-        backgroundImage: `url(${battleBg})`,
+        backgroundImage: `url(/images/themes/battle_bg.jpg)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",

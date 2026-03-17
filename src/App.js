@@ -29,7 +29,6 @@ import { useArena } from "./hooks/useArena";
 import { calcArenaXP, getRank } from "./utils/helpers";
 import { useEndTurn } from "./hooks/useEndTurn";
 import { useMusic } from "./hooks/useMusic";
-import battleBg from "./battleBg";
 import { spawnParticles, spawnBuffAnimation } from "./utils/animations";
 import { auth, db } from "./firebase";
 
@@ -688,7 +687,7 @@ if (arenaResult) {
 
   return (
    <div className="min-h-screen text-white p-2" style={{
-  backgroundImage: `url(${battleBg})`,
+  backgroundImage: `url(/images/themes/battle_bg.jpg)`,
   backgroundSize: "cover",
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
