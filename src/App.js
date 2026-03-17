@@ -265,7 +265,9 @@ useEffect(() => {
     }
   };
   useMusic({ soundEnabled, phase, gameStarted });
-  const { saveArenaTeam, fetchArenaOpponent, updateLeaderboard } = useArena({ user, turn });
+ const turnRef2 = useRef(turn);
+useEffect(() => { turnRef2.current = turn; }, [turn]);
+const { saveArenaTeam, fetchArenaOpponent, updateLeaderboard } = useArena({ user, turnRef: turnRef2 });
   useEndTurn({
   phase,
   pendingEndTurnAnims,

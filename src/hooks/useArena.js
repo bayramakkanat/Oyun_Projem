@@ -26,7 +26,8 @@ export const getCurrentMonthLabel = () => {
   return `${AYLAR[now.getMonth()]} ${now.getFullYear()}`;
 };
 
-export function useArena({ user, turn }) {
+export function useArena({ user, turnRef }) {
+  const turn = turnRef?.current || 1;
 
   const saveArenaTeam = async (currentTeam, difficulty) => {
     if (!user) return;
