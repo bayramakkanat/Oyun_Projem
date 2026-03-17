@@ -77,3 +77,30 @@ export const calcArenaXP = ({ won, turn, isNewBestTurn }) => {
   if (isNewBestTurn) xp += 50; // rekor kırma bonusu
   return Math.max(0, xp); // negatife düşmesin
 };
+// Koleksiyon sistemi
+export const loadCollection = (userId) => {
+  try {
+    const key = "oyunKoleksiyon_" + (userId || "guest");
+    const s = localStorage.getItem(key);
+    return s ? JSON.parse(s) : {};
+  } catch {
+    return {};
+  }
+};
+
+export const saveCollection = (data, userId) => {
+  try {
+    const key = "oyunKoleksiyon_" + (userId || "guest");
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {}
+};
+
+export const getDefaultAnimalData = () => ({
+  used: 0,        // Kaç kez kullanıldı
+  wins: 0,        // Kaç galibiyet kazandı
+  maxLvl: 0,      // En yüksek seviye
+  unlocked: false, // 3. seviyeye çıkarıldı mı
+  task1: false,   // 3 kez kullan
+  task2: false,   // 5 galibiyet kazan
+  task3: false,   // 3. seviyeye çıkar
+});
