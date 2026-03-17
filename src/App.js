@@ -578,7 +578,9 @@ if (arenaResult) {
             {xpBreakdown.map((item, i) => (
               <div key={i} className="flex justify-between text-sm">
                 <span className="text-gray-300">{item.label}</span>
-                <span className="text-purple-300 font-bold">+{item.xp} XP</span>
+                <span className={`font-bold ${item.xp < 0 ? "text-red-400" : "text-purple-300"}`}>
+  {item.xp > 0 ? "+" : ""}{item.xp} XP
+</span>
               </div>
             ))}
             <div className="border-t border-white/10 mt-1 pt-2 flex justify-between font-black">
