@@ -501,11 +501,13 @@ export default function MenuScreen({
             user={user}
           />
         )}
-        {menuView === "collection" && (
-          <CollectionScreen
-            onClose={() => setMenuView("main")}
-            userId={user?.uid}
-          />
+       {menuView === "collection" && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <CollectionScreen
+              onClose={() => setMenuView("main")}
+              userId={user?.uid}
+            />
+          </div>
         )}
       </div>
 
