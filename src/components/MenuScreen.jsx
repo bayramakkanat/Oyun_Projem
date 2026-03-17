@@ -9,6 +9,7 @@ import {
 import { auth } from "../firebase";
 import LeaderboardScreen from "./LeaderboardScreen";
 import CollectionScreen from "./CollectionScreen";
+import TasksScreen from "./TasksScreen";
 
 export default function MenuScreen({
   menuView,
@@ -185,7 +186,7 @@ export default function MenuScreen({
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
               </button>
-            <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="grid grid-cols-5 gap-2 w-full">
   <button
     onClick={() => setMenuView("achievements")}
     className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
@@ -202,6 +203,15 @@ export default function MenuScreen({
     <span className="text-2xl">🏅</span>
     <span className="text-xs uppercase tracking-widest opacity-60">
       Sıralama
+    </span>
+  </button>
+  <button
+    onClick={() => setMenuView("tasks")}
+    className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
+  >
+    <span className="text-2xl">📅</span>
+    <span className="text-xs uppercase tracking-widest opacity-60">
+      Görevler
     </span>
   </button>
   <button
@@ -503,8 +513,16 @@ export default function MenuScreen({
             />
           </div>
         )}
+        {menuView === "tasks" && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <TasksScreen
+              onClose={() => setMenuView("main")}
+              userId={user?.uid}
+            />
+          </div>
+        )}
       </div>
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
+      <div className="absolute bottom-6 left-6 z-20">
         <button
           onClick={onDebug}
           className="px-4 py-2 bg-purple-900/40 border border-purple-500/20 rounded-xl text-purple-400 text-xs font-bold hover:bg-purple-800/60 transition-all"

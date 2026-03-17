@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { getCurrentMonthLabel } from "../hooks/useArena";
 import { db } from "../firebase";
 import { getRank } from "../utils/helpers";
 
@@ -10,8 +11,9 @@ export default function LeaderboardScreen({ onBack, user }) {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const q = query(
-          collection(db, "arena_leaderboard"),
+       const monthKey = `${new Date().getFullYear()}_${String(new Date().getMonth() + 1).padStart(2, "0")}`;
+      const q = query(
+        collection(db, `arena_leaderboard_${monthKey}`),
           orderBy("xp", "desc"),
           limit(20)
         );
@@ -39,7 +41,7 @@ export default function LeaderboardScreen({ onBack, user }) {
       </button>
 
       <h2 className="text-4xl font-black mb-2">LİDERLİK TABLOSU</h2>
-      <p className="text-xs text-gray-500 uppercase tracking-widest mb-6">Arena Sıralaması</p>
+      <p className="text-xs text-gray-500 uppercase tracking-widest mb-6">🏆 {getCurrentMonthLabel()} Sıralaması</p>
 
       {loading ? (
         <div className="text-center text-gray-400 py-12">Yükleniyor...</div>

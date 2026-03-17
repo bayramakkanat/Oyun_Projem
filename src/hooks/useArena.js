@@ -13,6 +13,19 @@ import {
 import { db } from "../firebase";
 import { logError, calcArenaXP } from "../utils/helpers";
 
+const AYLAR = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran",
+               "Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+
+const getMonthKey = () => {
+  const now = new Date();
+  return `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, "0")}`;
+};
+
+export const getCurrentMonthLabel = () => {
+  const now = new Date();
+  return `${AYLAR[now.getMonth()]} ${now.getFullYear()}`;
+};
+
 export function useArena({ user, turn }) {
 
   const saveArenaTeam = async (currentTeam, difficulty) => {
@@ -83,10 +96,12 @@ return chosen;
       return null;
     }
   };
+
 const updateLeaderboard = async ({ won }) => {
   if (!user) return;
   try {
-    const ref = doc(db, "arena_leaderboard", user.uid);
+    const monthKey = getMonthKey();
+    const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
     const snap = await getDoc(ref);
     const prev = snap.exists() ? snap.data() : { xp: 0, bestTurn: 0, totalWins: 0 };
     const isNewBestTurn = turn > (prev.bestTurn || 0);
@@ -95,13 +110,14 @@ const updateLeaderboard = async ({ won }) => {
     const newBestTurn = Math.max(prev.bestTurn || 0, turn);
     const newTotalWins = (prev.totalWins || 0) + (won ? 1 : 0);
 
-    await setDoc(ref, {
+   await setDoc(ref, {
       uid: user.uid,
       userName: user.displayName || user.email.split("@")[0],
       xp: newXP,
       bestTurn: newBestTurn,
       totalWins: newTotalWins,
       lastPlayed: serverTimestamp(),
+      month: getMonthKey(),
     });
 
    return { earnedXP, isNewRecord: isNewBestTurn };

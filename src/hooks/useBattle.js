@@ -8,7 +8,7 @@ import {
   applyEndTurnBuffs,
   applySummonBuffs,
 } from "../utils/battleUtils";
-import { loadCollection, saveCollection, getDefaultAnimalData } from "../utils/helpers";
+import { loadCollection, saveCollection, getDefaultAnimalData, loadTasks, saveTasks } from "../utils/helpers";
 import {
   spawnParticles,
   spawnFloatingText,
@@ -838,6 +838,30 @@ const xpBreakdown = [
           collection[key] = data;
         });
         saveCollection(collection, user?.uid);
+      }
+      // Görev ilerlemesini güncelle
+      const taskData = loadTasks(user?.uid);
+      if (taskData) {
+        const updateTask = (tasks) => tasks.map(t => {
+          if (t.done) return t;
+          let progress = t.progress;
+          if (t.type === "battles") progress += 1;
+          if (t.type === "wins" && won) progress += 1;
+          if (t.type === "arena_wins" && won && gameMode === "arena") progress += 1;
+          if (t.type === "tier1_wins" && won && updatedTeam.some(p => p?.tier === 1)) progress += 1;
+          if (t.type === "lvl2" && updatedTeam.some(p => p?.lvl >= 2)) progress = Math.max(progress, 1);
+          if (t.type === "comeback" && won && lives === 1) progress += 1;
+          if (t.type === "unique_animals") {
+            const used = new Set(updatedTeam.filter(p => p).map(p => p.nick));
+            progress = Math.max(progress, used.size);
+          }
+          if (t.type === "reach_turn10" && turn >= 10 && gameMode === "arena") progress = 1;
+          const done = progress >= t.target;
+          return { ...t, progress: Math.min(progress, t.target), done };
+        });
+        taskData.daily.tasks = updateTask(taskData.daily.tasks);
+        taskData.weekly.tasks = updateTask(taskData.weekly.tasks);
+        saveTasks(taskData, user?.uid);
       }
 
      if (turn >= WIN_TURN) {
