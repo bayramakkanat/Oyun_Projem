@@ -83,13 +83,13 @@ return chosen;
       return null;
     }
   };
-const updateLeaderboard = async ({ won, isNewBestTurn }) => {
+const updateLeaderboard = async ({ won }) => {
   if (!user) return;
   try {
     const ref = doc(db, "arena_leaderboard", user.uid);
     const snap = await getDoc(ref);
     const prev = snap.exists() ? snap.data() : { xp: 0, bestTurn: 0, totalWins: 0 };
-
+    const isNewBestTurn = turn > (prev.bestTurn || 0);
     const earnedXP = calcArenaXP({ won, turn, isNewBestTurn });
     const newXP = (prev.xp || 0) + earnedXP;
     const newBestTurn = Math.max(prev.bestTurn || 0, turn);
@@ -104,7 +104,7 @@ const updateLeaderboard = async ({ won, isNewBestTurn }) => {
       lastPlayed: serverTimestamp(),
     });
 
-    return earnedXP;
+   return { earnedXP, isNewRecord: isNewBestTurn };
   } catch (err) {
     logError(err, "Leaderboard Update");
   }
