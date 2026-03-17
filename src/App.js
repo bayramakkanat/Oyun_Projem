@@ -299,6 +299,7 @@ const { battle, startBossBattle, startVersusBattle, versusSetReady } = useBattle
   triggerAnim, clampStat, pwr, unlockAchievement, playSound,
   spawnBuffAnimation,
   saveArenaTeam, fetchArenaOpponent, updateLeaderboard, setArenaResult,
+  user,
   difficultyLevel, maxT, teamSlots, difficulty,
   setPGold,
 });
