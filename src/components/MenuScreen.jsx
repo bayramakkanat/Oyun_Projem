@@ -516,10 +516,11 @@ export default function MenuScreen({
         )}
         {menuView === "tasks" && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
-            <TasksScreen
-              onClose={() => setMenuView("main")}
-              userId={user?.uid}
-            />
+           <TasksScreen
+  onClose={() => setMenuView("main")}
+  userId={user?.uid}
+  user={user}
+/>
           </div>
         )}
         {menuView === "profile" && (

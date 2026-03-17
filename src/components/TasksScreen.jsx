@@ -1,8 +1,30 @@
 import { useState, useEffect } from "react";
 import { initTasks, saveTasks } from "../utils/helpers";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../firebase";
 
-export default function TasksScreen({ onClose, userId }) {
+export default function TasksScreen({ onClose, userId, user }) {
   const [taskData, setTaskData] = useState(null);
+
+  const addTaskXP = async (xp) => {
+  if (!user) return;
+  try {
+    const now = new Date();
+    const monthKey = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
+    const snap = await getDoc(ref);
+    const prev = snap.exists() ? snap.data() : { xp: 0, bestTurn: 0, totalWins: 0 };
+    await setDoc(ref, {
+      ...prev,
+      uid: user.uid,
+      userName: user.displayName || user.email?.split("@")[0],
+      xp: (prev.xp || 0) + xp,
+      lastPlayed: serverTimestamp(),
+    });
+  } catch (e) {
+    console.error(e);
+  }
+};
 
   useEffect(() => {
     const data = initTasks(userId);
@@ -18,38 +40,60 @@ export default function TasksScreen({ onClose, userId }) {
   const totalDailyXP = daily.tasks.filter(t => t.done).reduce((s, t) => s + t.reward, 0);
   const totalWeeklyXP = weekly.tasks.filter(t => t.done).reduce((s, t) => s + t.reward, 0);
 
-  const TaskCard = ({ task }) => (
-    <div className={`rounded-2xl border-2 p-4 transition-all ${
+ const TaskCard = ({ task }) => (
+  <div
+    className={`rounded-2xl border-2 p-4 transition-all cursor-pointer ${
       task.done
         ? "bg-green-900/30 border-green-500/40"
-        : "bg-gray-900/60 border-gray-700/60"
-    }`}>
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{task.done ? "✅" : "⬜"}</span>
-          <span className={`text-sm font-bold ${task.done ? "text-green-300" : "text-white"}`}>
-            {task.label}
-          </span>
-        </div>
-        <div className={`text-xs font-black px-2 py-1 rounded-lg whitespace-nowrap ${
-          task.done ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"
-        }`}>
-          +{task.reward} XP
-        </div>
-      </div>
+        : "bg-gray-900/60 border-gray-700/60 hover:border-purple-500/50"
+    }`}
+    onClick={async () => {
+      if (task.done || task.progress < task.target) return;
+      const updated = { ...taskData };
+      const allTasks = [
+        ...updated.daily.tasks,
+        ...updated.weekly.tasks,
+      ];
+      const t = allTasks.find(t => t.id === task.id);
+      if (t) {
+        t.done = true;
+        saveTasks(updated, userId);
+        setTaskData({ ...updated });
+        await addTaskXP(task.reward);
+      }
+    }}
+  >
+    <div className="flex items-start justify-between gap-3 mb-2">
       <div className="flex items-center gap-2">
-        <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all ${task.done ? "bg-green-500" : "bg-purple-500"}`}
-            style={{ width: `${(task.progress / task.target) * 100}%` }}
-          />
-        </div>
-        <span className="text-xs text-gray-400 whitespace-nowrap">
-          {task.progress}/{task.target}
+        <span className="text-lg">{task.done ? "✅" : task.progress >= task.target ? "🎁" : "⬜"}</span>
+        <span className={`text-sm font-bold ${task.done ? "text-green-300" : "text-white"}`}>
+          {task.label}
         </span>
       </div>
+      <div className={`text-xs font-black px-2 py-1 rounded-lg whitespace-nowrap ${
+        task.done ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"
+      }`}>
+        +{task.reward} XP
+      </div>
     </div>
-  );
+    <div className="flex items-center gap-2">
+      <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all ${task.done ? "bg-green-500" : "bg-purple-500"}`}
+          style={{ width: `${(task.progress / task.target) * 100}%` }}
+        />
+      </div>
+      <span className="text-xs text-gray-400 whitespace-nowrap">
+        {task.progress}/{task.target}
+      </span>
+    </div>
+    {!task.done && task.progress >= task.target && (
+      <div className="text-xs text-yellow-400 font-black mt-2 text-center animate-pulse">
+        🎁 Ödülü almak için tıkla!
+      </div>
+    )}
+  </div>
+);
 
   return (
     <div className="min-h-screen text-white p-4" style={{
