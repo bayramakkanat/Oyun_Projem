@@ -185,7 +185,7 @@ export default function MenuScreen({
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
               </button>
-             <div className="grid grid-cols-3 gap-4 w-full">
+            <div className="grid grid-cols-4 gap-2 w-full">
   <button
     onClick={() => setMenuView("achievements")}
     className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
@@ -368,12 +368,6 @@ export default function MenuScreen({
             >
               BAŞLA! 🚀
             </button>
-            <button
-              onClick={onDebug}
-              className="w-full py-3 bg-purple-700/60 text-white rounded-2xl font-black text-sm hover:bg-purple-600/80 transition-all border border-purple-500/30"
-            >
-              🧪 Debug Paneli
-            </button>
           </div>
         )}
 
@@ -510,7 +504,14 @@ export default function MenuScreen({
           </div>
         )}
       </div>
-
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
+        <button
+          onClick={onDebug}
+          className="px-4 py-2 bg-purple-900/40 border border-purple-500/20 rounded-xl text-purple-400 text-xs font-bold hover:bg-purple-800/60 transition-all"
+        >
+          🧪 Debug
+        </button>
+      </div>
       {showSettingsModal && (
         <SettingsModal
           user={user}
