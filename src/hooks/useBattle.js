@@ -864,7 +864,7 @@ const xpBreakdown = [
         saveTasks(taskData, user?.uid);
       }
 
-     if (turn >= WIN_TURN) {
+  if (turn === WIN_TURN) {
   if (gameMode === "arena") {
     setLives((l) => l + 1);
     setLog((lg) => [...lg, `♾️ ${WIN_TURN}. tura ulaştın! +1 can ile devam ediyorsun...`]);
