@@ -31,6 +31,7 @@ import { useEndTurn } from "./hooks/useEndTurn";
 import { useMusic } from "./hooks/useMusic";
 import { spawnParticles, spawnBuffAnimation } from "./utils/animations";
 import { auth, db } from "./firebase";
+import { TIERS } from "./data/gameData";
 
 import {
   collection,
@@ -764,20 +765,47 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
     {/* Kademe */}
    <div className="flex flex-col items-center bg-purple-900/60 border border-purple-400/30 px-3 py-1.5 rounded-2xl shadow-inner">
   <span className="text-[9px] text-purple-300 uppercase tracking-widest font-black mb-1">KADEME</span>
-<div className="flex gap-0.5">
- {[1,2,3,4,5,6].map(i => (
-  <div
-    key={i}
-    className={`relative flex items-center justify-center ${i <= maxT ? "" : "opacity-20 grayscale"}`}
-    style={i === maxT ? {
-      animation: "tierUnlock 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-      display: "inline-flex"
-    } : {}}
-  >
-    <span className="text-2xl">💎</span>
-    <span className="absolute text-[9px] font-black text-white" style={{textShadow: "0 0 4px black"}}>{i}</span>
-  </div>
-))}
+<div className="flex gap-1">
+  {[1,2,3,4,5,6].map(i => (
+    <div key={i} className="relative group">
+      {/* Kutucuk */}
+      <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-sm cursor-pointer transition-all
+        ${i <= maxT 
+          ? "bg-purple-600 border-2 border-purple-300 text-white shadow-lg shadow-purple-500/40 hover:scale-110 hover:bg-purple-500" 
+          : "bg-gray-800 border-2 border-gray-600 text-gray-500 cursor-default"
+        }
+        ${i === maxT ? "ring-2 ring-yellow-400 ring-offset-1 ring-offset-black" : ""}
+      `}>
+        {i}
+      </div>
+
+      {/* Hover Popup */}
+      {i <= maxT && (
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 z-[999] hidden group-hover:flex flex-col items-center gap-2 bg-gray-900/95 border border-purple-500/50 rounded-2xl p-3 shadow-2xl backdrop-blur-xl min-w-[200px]">
+          <div className="text-[10px] text-purple-300 font-black uppercase tracking-widest mb-1">
+            💎 Kademe {i} Hayvanları
+          </div>
+          <div className="flex gap-2 flex-wrap justify-center">
+            {(TIERS[i] || []).map((animal) => (
+              <div key={animal.nick} className="flex flex-col items-center gap-1">
+                {animal.img ? (
+                  <img
+                    src={`/images/animals/${animal.img}`}
+                    alt={animal.nick}
+                    className="w-10 h-10 object-contain drop-shadow-lg"
+                    style={!animal.flip ? { transform: "scaleX(-1)" } : {}}
+                  />
+                ) : (
+                  <span className="text-2xl">{animal.name}</span>
+                )}
+                <span className="text-[9px] text-gray-300 font-bold">{animal.nick}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  ))}
 </div>
 </div>
 {/* Rehber */}
