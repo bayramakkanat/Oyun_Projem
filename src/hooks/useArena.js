@@ -99,6 +99,7 @@ return chosen;
   };
 
 const updateLeaderboard = async ({ won }) => {
+  console.log("🎯 updateLeaderboard çağrıldı!", { won, turn: turnRef?.current });
   if (!user) return;
   try {
     const monthKey = getMonthKey();
