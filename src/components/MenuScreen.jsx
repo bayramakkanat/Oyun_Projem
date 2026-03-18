@@ -312,6 +312,29 @@ export default function MenuScreen({
                 </span>
              </div>
             </div>}
+            {gameMode === "arena" && (
+  <div className="mb-8 p-5 rounded-2xl border border-purple-500/30 bg-purple-900/20">
+    <div className="text-purple-300 font-black text-sm uppercase tracking-widest mb-3">🏟️ Arena Modu</div>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-3 text-sm text-gray-300">
+        <span className="text-xl">🏆</span>
+        <span>Başarımlar Arena'da oynayarak açılır</span>
+      </div>
+      <div className="flex items-center gap-3 text-sm text-gray-300">
+        <span className="text-xl">📅</span>
+        <span>Günlük ve haftalık görevler sadece Arena'da ilerler</span>
+      </div>
+      <div className="flex items-center gap-3 text-sm text-gray-300">
+        <span className="text-xl">📖</span>
+        <span>Koleksiyon istatistiklerin Arena'da güncellenir</span>
+      </div>
+      <div className="flex items-center gap-3 text-sm text-gray-300">
+        <span className="text-xl">📊</span>
+        <span>XP kazan, rank atla ve lider tablosuna gir!</span>
+      </div>
+    </div>
+  </div>
+)}
             <div className="mb-10">
               <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-4">
                 Savaş Modu

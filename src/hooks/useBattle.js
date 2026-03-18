@@ -703,19 +703,16 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         setLives(newLives);
        if (newLives <= 0) {
  if (gameMode === "arena") {
-   const taskData = loadTasks(user?.uid);
-   console.log("📋 Görev XP kontrolü:", { taskData: !!taskData });
-const pendingTaskXP = taskData ? [
-  ...( taskData.daily?.tasks || []),
-  ...( taskData.weekly?.tasks || []),
+ const freshTaskData = loadTasks(user?.uid);
+const pendingTaskXP = freshTaskData ? [
+  ...( freshTaskData.daily?.tasks || []),
+  ...( freshTaskData.weekly?.tasks || []),
 ].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
-console.log("📋 Pending Task XP:", pendingTaskXP);
 
-// Görevleri claimed olarak işaretle
-if (taskData) {
-  taskData.daily.tasks = taskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  taskData.weekly.tasks = taskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  saveTasks(taskData, user?.uid);
+if (freshTaskData) {
+  freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  saveTasks(freshTaskData, user?.uid);
 }
 
 updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
@@ -780,7 +777,7 @@ const xpBreakdown = [
           setLives(newLives);
          if (newLives <= 0) {
  if (gameMode === "arena") {
-   const taskData = loadTasks(user?.uid);
+ const freshTaskData = loadTasks(user?.uid);
 const pendingTaskXP = taskData ? [
   ...( taskData.daily?.tasks || []),
   ...( taskData.weekly?.tasks || []),
@@ -868,29 +865,17 @@ const xpBreakdown = [
         saveCollection(collection, user?.uid);
       }
       // Görev ilerlemesini güncelle
-      const taskData = loadTasks(user?.uid);
-      if (taskData) {
-        const updateTask = (tasks) => tasks.map(t => {
-          if (t.done) return t;
-          let progress = t.progress;
-          if (t.type === "battles") progress += 1;
-          if (t.type === "wins" && won) progress += 1;
-          if (t.type === "arena_wins" && won && gameMode === "arena") progress += 1;
-          if (t.type === "tier1_wins" && won && updatedTeam.some(p => p?.tier === 1)) progress += 1;
-          if (t.type === "lvl2" && updatedTeam.some(p => p?.lvl >= 2)) progress = Math.max(progress, 1);
-          if (t.type === "comeback" && won && lives === 1) progress += 1;
-          if (t.type === "unique_animals") {
-            const used = new Set(updatedTeam.filter(p => p).map(p => p.nick));
-            progress = Math.max(progress, used.size);
-          }
-          if (t.type === "reach_turn10" && turn >= 10 && gameMode === "arena") progress = 1;
-          const done = progress >= t.target;
-          return { ...t, progress: Math.min(progress, t.target), done };
-        });
-        taskData.daily.tasks = updateTask(taskData.daily.tasks);
-        taskData.weekly.tasks = updateTask(taskData.weekly.tasks);
-        saveTasks(taskData, user?.uid);
-      }
+     const freshTaskData = loadTasks(user?.uid);
+const pendingTaskXP = freshTaskData ? [
+  ...( freshTaskData.daily?.tasks || []),
+  ...( freshTaskData.weekly?.tasks || []),
+].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
+
+if (freshTaskData) {
+  freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  saveTasks(freshTaskData, user?.uid);
+}
 
   if (turn === WIN_TURN) {
   if (gameMode === "arena") {
@@ -909,17 +894,16 @@ const xpBreakdown = [
         setLog((l) => [...l, "💀 Yenilgi"]);
       if (newLives <= 0) {
 if (gameMode === "arena") {
-   const taskData = loadTasks(user?.uid);
-const pendingTaskXP = taskData ? [
-  ...( taskData.daily?.tasks || []),
-  ...( taskData.weekly?.tasks || []),
+ const freshTaskData = loadTasks(user?.uid);
+const pendingTaskXP = freshTaskData ? [
+  ...( freshTaskData.daily?.tasks || []),
+  ...( freshTaskData.weekly?.tasks || []),
 ].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
 
-// Görevleri claimed olarak işaretle
-if (taskData) {
-  taskData.daily.tasks = taskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  taskData.weekly.tasks = taskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  saveTasks(taskData, user?.uid);
+if (freshTaskData) {
+  freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  saveTasks(freshTaskData, user?.uid);
 }
 
 updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
