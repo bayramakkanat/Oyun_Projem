@@ -704,10 +704,12 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
        if (newLives <= 0) {
  if (gameMode === "arena") {
    const taskData = loadTasks(user?.uid);
+   console.log("📋 Görev XP kontrolü:", { taskData: !!taskData });
 const pendingTaskXP = taskData ? [
   ...( taskData.daily?.tasks || []),
   ...( taskData.weekly?.tasks || []),
 ].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
+console.log("📋 Pending Task XP:", pendingTaskXP);
 
 // Görevleri claimed olarak işaretle
 if (taskData) {
