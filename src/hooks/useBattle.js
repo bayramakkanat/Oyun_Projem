@@ -703,7 +703,7 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         setLives(newLives);
        if (newLives <= 0) {
  if (gameMode === "arena") {
-    updateLeaderboard({ won: false }).then((result) => {
+    updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn }).then((result) => {
       const isNewRecord = result?.isNewRecord || false;
      const losses = turn - wins;
 const xpBreakdown = [
@@ -765,7 +765,7 @@ const xpBreakdown = [
           setLives(newLives);
          if (newLives <= 0) {
  if (gameMode === "arena") {
-    updateLeaderboard({ won: false }).then((result) => {
+    updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn }).then((result) => {
       const isNewRecord = result?.isNewRecord || false;
      const losses = turn - wins;
 const xpBreakdown = [
@@ -881,7 +881,7 @@ const xpBreakdown = [
         setLog((l) => [...l, "💀 Yenilgi"]);
       if (newLives <= 0) {
 if (gameMode === "arena") {
-    updateLeaderboard({ won: false }).then((result) => {
+    updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn }).then((result) => {
       const isNewRecord = result?.isNewRecord || false;
      const losses = turn - wins;
 const xpBreakdown = [
