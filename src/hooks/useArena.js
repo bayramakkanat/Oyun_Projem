@@ -106,6 +106,7 @@ const updateLeaderboard = async ({ won }) => {
     const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
     const snap = await getDoc(ref);
     const prev = snap.exists() ? snap.data() : { xp: 0, bestTurn: 0, totalWins: 0 };
+    console.log("📦 Firebase'den okunan veri:", prev);
     const isNewBestTurn = turn > (prev.bestTurn || 0);
     const earnedXP = calcArenaXP({ won, turn, isNewBestTurn });
     const newXP = (prev.xp || 0) + earnedXP;
@@ -121,7 +122,7 @@ const updateLeaderboard = async ({ won }) => {
       lastPlayed: serverTimestamp(),
       month: getMonthKey(),
     });
-
+console.log("✅ Firebase'e yazıldı!", { newXP, newBestTurn, newTotalWins });
    return { earnedXP, isNewRecord: isNewBestTurn };
   } catch (err) {
     logError(err, "Leaderboard Update");
