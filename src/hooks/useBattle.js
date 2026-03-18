@@ -863,7 +863,15 @@ const xpBreakdown = [
         });
         saveCollection(collection, user?.uid);
       }
-      
+      // Görev ilerlemesini güncelle
+      if (gameMode === "arena") {
+        const taskData = loadTasks(user?.uid);
+        if (taskData) {
+          taskData.daily.tasks = taskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+          taskData.weekly.tasks = taskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+          saveTasks(taskData, user?.uid);
+        }
+      }
   if (turn === WIN_TURN) {
   if (gameMode === "arena") {
     setLives((l) => l + 1);
