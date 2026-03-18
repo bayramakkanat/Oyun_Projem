@@ -19,6 +19,7 @@ export const TIERS = {
       ability: "none",
       tier: 1,
       img: "fish.png",
+      flip: true,
     },
     {
       name: "🐛",
@@ -70,6 +71,7 @@ export const TIERS = {
       ability: "end_gain_gold",
       tier: 1,
       img: "cricket.png",
+      flip: true,
     },
     {
       name: "🐌",
@@ -302,6 +304,7 @@ export const TIERS = {
       ability: "faint_summon",
       tier: 4,
       img: "crocodile.png",
+      flip: true,
     },
     {
       name: "🦅",
@@ -428,6 +431,7 @@ export const TIERS = {
       ability: "end_self_buff",
       tier: 5,
       img: "gorilla.png",
+      flip: true,
     },
     {
       name: "🐆",
@@ -560,6 +564,7 @@ export const TIERS = {
       ability: "start_multi_snipe",
       tier: 6,
       img: "squid.png",
+      flip: true,
     },
     {
       name: "🐙",
