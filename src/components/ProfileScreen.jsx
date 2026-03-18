@@ -5,7 +5,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 export default function ProfileScreen({ onClose, user, stats }) {
-  const [xp, setXp] = useState(0);
+ const [xp, setXp] = useState(0);
+const [arenaWins, setArenaWins] = useState(0);
   const [loading, setLoading] = useState(true);
   const taskData = loadTasks(user?.uid);
 
@@ -16,7 +17,10 @@ export default function ProfileScreen({ onClose, user, stats }) {
         const monthKey = `${new Date().getFullYear()}_${String(new Date().getMonth() + 1).padStart(2, "0")}`;
         const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
         const snap = await getDoc(ref);
-        if (snap.exists()) setXp(snap.data().xp || 0);
+       if (snap.exists()) {
+  setXp(snap.data().xp || 0);
+  setArenaWins(snap.data().totalWins || 0);
+}
       } catch (e) {
         console.error(e);
       } finally {
@@ -103,7 +107,7 @@ export default function ProfileScreen({ onClose, user, stats }) {
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Toplam Oyun</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-            <div className="text-3xl font-black text-green-400">{stats.totalWins}</div>
+           <div className="text-3xl font-black text-green-400">{arenaWins}</div>
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Galibiyet</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
