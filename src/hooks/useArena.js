@@ -112,6 +112,7 @@ const updateLeaderboard = async ({ won }) => {
     const newXP = (prev.xp || 0) + earnedXP;
     const newBestTurn = Math.max(prev.bestTurn || 0, turn);
     const newTotalWins = (prev.totalWins || 0) + (won ? 1 : 0);
+    console.log("🏆 won değeri:", won, "newTotalWins:", newTotalWins);
 
    await setDoc(ref, {
       uid: user.uid,
