@@ -777,17 +777,16 @@ const xpBreakdown = [
           setLives(newLives);
          if (newLives <= 0) {
  if (gameMode === "arena") {
- const freshTaskData = loadTasks(user?.uid);
-const pendingTaskXP = taskData ? [
-  ...( taskData.daily?.tasks || []),
-  ...( taskData.weekly?.tasks || []),
+const freshTaskData = loadTasks(user?.uid);
+const pendingTaskXP = freshTaskData ? [
+  ...(freshTaskData.daily?.tasks || []),
+  ...(freshTaskData.weekly?.tasks || []),
 ].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
 
-// Görevleri claimed olarak işaretle
-if (taskData) {
-  taskData.daily.tasks = taskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  taskData.weekly.tasks = taskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  saveTasks(taskData, user?.uid);
+if (freshTaskData) {
+  freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  saveTasks(freshTaskData, user?.uid);
 }
 
 updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
@@ -864,19 +863,7 @@ const xpBreakdown = [
         });
         saveCollection(collection, user?.uid);
       }
-      // Görev ilerlemesini güncelle
-     const freshTaskData = loadTasks(user?.uid);
-const pendingTaskXP = freshTaskData ? [
-  ...( freshTaskData.daily?.tasks || []),
-  ...( freshTaskData.weekly?.tasks || []),
-].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
-
-if (freshTaskData) {
-  freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  saveTasks(freshTaskData, user?.uid);
-}
-
+      
   if (turn === WIN_TURN) {
   if (gameMode === "arena") {
     setLives((l) => l + 1);
