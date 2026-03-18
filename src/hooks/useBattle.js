@@ -703,7 +703,20 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         setLives(newLives);
        if (newLives <= 0) {
  if (gameMode === "arena") {
-    updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn }).then((result) => {
+   const taskData = loadTasks(user?.uid);
+const pendingTaskXP = taskData ? [
+  ...( taskData.daily?.tasks || []),
+  ...( taskData.weekly?.tasks || []),
+].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
+
+// Görevleri claimed olarak işaretle
+if (taskData) {
+  taskData.daily.tasks = taskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  taskData.weekly.tasks = taskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  saveTasks(taskData, user?.uid);
+}
+
+updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
       const isNewRecord = result?.isNewRecord || false;
      const losses = turn - wins;
 const xpBreakdown = [
@@ -765,7 +778,20 @@ const xpBreakdown = [
           setLives(newLives);
          if (newLives <= 0) {
  if (gameMode === "arena") {
-    updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn }).then((result) => {
+   const taskData = loadTasks(user?.uid);
+const pendingTaskXP = taskData ? [
+  ...( taskData.daily?.tasks || []),
+  ...( taskData.weekly?.tasks || []),
+].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
+
+// Görevleri claimed olarak işaretle
+if (taskData) {
+  taskData.daily.tasks = taskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  taskData.weekly.tasks = taskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  saveTasks(taskData, user?.uid);
+}
+
+updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
       const isNewRecord = result?.isNewRecord || false;
      const losses = turn - wins;
 const xpBreakdown = [
@@ -881,7 +907,20 @@ const xpBreakdown = [
         setLog((l) => [...l, "💀 Yenilgi"]);
       if (newLives <= 0) {
 if (gameMode === "arena") {
-    updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn }).then((result) => {
+   const taskData = loadTasks(user?.uid);
+const pendingTaskXP = taskData ? [
+  ...( taskData.daily?.tasks || []),
+  ...( taskData.weekly?.tasks || []),
+].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
+
+// Görevleri claimed olarak işaretle
+if (taskData) {
+  taskData.daily.tasks = taskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  taskData.weekly.tasks = taskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+  saveTasks(taskData, user?.uid);
+}
+
+updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
       const isNewRecord = result?.isNewRecord || false;
      const losses = turn - wins;
 const xpBreakdown = [
