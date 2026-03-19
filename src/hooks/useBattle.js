@@ -64,6 +64,7 @@ export function useBattle({
 fetchArenaOpponent,
 updateLeaderboard,
 setArenaResult,
+saveTasksToDB,
   // Hesaplanan değerler
  difficultyLevel,
   maxT,
@@ -713,6 +714,7 @@ if (freshTaskData) {
   freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
   freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
   saveTasks(freshTaskData, user?.uid);
+if (saveTasksToDB) saveTasksToDB(freshTaskData);
 }
 
 updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
@@ -787,6 +789,7 @@ if (freshTaskData) {
   freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
   freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
   saveTasks(freshTaskData, user?.uid);
+if (saveTasksToDB) saveTasksToDB(freshTaskData);
 }
 
 updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
@@ -891,6 +894,7 @@ if (freshTaskData) {
   freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
   freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
   saveTasks(freshTaskData, user?.uid);
+if (saveTasksToDB) saveTasksToDB(freshTaskData);
 }
 
 updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {

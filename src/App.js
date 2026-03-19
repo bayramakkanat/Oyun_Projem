@@ -299,7 +299,7 @@ const { battle, startBossBattle, startVersusBattle, versusSetReady } = useBattle
   turnRef, setTurnAndRef,
   triggerAnim, clampStat, pwr, unlockAchievement, playSound,
   spawnBuffAnimation,
-  saveArenaTeam, fetchArenaOpponent, updateLeaderboard, setArenaResult,
+  saveArenaTeam, fetchArenaOpponent, updateLeaderboard, setArenaResult, saveTasksToDB,
   user,
   difficultyLevel, maxT, teamSlots, difficulty,
   setPGold,
