@@ -267,7 +267,7 @@ useEffect(() => {
   useMusic({ soundEnabled, phase, gameStarted });
  const turnRef2 = useRef(turn);
 useEffect(() => { turnRef2.current = turn; }, [turn]);
-const { saveArenaTeam, fetchArenaOpponent, updateLeaderboard } = useArena({ user, turnRef: turnRef2 });
+const { saveArenaTeam, fetchArenaOpponent, updateLeaderboard, loadTasksFromDB, saveTasksToDB } = useArena({ user, turnRef: turnRef2 });
   useEndTurn({
   phase,
   pendingEndTurnAnims,
@@ -527,6 +527,8 @@ useEffect(() => {
             }
           }}
           onDebug={() => setShowDebugPanel(true)}
+          loadTasksFromDB={loadTasksFromDB}
+saveTasksToDB={saveTasksToDB}
         />
       </>
     );

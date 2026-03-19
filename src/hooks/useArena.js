@@ -129,5 +129,30 @@ console.log("✅ Firebase'e yazıldı!", { newXP, newBestTurn, newTotalWins });
     logError(err, "Leaderboard Update");
   }
 };
- return { saveArenaTeam, fetchArenaOpponent, updateLeaderboard };
+const loadTasksFromDB = async () => {
+  if (!user) return null;
+  try {
+    const ref = doc(db, "user_tasks", user.uid);
+    const snap = await getDoc(ref);
+    return snap.exists() ? snap.data().tasks : null;
+  } catch (err) {
+    logError(err, "Load Tasks");
+    return null;
+  }
+};
+
+const saveTasksToDB = async (taskData) => {
+  if (!user) return;
+  try {
+    const ref = doc(db, "user_tasks", user.uid);
+    await setDoc(ref, {
+      uid: user.uid,
+      tasks: taskData,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (err) {
+    logError(err, "Save Tasks");
+  }
+};
+ return { saveArenaTeam, fetchArenaOpponent, updateLeaderboard, loadTasksFromDB, saveTasksToDB };
 }

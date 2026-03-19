@@ -48,7 +48,9 @@ export default function MenuScreen({
   handleLogout,
   handleUpdateProfile,
  onStart,
-  onDebug,
+onDebug,
+loadTasksFromDB,
+saveTasksToDB,
 }) {
   const currentDiffConfig =
     DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
@@ -539,10 +541,12 @@ export default function MenuScreen({
         )}
         {menuView === "tasks" && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
-           <TasksScreen
+          <TasksScreen
   onClose={() => setMenuView("main")}
   userId={user?.uid}
   user={user}
+  loadTasksFromDB={loadTasksFromDB}
+  saveTasksToDB={saveTasksToDB}
 />
           </div>
         )}

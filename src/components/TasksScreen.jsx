@@ -1,37 +1,42 @@
 import { useState, useEffect } from "react";
-import { initTasks, saveTasks } from "../utils/helpers";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebase";
+import { initTasks, saveTasks, getTodayString, getWeekStart } from "../utils/helpers";
 
-export default function TasksScreen({ onClose, userId, user }) {
+export default function TasksScreen({ onClose, userId, user, loadTasksFromDB, saveTasksToDB }) {
   const [taskData, setTaskData] = useState(null);
-
-  const addTaskXP = async (xp) => {
-  if (!user) return;
-  try {
-    const now = new Date();
-    const monthKey = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, "0")}`;
-    const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
-    const snap = await getDoc(ref);
-    const prev = snap.exists() ? snap.data() : { xp: 0, bestTurn: 0, totalWins: 0 };
-    await setDoc(ref, {
-      ...prev,
-      uid: user.uid,
-      userName: user.displayName || user.email?.split("@")[0],
-      xp: (prev.xp || 0) + xp,
-      lastPlayed: serverTimestamp(),
-    });
-  } catch (e) {
-    console.error(e);
-  }
-};
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const data = initTasks(userId);
-    setTaskData(data);
-  }, [userId]);
+  const load = async () => {
+    const localData = initTasks(userId);
+    if (!user || !loadTasksFromDB) {
+      setTaskData(localData);
+      setLoading(false);
+      return;
+    }
+    try {
+      const dbData = await loadTasksFromDB();
+      if (dbData) {
+        // Firebase'den gelen veriyi kontrol et, günlük/haftalık sıfırlama yap
+        const today = getTodayString();
+        const weekStart = getWeekStart();
+        if (dbData.daily?.date !== today) dbData.daily = localData.daily;
+        if (dbData.weekly?.weekStart !== weekStart) dbData.weekly = localData.weekly;
+        saveTasks(dbData, userId);
+        setTaskData(dbData);
+      } else {
+        await saveTasksToDB(localData);
+        setTaskData(localData);
+      }
+    } catch {
+      setTaskData(localData);
+    }
+    setLoading(false);
+  };
+  load();
+}, [userId]);
 
-  if (!taskData) return null;
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-white">Yükleniyor...</div>;
+if (!taskData) return null;
 
   const { daily, weekly } = taskData;
 
@@ -47,21 +52,21 @@ export default function TasksScreen({ onClose, userId, user }) {
         ? "bg-green-900/30 border-green-500/40"
         : "bg-gray-900/60 border-gray-700/60 hover:border-purple-500/50"
     }`}
-    onClick={async () => {
-      if (task.done || task.progress < task.target) return;
-      const updated = { ...taskData };
-      const allTasks = [
-        ...updated.daily.tasks,
-        ...updated.weekly.tasks,
-      ];
-      const t = allTasks.find(t => t.id === task.id);
-      if (t) {
-        t.done = true;
-        saveTasks(updated, userId);
-        setTaskData({ ...updated });
-        await addTaskXP(task.reward);
-      }
-    }}
+   onClick={async () => {
+  if (task.done || task.progress < task.target) return;
+  const updated = { ...taskData };
+  const allTasks = [
+    ...updated.daily.tasks,
+    ...updated.weekly.tasks,
+  ];
+  const t = allTasks.find(t => t.id === task.id);
+  if (t) {
+    t.done = true;
+    saveTasks(updated, userId);
+    setTaskData({ ...updated });
+    if (saveTasksToDB) await saveTasksToDB(updated);
+  }
+}}
   >
     <div className="flex items-start justify-between gap-3 mb-2">
       <div className="flex items-center gap-2">
