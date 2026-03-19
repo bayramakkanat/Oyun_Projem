@@ -831,7 +831,8 @@ const xpBreakdown = [
   return { ...pet, atk: battlePet.atk, curHp: pet.hp };
 }
 if (pet.ability === "start_fire") {
-  return { ...pet, atk: battlePet.atk, curHp: pet.hp };
+  const m = pwr(pet);
+  return { ...pet, atk: clampStat(pet.atk + 4 * m), hp: pet.hp, curHp: pet.hp };
 }
 return { ...pet, curHp: pet.hp };
       });
