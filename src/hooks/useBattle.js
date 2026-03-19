@@ -819,29 +819,28 @@ const xpBreakdown = [
       }
 
       const draw = pT.length === 0 && eT.length === 0;
-      const updatedTeam = team.map((pet) => {
-        if (!pet) return pet;
-        const battlePet = pT.find((p) => p?.id === pet.id);
-        if (!battlePet) {
-  if (pet.ability === "start_fire") {
+     const updatedTeam = team.map((pet) => {
+  if (!pet) return pet;
+  const battlePet = pT.find((p) => p?.id === pet.id);
+  if (!battlePet) {
+    if (pet.ability === "start_fire") {
+      const m = pwr(pet);
+      return { ...pet, atk: clampStat(pet.atk + 4 * m), curHp: pet.hp };
+    }
+    return { ...pet, curHp: pet.hp };
+  }
+  if (pet.ability === "start_multi_snipe") {
     const m = pwr(pet);
-    return { ...pet, atk: clampStat(pet.atk + 4 * m), hp: pet.hp, curHp: pet.hp };
+    return { ...pet, atk: clampStat(pet.atk + m * 5), hp: clampStat(pet.hp + m * 5), curHp: pet.hp };
+  }
+  if (pet.ability === "start_all_perm") {
+    return { ...pet, atk: battlePet.atk, curHp: pet.hp };
+  }
+  if (pet.ability === "start_fire") {
+    return { ...pet, atk: battlePet.atk, curHp: pet.hp };
   }
   return { ...pet, curHp: pet.hp };
-}
-        if (pet.ability === "start_multi_snipe") {
-          const m = pwr(pet);
-          return { ...pet, atk: clampStat(pet.atk + m * 5), hp: clampStat(pet.hp + m * 5), curHp: pet.hp };
-        }
-       if (pet.ability === "start_all_perm") {
-  return { ...pet, atk: battlePet.atk, curHp: pet.hp };
-}
-if (pet.ability === "start_fire") {
-  const m = pwr(pet);
-  return { ...pet, atk: clampStat(pet.atk + 4 * m), hp: pet.hp, curHp: pet.hp };
-}
-return { ...pet, curHp: pet.hp };
-      });
+});
       setTeam(updatedTeam);
 
      if (won) {
