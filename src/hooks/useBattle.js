@@ -362,14 +362,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         Object.assign(newSummon, buffedSummon);
       }, 800);
     }
-    if (killer && killer.ability === "kill_fear_all" && isP && en.length > 0) {
-      const km = pwr(killer);
-      en.forEach((x) => {
-        x.atk = Math.max(1, x.atk - 5 * km);
-        x.curHp = Math.max(0, x.curHp - 5 * km);
-      });
-      lg.push(`🐯 ${killer.nick} -> Tüm düşmanlara -${5 * km}/-${5 * km}`);
-    }
+    
     if (d.ability === "faint_gold" && isP) {
       gG = m;
       lg.push(`💰 ${d.nick} -> +${m} altın`);
