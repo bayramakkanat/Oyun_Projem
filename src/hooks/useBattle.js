@@ -219,14 +219,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         killer.curHp = clampStat(killer.curHp + Math.floor((d.hp || d.curHp) * pct));
         lg.push(`👹 Düşman ${killer.nick} -> yuttu, stat kazandı`);
       }
-      if (killer && killer.ability === "kill_fear_all" && al.length > 0) {
-        const km = pwr(killer);
-        al.forEach((x) => {
-          x.atk = Math.max(1, x.atk - 5 * km);
-          x.curHp = Math.max(0, x.curHp - 5 * km);
-        });
-        lg.push(`😱 Düşman ${killer.nick} -> Oyuncu takımına -${5 * km}/-${5 * km}`);
-      }
+     if (killer && killer.ability === "kill_fear_all" && en.length > 0) {
+  const km = pwr(killer);
+  en.forEach((x) => {
+    x.atk = Math.max(1, x.atk - 5 * km);
+    x.curHp = Math.max(0, x.curHp - 5 * km);
+  });
+  lg.push(`😱 Düşman ${killer.nick} -> Oyuncu takımına -${5 * km}/-${5 * km}`);
+}
       al.forEach((ally) => {
         if (ally && ally.ability === "summon_retrigger") {
           const dodoM = pwr(ally);
@@ -1474,16 +1474,16 @@ if (p.length === 0 || e.length === 0) {
         setLog((l) => [...l, `🦭 Düşman ${d.nick} -> Takıma +${3 * km}/+${3 * km} KALICI`]);
         await delay(800);
       }
-      if (d.ability === "kill_fear_all" && p[0].curHp <= 0) {
-        const kfm = pwr(d);
-        p.forEach((pet) => {
-          pet.atk = Math.max(1, pet.atk - 5 * kfm);
-          pet.curHp = Math.max(0, pet.curHp - 5 * kfm);
-          triggerAnim(pet.id, "damage");
-        });
-        setLog((l) => [...l, `😱 Düşman ${d.nick} -> Oyuncu takımına -${5 * kfm}/-${5 * kfm}`]);
-        await delay(500);
-      }
+     if (d.ability === "kill_fear_all" && p[0].curHp <= 0) {
+  const kfm = pwr(d);
+  p.filter((pet) => pet.curHp > 0).forEach((pet) => {
+    pet.atk = Math.max(1, pet.atk - 5 * kfm);
+    pet.curHp = Math.max(1, pet.curHp - 5 * kfm);
+    triggerAnim(pet.id, "damage");
+  });
+  setLog((l) => [...l, `😱 Düşman ${d.nick} -> Oyuncu takımına -${5 * kfm}/-${5 * kfm}`]);
+  await delay(500);
+}
       if (d.ability === "atk_buff" && e[0].curHp > 0) {
         e[0].atk = clampStat(e[0].atk + pwr(d));
         triggerAnim(d.id, "buff");
@@ -1556,7 +1556,7 @@ if (p.length === 0 || e.length === 0) {
           spawnDeathEffect(e[i].id);
           const deadEnemy = e[i];
           e = e.filter((_, idx) => idx !== i);
-          const r = faint(deadEnemy, e, p, false, p.length > 0 ? p[0] : null);
+          const r = faint(deadEnemy, e, p, false, null);
           for (const logMsg of r.lg) { setLog((l) => [...l, logMsg]); await delay(300); }
           eS = [...eS, ...r.sm];
           i--;
@@ -1594,7 +1594,7 @@ if (p.length === 0 || e.length === 0) {
           spawnDeathEffect(eS[i].id);
           const deadEnemy = eS[i];
           eS = eS.filter((_, idx) => idx !== i);
-          const r = faint(deadEnemy, [...eS, ...e], p, false, p.length > 0 ? p[0] : null);
+          const r = faint(deadEnemy, [...eS, ...e], p, false, null);
           for (const logMsg of r.lg) { setLog((l) => [...l, logMsg]); await delay(300); }
           eS = [...eS, ...r.sm];
           i--;
