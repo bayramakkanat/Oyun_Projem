@@ -362,7 +362,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         Object.assign(newSummon, buffedSummon);
       }, 800);
     }
-    
+
     if (d.ability === "faint_gold" && isP) {
       gG = m;
       lg.push(`💰 ${d.nick} -> +${m} altın`);
@@ -827,10 +827,13 @@ const xpBreakdown = [
           const m = pwr(pet);
           return { ...pet, atk: clampStat(pet.atk + m * 5), hp: clampStat(pet.hp + m * 5), curHp: pet.hp };
         }
-        if (pet.ability === "start_all_perm") {
-          return { ...pet, atk: battlePet.atk, curHp: pet.hp };
-        }
-        return { ...pet, curHp: pet.hp };
+       if (pet.ability === "start_all_perm") {
+  return { ...pet, atk: battlePet.atk, curHp: pet.hp };
+}
+if (pet.ability === "start_fire") {
+  return { ...pet, atk: battlePet.atk, curHp: pet.hp };
+}
+return { ...pet, curHp: pet.hp };
       });
       setTeam(updatedTeam);
 
