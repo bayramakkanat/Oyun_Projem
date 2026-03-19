@@ -1264,9 +1264,11 @@ ee = ee.filter((x) => x.curHp > 0);
 setPT([...pp]);
 setET([...ee]);
 if (pp.length === 0 || ee.length === 0) {
-  setIsBattleOver(true);
+  setPT([...pp]);
+  setET([...ee]);
   if (isDebugBattle) {
     setIsDebugBattle(false);
+    setIsBattleOver(true);
     const winner = ee.length === 0 && pp.length > 0 ? "🎉 SEN KAZANDIN!" : pp.length === 0 && ee.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
     setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
     setTimeout(() => {
@@ -1282,6 +1284,7 @@ if (pp.length === 0 || ee.length === 0) {
     }, 4000);
     return;
   }
+  setStep((s) => s + 1);
   return;
 }
 setStep((s) => s + 1);

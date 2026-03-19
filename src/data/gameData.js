@@ -799,7 +799,7 @@ export const BOSSES = {
         hp: 38,
         curHp: 38,
         ability: "start_fire",
-        lvl: 3,
+        lvl: 1,
         exp: 0,
         id: "boss_anka",
         isBossUnit: true,
