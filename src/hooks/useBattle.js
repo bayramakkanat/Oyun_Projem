@@ -822,7 +822,13 @@ const xpBreakdown = [
       const updatedTeam = team.map((pet) => {
         if (!pet) return pet;
         const battlePet = pT.find((p) => p?.id === pet.id);
-        if (!battlePet) return { ...pet, curHp: pet.hp };
+        if (!battlePet) {
+  if (pet.ability === "start_fire") {
+    const m = pwr(pet);
+    return { ...pet, atk: clampStat(pet.atk + 4 * m), hp: pet.hp, curHp: pet.hp };
+  }
+  return { ...pet, curHp: pet.hp };
+}
         if (pet.ability === "start_multi_snipe") {
           const m = pwr(pet);
           return { ...pet, atk: clampStat(pet.atk + m * 5), hp: clampStat(pet.hp + m * 5), curHp: pet.hp };
