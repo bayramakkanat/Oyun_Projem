@@ -189,7 +189,7 @@ saveTasksToDB,
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
               </button>
-            <div className="grid grid-cols-5 gap-2 w-full">
+            <div className="grid grid-cols-4 gap-2 w-full">
   <button
     onClick={() => setMenuView("achievements")}
     className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
@@ -224,15 +224,6 @@ saveTasksToDB,
     <span className="text-2xl">📖</span>
     <span className="text-xs uppercase tracking-widest opacity-60">
       Koleksiyon
-    </span>
-  </button>
-  <button
-    onClick={() => setMenuView("stats")}
-    className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
-  >
-    <span className="text-2xl">📊</span>
-    <span className="text-xs uppercase tracking-widest opacity-60">
-      İstatistikler
     </span>
   </button>
 </div>
@@ -485,69 +476,6 @@ saveTasksToDB,
             </div>
           </div>
         )}
-
-        {menuView === "stats" && (
-          <div
-            className="w-full"
-            style={{ animation: "slideInUp 0.3s ease-out" }}
-          >
-            <button
-              onClick={() => setMenuView("main")}
-              className="mb-8 flex items-center gap-2 text-gray-400 hover:text-white transition-colors font-bold uppercase text-xs tracking-widest"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="3"
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              Geri Dön
-            </button>
-            <h2 className="text-4xl font-black mb-8">İSTATİSTİKLER</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-6 bg-white/5 rounded-3xl border border-white/5">
-                <div className="text-3xl font-black text-white mb-1">
-                  {stats.totalGames}
-                </div>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                  Toplam Oyun
-                </div>
-              </div>
-              <div className="p-6 bg-white/5 rounded-3xl border border-white/5">
-                <div className="text-3xl font-black text-green-400 mb-1">
-                  {stats.totalWins}
-                </div>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                  Zafere Ulaşıldı
-                </div>
-              </div>
-              <div className="p-6 bg-white/5 rounded-3xl border border-white/5">
-                <div className="text-3xl font-black text-blue-400 mb-1">
-                  {stats.bestTurn}
-                </div>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                  Rekor Tur
-                </div>
-              </div>
-              <div className="p-6 bg-white/5 rounded-3xl border border-white/5">
-                <div className="text-3xl font-black text-yellow-400 mb-1">
-                  {Math.round((stats.totalWins / stats.totalGames) * 100) || 0}%
-                </div>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                  Kazanma Oranı
-                </div>
-              </div>
-            </div>
-          </div>
-       )}
-
         {menuView === "leaderboard" && (
           <LeaderboardScreen
             onBack={() => setMenuView("main")}
