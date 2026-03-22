@@ -113,6 +113,7 @@ const newXP = (prev.xp || 0) + earnedXP;
     const newBestTurn = Math.max(prev.bestTurn || 0, turn);
     const newTotalWins = (prev.totalWins || 0) + totalWins;
     const newTotalGames = (prev.totalGames || 0) + 1;
+    const newMonthlyWins = (prev.monthlyWins || 0) + (won ? 1 : 0);
     console.log("🏆 won değeri:", won, "newTotalWins:", newTotalWins);
 
  await setDoc(ref, {
@@ -122,6 +123,7 @@ const newXP = (prev.xp || 0) + earnedXP;
   bestTurn: newBestTurn,
   totalWins: newTotalWins,
   totalGames: newTotalGames,
+monthlyWins: newMonthlyWins,
   lastPlayed: serverTimestamp(),
   month: getMonthKey(),
 });
