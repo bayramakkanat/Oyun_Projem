@@ -8,6 +8,7 @@ export default function ProfileScreen({ onClose, user, stats }) {
 const [xp, setXp] = useState(0);
 const [arenaWins, setArenaWins] = useState(0);
 const [bestTurn, setBestTurn] = useState(0);
+const [totalGames, setTotalGames] = useState(0);
   const [loading, setLoading] = useState(true);
   const taskData = loadTasks(user?.uid);
 
@@ -23,6 +24,7 @@ const snap = await getDoc(ref);
 if (snap.exists()) {
   setXp(snap.data().xp || 0);
   setArenaWins(snap.data().totalWins || 0);
+  setTotalGames(snap.data().totalGames || 0);
 }
 
 const profileRef = doc(db, "user_profiles", user.uid);
@@ -113,7 +115,7 @@ if (profileSnap.exists()) {
         {/* İstatistikler */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-            <div className="text-3xl font-black text-white">{stats.totalGames}</div>
+            <div className="text-3xl font-black text-white">{totalGames}</div>
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Toplam Oyun</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">

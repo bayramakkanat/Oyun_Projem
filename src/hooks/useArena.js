@@ -105,21 +105,23 @@ const updateLeaderboard = async ({ won, totalWins = 0, totalTurns = 0, taskXP = 
     const monthKey = getMonthKey();
     const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
     const snap = await getDoc(ref);
-    const prev = snap.exists() ? snap.data() : { xp: 0, bestTurn: 0, totalWins: 0 };
+    const prev = snap.exists() ? snap.data() : { xp: 0, bestTurn: 0, totalWins: 0, totalGames: 0 };
     console.log("📦 Firebase'den okunan veri:", prev);
     const isNewBestTurn = turn > (prev.bestTurn || 0);
    const earnedXP = Math.max(0, totalTurns * 2 + totalWins * 5 - (totalTurns - totalWins) * 2) + (isNewBestTurn ? 50 : 0) + taskXP;
 const newXP = (prev.xp || 0) + earnedXP;
     const newBestTurn = Math.max(prev.bestTurn || 0, turn);
     const newTotalWins = (prev.totalWins || 0) + totalWins;
+    const newTotalGames = (prev.totalGames || 0) + 1;
     console.log("🏆 won değeri:", won, "newTotalWins:", newTotalWins);
 
-  await setDoc(ref, {
+ await setDoc(ref, {
   uid: user.uid,
   userName: user.displayName || user.email.split("@")[0],
   xp: newXP,
   bestTurn: newBestTurn,
   totalWins: newTotalWins,
+  totalGames: newTotalGames,
   lastPlayed: serverTimestamp(),
   month: getMonthKey(),
 });
