@@ -128,7 +128,7 @@ if (profileSnap.exists()) {
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
             <div className="text-3xl font-black text-yellow-400">
-              {Math.round((stats.totalWins / stats.totalGames) * 100) || 0}%
+              {totalGames > 0 ? Math.round((arenaWins / totalGames) * 100) : 0}%
             </div>
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Kazanma Oranı</div>
           </div>
