@@ -118,7 +118,7 @@ if (profileSnap.exists()) {
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Galibiyet</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-           <div className="text-3xl font-black text-blue-400">{bestTurn || stats.bestTurn}</div>
+          <div className="text-3xl font-black text-blue-400">{bestTurn || 0}</div>
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Rekor Tur</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
