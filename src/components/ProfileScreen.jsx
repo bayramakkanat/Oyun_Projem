@@ -12,9 +12,11 @@ const [bestTurn, setBestTurn] = useState(0);
   const taskData = loadTasks(user?.uid);
 
   useEffect(() => {
-    const fetchXP = async () => {
-      if (!user) { setLoading(false); return; }
-      try {
+  console.log("useEffect tetiklendi, user:", user?.uid);
+   const fetchXP = async () => {
+  console.log("fetchXP çalıştı, user:", user?.uid);
+  if (!user) { setLoading(false); return; }
+  try {
         const monthKey = `${new Date().getFullYear()}_${String(new Date().getMonth() + 1).padStart(2, "0")}`;
        const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
 const snap = await getDoc(ref);
@@ -25,6 +27,7 @@ if (snap.exists()) {
 
 const profileRef = doc(db, "user_profiles", user.uid);
 const profileSnap = await getDoc(profileRef);
+console.log("Profile snap:", profileSnap.exists(), profileSnap.data());
 if (profileSnap.exists()) {
   setBestTurn(profileSnap.data().allTimeBestTurn || 0);
 }
@@ -118,7 +121,7 @@ if (profileSnap.exists()) {
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Galibiyet</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-          <div className="text-3xl font-black text-blue-400">{bestTurn || 0}</div>
+         <div className="text-3xl font-black text-blue-400">{bestTurn || 0}</div>
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Rekor Tur</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
