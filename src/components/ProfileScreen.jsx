@@ -5,8 +5,9 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 export default function ProfileScreen({ onClose, user, stats }) {
- const [xp, setXp] = useState(0);
+const [xp, setXp] = useState(0);
 const [arenaWins, setArenaWins] = useState(0);
+const [bestTurn, setBestTurn] = useState(0);
   const [loading, setLoading] = useState(true);
   const taskData = loadTasks(user?.uid);
 
@@ -17,9 +18,10 @@ const [arenaWins, setArenaWins] = useState(0);
         const monthKey = `${new Date().getFullYear()}_${String(new Date().getMonth() + 1).padStart(2, "0")}`;
         const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
         const snap = await getDoc(ref);
-       if (snap.exists()) {
+      if (snap.exists()) {
   setXp(snap.data().xp || 0);
   setArenaWins(snap.data().totalWins || 0);
+  setBestTurn(snap.data().bestTurn || 0);
 }
       } catch (e) {
         console.error(e);
@@ -111,7 +113,7 @@ const [arenaWins, setArenaWins] = useState(0);
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Galibiyet</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-            <div className="text-3xl font-black text-blue-400">{stats.bestTurn}</div>
+           <div className="text-3xl font-black text-blue-400">{bestTurn || stats.bestTurn}</div>
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Rekor Tur</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
