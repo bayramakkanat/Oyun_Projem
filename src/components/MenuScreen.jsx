@@ -314,7 +314,7 @@ saveTasksToDB,
                 </span>
              </div>
             </div>}
-            {gameMode === "arena" && (
+           {gameMode === "arena" && (
   <div className="mb-8 p-5 rounded-2xl border border-purple-500/30 bg-purple-900/20">
     <div className="text-purple-300 font-black text-sm uppercase tracking-widest mb-3">🏟️ Arena Modu</div>
     <div className="flex flex-col gap-2">
@@ -333,6 +333,29 @@ saveTasksToDB,
       <div className="flex items-center gap-3 text-sm text-gray-300">
         <span className="text-xl">📊</span>
         <span>XP kazan, rank atla ve lider tablosuna gir!</span>
+      </div>
+    </div>
+  </div>
+)}
+{gameMode === "versus" && (
+  <div className="mb-8 p-5 rounded-2xl border border-blue-500/30 bg-blue-900/20">
+    <div className="text-blue-300 font-black text-sm uppercase tracking-widest mb-3">⚔️ Karşılaşma Modu</div>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-3 text-sm text-gray-300">
+        <span className="text-xl">👥</span>
+        <span>Gerçek oyuncularla anlık savaş</span>
+      </div>
+      <div className="flex items-center gap-3 text-sm text-gray-300">
+        <span className="text-xl">🔑</span>
+        <span>Oda kodu ile arkadaşını davet et</span>
+      </div>
+      <div className="flex items-center gap-3 text-sm text-gray-300">
+        <span className="text-xl">🛒</span>
+        <span>Her tur ayrı ayrı alışveriş yaparsınız</span>
+      </div>
+      <div className="flex items-center gap-3 text-sm text-gray-300">
+        <span className="text-xl">💀</span>
+        <span>Canın bitince oyun sona erer, rakibin kazanır</span>
       </div>
     </div>
   </div>
