@@ -114,15 +114,27 @@ const newXP = (prev.xp || 0) + earnedXP;
     const newTotalWins = (prev.totalWins || 0) + totalWins;
     console.log("🏆 won değeri:", won, "newTotalWins:", newTotalWins);
 
-   await setDoc(ref, {
-      uid: user.uid,
-      userName: user.displayName || user.email.split("@")[0],
-      xp: newXP,
-      bestTurn: newBestTurn,
-      totalWins: newTotalWins,
-      lastPlayed: serverTimestamp(),
-      month: getMonthKey(),
-    });
+  await setDoc(ref, {
+  uid: user.uid,
+  userName: user.displayName || user.email.split("@")[0],
+  xp: newXP,
+  bestTurn: newBestTurn,
+  totalWins: newTotalWins,
+  lastPlayed: serverTimestamp(),
+  month: getMonthKey(),
+});
+
+// Kalıcı profil güncelle
+const profileRef = doc(db, "user_profiles", user.uid);
+const profileSnap = await getDoc(profileRef);
+const prevProfile = profileSnap.exists() ? profileSnap.data() : { allTimeBestTurn: 0 };
+const newAllTimeBestTurn = Math.max(prevProfile.allTimeBestTurn || 0, turn);
+await setDoc(profileRef, {
+  uid: user.uid,
+  userName: user.displayName || user.email.split("@")[0],
+  allTimeBestTurn: newAllTimeBestTurn,
+  lastPlayed: serverTimestamp(),
+}, { merge: true });
 console.log("✅ Firebase'e yazıldı!", { newXP, newBestTurn, newTotalWins });
    return { earnedXP, isNewRecord: isNewBestTurn };
   } catch (err) {

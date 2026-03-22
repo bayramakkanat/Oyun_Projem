@@ -16,12 +16,17 @@ const [bestTurn, setBestTurn] = useState(0);
       if (!user) { setLoading(false); return; }
       try {
         const monthKey = `${new Date().getFullYear()}_${String(new Date().getMonth() + 1).padStart(2, "0")}`;
-        const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
-        const snap = await getDoc(ref);
-      if (snap.exists()) {
+       const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
+const snap = await getDoc(ref);
+if (snap.exists()) {
   setXp(snap.data().xp || 0);
   setArenaWins(snap.data().totalWins || 0);
-  setBestTurn(snap.data().bestTurn || 0);
+}
+
+const profileRef = doc(db, "user_profiles", user.uid);
+const profileSnap = await getDoc(profileRef);
+if (profileSnap.exists()) {
+  setBestTurn(profileSnap.data().allTimeBestTurn || 0);
 }
       } catch (e) {
         console.error(e);
