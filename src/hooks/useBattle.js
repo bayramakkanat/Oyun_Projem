@@ -650,8 +650,8 @@ saveTasksToDB,
     if (versusReady) return;
     if (!versusRoom) return;
     const { code, role } = versusRoom;
-   const readyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
-const teamKey = role === "host" ? "hostTeam" : "guestTeam";
+    const readyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
+    const teamKey = role === "host" ? "hostTeam" : "guestTeam";
     const currentTeam = team
       .filter((x) => x)
       .map((p) => ({
@@ -663,9 +663,9 @@ const teamKey = role === "host" ? "hostTeam" : "guestTeam";
       }));
     try {
       await updateDoc(doc(db, "versus_rooms", code), {
-  [readyTurnField]: turnRef.current,
-  [teamKey]: currentTeam,
-});
+        [readyTurnField]: turnRef.current,
+        [teamKey]: currentTeam,
+      });
       setVersusReady(true);
     } catch (err) {
       console.error("Versus hazır hatası:", err);
@@ -696,16 +696,16 @@ const teamKey = role === "host" ? "hostTeam" : "guestTeam";
       const opponentData = await fetchArenaOpponent(difficultyLevel);
       if (opponentData) {
         setArenaOpponent(opponentData);
-       const allAnimals = Object.values(TIERS).flat();
-et = [...opponentData.team].reverse().map((p) => {
-  const animalData = allAnimals.find((a) => a.name === p.name);
-  return {
-    ...p,
-    img: p.img || animalData?.img || null,
-    id: Math.random(),
-    curHp: p.hp,
-  };
-});
+        const allAnimals = Object.values(TIERS).flat();
+        et = [...opponentData.team].reverse().map((p) => {
+          const animalData = allAnimals.find((a) => a.name === p.name);
+          return {
+            ...p,
+            img: p.img || animalData?.img || null,
+            id: Math.random(),
+            curHp: p.hp,
+          };
+        });
       } else {
         et = genE(turn, maxT, teamSlots, difficulty, difficultyLevel);
         setArenaOpponent({ userName: "AI Komutan" });
@@ -721,43 +721,43 @@ et = [...opponentData.team].reverse().map((p) => {
     setStep(0);
     setPhase("battle");
   };
-// --- VERSUS SHOP RESET ---
-useEffect(() => {
-  if (phase !== "shop" || !versusRoom || versusPhase !== "playing") return;
-  const { code, role } = versusRoom;
-  const myReadyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
-  const myTeamField = role === "host" ? "hostTeam" : "guestTeam";
-  updateDoc(doc(db, "versus_rooms", code), {
-    [myReadyTurnField]: null,
-    [myTeamField]: null,
-  }).catch(console.error);
-}, [phase]);
+  // --- VERSUS SHOP RESET ---
+  useEffect(() => {
+    if (phase !== "shop" || !versusRoom || versusPhase !== "playing") return;
+    const { code, role } = versusRoom;
+    const myReadyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
+    const myTeamField = role === "host" ? "hostTeam" : "guestTeam";
+    updateDoc(doc(db, "versus_rooms", code), {
+      [myReadyTurnField]: null,
+      [myTeamField]: null,
+    }).catch(console.error);
+  }, [phase]);
   // --- VERSUS SNAPSHOT LISTENER ---
   useEffect(() => {
     if (!versusRoom || versusPhase !== "playing") return;
     const { code, role } = versusRoom;
 
-   const unsub = onSnapshot(doc(db, "versus_rooms", code), async (snap) => {
+    const unsub = onSnapshot(doc(db, "versus_rooms", code), async (snap) => {
       const data = snap.data();
       if (!data) return;
 
-if (data.loser) {
-  const iLost = data.loser === role;
-  if (!iLost) {
-    setVictory(true);
-  }
-  return;
-}
+      if (data.loser) {
+        const iLost = data.loser === role;
+        if (!iLost) {
+          setVictory(true);
+        }
+        return;
+      }
 
-if (phaseRef.current !== "shop") return;
+      if (phaseRef.current !== "shop") return;
 
-const currentTurn = turnRef.current;
-const hostReady = data.hostReadyTurn === currentTurn;
-const guestReady = data.guestReadyTurn === currentTurn;
-const theirReady = role === "host" ? guestReady : hostReady;
-setOpponentReady(theirReady);
+      const currentTurn = turnRef.current;
+      const hostReady = data.hostReadyTurn === currentTurn;
+      const guestReady = data.guestReadyTurn === currentTurn;
+      const theirReady = role === "host" ? guestReady : hostReady;
+      setOpponentReady(theirReady);
 
-if (!hostReady || !guestReady) return;
+      if (!hostReady || !guestReady) return;
 if (!data.hostTeam || !data.guestTeam) return;
 if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
 
