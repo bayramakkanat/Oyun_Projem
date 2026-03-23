@@ -605,7 +605,7 @@ if (arenaResult) {
         </div>
         <div className="flex gap-3 w-full">
           <button onClick={() => { setArenaResult(null); reset(); }} className="flex-1 py-3 rounded-2xl bg-white/10 border border-white/20 font-bold text-white hover:bg-white/20 transition-all">🔁 Tekrar</button>
-          <button onClick={() => { setArenaResult(null); reset(); setGameStarted(false); }} className="flex-1 py-3 rounded-2xl bg-purple-600 border border-purple-400/50 font-bold text-white hover:bg-purple-500 transition-all">🏠 Ana Menü</button>
+          <button onClick={() => { setArenaResult(null); reset(); setMenuView("main"); setGameStarted(false); }} className="flex-1 py-3 rounded-2xl bg-purple-600 border border-purple-400/50 font-bold text-white hover:bg-purple-500 transition-all">🏠 Ana Menü</button>
         </div>
       </div>
     </div>
@@ -844,7 +844,7 @@ title="Koleksiyon Defteri"
     >{soundEnabled ? "🔊" : "🔇"}</button>
     {/* Menü */}
     <button
-      onClick={() => { reset(); setGameStarted(false); }}
+      onClick={() => { reset(); setMenuView("main"); setGameStarted(false); }}
       className="p-2 bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30"
       title="Ana Menü"
     >🏠</button>
