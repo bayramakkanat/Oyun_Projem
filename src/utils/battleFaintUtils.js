@@ -39,3 +39,16 @@ export const createFaintSummonUnit = ({ name, nick, power, img, flip = false }) 
   img,
   flip,
 });
+
+export const pushFaintDuplicateEffect = ({ deadUnit, allyTeam, summons, logs, logPrefix = "" }) => {
+  if (allyTeam.length === 0) return false;
+  const i = Math.floor(Math.random() * allyTeam.length);
+  summons.push({
+    ...allyTeam[i],
+    id: Math.random(),
+    curHp: allyTeam[i].hp,
+    ability: allyTeam[i].ability === "faint_duplicate" ? "none" : allyTeam[i].ability,
+  });
+  logs.push(`${logPrefix}${deadUnit.nick} -> ${allyTeam[i].nick} kopyalandi`);
+  return true;
+};

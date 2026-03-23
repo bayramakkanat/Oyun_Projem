@@ -25,7 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
-import { applyFaintBuffEffect, applyFaintDamageEffect, applyFaintShieldEffect, createFaintSummonUnit } from "../utils/battleFaintUtils";
+import { applyFaintBuffEffect, applyFaintDamageEffect, applyFaintShieldEffect, createFaintSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -158,19 +158,6 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
   };
 
 
-  const pushFaintDuplicate = ({ deadUnit, allyTeam, summons, logs, logPrefix = "" }) => {
-    if (allyTeam.length === 0) return false;
-    const i = Math.floor(Math.random() * allyTeam.length);
-    summons.push({
-      ...allyTeam[i],
-      id: Math.random(),
-      curHp: allyTeam[i].hp,
-      ability:
-        allyTeam[i].ability === "faint_duplicate" ? "none" : allyTeam[i].ability,
-    });
-    logs.push(`${logPrefix}${deadUnit.nick} -> ${allyTeam[i].nick} kopyalandi`);
-    return true;
-  };
 
   const applyFaintCopy = ({
     deadUnit,
@@ -410,7 +397,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         }
       });
       if (d.ability === "faint_duplicate") {
-        pushFaintDuplicate({
+        pushFaintDuplicateEffect({
           deadUnit: d,
           allyTeam: al,
           summons: sm,
@@ -580,7 +567,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       });
     }
     if (d.ability === "faint_duplicate" && isP) {
-      pushFaintDuplicate({
+      pushFaintDuplicateEffect({
         deadUnit: d,
         allyTeam: al,
         summons: sm,
