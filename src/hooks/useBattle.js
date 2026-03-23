@@ -25,7 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
-import { applyFaintDamageEffect, applyFaintShieldEffect } from "../utils/battleFaintUtils";
+import { applyFaintBuffEffect, applyFaintDamageEffect, applyFaintShieldEffect } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -186,15 +186,6 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
     return true;
   };
 
-  const applyFaintBuff = ({ deadUnit, power, allyTeam, logs, logPrefix = "", logSuffix = "" }) => {
-    if (allyTeam.length === 0) return false;
-    const i = Math.floor(Math.random() * allyTeam.length);
-    allyTeam[i].atk = clampStat(allyTeam[i].atk + power);
-    allyTeam[i].curHp = clampStat(allyTeam[i].curHp + power);
-    logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick} e +${power}/+${power}`);
-    return true;
-  };
-
   const applyFaintCopy = ({
     deadUnit,
     power,
@@ -233,7 +224,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
 
     if (!isP) {
       if (d.ability === "faint_buff" && al.length > 0) {
-        applyFaintBuff({
+        applyFaintBuffEffect({
           deadUnit: d,
           power: m,
           allyTeam: al,
@@ -376,7 +367,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           const dodoM = pwr(ally);
           for (let dodoI = 0; dodoI < dodoM; dodoI++) {
             if (d.ability === "faint_buff" && al.length > 0) {
-              applyFaintBuff({
+              applyFaintBuffEffect({
                 deadUnit: d,
                 power: m,
                 allyTeam: al,
@@ -446,7 +437,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
 
     // isP === true (oyuncu tarafı ölümleri)
     if (d.ability === "faint_buff" && al.length > 0) {
-      applyFaintBuff({
+      applyFaintBuffEffect({
         deadUnit: d,
         power: m,
         allyTeam: al,
@@ -617,7 +608,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           const dodoM = pwr(ally);
           for (let dodoI = 0; dodoI < dodoM; dodoI++) {
             if (d.ability === "faint_buff" && al.length > 0) {
-              applyFaintBuff({
+              applyFaintBuffEffect({
                 deadUnit: d,
                 power: m,
                 allyTeam: al,

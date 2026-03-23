@@ -15,3 +15,12 @@ export const applyFaintShieldEffect = ({ deadUnit, power, allyTeam, clampStat, l
   logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${targetLabel} +${amount} HP`);
   return amount;
 };
+
+export const applyFaintBuffEffect = ({ deadUnit, power, allyTeam, clampStat, logs, logPrefix = "", logSuffix = "" }) => {
+  if (allyTeam.length === 0) return false;
+  const i = Math.floor(Math.random() * allyTeam.length);
+  allyTeam[i].atk = clampStat(allyTeam[i].atk + power);
+  allyTeam[i].curHp = clampStat(allyTeam[i].curHp + power);
+  logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick} e +${power}/+${power}`);
+  return true;
+};
