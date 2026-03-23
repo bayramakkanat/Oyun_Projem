@@ -16,6 +16,15 @@ import {
   spawnProjectile,
 } from "../utils/animations";
 import { BOSSES, TIERS, WIN_TURN, ACHIEVEMENTS_DEF } from "../data/gameData";
+import {
+  applyTeamBuff,
+  applyTeamDamage,
+  applyTeamDebuff,
+  getFaintWeakenAllDebuff,
+  getFearAllDebuff,
+  getTeamBuffAmount,
+  getWaveDamage,
+} from "../utils/battleEffectUtils";
 
 export function useBattle({
   // State değerleri
@@ -105,24 +114,19 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         lg.push(`🛡️ Düşman ${d.nick} -> Düşman takımına +${2 * m} HP`);
       }
       if (d.ability === "faint_rage") {
-        const buff = 8 * m;
-        al.forEach((x) => {
-          x.atk = clampStat(x.atk + buff);
-          x.curHp = clampStat(x.curHp + buff);
-        });
-        lg.push(`😡 Düşman ${d.nick} -> Düşman takımına +${buff}/+${buff}`);
+        const buff = getTeamBuffAmount(m);
+        applyTeamBuff(al, buff, clampStat);
+        lg.push(`${d.nick} faint_rage -> enemy team +${buff}/+${buff}`);
       }
       if (d.ability === "faint_wave") {
-        en.forEach((x) => { x.curHp -= 9 * m; });
-        lg.push(`🌊 Düşman ${d.nick} -> Oyuncu takımına ${9 * m} hasar`);
+        const damage = getWaveDamage(m);
+        applyTeamDamage(en, damage);
+        lg.push(`${d.nick} faint_wave -> player team ${damage} damage`);
       }
       if (d.ability === "cheetah_faint") {
-        const buff = 8 * m;
-        al.forEach((x) => {
-          x.atk = clampStat(x.atk + buff);
-          x.curHp = clampStat(x.curHp + buff);
-        });
-        lg.push(`💨 Düşman ${d.nick} -> Düşman takımına +${buff}/+${buff}`);
+        const buff = getTeamBuffAmount(m);
+        applyTeamBuff(al, buff, clampStat);
+        lg.push(`${d.nick} cheetah_faint -> enemy team +${buff}/+${buff}`);
       }
       if (d.ability === "faint_gold") {
         lg.push(`💰 Düşman ${d.nick} -> +${m} altın (oyuncuya etkisi yok)`);
@@ -209,12 +213,9 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         lg.push(`🦈 Düşman ${killer.nick} -> öldürdü, +${3 * km}/+${3 * km}`);
       }
      if (killer && killer.ability === "kill_fear_all" && al.length > 0) {
-  const km = pwr(killer);
-  al.forEach((x) => {
-    x.atk = Math.max(1, x.atk - 5 * km);
-    x.curHp = Math.max(0, x.curHp - 5 * km);
-  });
-  lg.push(`Fear -> ${killer.nick} dusman takimina -${5 * km}/-${5 * km}`);
+  const debuff = getFearAllDebuff(pwr(killer));
+  applyTeamDebuff(al, debuff);
+  lg.push(`Fear -> ${killer.nick} -> enemy team -${debuff}/-${debuff}`);
 }
       al.forEach((ally) => {
         if (ally && ally.ability === "summon_retrigger") {
@@ -235,24 +236,19 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Takıma +${2 * m} HP`);
             }
             if (d.ability === "faint_rage" || d.ability === "cheetah_faint") {
-              const buff = 8 * m;
-              al.forEach((x) => {
-                x.atk = clampStat(x.atk + buff);
-                x.curHp = clampStat(x.curHp + buff);
-              });
-              lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Takıma +${buff}/+${buff}`);
+              const buff = getTeamBuffAmount(m);
+              applyTeamBuff(al, buff, clampStat);
+              lg.push(`Dodo retrigger -> ${d.nick} -> team +${buff}/+${buff}`);
             }
             if (d.ability === "faint_wave") {
-              en.forEach((x) => { x.curHp -= 9 * m; });
-              lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Oyuncu takımına ${9 * m} hasar`);
+              const damage = getWaveDamage(m);
+              applyTeamDamage(en, damage);
+              lg.push(`Dodo retrigger -> ${d.nick} -> player team ${damage} damage`);
             }
             if (d.ability === "faint_weaken_all") {
-              const debuff = m === 1 ? 3 : m === 2 ? 5 : 8;
-              en.forEach((x) => {
-                x.atk = Math.max(1, x.atk - debuff);
-                x.curHp = Math.max(0, x.curHp - debuff);
-              });
-              lg.push(`Dodo tekrar -> ${d.nick} efekti tekrar! Oyuncu takimina -${debuff}/-${debuff}`);
+              const debuff = getFaintWeakenAllDebuff(m);
+              applyTeamDebuff(en, debuff);
+              lg.push(`Dodo retrigger -> ${d.nick} -> player team -${debuff}/-${debuff}`);
             }
             if (d.ability === "faint_summon") {
              const extraSummon = {
@@ -447,24 +443,19 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Takıma +${2 * m} HP`);
             }
             if (d.ability === "faint_rage" || d.ability === "cheetah_faint") {
-              const buff = 8 * m;
-              al.forEach((x) => {
-                x.atk = clampStat(x.atk + buff);
-                x.curHp = clampStat(x.curHp + buff);
-              });
-              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Takıma +${buff}/+${buff}`);
+              const buff = getTeamBuffAmount(m);
+              applyTeamBuff(al, buff, clampStat);
+              lg.push(`Dodo retrigger -> ${d.nick} -> team +${buff}/+${buff}`);
             }
             if (d.ability === "faint_wave") {
-              en.forEach((x) => { x.curHp -= 9 * m; });
-              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Tüm düşmanlara ${9 * m} hasar`);
+              const damage = getWaveDamage(m);
+              applyTeamDamage(en, damage);
+              lg.push(`Dodo retrigger -> ${d.nick} -> enemy team ${damage} damage`);
             }
             if (d.ability === "faint_weaken_all") {
-              const debuff = m === 1 ? 3 : m === 2 ? 5 : 8;
-              en.forEach((x) => {
-                x.atk = Math.max(1, x.atk - debuff);
-                x.curHp = Math.max(0, x.curHp - debuff);
-              });
-              lg.push(`Dodo tekrar -> ${d.nick} efekti tekrar! Tum dusmanlara -${debuff}/-${debuff}`);
+              const debuff = getFaintWeakenAllDebuff(m);
+              applyTeamDebuff(en, debuff);
+              lg.push(`Dodo retrigger -> ${d.nick} -> enemy team -${debuff}/-${debuff}`);
             }
             if (d.ability === "faint_copy" && al.length > 0) {
               const i = Math.floor(Math.random() * al.length);
@@ -1375,13 +1366,13 @@ if (p.length === 0 || e.length === 0) {
         await delay(500);
       }
      if (a.ability === "faint_weaken_all" && p[0].curHp <= 0) {
-  const debuff = pwr(a) === 1 ? 3 : pwr(a) === 2 ? 5 : 8;
+  const debuff = getFaintWeakenAllDebuff(pwr(a));
   e.forEach((enemy) => {
     enemy.atk = Math.max(1, enemy.atk - debuff);
     enemy.curHp = Math.max(0, enemy.curHp - debuff);
     triggerAnim(enemy.id, "damage");
   });
-  setLog((l) => [...l, `🐃 ${a.nick} öldü -> Tüm düşmanlara -${debuff}/-${debuff}`]);
+  setLog((l) => [...l, `${a.nick} faint_weaken_all -> enemy team -${debuff}/-${debuff}`]);
   await delay(600);
 }
       if (a.ability === "hurt_team_buff" && p[0].curHp > 0 && dD > 0) {
@@ -1456,14 +1447,14 @@ if (p.length === 0 || e.length === 0) {
         await delay(800);
       }
      if (a.ability === "kill_fear_all" && e[0].curHp <= 0 && p[0].id === a.id) {
-  const m = pwr(a);
+  const debuff = getFearAllDebuff(pwr(a));
   e.forEach((enemy) => {
-    enemy.atk = Math.max(1, enemy.atk - 5 * m);
-    enemy.curHp = Math.max(0, enemy.curHp - 5 * m);
+    enemy.atk = Math.max(1, enemy.atk - debuff);
+    enemy.curHp = Math.max(0, enemy.curHp - debuff);
     spawnProjectile(a.id, enemy.id, "kill_fear_all");
     triggerAnim(enemy.id, "damage");
   });
-        setLog((l) => [...l, `😱 ${a.nick} -> Tüm düşmanlara -${5 * m}/-${5 * m}`]);
+        setLog((l) => [...l, `${a.nick} fear -> enemy team -${debuff}/-${debuff}`]);
         await delay(500);
       }
       if (d.ability === "devour" && p[0].curHp <= 0 && e[0].curHp > 0) {
@@ -1496,13 +1487,13 @@ if (p.length === 0 || e.length === 0) {
         await delay(800);
       }
      if (d.ability === "kill_fear_all" && p[0].curHp <= 0) {
-  const kfm = pwr(d);
+  const debuff = getFearAllDebuff(pwr(d));
   p.filter((pet) => pet.curHp > 0).forEach((pet) => {
-    pet.atk = Math.max(1, pet.atk - 5 * kfm);
-    pet.curHp = Math.max(1, pet.curHp - 5 * kfm);
+    pet.atk = Math.max(1, pet.atk - debuff);
+    pet.curHp = Math.max(1, pet.curHp - debuff);
     triggerAnim(pet.id, "damage");
   });
-  setLog((l) => [...l, `😱 Düşman ${d.nick} -> Oyuncu takımına -${5 * kfm}/-${5 * kfm}`]);
+  setLog((l) => [...l, `${d.nick} fear -> player team -${debuff}/-${debuff}`]);
   await delay(500);
 }
       if (d.ability === "atk_buff" && e[0].curHp > 0) {
@@ -1512,13 +1503,13 @@ if (p.length === 0 || e.length === 0) {
         await delay(500);
       }
      if (d.ability === "faint_weaken_all" && e[0].curHp <= 0) {
-  const debuff = pwr(d) === 1 ? 3 : pwr(d) === 2 ? 5 : 8;
+  const debuff = getFaintWeakenAllDebuff(pwr(d));
   p.forEach((pet) => {
     pet.atk = Math.max(1, pet.atk - debuff);
     pet.curHp = Math.max(0, pet.curHp - debuff);
     triggerAnim(pet.id, "damage");
   });
-  setLog((l) => [...l, `🐃 Düşman ${d.nick} öldü -> Tüm oyuncu takımına -${debuff}/-${debuff}`]);
+  setLog((l) => [...l, `${d.nick} faint_weaken_all -> player team -${debuff}/-${debuff}`]);
   await delay(600);
 }
       if (d.ability === "hurt_team_buff" && e[0].curHp > 0 && aD > 0) {
