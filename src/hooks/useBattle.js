@@ -1449,8 +1449,7 @@ const xpBreakdown = [
         }
         pp = pp.filter((x) => x.curHp > 0);
         ee = ee.filter((x) => x.curHp > 0);
-        setPT([...pp]);
-        setET([...ee]);
+        syncBattleTeams(pp, ee);
         if (pp.length === 0 || ee.length === 0) {
           syncBattleTeams(pp, ee);
           if (isDebugBattle) {
@@ -1802,8 +1801,7 @@ const xpBreakdown = [
       if (newE.length > 0 && newE[0].id !== oldDId) triggerAnim(newE[0].id, "slideInRight");
 
       await delay(150);
-      setPT(newP);
-      setET(newE);
+      syncBattleTeams(newP, newE);
       setStep((s) => s + 1);
     }, 300);
     return () => {
@@ -1814,6 +1812,7 @@ const xpBreakdown = [
   }, [phase, step]);
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+
 
 
 
