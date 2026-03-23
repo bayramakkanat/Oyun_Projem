@@ -25,7 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
-import { applyDodoTeamRetriggerEffect, applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, applyFriendFaintEffect, createFaintSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
+import { applyDodoTeamRetriggerEffect, applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, applyFriendFaintEffect, createFaintSummonUnit, createFriendSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -258,14 +258,15 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           if (!a.summonCount) a.summonCount = 0;
           if (a.summonCount < 3) {
             const am = pwr(a);
-            const newSummon = {
-  name: "🦘", nick: "Düş.Yavru",
-  atk: am * 2, hp: am * 3, curHp: am * 3,
-  ability: "none", tier: 1, lvl: 1, exp: 0,
-  id: Math.random(), isSummon: true,
-  img: "joey.png", flip: false,
-};
-            a.summonCount++;
+            const newSummon = createFriendSummonUnit({
+              allyUnit: a,
+              power: am,
+              name: "🦘",
+              nick: "Düş.Yavru",
+              img: "joey.png",
+              flip: false,
+            });
+            if (!newSummon) return;
             applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
             sm.push(newSummon);
             lg.push(`🦘 Düşman ${a.nick} -> yavru çağırdı (${a.summonCount}/3)`);
@@ -504,14 +505,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           if (!a.summonCount) a.summonCount = 0;
          if (a.summonCount < 3) {
             const am = pwr(a);
-            const newSummon = {
-              name: "🦘", nick: "Yavru",
-              atk: am * 2, hp: am * 3, curHp: am * 3,
-              ability: "none", tier: 1, lvl: 1, exp: 0,
-              id: Math.random(), isSummon: true,
+            const newSummon = createFriendSummonUnit({
+              allyUnit: a,
+              power: am,
+              name: "🦘",
+              nick: "Yavru",
               img: "joey.png",
-            };
-            a.summonCount++;
+            });
+            if (!newSummon) return;
             const buffedSummons = applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
             sm.push(...buffedSummons);
             lg.push(`🦘 ${a.nick} -> yavru çağırdı (${a.summonCount}/3)`);

@@ -101,3 +101,25 @@ export const applyFriendFaintEffect = ({ allyUnit, power, clampStat, logs, logPr
   logs.push(`${logPrefix}${allyUnit.nick} -> +${2 * power}/+${2 * power}${logSuffix}`);
   return true;
 };
+
+export const createFriendSummonUnit = ({ allyUnit, power, name, nick, img, flip = false }) => {
+  if (!allyUnit.summonCount) allyUnit.summonCount = 0;
+  if (allyUnit.summonCount >= 3) return null;
+  const summon = {
+    name,
+    nick,
+    atk: power * 2,
+    hp: power * 3,
+    curHp: power * 3,
+    ability: "none",
+    tier: 1,
+    lvl: 1,
+    exp: 0,
+    id: Math.random(),
+    isSummon: true,
+    img,
+    flip,
+  };
+  allyUnit.summonCount++;
+  return summon;
+};
