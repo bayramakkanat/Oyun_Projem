@@ -82,12 +82,12 @@ export function useBattle({
   spawnBuffAnimation,
   // Harici async fonksiyonlar
   saveArenaTeam,
-fetchArenaOpponent,
+  fetchArenaOpponent,
 updateLeaderboard,
 setArenaResult,
 saveTasksToDB,
   // Hesaplanan değerler
- difficultyLevel,
+  difficultyLevel,
   maxT,
   teamSlots,
   difficulty,
@@ -99,8 +99,9 @@ saveTasksToDB,
   const versusUnsubRef = useRef(null);
   const lastBattleIdRef = useRef(null);
   const phaseRef = useRef(phase);
-useEffect(() => { phaseRef.current = phase; }, [phase]);
-
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
   // --- FAINT FONKSİYONU ---
   const applyDamageAnimToTeam = (team) => {
     team.forEach((pet) => {
@@ -137,9 +138,6 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       }
     });
   };
-
-
-
 
   const faint = (d, al, en, isP, killer) => {
     if (!d) return { lg: [], sm: [], gG: 0 };
