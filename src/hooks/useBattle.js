@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, addDoc, collection } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import {
@@ -856,6 +856,7 @@ const xpBreakdown = [
           collection[key] = data;
         });
         saveCollection(collection, user?.uid);
+        
 if (gameMode === "arena") {
   const toId = (nick) => nick
     .toLowerCase()
