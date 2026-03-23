@@ -208,9 +208,9 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         killer.curHp = clampStat(killer.curHp + 3 * km);
         lg.push(`🦈 Düşman ${killer.nick} -> öldürdü, +${3 * km}/+${3 * km}`);
       }
-     if (killer && killer.ability === "kill_fear_all" && en.length > 0) {
+     if (killer && killer.ability === "kill_fear_all" && al.length > 0) {
   const km = pwr(killer);
-  en.forEach((x) => {
+  al.forEach((x) => {
     x.atk = Math.max(1, x.atk - 5 * km);
     x.curHp = Math.max(0, x.curHp - 5 * km);
   });
