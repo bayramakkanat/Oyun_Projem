@@ -36,7 +36,7 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === "sell_buff_friend")
     return `Satınca: Rastgele ${m} dosta +${m}/+${m} kalıcı`;
   if (a.ability === "shop_discount")
-    return `Alınca: Sonraki yenilemede tüm hayvanlara -${m} altın indirim`;
+    return `Alınca: Sonraki yenilemede tüm hayvanlara ${m} altın indirim`;
   if (a.ability === "faint_shield") return `Ölünce: Tüm dostlara +${2 * m} hp`;
   if (a.ability === "start_snipe")
     return `Savaş başı: Arka düşmana ${3 * m} hasar`;
