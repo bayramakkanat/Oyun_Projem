@@ -25,7 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
-import { applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, createFaintSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
+import { applyDodoTeamRetriggerEffect, applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, createFaintSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -127,35 +127,6 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
     });
   };
 
-  const applyDodoTeamRetrigger = ({
-    ability,
-    sourceNick,
-    power,
-    allyTeam,
-    enemyTeam,
-    enemyLabel,
-    logs,
-  }) => {
-    if (ability === "faint_rage" || ability === "cheetah_faint") {
-      const buff = getTeamBuffAmount(power);
-      applyTeamBuff(allyTeam, buff, clampStat);
-      logs.push(`Dodo retrigger -> ${sourceNick} -> team +${buff}/+${buff}`);
-      return true;
-    }
-    if (ability === "faint_wave") {
-      const damage = getWaveDamage(power);
-      applyTeamDamage(enemyTeam, damage);
-      logs.push(`Dodo retrigger -> ${sourceNick} -> ${enemyLabel} ${damage} damage`);
-      return true;
-    }
-    if (ability === "faint_weaken_all") {
-      const debuff = getFaintWeakenAllDebuff(power);
-      applyTeamDebuff(enemyTeam, debuff);
-      logs.push(`Dodo retrigger -> ${sourceNick} -> ${enemyLabel} -${debuff}/-${debuff}`);
-      return true;
-    }
-    return false;
-  };
 
 
 
@@ -344,7 +315,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
                 logSuffix: " efekti tekrar! ",
               });
             }
-            applyDodoTeamRetrigger({
+            applyDodoTeamRetriggerEffect({
               ability: d.ability,
               sourceNick: d.nick,
               power: m,
@@ -352,6 +323,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               enemyTeam: en,
               enemyLabel: "player team",
               logs: lg,
+              clampStat,
             });
             if (d.ability === "faint_summon") {
               const extraSummon = createFaintSummonUnit({
@@ -585,7 +557,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
                 logSuffix: " efekti tekrar! ",
               });
             }
-            applyDodoTeamRetrigger({
+            applyDodoTeamRetriggerEffect({
               ability: d.ability,
               sourceNick: d.nick,
               power: m,
@@ -593,6 +565,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               enemyTeam: en,
               enemyLabel: "enemy team",
               logs: lg,
+              clampStat,
             });
             if (d.ability === "faint_copy" && al.length > 0) {
               applyFaintCopyEffect({

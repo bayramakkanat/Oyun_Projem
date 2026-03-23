@@ -1,3 +1,5 @@
+import { applyTeamBuff, applyTeamDamage, applyTeamDebuff, getFaintWeakenAllDebuff, getTeamBuffAmount, getWaveDamage } from "./battleEffectUtils";
+
 export const applyFaintDamageEffect = ({ deadUnit, power, enemyTeam, logs, logPrefix = "", targetLabel = "", logSuffix = "" }) => {
   const damage = power * 2;
   enemyTeam.forEach((unit) => {
@@ -70,4 +72,26 @@ export const applyFaintCopyEffect = ({ deadUnit, power, allyTeam, clampStat, log
   allyTeam[i].curHp = clampStat(allyTeam[i].curHp + hpGain);
   logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick} e +${atkGain}/+${hpGain}${temporary ? " (geçici)" : ""}`);
   return true;
+};
+
+export const applyDodoTeamRetriggerEffect = ({ ability, sourceNick, power, allyTeam, enemyTeam, enemyLabel, clampStat, logs }) => {
+  if (ability === "faint_rage" || ability === "cheetah_faint") {
+    const buff = getTeamBuffAmount(power);
+    applyTeamBuff(allyTeam, buff, clampStat);
+    logs.push(`Dodo retrigger -> ${sourceNick} -> team +${buff}/+${buff}`);
+    return true;
+  }
+  if (ability === "faint_wave") {
+    const damage = getWaveDamage(power);
+    applyTeamDamage(enemyTeam, damage);
+    logs.push(`Dodo retrigger -> ${sourceNick} -> ${enemyLabel} ${damage} damage`);
+    return true;
+  }
+  if (ability === "faint_weaken_all") {
+    const debuff = getFaintWeakenAllDebuff(power);
+    applyTeamDebuff(enemyTeam, debuff);
+    logs.push(`Dodo retrigger -> ${sourceNick} -> ${enemyLabel} -${debuff}/-${debuff}`);
+    return true;
+  }
+  return false;
 };
