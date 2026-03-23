@@ -25,7 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
-import { applyDodoTeamRetriggerEffect, applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, applyFriendFaintEffect, applySelfFaintBuffEffect, applyTeamWideFaintEffect, createFaintSummonUnit, createFriendSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
+import { applyDodoTeamRetriggerEffect, applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, applyFriendFaintEffect, applySelfFaintBuffEffect, applyStagComboEffect, applyTeamWideFaintEffect, createFaintSummonUnit, createFriendSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -1753,6 +1753,9 @@ setET(newE);
 
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+
+
+
 
 
 

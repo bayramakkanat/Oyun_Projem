@@ -167,3 +167,19 @@ export const applySelfFaintBuffEffect = ({ deadUnit, power, allyTeam, clampStat,
   }
   return applied;
 };
+
+export const applyStagComboEffect = ({ deadUnit, power, allyTeam, clampStat, logs, logPrefix = "", targetLabel = "" }) => {
+  const buff = 2 * power;
+  allyTeam.forEach((pet, idx) => {
+    if (!pet) return;
+    if (pet.id === deadUnit.id) return;
+    allyTeam[idx] = {
+      ...pet,
+      atk: clampStat(pet.atk + buff),
+      hp: typeof pet.hp === "number" ? clampStat(pet.hp + buff) : pet.hp,
+      curHp: clampStat(pet.curHp + buff),
+    };
+  });
+  logs.push(`${logPrefix}${deadUnit.nick} -> ${targetLabel}+${buff}/+${buff} KALICI`);
+  return buff;
+};
