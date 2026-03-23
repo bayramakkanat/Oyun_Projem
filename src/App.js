@@ -1255,7 +1255,7 @@ title="Koleksiyon Defteri"
 }}
                       className="flex flex-col items-center flex-shrink-0"
                     >
-                     <div className={`relative group ${sel?.pendingTargetBuff && i !== sel.sourceSlot ? "ring-2 ring-cyan-400 rounded-2xl shadow-[0_0_15px_rgba(34,211,238,0.5)]" : ""}`}>
+                    <div className="relative group">
   <Card
                           a={a}
                           anim={anims[a.id]}
