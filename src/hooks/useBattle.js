@@ -1143,13 +1143,17 @@ const xpBreakdown = [
           check();
         });
 
+      // Battle playback helpers
+      const addBattleLog = (message) => {
+        setLog((l) => [...l, message]);
+      };
+
       const playBattleLogs = async (messages, waitMs) => {
         for (const logMsg of messages) {
-          setLog((l) => [...l, logMsg]);
+          addBattleLog(logMsg);
           await delay(waitMs);
         }
       };
-
 
       const playDeathAnim = (petId, direction) => {
         triggerAnim(petId, direction);
