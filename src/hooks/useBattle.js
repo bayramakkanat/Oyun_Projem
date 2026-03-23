@@ -90,6 +90,42 @@ saveTasksToDB,
 useEffect(() => { phaseRef.current = phase; }, [phase]);
 
   // --- FAINT FONKSİYONU ---
+  const applyDamageAnimToTeam = (team) => {
+    team.forEach((pet) => {
+      triggerAnim(pet.id, "damage");
+    });
+  };
+
+  const applyFearToTeam = (team, power, minHp = 0) => {
+    const debuff = getFearAllDebuff(power);
+    team.forEach((pet) => {
+      pet.atk = Math.max(1, pet.atk - debuff);
+      pet.curHp = Math.max(minHp, pet.curHp - debuff);
+      triggerAnim(pet.id, "damage");
+    });
+    return debuff;
+  };
+
+  const applyFaintWeakenToTeam = (team, power, minHp = 0) => {
+    const debuff = getFaintWeakenAllDebuff(power);
+    team.forEach((pet) => {
+      pet.atk = Math.max(1, pet.atk - debuff);
+      pet.curHp = Math.max(minHp, pet.curHp - debuff);
+      triggerAnim(pet.id, "damage");
+    });
+    return debuff;
+  };
+
+  const applyHurtTeamBuff = (team, amount) => {
+    team.forEach((pet) => {
+      if (pet && pet.curHp > 0) {
+        pet.atk = clampStat(pet.atk + amount);
+        pet.curHp = clampStat(pet.curHp + amount);
+        triggerAnim(pet.id, "buff");
+      }
+    });
+  };
+
   const faint = (d, al, en, isP, killer) => {
     if (!d) return { lg: [], sm: [], gG: 0 };
     if (d.isDead) return { lg: [], sm: [], gG: 0 };
@@ -1370,20 +1406,14 @@ if (p.length === 0 || e.length === 0) {
   e.forEach((enemy) => {
     enemy.atk = Math.max(1, enemy.atk - debuff);
     enemy.curHp = Math.max(0, enemy.curHp - debuff);
-    triggerAnim(enemy.id, "damage");
   });
+  applyDamageAnimToTeam(e);
   setLog((l) => [...l, `${a.nick} faint_weaken_all -> enemy team -${debuff}/-${debuff}`]);
   await delay(600);
 }
       if (a.ability === "hurt_team_buff" && p[0].curHp > 0 && dD > 0) {
         const m = pwr(a);
-        p.forEach((pet) => {
-          if (pet && pet.curHp > 0) {
-            pet.atk = clampStat(pet.atk + 3 * m);
-            pet.curHp = clampStat(pet.curHp + 3 * m);
-            triggerAnim(pet.id, "buff");
-          }
-        });
+        applyHurtTeamBuff(p, 3 * m);
         setLog((l) => [...l, `🦬 ${a.nick} hasar aldı -> Takıma +${3 * pwr(a)}/+${3 * pwr(a)}`]);
         await delay(500);
       }
@@ -1447,12 +1477,9 @@ if (p.length === 0 || e.length === 0) {
         await delay(800);
       }
      if (a.ability === "kill_fear_all" && e[0].curHp <= 0 && p[0].id === a.id) {
-  const debuff = getFearAllDebuff(pwr(a));
+  const debuff = applyFearToTeam(e, pwr(a));
   e.forEach((enemy) => {
-    enemy.atk = Math.max(1, enemy.atk - debuff);
-    enemy.curHp = Math.max(0, enemy.curHp - debuff);
     spawnProjectile(a.id, enemy.id, "kill_fear_all");
-    triggerAnim(enemy.id, "damage");
   });
         setLog((l) => [...l, `${a.nick} fear -> enemy team -${debuff}/-${debuff}`]);
         await delay(500);
@@ -1487,12 +1514,11 @@ if (p.length === 0 || e.length === 0) {
         await delay(800);
       }
      if (d.ability === "kill_fear_all" && p[0].curHp <= 0) {
-  const debuff = getFearAllDebuff(pwr(d));
-  p.filter((pet) => pet.curHp > 0).forEach((pet) => {
-    pet.atk = Math.max(1, pet.atk - debuff);
-    pet.curHp = Math.max(1, pet.curHp - debuff);
-    triggerAnim(pet.id, "damage");
-  });
+  const debuff = applyFearToTeam(
+    p.filter((pet) => pet.curHp > 0),
+    pwr(d),
+    1
+  );
   setLog((l) => [...l, `${d.nick} fear -> player team -${debuff}/-${debuff}`]);
   await delay(500);
 }
@@ -1503,24 +1529,13 @@ if (p.length === 0 || e.length === 0) {
         await delay(500);
       }
      if (d.ability === "faint_weaken_all" && e[0].curHp <= 0) {
-  const debuff = getFaintWeakenAllDebuff(pwr(d));
-  p.forEach((pet) => {
-    pet.atk = Math.max(1, pet.atk - debuff);
-    pet.curHp = Math.max(0, pet.curHp - debuff);
-    triggerAnim(pet.id, "damage");
-  });
+  const debuff = applyFaintWeakenToTeam(p, pwr(d));
   setLog((l) => [...l, `${d.nick} faint_weaken_all -> player team -${debuff}/-${debuff}`]);
   await delay(600);
 }
       if (d.ability === "hurt_team_buff" && e[0].curHp > 0 && aD > 0) {
         const htm = pwr(d);
-        e.forEach((pet) => {
-          if (pet && pet.curHp > 0) {
-            pet.atk = clampStat(pet.atk + 3 * htm);
-            pet.curHp = clampStat(pet.curHp + 3 * htm);
-            triggerAnim(pet.id, "buff");
-          }
-        });
+        applyHurtTeamBuff(e, 3 * htm);
         setLog((l) => [...l, `🦬 Düşman ${d.nick} hasar aldı -> Takıma +${3 * pwr(d)}/+${3 * pwr(d)}`]);
         await delay(500);
       }
