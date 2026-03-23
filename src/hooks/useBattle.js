@@ -1167,6 +1167,18 @@ const xpBreakdown = [
         return result.sm;
       };
 
+      const runFaintResolution = async ({
+        deadUnit,
+        allyTeam,
+        enemyTeam,
+        isPlayer,
+        killer,
+        waitMs,
+      }) => {
+        const result = faint(deadUnit, allyTeam, enemyTeam, isPlayer, killer);
+        return resolveFaintResult(result, waitMs);
+      };
+
       // Step 0: Savaş başı yetenekleri
       if (step === 0) {
         await delay(1200);
@@ -1680,8 +1692,14 @@ const xpBreakdown = [
           playDeathAnim(p[i].id, "deathLeft");
           const deadPet = p[i];
           p = p.filter((_, idx) => idx !== i);
-          const r = faint(deadPet, p, e, true, e.length > 0 ? e[0] : null);
-          pS = [...pS, ...(await resolveFaintResult(r, 800))];
+          pS = [...pS, ...(await runFaintResolution({
+            deadUnit: deadPet,
+            allyTeam: p,
+            enemyTeam: e,
+            isPlayer: true,
+            killer: e.length > 0 ? e[0] : null,
+            waitMs: 800,
+          }))];
           i--;
         }
       }
@@ -1690,8 +1708,14 @@ const xpBreakdown = [
           playDeathAnim(e[i].id, "deathRight");
           const deadEnemy = e[i];
           e = e.filter((_, idx) => idx !== i);
-          const r = faint(deadEnemy, e, p, false, null);
-          eS = [...eS, ...(await resolveFaintResult(r, 300))];
+          eS = [...eS, ...(await runFaintResolution({
+            deadUnit: deadEnemy,
+            allyTeam: e,
+            enemyTeam: p,
+            isPlayer: false,
+            killer: null,
+            waitMs: 300,
+          }))];
           i--;
         }
       }
@@ -1701,16 +1725,28 @@ const xpBreakdown = [
         playDeathAnim(p[0].id, "deathLeft");
         const deadPet = p[0];
         p = p.slice(1);
-        const r = faint(deadPet, p, e, true, e.length > 0 && e[0].curHp > 0 ? e[0] : null);
-        pS = [...pS, ...(await resolveFaintResult(r, 800))];
+        pS = [...pS, ...(await runFaintResolution({
+          deadUnit: deadPet,
+          allyTeam: p,
+          enemyTeam: e,
+          isPlayer: true,
+          killer: e.length > 0 && e[0].curHp > 0 ? e[0] : null,
+          waitMs: 800,
+        }))];
         await delay(500);
       }
       if (e[0] && e[0].curHp <= 0) {
         playDeathAnim(e[0].id, "deathRight");
         const deadEnemy = e[0];
         e = e.slice(1);
-        const r = faint(deadEnemy, e, p, false, p.length > 0 && p[0].curHp > 0 ? p[0] : null);
-        eS = [...eS, ...(await resolveFaintResult(r, 300))];
+        eS = [...eS, ...(await runFaintResolution({
+          deadUnit: deadEnemy,
+          allyTeam: e,
+          enemyTeam: p,
+          isPlayer: false,
+          killer: p.length > 0 && p[0].curHp > 0 ? p[0] : null,
+          waitMs: 300,
+        }))];
         await delay(500);
       }
 
@@ -1721,8 +1757,14 @@ const xpBreakdown = [
           playDeathAnim(eS[i].id, "deathRight");
           const deadEnemy = eS[i];
           eS = eS.filter((_, idx) => idx !== i);
-          const r = faint(deadEnemy, [...eS, ...e], p, false, null);
-          eS = [...eS, ...(await resolveFaintResult(r, 300))];
+          eS = [...eS, ...(await runFaintResolution({
+            deadUnit: deadEnemy,
+            allyTeam: [...eS, ...e],
+            enemyTeam: p,
+            isPlayer: false,
+            killer: null,
+            waitMs: 300,
+          }))];
           i--;
         }
       }
@@ -1772,6 +1814,7 @@ setET(newE);
 
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+
 
 
 
