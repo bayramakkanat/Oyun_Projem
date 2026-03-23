@@ -156,6 +156,35 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
     return false;
   };
 
+  const createFaintSummon = ({ name, nick, power, img, flip = false }) => ({
+    name,
+    nick,
+    atk: 4 * power,
+    hp: 4 * power,
+    curHp: 4 * power,
+    ability: "none",
+    tier: 1,
+    lvl: 1,
+    exp: 0,
+    id: Math.random(),
+    img,
+    flip,
+  });
+
+  const pushFaintDuplicate = ({ deadUnit, allyTeam, summons, logs, logPrefix = "" }) => {
+    if (allyTeam.length === 0) return false;
+    const i = Math.floor(Math.random() * allyTeam.length);
+    summons.push({
+      ...allyTeam[i],
+      id: Math.random(),
+      curHp: allyTeam[i].hp,
+      ability:
+        allyTeam[i].ability === "faint_duplicate" ? "none" : allyTeam[i].ability,
+    });
+    logs.push(`${logPrefix}${deadUnit.nick} -> ${allyTeam[i].nick} kopyalandi`);
+    return true;
+  };
+
   const faint = (d, al, en, isP, killer) => {
     if (!d) return { lg: [], sm: [], gG: 0 };
     if (d.isDead) return { lg: [], sm: [], gG: 0 };
@@ -228,12 +257,13 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         lg.push(`🦬 Düşman ${d.nick} -> Takıma +${3 * m}/+${3 * m}`);
       }
       if (d.ability === "faint_summon") {
-       const newSummon = {
-  name: "🥚", nick: "Düş.Yavru",
-  atk: 4 * m, hp: 4 * m, curHp: 4 * m,
-  ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
-  img: "baby_crocodile.png", flip: false,
-};
+        const newSummon = createFaintSummon({
+          name: "🥚",
+          nick: "Düş.Yavru",
+          power: m,
+          img: "baby_crocodile.png",
+          flip: false,
+        });
         applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
         sm.push(newSummon);
         lg.push(`🥚 Düşman ${d.nick} -> ${4 * m}/${4 * m} yavru çağırdı`);
@@ -311,12 +341,13 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               logs: lg,
             });
             if (d.ability === "faint_summon") {
-             const extraSummon = {
-  name: "🥚", nick: "Düş.Yavru",
-  atk: 4 * m, hp: 4 * m, curHp: 4 * m,
-  ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
-  img: "baby_crocodile.png", flip: false,
-};
+              const extraSummon = createFaintSummon({
+                name: "🥚",
+                nick: "Düş.Yavru",
+                power: m,
+                img: "baby_crocodile.png",
+                flip: false,
+              });
               applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
               sm.push(extraSummon);
               lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Ekstra yavru ${4 * m}/${4 * m}`);
@@ -324,13 +355,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           }
         }
       });
-      if (d.ability === "faint_duplicate" && al.length > 0) {
-        const i = Math.floor(Math.random() * al.length);
-        sm.push({
-          ...al[i], id: Math.random(), curHp: al[i].hp,
-          ability: al[i].ability === "faint_duplicate" ? "none" : al[i].ability,
+      if (d.ability === "faint_duplicate") {
+        pushFaintDuplicate({
+          deadUnit: d,
+          allyTeam: al,
+          summons: sm,
+          logs: lg,
+          logPrefix: "🐙 Düşman ",
         });
-        lg.push(`🐙 Düşman ${d.nick} -> ${al[i].nick} kopyalandı`);
       }
       return { lg, sm, gG: 0 };
     }
@@ -400,13 +432,13 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       });
       lg.push(`💨 ${d.nick} -> Tüm takıma +${buff}/+${buff}`);
     }
-   if (d.ability === "faint_summon") {
-      const newSummon = {
-        name: "🥚", nick: "Yavru",
-        atk: 4 * m, hp: 4 * m, curHp: 4 * m,
-        ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
+    if (d.ability === "faint_summon") {
+      const newSummon = createFaintSummon({
+        name: "🥚",
+        nick: "Yavru",
+        power: m,
         img: "baby_crocodile.png",
-      };
+      });
       lg.push(`🥚 ${d.nick} -> ${4 * m}/${4 * m} yavru çağırdı`);
       sm.push(newSummon);
       setTimeout(() => {
@@ -475,13 +507,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         }
       });
     }
-    if (d.ability === "faint_duplicate" && al.length > 0 && isP) {
-      const i = Math.floor(Math.random() * al.length);
-      sm.push({
-        ...al[i], id: Math.random(), curHp: al[i].hp,
-        ability: al[i].ability === "faint_duplicate" ? "none" : al[i].ability,
+    if (d.ability === "faint_duplicate" && isP) {
+      pushFaintDuplicate({
+        deadUnit: d,
+        allyTeam: al,
+        summons: sm,
+        logs: lg,
+        logPrefix: "🐙 ",
       });
-      lg.push(`🐙 ${d.nick} -> ${al[i].nick} kopyalandı`);
     }
     if (isP) {
       al.forEach((ally) => {
@@ -521,12 +554,13 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! ${al[i].nick} e +${atkGain}/+${hpGain}`);
             }
             if (d.ability === "faint_summon") {
-             const extraSummon = {
-                name: "🥚", nick: "Yavru",
-                atk: 4 * m, hp: 4 * m, curHp: 4 * m,
-                ability: "none", tier: 1, lvl: 1, exp: 0, id: Math.random(),
-                img: "baby_crocodile.png", flip: false,
-              };
+              const extraSummon = createFaintSummon({
+                name: "🥚",
+                nick: "Yavru",
+                power: m,
+                img: "baby_crocodile.png",
+                flip: false,
+              });
               applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
               sm.push(extraSummon);
               lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Ekstra yavru ${4 * m}/${4 * m}`);
