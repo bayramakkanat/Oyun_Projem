@@ -589,8 +589,15 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               });
             }
             if (d.ability === "faint_dmg") {
-              en.forEach((x) => { x.curHp -= m * 2; });
-              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Tüm düşmanlara ${m * 2} hasar`);
+              applyFaintDamageEffect({
+                deadUnit: d,
+                power: m,
+                enemyTeam: en,
+                logs: lg,
+                logPrefix: "🦤 Dodo -> ",
+                targetLabel: "Tüm düşmanlara",
+                logSuffix: " efekti tekrar! ",
+              });
             }
             if (d.ability === "faint_shield") {
               al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
