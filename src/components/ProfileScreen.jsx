@@ -9,6 +9,7 @@ const [xp, setXp] = useState(0);
 const [arenaWins, setArenaWins] = useState(0);
 const [bestTurn, setBestTurn] = useState(0);
 const [totalGames, setTotalGames] = useState(0);
+const [totalTurns, setTotalTurns] = useState(0);
   const [loading, setLoading] = useState(true);
   const taskData = loadTasks(user?.uid);
 
@@ -25,6 +26,7 @@ if (snap.exists()) {
   setXp(snap.data().xp || 0);
   setArenaWins(snap.data().totalWins || 0);
   setTotalGames(snap.data().totalGames || 0);
+setTotalTurns(snap.data().totalTurns || 0);
 setArenaWins(snap.data().totalWins || 0);
 }
 
@@ -127,12 +129,12 @@ if (profileSnap.exists()) {
          <div className="text-3xl font-black text-blue-400">{bestTurn || 0}</div>
             <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Rekor Tur</div>
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-            <div className="text-3xl font-black text-yellow-400">
-             {totalGames > 0 ? Math.round((arenaWins / totalGames) * 100) : 0}%
-            </div>
-            <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Kazanma Oranı</div>
-          </div>
+         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+  <div className="text-3xl font-black text-yellow-400">
+    {totalGames > 0 ? Math.round(totalTurns / totalGames) : 0}
+  </div>
+  <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Ort. Tur</div>
+</div>
         </div>
 
         {/* Görev Özeti */}

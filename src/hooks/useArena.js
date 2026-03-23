@@ -113,6 +113,7 @@ const newXP = (prev.xp || 0) + earnedXP;
     const newBestTurn = Math.max(prev.bestTurn || 0, turn);
     const newTotalWins = (prev.totalWins || 0) + totalWins;
     const newTotalGames = (prev.totalGames || 0) + 1;
+    const newTotalTurns = (prev.totalTurns || 0) + totalTurns;
     const newMonthlyWins = (prev.monthlyWins || 0) + (won ? 1 : 0);
     console.log("🏆 won değeri:", won, "newTotalWins:", newTotalWins);
 
@@ -123,6 +124,7 @@ const newXP = (prev.xp || 0) + earnedXP;
   bestTurn: newBestTurn,
   totalWins: newTotalWins,
   totalGames: newTotalGames,
+totalTurns: newTotalTurns,
 monthlyWins: newMonthlyWins,
   lastPlayed: serverTimestamp(),
   month: getMonthKey(),
