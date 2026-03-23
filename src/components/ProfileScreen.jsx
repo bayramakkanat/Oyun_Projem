@@ -3,6 +3,7 @@ import { getRank, RANKS, loadStats, loadTasks } from "../utils/helpers";
 import { getCurrentMonthLabel } from "../hooks/useArena";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { ACHIEVEMENTS_DEF } from "../data/gameData";
 
 export default function ProfileScreen({ onClose, user, stats }) {
 const [xp, setXp] = useState(0);
@@ -178,11 +179,16 @@ if (profileSnap.exists()) {
             Başarımlar — {stats.achievements?.length || 0} Kazanıldı
           </div>
           <div className="flex flex-wrap gap-2">
-            {(firebaseAchievements || stats.achievements)?.slice(0, 10).map((id, i) => (
-              <div key={i} className="w-10 h-10 bg-yellow-500/20 border border-yellow-500/30 rounded-xl flex items-center justify-center text-xl">
-                🏆
-              </div>
-            ))}
+           {(firebaseAchievements || stats.achievements)?.slice(0, 20).map((id, i) => {
+  const def = ACHIEVEMENTS_DEF.find(a => a.id === id);
+  if (!def) return null;
+  return (
+    <div key={i} title={def.name + " — " + def.desc}
+      className="w-10 h-10 bg-yellow-500/20 border border-yellow-500/30 rounded-xl flex items-center justify-center text-xl cursor-help">
+      {def.secret && !firebaseAchievements?.includes(id) ? "🔒" : def.icon}
+    </div>
+  );
+})}
             {((firebaseAchievements || stats.achievements)?.length || 0) === 0 && (
               <div className="text-gray-500 text-sm">Henüz başarım kazanılmadı</div>
             )}
