@@ -254,8 +254,16 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         });
       }
       if (d.ability === "faint_shield" && al.length > 0) {
-        al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
-        lg.push(`🛡️ Düşman ${d.nick} -> Düşman takımına +${2 * m} HP`);
+        applyFaintShieldEffect({
+          deadUnit: d,
+          power: m,
+          allyTeam: al,
+          clampStat,
+          logs: lg,
+          logPrefix: "🛡️ Düşman ",
+          targetLabel: "Düşman takımına",
+          logSuffix: " -> ",
+        });
       }
       if (d.ability === "faint_rage") {
         const buff = getTeamBuffAmount(m);
