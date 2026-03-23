@@ -185,6 +185,43 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
     return true;
   };
 
+  const applyFaintBuff = ({ deadUnit, power, allyTeam, logs, logPrefix = "", logSuffix = "" }) => {
+    if (allyTeam.length === 0) return false;
+    const i = Math.floor(Math.random() * allyTeam.length);
+    allyTeam[i].atk = clampStat(allyTeam[i].atk + power);
+    allyTeam[i].curHp = clampStat(allyTeam[i].curHp + power);
+    logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick} e +${power}/+${power}`);
+    return true;
+  };
+
+  const applyFaintCopy = ({
+    deadUnit,
+    power,
+    allyTeam,
+    logs,
+    logPrefix = "",
+    temporary = false,
+    logSuffix = "",
+  }) => {
+    if (allyTeam.length === 0) return false;
+    const i = Math.floor(Math.random() * allyTeam.length);
+    const pct = power === 1 ? 0.25 : power === 2 ? 0.5 : 1;
+    const atkGain = Math.floor(deadUnit.atk * pct);
+    const hpGain = Math.floor(deadUnit.hp * pct);
+    if (temporary) {
+      if (!allyTeam[i].tempAtk) allyTeam[i].tempAtk = 0;
+      if (!allyTeam[i].tempHp) allyTeam[i].tempHp = 0;
+      allyTeam[i].tempAtk += atkGain;
+      allyTeam[i].tempHp += hpGain;
+    } else {
+      allyTeam[i].atk = clampStat(allyTeam[i].atk + atkGain);
+    }
+    allyTeam[i].curHp = clampStat(allyTeam[i].curHp + hpGain);
+    logs.push(
+      `${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick} e +${atkGain}/+${hpGain}${temporary ? " (geçici)" : ""}`
+    );
+    return true;
+  };
   const faint = (d, al, en, isP, killer) => {
     if (!d) return { lg: [], sm: [], gG: 0 };
     if (d.isDead) return { lg: [], sm: [], gG: 0 };
@@ -195,10 +232,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
 
     if (!isP) {
       if (d.ability === "faint_buff" && al.length > 0) {
-        const i = Math.floor(Math.random() * al.length);
-        al[i].atk = clampStat(al[i].atk + m);
-        al[i].curHp = clampStat(al[i].curHp + m);
-        lg.push(`💀 Düşman ${d.nick} -> ${al[i].nick} e +${m}/+${m}`);
+        applyFaintBuff({
+          deadUnit: d,
+          power: m,
+          allyTeam: al,
+          logs: lg,
+          logPrefix: "💀 Düşman ",
+          logSuffix: " -> ",
+        });
       }
       if (d.ability === "faint_dmg" && en.length > 0) {
         en.forEach((x) => { x.curHp -= m * 2; });
@@ -269,13 +310,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         lg.push(`🥚 Düşman ${d.nick} -> ${4 * m}/${4 * m} yavru çağırdı`);
       }
       if (d.ability === "faint_copy" && al.length > 0) {
-        const i = Math.floor(Math.random() * al.length);
-        const pct = m === 1 ? 0.25 : m === 2 ? 0.5 : 1;
-        const atkGain = Math.floor(d.atk * pct);
-        const hpGain = Math.floor(d.hp * pct);
-        al[i].atk = clampStat(al[i].atk + atkGain);
-        al[i].curHp = clampStat(al[i].curHp + hpGain);
-        lg.push(`📋 Düşman ${d.nick} -> ${al[i].nick} e +${atkGain}/+${hpGain} kopyalandı`);
+        applyFaintCopy({
+          deadUnit: d,
+          power: m,
+          allyTeam: al,
+          logs: lg,
+          logPrefix: "📋 Düşman ",
+          logSuffix: " -> ",
+        });
       }
       al.forEach((a) => {
         if (a.ability === "friend_faint") {
@@ -318,10 +360,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           const dodoM = pwr(ally);
           for (let dodoI = 0; dodoI < dodoM; dodoI++) {
             if (d.ability === "faint_buff" && al.length > 0) {
-              const i = Math.floor(Math.random() * al.length);
-              al[i].atk = clampStat(al[i].atk + m);
-              al[i].curHp = clampStat(al[i].curHp + m);
-              lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! ${al[i].nick} e +${m}/+${m}`);
+              applyFaintBuff({
+                deadUnit: d,
+                power: m,
+                allyTeam: al,
+                logs: lg,
+                logPrefix: "🦤 Düşman Dodo -> ",
+                logSuffix: " efekti tekrar! ",
+              });
             }
             if (d.ability === "faint_dmg") {
               en.forEach((x) => { x.curHp -= m * 2; });
@@ -369,22 +415,25 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
 
     // isP === true (oyuncu tarafı ölümleri)
     if (d.ability === "faint_buff" && al.length > 0) {
-      const i = Math.floor(Math.random() * al.length);
-      al[i].atk = clampStat(al[i].atk + m);
-      al[i].curHp = clampStat(al[i].curHp + m);
-      lg.push(`💀 ${d.nick} -> ${al[i].nick} e +${m}/+${m}`);
+      applyFaintBuff({
+        deadUnit: d,
+        power: m,
+        allyTeam: al,
+        logs: lg,
+        logPrefix: "💀 ",
+        logSuffix: " -> ",
+      });
     }
     if (d.ability === "faint_copy" && al.length > 0) {
-      const i = Math.floor(Math.random() * al.length);
-      const pct = m === 1 ? 0.25 : m === 2 ? 0.5 : 1;
-      const atkGain = Math.floor(d.atk * pct);
-      const hpGain = Math.floor(d.hp * pct);
-      if (!al[i].tempAtk) al[i].tempAtk = 0;
-      if (!al[i].tempHp) al[i].tempHp = 0;
-      al[i].tempAtk += atkGain;
-      al[i].tempHp += hpGain;
-      al[i].curHp = clampStat(al[i].curHp + hpGain);
-      lg.push(`🦛 ${d.nick} -> ${al[i].nick} e +${atkGain}/+${hpGain} (geçici)`);
+      applyFaintCopy({
+        deadUnit: d,
+        power: m,
+        allyTeam: al,
+        logs: lg,
+        logPrefix: "🦛 ",
+        temporary: true,
+        logSuffix: " -> ",
+      });
     }
     if (d.ability === "faint_dmg") {
       en.forEach((x) => { x.curHp -= m * 2; });
@@ -522,10 +571,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           const dodoM = pwr(ally);
           for (let dodoI = 0; dodoI < dodoM; dodoI++) {
             if (d.ability === "faint_buff" && al.length > 0) {
-              const i = Math.floor(Math.random() * al.length);
-              al[i].atk = clampStat(al[i].atk + m);
-              al[i].curHp = clampStat(al[i].curHp + m);
-              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! ${al[i].nick} e +${m}/+${m}`);
+              applyFaintBuff({
+                deadUnit: d,
+                power: m,
+                allyTeam: al,
+                logs: lg,
+                logPrefix: "🦤 Dodo -> ",
+                logSuffix: " efekti tekrar! ",
+              });
             }
             if (d.ability === "faint_dmg") {
               en.forEach((x) => { x.curHp -= m * 2; });
@@ -545,13 +598,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               logs: lg,
             });
             if (d.ability === "faint_copy" && al.length > 0) {
-              const i = Math.floor(Math.random() * al.length);
-              const pct = m === 1 ? 0.25 : m === 2 ? 0.5 : 1;
-              const atkGain = Math.floor(d.atk * pct);
-              const hpGain = Math.floor(d.hp * pct);
-              al[i].atk = clampStat(al[i].atk + atkGain);
-              al[i].curHp = clampStat(al[i].curHp + hpGain);
-              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! ${al[i].nick} e +${atkGain}/+${hpGain}`);
+              applyFaintCopy({
+                deadUnit: d,
+                power: m,
+                allyTeam: al,
+                logs: lg,
+                logPrefix: "🦤 Dodo -> ",
+                logSuffix: " efekti tekrar! ",
+              });
             }
             if (d.ability === "faint_summon") {
               const extraSummon = createFaintSummon({
