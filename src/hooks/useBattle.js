@@ -1183,6 +1183,15 @@ const xpBreakdown = [
         }, 4000);
       };
 
+      const announceDebugWinner = (playerAliveCount, enemyAliveCount) => {
+        const winner = enemyAliveCount === 0 && playerAliveCount > 0
+          ? "SEN KAZANDIN!"
+          : playerAliveCount === 0 && enemyAliveCount > 0
+            ? "DUSMAN KAZANDI!"
+            : "BERABERLIK!";
+        setLog((l) => [...l, "------------------", winner, "------------------"]);
+      };
+
       const runFaintResolution = async ({
         deadUnit,
         allyTeam,
@@ -1442,8 +1451,7 @@ const xpBreakdown = [
           setPT([...pp]);
           setET([...ee]);
           if (isDebugBattle) {
-            const winner = ee.length === 0 && pp.length > 0 ? "🎉 SEN KAZANDIN!" : pp.length === 0 && ee.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
-            setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
+            announceDebugWinner(pp.length, ee.length);
             scheduleDebugBattleReset();
             return;
           }
@@ -1781,8 +1789,7 @@ const xpBreakdown = [
         setET(newE);
         if (isDebugBattle) {
           const winner = newE.length === 0 && newP.length > 0 ? "🎉 SEN KAZANDIN!" : newP.length === 0 && newE.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
-          setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
-          scheduleDebugBattleReset();
+          announceDebugWinner(newP.length, newE.length);
           return;
         }
         setStep((s) => s + 1);
