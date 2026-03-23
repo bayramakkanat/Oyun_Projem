@@ -1153,9 +1153,14 @@ title="Koleksiyon Defteri"
 
        <div className="bg-black/60 rounded-[2.5rem] p-4 mb-3 border border-white/10 shadow-2xl relative overflow-visible">
             <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-4">
-                <span className="text-yellow-300/90">⚔️ SAVAŞ TAKIMI</span>
-                {sel && <span className="text-yellow-300"> - Slot seç</span>}
-              </div>
+  <span className="text-yellow-300/90">⚔️ SAVAŞ TAKIMI</span>
+  {sel?.pendingTargetBuff
+    ? <span className="text-cyan-300 animate-pulse"> 🎯 Buff vermek için hedef seç!</span>
+    : sel
+    ? <span className="text-yellow-300"> - Slot seç</span>
+    : null
+  }
+</div>
             <div className="flex gap-2.5 justify-center px-1 py-3">
                 {team.map((a, i) => {
                   // ← GÜNCELLENDİ: Tur 7 ve Tur 9
@@ -1244,8 +1249,8 @@ title="Koleksiyon Defteri"
 }}
                       className="flex flex-col items-center flex-shrink-0"
                     >
-                      <div className="relative group">
-                        <Card
+                     <div className={`relative group ${sel?.pendingTargetBuff && i !== sel.sourceSlot ? "ring-2 ring-cyan-400 rounded-2xl shadow-[0_0_15px_rgba(34,211,238,0.5)]" : ""}`}>
+  <Card
                           a={a}
                           anim={anims[a.id]}
                           selected={selI === i}
