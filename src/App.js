@@ -771,7 +771,12 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
     {/* Tur */}
     <div className="flex flex-col items-center bg-gray-900/80 border border-white/20 px-3 py-1.5 rounded-2xl shadow-inner min-w-[52px]">
       <span className="text-[9px] text-gray-400 uppercase tracking-widest font-black">TUR</span>
-      <span className="text-white font-black text-base leading-none">{turn}<span className="text-gray-500 text-[10px] font-bold">/{WIN_TURN}</span></span>
+     <span className="text-white font-black text-base leading-none">
+  {turn}
+  {gameMode === "standard" && (
+    <span className="text-gray-500 text-[10px] font-bold">/{WIN_TURN}</span>
+  )}
+</span>
     </div>
     {/* Kademe */}
   <div className="flex flex-col items-center bg-purple-900/60 border border-purple-400/30 px-3 py-1.5 rounded-2xl shadow-inner min-h-[52px] justify-center">
