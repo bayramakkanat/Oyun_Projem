@@ -15,7 +15,7 @@ import {
   spawnDeathEffect,
   spawnProjectile,
 } from "../utils/animations";
-import { BOSSES, TIERS, WIN_TURN } from "../data/gameData";
+import { BOSSES, TIERS, WIN_TURN, ACHIEVEMENTS_DEF } from "../data/gameData";
 
 export function useBattle({
   // State değerleri
@@ -574,6 +574,7 @@ const teamKey = role === "host" ? "hostTeam" : "guestTeam";
 
     let et;
     if (gameMode === "arena") {
+      unlockAchievement("arena_first");
       const opponentData = await fetchArenaOpponent(difficultyLevel);
       if (opponentData) {
         setArenaOpponent(opponentData);
@@ -867,6 +868,23 @@ const xpBreakdown = [
           collection[key] = data;
         });
         saveCollection(collection, user?.uid);
+if (gameMode === "arena") {
+  const toId = (nick) => nick
+    .toLowerCase()
+    .replace(/ş/g, "s").replace(/ğ/g, "g").replace(/ü/g, "u")
+    .replace(/ö/g, "o").replace(/ı/g, "i").replace(/ç/g, "c")
+    .replace(/\s+/g, "_");
+
+  updatedTeam.forEach((pet) => {
+    if (!pet) return;
+    const col = collection[pet.nick];
+    if (!col) return;
+    const id = toId(pet.nick);
+    if (col.wins >= 1) unlockAchievement(`use_${id}`);
+    if (col.maxLvl >= 2 && col.wins >= 1) unlockAchievement(`lvl2_${id}`);
+    if (col.maxLvl >= 3) unlockAchievement(`lvl3_${id}`);
+  });
+}
       }
      // Görev ilerlemesini güncelle
 const taskData = loadTasks(user?.uid);
@@ -947,6 +965,11 @@ const xpBreakdown = [
       }
 
       const newTurn = turn + 1;
+      if (gameMode === "arena") {
+  if (newTurn >= 5) unlockAchievement("arena_turn5");
+  if (newTurn >= 10) unlockAchievement("arena_turn10");
+  if (newTurn >= 15) unlockAchievement("arena_turn15");
+}
       const currentMaxT = Math.min(Math.ceil(newTurn / 2), 6);
       const willOpenNewTier = currentMaxT > lastT;
       if (newTurn === 5) {

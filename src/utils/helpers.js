@@ -24,15 +24,14 @@ export const loadStats = (userId) => {
   try {
     const key = "oyunStats_" + (userId || "guest");
     const s = localStorage.getItem(key);
-    return s
-      ? JSON.parse(s)
-      : {
-          totalGames: 0,
-          totalWins: 0,
-          bestTurn: 0,
-          bestWins: 0,
-          achievements: [],
-        };
+    const parsed = s ? JSON.parse(s) : null;
+    return {
+      totalGames: parsed?.totalGames || 0,
+      totalWins: parsed?.totalWins || 0,
+      bestTurn: parsed?.bestTurn || 0,
+      bestWins: parsed?.bestWins || 0,
+      achievements: [], // artık Firebase'den geliyor
+    };
   } catch {
     return {
       totalGames: 0,
