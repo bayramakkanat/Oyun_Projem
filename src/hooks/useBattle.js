@@ -403,15 +403,17 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       });
     }
     }
-    if (d.ability === "faint_rage") {
-      const buff = 8 * m;
-      al.forEach((x) => {
-        x.atk = clampStat(x.atk + buff);
-        x.hp = clampStat(x.hp + buff);
-        x.curHp = clampStat(x.curHp + buff);
-      });
-      lg.push(`🐻 ${d.nick} öldü -> Tüm takıma +${buff}/+${buff}`);
-    }
+    applyTeamWideFaintEffect({
+      ability: d.ability,
+      sourceNick: d.nick,
+      power: m,
+      allyTeam: al,
+      enemyTeam: en,
+      clampStat,
+      logs: lg,
+      teamBuffLabel: "player team",
+      enemyLabel: "enemy team",
+    });
     if (d.ability === "faint_buff_self" && isP) {
       const m2 = pwr(d);
       setTeam((prevTeam) =>
@@ -427,19 +429,6 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         )
       );
       lg.push(`🦡 ${d.nick} -> Kendine +${2 * m2}/+${2 * m2} kalıcı`);
-    }
-    if (d.ability === "faint_wave") {
-      en.forEach((x) => { x.curHp -= 9 * m; });
-      lg.push(`🌊 ${d.nick} -> Tüm düşmanlara ${9 * m} hasar`);
-    }
-    if (d.ability === "cheetah_faint") {
-      const buff = 8 * m;
-      al.forEach((x) => {
-        x.atk = clampStat(x.atk + buff);
-        x.hp = clampStat(x.hp + buff);
-        x.curHp = clampStat(x.curHp + buff);
-      });
-      lg.push(`💨 ${d.nick} -> Tüm takıma +${buff}/+${buff}`);
     }
     if (d.ability === "faint_summon") {
       const newSummon = createFaintSummonUnit({
