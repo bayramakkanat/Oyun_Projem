@@ -769,7 +769,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
   {/* SOL: Tur / Kademe / Zorluk / Boss */}
   <div className="flex items-center gap-2 flex-wrap">
     {/* Tur */}
-   <div className="flex flex-col items-center bg-gray-900/80 border border-white/20 px-3 py-1.5 rounded-2xl shadow-inner min-w-[52px] min-h-[52px] justify-center">
+  <div className="flex flex-col items-center bg-gray-900/80 border border-white/20 px-3 rounded-2xl shadow-inner min-w-[52px] h-[52px] justify-center">
       <span className="text-[9px] text-gray-400 uppercase tracking-widest font-black">TUR</span>
      <span className="text-white font-black text-base leading-none">
   {turn}
@@ -799,13 +799,13 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
 {/* Rehber */}
    <button
   onClick={() => setGuide(true)}
-  className="p-2 bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 min-w-[48px] min-h-[52px] flex items-center justify-center"
-  title="Kademe Rehberi"
+  className="bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 w-[48px] h-[52px] flex items-center justify-center"
+title="Kademe Rehberi"
 >🗺️</button>
 <button
   onClick={() => setShowCollection(true)}
-  className="p-2 bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 min-w-[48px] min-h-[52px] flex items-center justify-center"
-  title="Koleksiyon Defteri"
+className="bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 w-[48px] h-[52px] flex items-center justify-center"
+title="Koleksiyon Defteri"
 >📖</button>
     {/* Boss Uyarısı */}
     {BOSSES[turn + 1] && gameMode === "standard" && (
