@@ -25,6 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
+import { applyFaintDamageEffect } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -434,10 +435,17 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         temporary: true,
         logSuffix: " -> ",
       });
-    }
     if (d.ability === "faint_dmg") {
-      en.forEach((x) => { x.curHp -= m * 2; });
-      lg.push(`☠️ ${d.nick} -> Tüm düşmanlara ${m * 2} hasar`);
+      applyFaintDamageEffect({
+        deadUnit: d,
+        power: m,
+        enemyTeam: en,
+        logs: lg,
+        logPrefix: "☠️ ",
+        targetLabel: "Tüm düşmanlara",
+        logSuffix: " -> ",
+      });
+    }
     }
     if (d.ability === "faint_shield") {
       al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
