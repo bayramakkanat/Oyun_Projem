@@ -52,3 +52,22 @@ export const pushFaintDuplicateEffect = ({ deadUnit, allyTeam, summons, logs, lo
   logs.push(`${logPrefix}${deadUnit.nick} -> ${allyTeam[i].nick} kopyalandi`);
   return true;
 };
+
+export const applyFaintCopyEffect = ({ deadUnit, power, allyTeam, clampStat, logs, logPrefix = "", temporary = false, logSuffix = "" }) => {
+  if (allyTeam.length === 0) return false;
+  const i = Math.floor(Math.random() * allyTeam.length);
+  const pct = power === 1 ? 0.25 : power === 2 ? 0.5 : 1;
+  const atkGain = Math.floor(deadUnit.atk * pct);
+  const hpGain = Math.floor(deadUnit.hp * pct);
+  if (temporary) {
+    if (!allyTeam[i].tempAtk) allyTeam[i].tempAtk = 0;
+    if (!allyTeam[i].tempHp) allyTeam[i].tempHp = 0;
+    allyTeam[i].tempAtk += atkGain;
+    allyTeam[i].tempHp += hpGain;
+  } else {
+    allyTeam[i].atk = clampStat(allyTeam[i].atk + atkGain);
+  }
+  allyTeam[i].curHp = clampStat(allyTeam[i].curHp + hpGain);
+  logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick} e +${atkGain}/+${hpGain}${temporary ? " (geçici)" : ""}`);
+  return true;
+};

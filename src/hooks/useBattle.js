@@ -25,7 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
-import { applyFaintBuffEffect, applyFaintDamageEffect, applyFaintShieldEffect, createFaintSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
+import { applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, createFaintSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -159,34 +159,6 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
 
 
 
-  const applyFaintCopy = ({
-    deadUnit,
-    power,
-    allyTeam,
-    logs,
-    logPrefix = "",
-    temporary = false,
-    logSuffix = "",
-  }) => {
-    if (allyTeam.length === 0) return false;
-    const i = Math.floor(Math.random() * allyTeam.length);
-    const pct = power === 1 ? 0.25 : power === 2 ? 0.5 : 1;
-    const atkGain = Math.floor(deadUnit.atk * pct);
-    const hpGain = Math.floor(deadUnit.hp * pct);
-    if (temporary) {
-      if (!allyTeam[i].tempAtk) allyTeam[i].tempAtk = 0;
-      if (!allyTeam[i].tempHp) allyTeam[i].tempHp = 0;
-      allyTeam[i].tempAtk += atkGain;
-      allyTeam[i].tempHp += hpGain;
-    } else {
-      allyTeam[i].atk = clampStat(allyTeam[i].atk + atkGain);
-    }
-    allyTeam[i].curHp = clampStat(allyTeam[i].curHp + hpGain);
-    logs.push(
-      `${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick} e +${atkGain}/+${hpGain}${temporary ? " (geçici)" : ""}`
-    );
-    return true;
-  };
   const faint = (d, al, en, isP, killer) => {
     if (!d) return { lg: [], sm: [], gG: 0 };
     if (d.isDead) return { lg: [], sm: [], gG: 0 };
@@ -290,7 +262,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         lg.push(`🥚 Düşman ${d.nick} -> ${4 * m}/${4 * m} yavru çağırdı`);
       }
       if (d.ability === "faint_copy" && al.length > 0) {
-        applyFaintCopy({
+        applyFaintCopyEffect({
           deadUnit: d,
           power: m,
           allyTeam: al,
@@ -420,7 +392,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       });
     }
     if (d.ability === "faint_copy" && al.length > 0) {
-      applyFaintCopy({
+      applyFaintCopyEffect({
         deadUnit: d,
         power: m,
         allyTeam: al,
@@ -623,7 +595,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               logs: lg,
             });
             if (d.ability === "faint_copy" && al.length > 0) {
-              applyFaintCopy({
+              applyFaintCopyEffect({
                 deadUnit: d,
                 power: m,
                 allyTeam: al,
