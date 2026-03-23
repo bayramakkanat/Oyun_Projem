@@ -25,7 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
-import { applyDodoTeamRetriggerEffect, applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, createFaintSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
+import { applyDodoTeamRetriggerEffect, applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, applyFriendFaintEffect, createFaintSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -245,9 +245,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       al.forEach((a) => {
         if (a.ability === "friend_faint") {
           const am = pwr(a);
-          a.atk = clampStat(a.atk + 2 * am);
-          a.curHp = clampStat(a.curHp + 2 * am);
-          lg.push(`🐺 Düşman ${a.nick} -> +${2 * am}/+${2 * am} (dost öldü)`);
+          applyFriendFaintEffect({
+            allyUnit: a,
+            power: am,
+            clampStat,
+            logs: lg,
+            logPrefix: "🐺 Düşman ",
+            logSuffix: " (dost öldü)",
+          });
         }
         if (a.ability === "friend_summon" && !a.isSummon) {
           if (!a.summonCount) a.summonCount = 0;
@@ -487,9 +492,13 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       al.forEach((a) => {
         if (a.ability === "friend_faint") {
           const am = pwr(a);
-          a.atk = clampStat(a.atk + 2 * am);
-          a.curHp = clampStat(a.curHp + 2 * am);
-          lg.push(`🐺 ${a.nick} -> +${2 * am}/+${2 * am}`);
+          applyFriendFaintEffect({
+            allyUnit: a,
+            power: am,
+            clampStat,
+            logs: lg,
+            logPrefix: "🐺 ",
+          });
         }
         if (a.ability === "friend_summon" && !a.isSummon) {
           if (!a.summonCount) a.summonCount = 0;

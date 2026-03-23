@@ -95,3 +95,9 @@ export const applyDodoTeamRetriggerEffect = ({ ability, sourceNick, power, allyT
   }
   return false;
 };
+export const applyFriendFaintEffect = ({ allyUnit, power, clampStat, logs, logPrefix = "", logSuffix = "" }) => {
+  allyUnit.atk = clampStat(allyUnit.atk + 2 * power);
+  allyUnit.curHp = clampStat(allyUnit.curHp + 2 * power);
+  logs.push(`${logPrefix}${allyUnit.nick} -> +${2 * power}/+${2 * power}${logSuffix}`);
+  return true;
+};
