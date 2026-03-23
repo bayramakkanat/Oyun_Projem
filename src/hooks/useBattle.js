@@ -317,11 +317,11 @@ saveTasksToDB,
         killer.curHp = clampStat(killer.curHp + 3 * km);
         lg.push(`🦈 Düşman ${killer.nick} -> öldürdü, +${3 * km}/+${3 * km}`);
       }
-      if (killer && killer.ability === "kill_fear_all" && al.length > 0) {
-        const debuff = getFearAllDebuff(pwr(killer));
-        applyTeamDebuff(al, debuff);
-        lg.push(`Fear -> ${killer.nick} -> enemy team -${debuff}/-${debuff}`);
-      }
+     if (killer && killer.ability === "kill_fear_all" && al.length > 0) {
+  const debuff = getFearAllDebuff(pwr(killer));
+  applyTeamDebuff(en, debuff);  // al değil en!
+  lg.push(`Fear -> ${killer.nick} -> enemy team -${debuff}/-${debuff}`);
+}
       // Enemy-side Dodo retriggers replay supported faint effects.
       al.forEach((ally) => {
         if (ally && ally.ability === "summon_retrigger") {
