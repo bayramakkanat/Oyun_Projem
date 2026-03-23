@@ -150,11 +150,6 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         al[0].trample = true;
         lg.push(`🦏 Düşman ${d.nick} -> +${buff} ATK (çiğneme aktif)`);
       }
-      if (d.ability === "hurt_buff" && al.length > 0) {
-        const buff = 4 * m;
-        al[0].atk = clampStat(al[0].atk + buff);
-        lg.push(`🐃 Düşman ${d.nick} -> +${buff} ATK (hasar aldı)`);
-      }
       if (d.ability === "hurt_team_buff" && al.length > 0) {
         al.forEach((pet) => {
           pet.atk = clampStat(pet.atk + 3 * m);
@@ -1362,13 +1357,16 @@ if (p.length === 0 || e.length === 0) {
         setLog((l) => [...l, `🐗 ${a.nick} -> +${2 * pwr(a)} ATK`]);
         await delay(500);
       }
-      if (a.ability === "hurt_buff" && p[0].curHp > 0 && dD > 0) {
-        const buff = 4 * pwr(a);
-        p[0].atk = clampStat(p[0].atk + buff);
-        triggerAnim(a.id, "buff");
-        setLog((l) => [...l, `🐃 ${a.nick} -> +${buff} ATK`]);
-        await delay(500);
-      }
+     if (a.ability === "faint_weaken_all" && p[0].curHp <= 0) {
+  const debuff = pwr(a) === 1 ? 3 : pwr(a) === 2 ? 5 : 8;
+  e.forEach((enemy) => {
+    enemy.atk = Math.max(1, enemy.atk - debuff);
+    enemy.curHp = Math.max(0, enemy.curHp - debuff);
+    triggerAnim(enemy.id, "damage");
+  });
+  setLog((l) => [...l, `🐃 ${a.nick} öldü -> Tüm düşmanlara -${debuff}/-${debuff}`]);
+  await delay(600);
+}
       if (a.ability === "hurt_team_buff" && p[0].curHp > 0 && dD > 0) {
         const m = pwr(a);
         p.forEach((pet) => {
@@ -1407,14 +1405,14 @@ if (p.length === 0 || e.length === 0) {
           await delay(600);
         }
       }
-      if (a.ability === "hurt_weaken_attacker" && p[0].curHp > 0 && dD > 0 && e[0] && p[0].id === a.id) {
-        const wm = pwr(a);
-        const weakenPercent = wm === 1 ? 0.33 : wm === 2 ? 0.66 : 0.99;
-        e[0].atk = Math.max(1, Math.floor(e[0].atk * (1 - weakenPercent)));
-        triggerAnim(e[0].id, "damage");
-        setLog((l) => [...l, `🦨 ${a.nick} -> ${e[0].nick} -%${weakenPercent * 100} ATK`]);
-        await delay(500);
-      }
+     if (a.ability === "hurt_reflect" && p[0].curHp > 0 && dD > 0 && p[0].id === a.id) {
+  const pct = pwr(a) === 1 ? 0.33 : pwr(a) === 2 ? 0.50 : 0.75;
+  const reflectDmg = Math.max(1, Math.floor(dD * pct));
+  e[0].curHp = Math.max(0, e[0].curHp - reflectDmg);
+  triggerAnim(e[0].id, "damage");
+  setLog((l) => [...l, `🪞 ${a.nick} -> ${e[0].nick} e ${reflectDmg} yansıma hasarı`]);
+  await delay(500);
+}
       if (a.ability === "kill_buff" && e[0].curHp <= 0) {
         p[0].atk = clampStat(p[0].atk + 3 * pwr(a));
         p[0].curHp = clampStat(p[0].curHp + 3 * pwr(a));
@@ -1496,13 +1494,16 @@ if (p.length === 0 || e.length === 0) {
         setLog((l) => [...l, `💪 Düşman ${d.nick} -> +${pwr(d)} ATK`]);
         await delay(500);
       }
-      if (d.ability === "hurt_buff" && e[0].curHp > 0 && aD > 0) {
-        const hbuff = 4 * pwr(d);
-        e[0].atk = clampStat(e[0].atk + hbuff);
-        triggerAnim(d.id, "buff");
-        setLog((l) => [...l, `🐃 Düşman ${d.nick} -> +${hbuff} ATK`]);
-        await delay(500);
-      }
+     if (d.ability === "faint_weaken_all" && e[0].curHp <= 0) {
+  const debuff = pwr(d) === 1 ? 3 : pwr(d) === 2 ? 5 : 8;
+  p.forEach((pet) => {
+    pet.atk = Math.max(1, pet.atk - debuff);
+    pet.curHp = Math.max(0, pet.curHp - debuff);
+    triggerAnim(pet.id, "damage");
+  });
+  setLog((l) => [...l, `🐃 Düşman ${d.nick} öldü -> Tüm oyuncu takımına -${debuff}/-${debuff}`]);
+  await delay(600);
+}
       if (d.ability === "hurt_team_buff" && e[0].curHp > 0 && aD > 0) {
         const htm = pwr(d);
         e.forEach((pet) => {
@@ -1515,14 +1516,14 @@ if (p.length === 0 || e.length === 0) {
         setLog((l) => [...l, `🦬 Düşman ${d.nick} hasar aldı -> Takıma +${3 * pwr(d)}/+${3 * pwr(d)}`]);
         await delay(500);
       }
-      if (d.ability === "hurt_weaken_attacker" && e[0].curHp > 0 && aD > 0 && p[0]) {
-        const hwm = pwr(d);
-        const weakenPct = hwm === 1 ? 0.33 : hwm === 2 ? 0.66 : 0.99;
-        p[0].atk = Math.max(1, Math.floor(p[0].atk * (1 - weakenPct)));
-        triggerAnim(p[0].id, "damage");
-        setLog((l) => [...l, `🦨 Düşman ${d.nick} -> ${p[0].nick} -%${weakenPct * 100} ATK`]);
-        await delay(500);
-      }
+     if (d.ability === "hurt_reflect" && e[0].curHp > 0 && aD > 0 && e[0].id === d.id) {
+  const dpct = pwr(d) === 1 ? 0.33 : pwr(d) === 2 ? 0.50 : 0.75;
+  const dreflectDmg = Math.max(1, Math.floor(aD * dpct));
+  p[0].curHp = Math.max(0, p[0].curHp - dreflectDmg);
+  triggerAnim(p[0].id, "damage");
+  setLog((l) => [...l, `🪞 Düşman ${d.nick} -> ${p[0].nick} e ${dreflectDmg} yansıma hasarı`]);
+  await delay(500);
+}
       if (d.ability === "start_charge" && e[0].curHp > 0) {
         e[0].atk = clampStat(e[0].atk + 2 * pwr(d));
         triggerAnim(d.id, "buff");

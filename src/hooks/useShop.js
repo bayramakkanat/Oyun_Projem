@@ -321,6 +321,30 @@ export function useShop({
     };
 
     if (!a.isR && gold < a.cost) return;
+    if (a.ability === "buy_target_buff" && !a.pendingTargetBuff) {
+  if (nt[slot] !== null) return;
+  const m = pwr({ ...a, lvl: a.lvl || 1 });
+  const buffAmount = m === 1 ? 1 : m === 2 ? 2 : 4;
+  nt[slot] = {
+    ...a,
+    lvl: a.lvl || 1,
+    exp: a.exp || 0,
+    curHp: a.curHp || a.hp,
+    isR: undefined,
+    rT: undefined,
+    grp: undefined,
+  };
+  if (!a.isR) {
+    setGold((g) => g - a.cost);
+    setShop(shop.filter((x) => x.id !== a.id));
+  } else {
+    setRewards(rewards.filter((x) => x.grp !== a.grp));
+  }
+  setTeam(nt);
+  setSel({ ...a, pendingTargetBuff: true, buffAmount, sourceSlot: slot });
+  setSelI(null);
+  return;
+}
     if (a.tier >= 5) unlockAchievement("lion_heart");
     if (a.name === "🐉") unlockAchievement("dragon");
     const nt = [...team];

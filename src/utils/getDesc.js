@@ -111,5 +111,17 @@ export const getDesc = (a, lvlOverride) => {
     return `Dost ölünce: Ölüm efekti ve yavru güçlendirmesini ${m} kez tekrarlar`;
   if (a.ability === "cheetah_faint")
     return `Ölünce: Tüm takıma +${8 * m}/+${8 * m}`;
+  if (a.ability === "buy_target_buff") {
+  const buffAmount = m === 1 ? 1 : m === 2 ? 2 : 4;
+  return `Satın alınınca: Seçilen dosta +${buffAmount}/+${buffAmount} kalıcı`;
+}
+if (a.ability === "faint_weaken_all") {
+  const debuff = m === 1 ? 3 : m === 2 ? 5 : 8;
+  return `Ölünce: Tüm düşmanlara -${debuff}/-${debuff}`;
+}
+if (a.ability === "hurt_reflect") {
+  const pct = m === 1 ? 33 : m === 2 ? 50 : 75;
+  return `Hasar alınca: Saldırana aldığının %${pct}'ini geri yansıt`;
+}
   return "";
 };

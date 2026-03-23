@@ -780,7 +780,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
     </div>
     {/* Kademe */}
  <div className="flex flex-col items-center bg-purple-900/60 border border-purple-400/30 px-3 rounded-2xl shadow-inner h-[52px] justify-center">
-  <span className="text-[9px] text-purple-300 uppercase tracking-widest font-black mb-1">KADEME</span>
+ <span className="text-[9px] text-purple-300 uppercase tracking-widest font-black mb-0.5">KADEME</span>
 <div className="flex gap-1">
   {[1,2,3,4,5,6].map(i => (
     <div key={i}
@@ -1218,12 +1218,30 @@ title="Koleksiyon Defteri"
                   return a ? (
                     <div
                       key={a.id}
-                      onClick={() => {
-                        if (sel) buy(sel, i);
-                        else if (selI !== null && selI !== i) {
-                          if (!mergeT(selI, i)) swap(selI, i);
-                        } else setSelI(selI === i ? null : i);
-                      }}
+                     onClick={() => {
+  if (sel?.pendingTargetBuff) {
+    // Balık hedef buff modu
+    if (team[i] && i !== sel.sourceSlot) {
+      const buffAmount = sel.buffAmount;
+      setTeam((prev) => prev.map((pet, idx) =>
+        idx === i ? {
+          ...pet,
+          atk: Math.min((pet.atk || 0) + buffAmount, 500),
+          hp: Math.min((pet.hp || 0) + buffAmount, 500),
+          curHp: Math.min((pet.curHp || 0) + buffAmount, 500),
+        } : pet
+      ));
+      setSel(null);
+      playSound("buff");
+    }
+  } else if (sel) {
+    buy(sel, i);
+  } else if (selI !== null && selI !== i) {
+    if (!mergeT(selI, i)) swap(selI, i);
+  } else {
+    setSelI(selI === i ? null : i);
+  }
+}}
                       className="flex flex-col items-center flex-shrink-0"
                     >
                       <div className="relative group">
