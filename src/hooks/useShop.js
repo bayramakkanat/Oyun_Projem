@@ -321,7 +321,8 @@ export function useShop({
     };
 
     if (!a.isR && gold < a.cost) return;
-    if (a.ability === "buy_target_buff" && !a.pendingTargetBuff) {
+   if (a.ability === "buy_target_buff" && !a.pendingTargetBuff) {
+  const nt = [...team];
   if (nt[slot] !== null) return;
   const m = pwr({ ...a, lvl: a.lvl || 1 });
   const buffAmount = m === 1 ? 1 : m === 2 ? 2 : 4;
