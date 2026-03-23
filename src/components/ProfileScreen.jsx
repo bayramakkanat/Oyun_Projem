@@ -10,6 +10,7 @@ const [arenaWins, setArenaWins] = useState(0);
 const [bestTurn, setBestTurn] = useState(0);
 const [totalGames, setTotalGames] = useState(0);
 const [totalTurns, setTotalTurns] = useState(0);
+const [firebaseAchievements, setFirebaseAchievements] = useState(null);
   const [loading, setLoading] = useState(true);
   const taskData = loadTasks(user?.uid);
 
@@ -35,6 +36,9 @@ const profileSnap = await getDoc(profileRef);
 console.log("Profile snap:", profileSnap.exists(), profileSnap.data());
 if (profileSnap.exists()) {
   setBestTurn(profileSnap.data().allTimeBestTurn || 0);
+  if (profileSnap.data().achievements) {
+    setFirebaseAchievements(profileSnap.data().achievements);
+  }
 }
       } catch (e) {
         console.error(e);
@@ -174,12 +178,12 @@ if (profileSnap.exists()) {
             Başarımlar — {stats.achievements?.length || 0} Kazanıldı
           </div>
           <div className="flex flex-wrap gap-2">
-            {stats.achievements?.slice(0, 10).map((id, i) => (
+            {(firebaseAchievements || stats.achievements)?.slice(0, 10).map((id, i) => (
               <div key={i} className="w-10 h-10 bg-yellow-500/20 border border-yellow-500/30 rounded-xl flex items-center justify-center text-xl">
                 🏆
               </div>
             ))}
-            {(stats.achievements?.length || 0) === 0 && (
+            {((firebaseAchievements || stats.achievements)?.length || 0) === 0 && (
               <div className="text-gray-500 text-sm">Henüz başarım kazanılmadı</div>
             )}
           </div>

@@ -48,6 +48,19 @@ export const saveStats = (s, userId) => {
   try {
     const key = "oyunStats_" + (userId || "guest");
     localStorage.setItem(key, JSON.stringify(s));
+
+    // Firebase'e achievements kaydet
+    if (userId && s.achievements) {
+      import("../firebase").then(({ db }) => {
+        import("firebase/firestore").then(({ doc, setDoc }) => {
+          setDoc(
+            doc(db, "user_profiles", userId),
+            { achievements: s.achievements },
+            { merge: true }
+          );
+        });
+      });
+    }
   } catch {}
 };
 
