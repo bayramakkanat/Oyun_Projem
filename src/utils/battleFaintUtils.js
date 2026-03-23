@@ -123,3 +123,29 @@ export const createFriendSummonUnit = ({ allyUnit, power, name, nick, img, flip 
   allyUnit.summonCount++;
   return summon;
 };
+
+export const applyTeamWideFaintEffect = ({
+  ability,
+  sourceNick,
+  power,
+  allyTeam,
+  enemyTeam,
+  clampStat,
+  logs,
+  teamBuffLabel = "team",
+  enemyLabel = "enemy team",
+}) => {
+  if (ability === "faint_rage" || ability === "cheetah_faint") {
+    const buff = getTeamBuffAmount(power);
+    applyTeamBuff(allyTeam, buff, clampStat);
+    logs.push(`${sourceNick} ${ability} -> ${teamBuffLabel} +${buff}/+${buff}`);
+    return true;
+  }
+  if (ability === "faint_wave") {
+    const damage = getWaveDamage(power);
+    applyTeamDamage(enemyTeam, damage);
+    logs.push(`${sourceNick} ${ability} -> ${enemyLabel} ${damage} damage`);
+    return true;
+  }
+  return false;
+};

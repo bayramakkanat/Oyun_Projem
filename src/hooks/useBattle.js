@@ -25,7 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
-import { applyDodoTeamRetriggerEffect, applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, applyFriendFaintEffect, createFaintSummonUnit, createFriendSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
+import { applyDodoTeamRetriggerEffect, applyFaintBuffEffect, applyFaintCopyEffect, applyFaintDamageEffect, applyFaintShieldEffect, applyFriendFaintEffect, applyTeamWideFaintEffect, createFaintSummonUnit, createFriendSummonUnit, pushFaintDuplicateEffect } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -173,21 +173,17 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           logSuffix: " -> ",
         });
       }
-      if (d.ability === "faint_rage") {
-        const buff = getTeamBuffAmount(m);
-        applyTeamBuff(al, buff, clampStat);
-        lg.push(`${d.nick} faint_rage -> enemy team +${buff}/+${buff}`);
-      }
-      if (d.ability === "faint_wave") {
-        const damage = getWaveDamage(m);
-        applyTeamDamage(en, damage);
-        lg.push(`${d.nick} faint_wave -> player team ${damage} damage`);
-      }
-      if (d.ability === "cheetah_faint") {
-        const buff = getTeamBuffAmount(m);
-        applyTeamBuff(al, buff, clampStat);
-        lg.push(`${d.nick} cheetah_faint -> enemy team +${buff}/+${buff}`);
-      }
+      applyTeamWideFaintEffect({
+        ability: d.ability,
+        sourceNick: d.nick,
+        power: m,
+        allyTeam: al,
+        enemyTeam: en,
+        clampStat,
+        logs: lg,
+        teamBuffLabel: "enemy team",
+        enemyLabel: "player team",
+      });
       if (d.ability === "faint_gold") {
         lg.push(`💰 Düşman ${d.nick} -> +${m} altın (oyuncuya etkisi yok)`);
       }
@@ -1768,6 +1764,7 @@ setET(newE);
 
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+
 
 
 
