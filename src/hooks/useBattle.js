@@ -243,8 +243,15 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         });
       }
       if (d.ability === "faint_dmg" && en.length > 0) {
-        en.forEach((x) => { x.curHp -= m * 2; });
-        lg.push(`☠️ Düşman ${d.nick} -> Oyuncu takımına ${m * 2} hasar`);
+        applyFaintDamageEffect({
+          deadUnit: d,
+          power: m,
+          enemyTeam: en,
+          logs: lg,
+          logPrefix: "☠️ Düşman ",
+          targetLabel: "Oyuncu takımına",
+          logSuffix: " -> ",
+        });
       }
       if (d.ability === "faint_shield" && al.length > 0) {
         al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
