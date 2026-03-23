@@ -1209,6 +1209,49 @@ const xpBreakdown = [
         return resolveFaintResult(result, waitMs);
       };
 
+
+      const runTempBuffPhase = async (playerTeam) => {
+        for (let i = 0; i < playerTeam.length; i++) {
+          const pet = playerTeam[i];
+          if (!pet || (!pet.tempAtk && !pet.tempHp)) continue;
+          triggerAnim(pet.id, "ability");
+          if (pet.tempAtk) playerTeam[i].atk += pet.tempAtk;
+          if (pet.tempHp) playerTeam[i].curHp += pet.tempHp;
+          addBattleLog(`? ${pet.nick} +${pet.tempAtk || 0} ATK / +${pet.tempHp || 0} HP (Gecici)`);
+          syncBattleTeams(playerTeam, null);
+          await delay(800);
+          if (isCancelled) return false;
+        }
+        return true;
+      };
+      const selfBuffAbilities = ["start_buff", "start_team_shield", "start_all_perm", "start_trample", "start_charge", "start_tank"];
+
+      const runPlayerSelfBuffPhase = async (playerTeam) => {
+        let nextTeam = [...playerTeam];
+        for (let i = 0; i < nextTeam.length; i++) {
+          const a = nextTeam[i];
+          if (!a || !selfBuffAbilities.includes(a.ability)) continue;
+          const m = pwr(a);
+          if (a.ability === "start_buff") { nextTeam[i].atk += m; setLog((l) => [...l, `⚡ ${a.nick} -> +${m} ATK`]); }
+          else if (a.ability === "start_team_shield") { nextTeam = nextTeam.map((x) => x ? { ...x, hp: clampStat(x.hp + m), curHp: clampStat(x.curHp + m) } : x); setLog((l) => [...l, `🛡️ ${a.nick} -> Tüm takima +${m} HP`]); }
+          else if (a.ability === "start_all_perm") {
+            const buffAmount = 2 * m;
+            nextTeam = nextTeam.map((x) => x ? { ...x, atk: clampStat(x.atk + buffAmount) } : x);
+            setTeam((prevTeam) => prevTeam.map((pet) => pet ? { ...pet, atk: clampStat(pet.atk + buffAmount) } : pet));
+            nextTeam.forEach((x) => { if (x) triggerAnim(x.id, "buff"); });
+            setLog((l) => [...l, `🦅 ${a.nick} -> Tüm takima +${2 * m} ATK KALICI`]);
+          }
+          else if (a.ability === "start_trample") { nextTeam[i].atk += 5 * m; nextTeam[i].trample = true; setLog((l) => [...l, `🦏 ${a.nick} -> +${5 * m} ATK (ciğneme)`]); }
+          else if (a.ability === "start_charge") { nextTeam[i].curHp += 2 * m; setLog((l) => [...l, `🐗 ${a.nick} -> +${2 * m} HP`]); }
+          else if (a.ability === "start_tank") { nextTeam[i].curHp += 3 * m; setLog((l) => [...l, `🦀 ${a.nick} -> +${3 * m} HP`]); }
+          triggerAnim(a.id, "ability");
+          spawnParticles(a.id, "buff");
+          syncBattleTeams(nextTeam, null);
+          await delay(600);
+          if (isCancelled) return { cancelled: true, playerTeam: nextTeam };
+        }
+        return { cancelled: false, playerTeam: nextTeam };
+      };
       // Step 0: Savaş başı yetenekleri
       if (step === 0) {
         await delay(1200);
@@ -1247,44 +1290,11 @@ const xpBreakdown = [
         }
 
         // 2. Geçici Bufflar
-        for (let i = 0; i < pp.length; i++) {
-          const a = pp[i];
-          if (a && (a.tempAtk || a.tempHp)) {
-            triggerAnim(a.id, "ability");
-            if (a.tempAtk) pp[i].atk += a.tempAtk;
-            if (a.tempHp) pp[i].curHp += a.tempHp;
-            setLog((l) => [...l, `✨ ${a.nick} +${a.tempAtk || 0} ATK / +${a.tempHp || 0} HP (Gecici)`]);
-            syncBattleTeams(pp, null);
-            await delay(800);
-            if (isCancelled) return;
-          }
-        }
-
+        if (!(await runTempBuffPhase(pp))) return;
         // 3. Kendi buff yetenekleri (sıra önemli değil, animasyon hızlı)
-        const selfBuffAbilities = ["start_buff", "start_team_shield", "start_all_perm", "start_trample", "start_charge", "start_tank"];
-        
-        for (let i = 0; i < pp.length; i++) {
-          const a = pp[i];
-          if (!a || !selfBuffAbilities.includes(a.ability)) continue;
-          const m = pwr(a);
-          if (a.ability === "start_buff") { pp[i].atk += m; setLog((l) => [...l, `⚡ ${a.nick} -> +${m} ATK`]); }
-          else if (a.ability === "start_team_shield") { pp = pp.map((x) => x ? { ...x, hp: clampStat(x.hp + m), curHp: clampStat(x.curHp + m) } : x); setLog((l) => [...l, `🛡️ ${a.nick} -> Tüm takima +${m} HP`]); }
-          else if (a.ability === "start_all_perm") {
-            const buffAmount = 2 * m;
-            pp = pp.map((x) => x ? { ...x, atk: clampStat(x.atk + buffAmount) } : x);
-            setTeam((prevTeam) => prevTeam.map((pet) => pet ? { ...pet, atk: clampStat(pet.atk + buffAmount) } : pet));
-            pp.forEach((x) => { if (x) triggerAnim(x.id, "buff"); });
-            setLog((l) => [...l, `🦅 ${a.nick} -> Tüm takima +${2 * m} ATK KALICI`]);
-          }
-          else if (a.ability === "start_trample") { pp[i].atk += 5 * m; pp[i].trample = true; setLog((l) => [...l, `🦏 ${a.nick} -> +${5 * m} ATK (ciğneme)`]); }
-          else if (a.ability === "start_charge") { pp[i].curHp += 2 * m; setLog((l) => [...l, `🐗 ${a.nick} -> +${2 * m} HP`]); }
-          else if (a.ability === "start_tank") { pp[i].curHp += 3 * m; setLog((l) => [...l, `🦀 ${a.nick} -> +${3 * m} HP`]); }
-          triggerAnim(a.id, "ability");
-          spawnParticles(a.id, "buff");
-          syncBattleTeams(pp, null);
-          await delay(600);
-          if (isCancelled) return;
-        }
+        const playerSelfBuffPhase = await runPlayerSelfBuffPhase(pp);
+        if (playerSelfBuffPhase.cancelled) return;
+        pp = playerSelfBuffPhase.playerTeam;
         for (let i = 0; i < ee.length; i++) {
           const a = ee[i];
           if (!a || !selfBuffAbilities.includes(a.ability)) continue;
@@ -1812,6 +1822,7 @@ const xpBreakdown = [
   }, [phase, step]);
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+
 
 
 
