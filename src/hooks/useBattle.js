@@ -764,7 +764,6 @@ const xpBreakdown = [
           for (let i = 0; i < 3; i++) {
             setTimeout(() => spawnParticles("boss_center", "buff"), (i * 200) / battleSpeedRef.current);
           }
-          unlockAchievement("first_win");
           playSound("victory");
         } else {
           setBossResult("lose");
