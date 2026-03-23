@@ -33,6 +33,8 @@ import {
   applyFaintShieldEffect,
   applyFriendFaintEffect,
   applyTeamWideFaintEffect,
+  applySelfFaintBuffEffect,
+  applyStagComboEffect,
   createFaintSummonUnit,
   createFriendSummonUnit,
   pushFaintDuplicateEffect,
@@ -138,7 +140,33 @@ saveTasksToDB,
       }
     });
   };
+  const handleArenaGameOver = (wins, turn) => {
+  const freshTaskData = loadTasks(user?.uid);
+  const pendingTaskXP = freshTaskData ? [
+    ...(freshTaskData.daily?.tasks || []),
+    ...(freshTaskData.weekly?.tasks || []),
+  ].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
 
+  if (freshTaskData) {
+    freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+    freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
+    saveTasks(freshTaskData, user?.uid);
+    if (saveTasksToDB) saveTasksToDB(freshTaskData);
+  }
+
+  updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
+    const isNewRecord = result?.isNewRecord || false;
+    const losses = turn - wins;
+    const xpBreakdown = [
+      { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
+      { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
+      { label: `${losses} Yenilgi × -2 XP`, xp: -(losses * 2) },
+      ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
+    ];
+    const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
+    setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
+  });
+};
   const faint = (d, al, en, isP, killer) => {
     if (!d) return { lg: [], sm: [], gG: 0 };
     if (d.isDead) return { lg: [], sm: [], gG: 0 };
@@ -154,6 +182,7 @@ saveTasksToDB,
           deadUnit: d,
           power: m,
           allyTeam: al,
+          clampStat,
           logs: lg,
           logPrefix: "💀 Düşman ",
           logSuffix: " -> ",
@@ -243,6 +272,7 @@ saveTasksToDB,
           deadUnit: d,
           power: m,
           allyTeam: al,
+          clampStat,
           logs: lg,
           logPrefix: "📋 Düşman ",
           logSuffix: " -> ",
@@ -302,6 +332,7 @@ saveTasksToDB,
                 deadUnit: d,
                 power: m,
                 allyTeam: al,
+                clampStat,
                 logs: lg,
                 logPrefix: "🦤 Düşman Dodo -> ",
                 logSuffix: " efekti tekrar! ",
@@ -373,6 +404,7 @@ saveTasksToDB,
         deadUnit: d,
         power: m,
         allyTeam: al,
+        clampStat,
         logs: lg,
         logPrefix: "💀 ",
         logSuffix: " -> ",
@@ -383,6 +415,7 @@ saveTasksToDB,
         deadUnit: d,
         power: m,
         allyTeam: al,
+        clampStat,
         logs: lg,
         logPrefix: "🦛 ",
         temporary: true,
@@ -423,21 +456,24 @@ saveTasksToDB,
       teamBuffLabel: "player team",
       enemyLabel: "enemy team",
     });
-    if (d.ability === "faint_buff_self" && isP) {
+   if (d.ability === "faint_buff_self" && isP) {
       const m2 = pwr(d);
+      applySelfFaintBuffEffect({
+        deadUnit: d,
+        power: m2,
+        allyTeam: al,
+        clampStat,
+        logs: lg,
+        logPrefix: "🦡 ",
+        logSuffix: " -> ",
+      });
       setTeam((prevTeam) =>
         prevTeam.map((pet) =>
           pet && pet.id === d.id
-            ? {
-                ...pet,
-                atk: clampStat(pet.atk + 2 * m2),
-                hp: clampStat(pet.hp + 2 * m2),
-                curHp: clampStat(pet.curHp + 2 * m2),
-              }
+            ? { ...pet, atk: clampStat(pet.atk + 2 * m2), hp: clampStat(pet.hp + 2 * m2), curHp: clampStat(pet.curHp + 2 * m2) }
             : pet
         )
       );
-      lg.push(`🦡 ${d.nick} -> Kendine +${2 * m2}/+${2 * m2} kalıcı`);
     }
     if (d.ability === "faint_summon") {
       const newSummon = createFaintSummonUnit({
@@ -459,33 +495,26 @@ saveTasksToDB,
       gG = m;
       lg.push(`💰 ${d.nick} -> +${m} altın`);
     }
-    if (d.ability === "stag_combo") {
+   if (d.ability === "stag_combo") {
       const m2 = pwr(d);
-      al.forEach((ally, idx) => {
-        if (ally && ally.id !== d.id) {
-          al[idx] = {
-            ...ally,
-            atk: clampStat(ally.atk + 2 * m2),
-            hp: clampStat(ally.hp + 2 * m2),
-            curHp: clampStat(ally.curHp + 2 * m2),
-          };
-        }
+      applyStagComboEffect({
+        deadUnit: d,
+        power: m2,
+        allyTeam: al,
+        clampStat,
+        logs: lg,
+        logPrefix: "🦌 ",
+        targetLabel: "Takıma ",
       });
       setTeam((prevTeam) =>
         prevTeam.map((pet) => {
           if (!pet || pet.id === d.id) return pet;
           const isAlive = al.some((bp) => bp && bp.id === pet.id);
           return isAlive
-            ? {
-                ...pet,
-                atk: clampStat(pet.atk + 2 * m2),
-                hp: clampStat(pet.hp + 2 * m2),
-                curHp: clampStat(pet.curHp + 2 * m2),
-              }
+            ? { ...pet, atk: clampStat(pet.atk + 2 * m2), hp: clampStat(pet.hp + 2 * m2), curHp: clampStat(pet.curHp + 2 * m2) }
             : pet;
         })
       );
-      lg.push(`🦌 ${d.nick} -> Takıma +${2 * m2}/+${2 * m2} KALICI (ölünce)`);
     }
     // Player ally reactions resolve after the faint.
     if (isP) {
@@ -539,6 +568,7 @@ saveTasksToDB,
                 deadUnit: d,
                 power: m,
                 allyTeam: al,
+                clampStat,
                 logs: lg,
                 logPrefix: "🦤 Dodo -> ",
                 logSuffix: " efekti tekrar! ",
@@ -582,6 +612,7 @@ saveTasksToDB,
                 deadUnit: d,
                 power: m,
                 allyTeam: al,
+                clampStat,
                 logs: lg,
                 logPrefix: "🦤 Dodo -> ",
                 logSuffix: " efekti tekrar! ",
@@ -815,40 +846,16 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
         const newLives = lives - 1;
         setLives(newLives);
        if (newLives <= 0) {
- if (gameMode === "arena") {
- const freshTaskData = loadTasks(user?.uid);
-const pendingTaskXP = freshTaskData ? [
-  ...( freshTaskData.daily?.tasks || []),
-  ...( freshTaskData.weekly?.tasks || []),
-].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
-
-if (freshTaskData) {
-  freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  saveTasks(freshTaskData, user?.uid);
-if (saveTasksToDB) saveTasksToDB(freshTaskData);
-}
-
-updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
-      const isNewRecord = result?.isNewRecord || false;
-     const losses = turn - wins;
-const xpBreakdown = [
-  { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
-  { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
-  { label: `${losses} Yenilgi × -2 XP`, xp: -(losses * 2) },
-  ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
-];
-      const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
-      setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
-    });
-    return;
-  }
-  setOver(true);
-  if (gameMode === "versus" && versusRoom) {
-    const { code, role } = versusRoom;
-    updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
-  }
+if (gameMode === "arena") {
+  handleArenaGameOver(wins, turn);
   return;
+}
+setOver(true);
+if (gameMode === "versus" && versusRoom) {
+  const { code, role } = versusRoom;
+  updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
+}
+return;
 }
         setTurnAndRef(turnRef.current + 1);
         setGold((g) => g + 10);
@@ -889,40 +896,16 @@ const xpBreakdown = [
           const newLives = lives - 2;
           setLives(newLives);
          if (newLives <= 0) {
- if (gameMode === "arena") {
-const freshTaskData = loadTasks(user?.uid);
-const pendingTaskXP = freshTaskData ? [
-  ...(freshTaskData.daily?.tasks || []),
-  ...(freshTaskData.weekly?.tasks || []),
-].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
-
-if (freshTaskData) {
-  freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  saveTasks(freshTaskData, user?.uid);
-if (saveTasksToDB) saveTasksToDB(freshTaskData);
-}
-
-updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
-      const isNewRecord = result?.isNewRecord || false;
-     const losses = turn - wins;
-const xpBreakdown = [
-  { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
-  { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
-  { label: `${losses} Yenilgi × -2 XP`, xp: -(losses * 2) },
-  ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
-];
-      const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
-      setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
-    });
-    return;
-  }
-  setOver(true);
-  if (gameMode === "versus" && versusRoom) {
-    const { code, role } = versusRoom;
-    updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
-  }
+if (gameMode === "arena") {
+  handleArenaGameOver(wins, turn);
   return;
+}
+setOver(true);
+if (gameMode === "versus" && versusRoom) {
+  const { code, role } = versusRoom;
+  updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
+}
+return;
 }
           setTimeout(() => {
             setTurnAndRef(turnRef.current + 1);
@@ -1046,39 +1029,15 @@ if (taskData) {
         setLog((l) => [...l, "💀 Yenilgi"]);
       if (newLives <= 0) {
 if (gameMode === "arena") {
- const freshTaskData = loadTasks(user?.uid);
-const pendingTaskXP = freshTaskData ? [
-  ...( freshTaskData.daily?.tasks || []),
-  ...( freshTaskData.weekly?.tasks || []),
-].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
-
-if (freshTaskData) {
-  freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-  saveTasks(freshTaskData, user?.uid);
-if (saveTasksToDB) saveTasksToDB(freshTaskData);
-}
-
-updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
-      const isNewRecord = result?.isNewRecord || false;
-     const losses = turn - wins;
-const xpBreakdown = [
-  { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
-  { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
-  { label: `${losses} Yenilgi × -2 XP`, xp: -(losses * 2) },
-  ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
-];
-      const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
-      setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
-    });
-    return;
-  }
-  setOver(true);
-  if (gameMode === "versus" && versusRoom) {
-    const { code, role } = versusRoom;
-    updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
-  }
+  handleArenaGameOver(wins, turn);
   return;
+}
+setOver(true);
+if (gameMode === "versus" && versusRoom) {
+  const { code, role } = versusRoom;
+  updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
+}
+return;
 }
       }
 
