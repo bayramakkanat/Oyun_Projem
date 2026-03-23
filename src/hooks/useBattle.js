@@ -1706,8 +1706,7 @@ const xpBreakdown = [
         const deadEnemy = e[0];
         e = e.slice(1);
         const r = faint(deadEnemy, e, p, false, p.length > 0 && p[0].curHp > 0 ? p[0] : null);
-        await playBattleLogs(r.lg, 300);
-        eS = [...eS, ...r.sm];
+        eS = [...eS, ...(await resolveFaintResult(r, 300))];
         await delay(500);
       }
 
@@ -1769,6 +1768,7 @@ setET(newE);
 
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+
 
 
 
