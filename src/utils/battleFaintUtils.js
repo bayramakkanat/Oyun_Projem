@@ -183,3 +183,10 @@ export const applyStagComboEffect = ({ deadUnit, power, allyTeam, clampStat, log
   logs.push(`${logPrefix}${deadUnit.nick} -> ${targetLabel}+${buff}/+${buff} KALICI`);
   return buff;
 };
+
+export const pushFaintSummonEffect = ({ deadUnit, power, summons, logs, name, nick, img, flip = false, logPrefix = "" }) => {
+  const summon = createFaintSummonUnit({ name, nick, power, img, flip });
+  summons.push(summon);
+  logs.push(`${logPrefix}${deadUnit.nick} -> ${4 * power}/${4 * power} yavru çağırdı`);
+  return summon;
+};
