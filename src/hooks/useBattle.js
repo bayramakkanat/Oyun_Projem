@@ -378,7 +378,7 @@ saveTasksToDB,
         logSuffix: " -> ",
       });
     }
-    if (d.ability === "faint_copy" && al.length > 0) {
+   if (d.ability === "faint_copy" && al.length > 0) {
       applyFaintCopyEffect({
         deadUnit: d,
         power: m,
@@ -388,6 +388,7 @@ saveTasksToDB,
         temporary: true,
         logSuffix: " -> ",
       });
+    }
     if (d.ability === "faint_dmg") {
       applyFaintDamageEffect({
         deadUnit: d,
@@ -410,7 +411,6 @@ saveTasksToDB,
         targetLabel: "Tüm takıma",
         logSuffix: " -> ",
       });
-    }
     }
     applyTeamWideFaintEffect({
       ability: d.ability,
@@ -1809,6 +1809,7 @@ const xpBreakdown = [
         if (isDebugBattle) {
           const winner = newE.length === 0 && newP.length > 0 ? "🎉 SEN KAZANDIN!" : newP.length === 0 && newE.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
           announceDebugWinner(newP.length, newE.length);
+          scheduleDebugBattleReset(); 
           return;
         }
         setStep((s) => s + 1);
