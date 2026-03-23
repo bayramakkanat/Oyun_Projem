@@ -125,7 +125,8 @@ export function useShop({
   // --- BİRLEŞTİRME ---
   const merge = (base, add) => {
     try {
-      if (!base || !add) return { merged: base || add, rewards: [] };
+      if (!base || !add)
+        return { merged: base || add, rewards: [], leveledUp: false };
 
       const baseTotal = safeNumber(base.atk, 0) + safeNumber(base.hp, 0);
       const addTotal = safeNumber(add.atk, 0) + safeNumber(add.hp, 0);
@@ -180,10 +181,10 @@ export function useShop({
       playSound("buff");
       spawnParticles(baseId, "buff");
 
-      return { merged, rewards: newRewards };
+      return { merged, rewards: newRewards, leveledUp: nL > oL };
     } catch (e) {
       logError(e, "merge");
-      return { merged: base, rewards: [] };
+      return { merged: base, rewards: [], leveledUp: false };
     }
   };
 
@@ -460,12 +461,23 @@ export function useShop({
         return true;
       }
       if (t.lvl < 3) {
-        const { merged, rewards: newRewards } = merge(t, f);
+        const { merged, rewards: newRewards, leveledUp } = merge(t, f);
         nt[ti] = merged;
         nt[fi] = null;
         setTeam(nt);
         if (newRewards.length > 0)
           setRewards((prev) => [...prev, ...newRewards]);
+        if (leveledUp && merged.ability === "buy_target_buff") {
+          const mergedPower = pwr(merged);
+          const buffAmount =
+            mergedPower === 1 ? 1 : mergedPower === 2 ? 2 : 4;
+          setSel({
+            ...merged,
+            pendingTargetBuff: true,
+            buffAmount,
+            sourceSlot: ti,
+          });
+        }
         setSelI(null);
         return true;
       }
