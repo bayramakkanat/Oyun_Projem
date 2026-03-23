@@ -214,7 +214,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
     x.atk = Math.max(1, x.atk - 5 * km);
     x.curHp = Math.max(0, x.curHp - 5 * km);
   });
-  lg.push(`😱 Düşman ${killer.nick} -> Oyuncu takımına -${5 * km}/-${5 * km}`);
+  lg.push(`Fear -> ${killer.nick} dusman takimina -${5 * km}/-${5 * km}`);
 }
       al.forEach((ally) => {
         if (ally && ally.ability === "summon_retrigger") {
@@ -252,7 +252,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
                 x.atk = Math.max(1, x.atk - debuff);
                 x.curHp = Math.max(0, x.curHp - debuff);
               });
-              lg.push(`ğŸ¦¤ DÃ¼ÅŸman Dodo -> ${d.nick} efekti tekrar! Oyuncu takÄ±mÄ±na -${debuff}/-${debuff}`);
+              lg.push(`Dodo tekrar -> ${d.nick} efekti tekrar! Oyuncu takimina -${debuff}/-${debuff}`);
             }
             if (d.ability === "faint_summon") {
              const extraSummon = {
@@ -464,7 +464,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
                 x.atk = Math.max(1, x.atk - debuff);
                 x.curHp = Math.max(0, x.curHp - debuff);
               });
-              lg.push(`ğŸ¦¤ Dodo -> ${d.nick} efekti tekrar! TÃ¼m dÃ¼ÅŸmanlara -${debuff}/-${debuff}`);
+              lg.push(`Dodo tekrar -> ${d.nick} efekti tekrar! Tum dusmanlara -${debuff}/-${debuff}`);
             }
             if (d.ability === "faint_copy" && al.length > 0) {
               const i = Math.floor(Math.random() * al.length);
