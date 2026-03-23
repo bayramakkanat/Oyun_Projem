@@ -1167,6 +1167,22 @@ const xpBreakdown = [
         return result.sm;
       };
 
+      const scheduleDebugBattleReset = () => {
+        setIsDebugBattle(false);
+        setIsBattleOver(true);
+        setTimeout(() => {
+          setIsBattleOver(false);
+          lastProcessedStepRef.current = -1;
+          setPT([]);
+          setET([]);
+          setStep(0);
+          setLog([]);
+          setPhase("shop");
+          setGameStarted(false);
+          setTimeout(() => setShowDebugPanel(true), 50);
+        }, 4000);
+      };
+
       const runFaintResolution = async ({
         deadUnit,
         allyTeam,
@@ -1426,21 +1442,9 @@ const xpBreakdown = [
           setPT([...pp]);
           setET([...ee]);
           if (isDebugBattle) {
-            setIsDebugBattle(false);
-            setIsBattleOver(true);
             const winner = ee.length === 0 && pp.length > 0 ? "🎉 SEN KAZANDIN!" : pp.length === 0 && ee.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
             setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
-            setTimeout(() => {
-              setIsBattleOver(false);
-              lastProcessedStepRef.current = -1;
-              setPT([]);
-              setET([]);
-              setStep(0);
-              setLog([]);
-              setPhase("shop");
-              setGameStarted(false);
-              setTimeout(() => setShowDebugPanel(true), 50);
-            }, 4000);
+            scheduleDebugBattleReset();
             return;
           }
           setStep((s) => s + 1);
@@ -1776,42 +1780,29 @@ const xpBreakdown = [
         setPT(newP);
         setET(newE);
         if (isDebugBattle) {
-          setIsDebugBattle(false);
-          setIsBattleOver(true);
           const winner = newE.length === 0 && newP.length > 0 ? "🎉 SEN KAZANDIN!" : newP.length === 0 && newE.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
           setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
-          setTimeout(() => {
-          setIsBattleOver(false);
-          lastProcessedStepRef.current = -1;
-          setPT([]);
-          setET([]);
-          setStep(0);
-          setLog([]);
-          setPhase("shop");
-          setGameStarted(false);
-          setTimeout(() => setShowDebugPanel(true), 50);
-}, 4000);
+          scheduleDebugBattleReset();
           return;
         }
         setStep((s) => s + 1);
         return;
       }
 
-     if (newP.length > 0 && newP[0].id !== oldAId) triggerAnim(newP[0].id, "slideInLeft");
-if (newE.length > 0 && newE[0].id !== oldDId) triggerAnim(newE[0].id, "slideInRight");
+      if (newP.length > 0 && newP[0].id !== oldAId) triggerAnim(newP[0].id, "slideInLeft");
+      if (newE.length > 0 && newE[0].id !== oldDId) triggerAnim(newE[0].id, "slideInRight");
 
-await delay(150);
-setPT(newP);
-setET(newE);
+      await delay(150);
+      setPT(newP);
+      setET(newE);
       setStep((s) => s + 1);
     }, 300);
-
     return () => {
       isCancelled = true;
       clearTimeout(tmr);
     };
-  }, [phase, step]);
 
+  }, [phase, step]);
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
 
