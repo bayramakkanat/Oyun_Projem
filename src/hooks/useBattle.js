@@ -1150,6 +1150,11 @@ const xpBreakdown = [
         }
       };
 
+
+      const playDeathAnim = (petId, direction) => {
+        triggerAnim(petId, direction);
+        spawnDeathEffect(petId);
+      };
       if (isCancelled) return;
 
       // Step 0: Savaş başı yetenekleri
@@ -1662,8 +1667,7 @@ const xpBreakdown = [
       // Ara ölüm kontrolleri
       for (let i = 1; i < p.length; i++) {
         if (p[i].curHp <= 0) {
-          triggerAnim(p[i].id, "deathLeft");
-          spawnDeathEffect(p[i].id);
+          playDeathAnim(p[i].id, "deathLeft");
           const deadPet = p[i];
           p = p.filter((_, idx) => idx !== i);
           const r = faint(deadPet, p, e, true, e.length > 0 ? e[0] : null);
@@ -1675,8 +1679,7 @@ const xpBreakdown = [
       }
       for (let i = 1; i < e.length; i++) {
         if (e[i].curHp <= 0) {
-          triggerAnim(e[i].id, "deathRight");
-          spawnDeathEffect(e[i].id);
+          playDeathAnim(e[i].id, "deathRight");
           const deadEnemy = e[i];
           e = e.filter((_, idx) => idx !== i);
           const r = faint(deadEnemy, e, p, false, null);
@@ -1688,8 +1691,7 @@ const xpBreakdown = [
 
       // Ön hayvan ölüm kontrolleri
       if (p[0] && p[0].curHp <= 0) {
-        triggerAnim(p[0].id, "deathLeft");
-        spawnDeathEffect(p[0].id);
+        playDeathAnim(p[0].id, "deathLeft");
         const deadPet = p[0];
         p = p.slice(1);
         const r = faint(deadPet, p, e, true, e.length > 0 && e[0].curHp > 0 ? e[0] : null);
@@ -1699,8 +1701,7 @@ const xpBreakdown = [
         await delay(500);
       }
       if (e[0] && e[0].curHp <= 0) {
-        triggerAnim(e[0].id, "deathRight");
-        spawnDeathEffect(e[0].id);
+        playDeathAnim(e[0].id, "deathRight");
         const deadEnemy = e[0];
         e = e.slice(1);
         const r = faint(deadEnemy, e, p, false, p.length > 0 && p[0].curHp > 0 ? p[0] : null);
@@ -1713,8 +1714,7 @@ const xpBreakdown = [
       eS = eS.filter((x) => x.curHp > 0);
       for (let i = 0; i < eS.length; i++) {
         if (eS[i].curHp <= 0) {
-          triggerAnim(eS[i].id, "deathRight");
-          spawnDeathEffect(eS[i].id);
+          playDeathAnim(eS[i].id, "deathRight");
           const deadEnemy = eS[i];
           eS = eS.filter((_, idx) => idx !== i);
           const r = faint(deadEnemy, [...eS, ...e], p, false, null);
@@ -1769,6 +1769,7 @@ setET(newE);
 
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+
 
 
 
