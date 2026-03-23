@@ -1406,7 +1406,7 @@ if (p.length === 0 || e.length === 0) {
         }
       }
      if (a.ability === "hurt_reflect" && p[0].curHp > 0 && dD > 0 && p[0].id === a.id) {
-  const pct = pwr(a) === 1 ? 0.33 : pwr(a) === 2 ? 0.50 : 0.75;
+  const pct = pwr(a) === 1 ? 0.33 : pwr(a) === 2 ? 0.66 : 0.99;
   const reflectDmg = Math.max(1, Math.floor(dD * pct));
   e[0].curHp = Math.max(0, e[0].curHp - reflectDmg);
   triggerAnim(e[0].id, "damage");
@@ -1517,7 +1517,7 @@ if (p.length === 0 || e.length === 0) {
         await delay(500);
       }
      if (d.ability === "hurt_reflect" && e[0].curHp > 0 && aD > 0 && e[0].id === d.id) {
-  const dpct = pwr(d) === 1 ? 0.33 : pwr(d) === 2 ? 0.50 : 0.75;
+  const dpct = pwr(d) === 1 ? 0.33 : pwr(d) === 2 ? 0.66 : 0.99;
   const dreflectDmg = Math.max(1, Math.floor(aD * dpct));
   p[0].curHp = Math.max(0, p[0].curHp - dreflectDmg);
   triggerAnim(p[0].id, "damage");

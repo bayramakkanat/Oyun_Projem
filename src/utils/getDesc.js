@@ -120,7 +120,7 @@ if (a.ability === "faint_weaken_all") {
   return `Ölünce: Tüm düşmanlara -${debuff}/-${debuff}`;
 }
 if (a.ability === "hurt_reflect") {
-  const pct = m === 1 ? 33 : m === 2 ? 50 : 75;
+  const pct = m === 1 ? 33 : m === 2 ? 66 : 99;
   return `Hasar alınca: Saldırana aldığının %${pct}'ini geri yansıt`;
 }
   return "";
