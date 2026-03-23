@@ -139,6 +139,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
     let lg = [], sm = [], gG = 0;
 
     if (!isP) {
+      // Enemy dead-unit effects resolve first.
       if (d.ability === "faint_buff" && al.length > 0) {
         applyFaintBuffEffect({
           deadUnit: d,
@@ -242,6 +243,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           logSuffix: " -> ",
         });
       }
+      // Enemy ally reactions resolve after the faint.
       al.forEach((a) => {
         if (a.ability === "friend_faint") {
           const am = pwr(a);
@@ -273,17 +275,19 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
           }
         }
       });
+      // Killer follow-up abilities trigger after ally reactions.
       if (killer && killer.ability === "kill_buff") {
         const km = pwr(killer);
         killer.atk = clampStat(killer.atk + 3 * km);
         killer.curHp = clampStat(killer.curHp + 3 * km);
         lg.push(`🦈 Düşman ${killer.nick} -> öldürdü, +${3 * km}/+${3 * km}`);
       }
-     if (killer && killer.ability === "kill_fear_all" && al.length > 0) {
-  const debuff = getFearAllDebuff(pwr(killer));
-  applyTeamDebuff(al, debuff);
-  lg.push(`Fear -> ${killer.nick} -> enemy team -${debuff}/-${debuff}`);
-}
+      if (killer && killer.ability === "kill_fear_all" && al.length > 0) {
+        const debuff = getFearAllDebuff(pwr(killer));
+        applyTeamDebuff(al, debuff);
+        lg.push(`Fear -> ${killer.nick} -> enemy team -${debuff}/-${debuff}`);
+      }
+      // Enemy-side Dodo retriggers replay supported faint effects.
       al.forEach((ally) => {
         if (ally && ally.ability === "summon_retrigger") {
           const dodoM = pwr(ally);
@@ -489,6 +493,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       );
       lg.push(`🦌 ${d.nick} -> Takıma +${2 * m2}/+${2 * m2} KALICI (ölünce)`);
     }
+    // Player ally reactions resolve after the faint.
     if (isP) {
       al.forEach((a) => {
         if (a.ability === "friend_faint") {
@@ -529,6 +534,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         logPrefix: "🐙 ",
       });
     }
+    // Player-side Dodo retriggers replay supported faint effects.
     if (isP) {
       al.forEach((ally) => {
         if (ally && ally.ability === "summon_retrigger") {
@@ -1762,3 +1768,7 @@ setET(newE);
 
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+
+
+
+
