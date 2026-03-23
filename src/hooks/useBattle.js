@@ -25,7 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
-import { applyFaintDamageEffect } from "../utils/battleFaintUtils";
+import { applyFaintDamageEffect, applyFaintShieldEffect } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -446,10 +446,18 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         logSuffix: " -> ",
       });
     }
-    }
     if (d.ability === "faint_shield") {
-      al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
-      lg.push(`🛡️ ${d.nick} -> Tüm takıma +${2 * m} HP`);
+      applyFaintShieldEffect({
+        deadUnit: d,
+        power: m,
+        allyTeam: al,
+        clampStat,
+        logs: lg,
+        logPrefix: "🛡️ ",
+        targetLabel: "Tüm takıma",
+        logSuffix: " -> ",
+      });
+    }
     }
     if (d.ability === "faint_rage") {
       const buff = 8 * m;
@@ -600,8 +608,16 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               });
             }
             if (d.ability === "faint_shield") {
-              al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
-              lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Takıma +${2 * m} HP`);
+              applyFaintShieldEffect({
+                deadUnit: d,
+                power: m,
+                allyTeam: al,
+                clampStat,
+                logs: lg,
+                logPrefix: "🦤 Dodo -> ",
+                targetLabel: "Takıma",
+                logSuffix: " efekti tekrar! ",
+              });
             }
             applyDodoTeamRetrigger({
               ability: d.ability,
