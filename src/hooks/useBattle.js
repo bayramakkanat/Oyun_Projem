@@ -1192,6 +1192,11 @@ const xpBreakdown = [
         setLog((l) => [...l, "------------------", winner, "------------------"]);
       };
 
+
+      const syncBattleTeams = (playerTeam, enemyTeam) => {
+        if (playerTeam) setPT([...playerTeam]);
+        if (enemyTeam) setET([...enemyTeam]);
+      };
       const runFaintResolution = async ({
         deadUnit,
         allyTeam,
@@ -1223,7 +1228,7 @@ const xpBreakdown = [
               prevTeam.map((p) => p ? { ...p, atk: clampStat(p.atk + 2 * m), hp: clampStat(p.hp + 2 * m), curHp: clampStat(p.curHp + 2 * m) } : p)
             );
             setLog((l) => [...l, `🦌 ${pet.nick} -> Takima +${2 * m}/+${2 * m} KALICI`]);
-            setPT([...pp]);
+            syncBattleTeams(pp, null);
             await delay(1000);
             if (isCancelled) return;
           }
@@ -1235,7 +1240,7 @@ const xpBreakdown = [
             const m = pwr(pet);
             ee = ee.map((a) => a ? { ...a, atk: clampStat(a.atk + 2 * m), hp: clampStat(a.hp + 2 * m), curHp: clampStat(a.curHp + 2 * m) } : a);
             setLog((l) => [...l, `🦌 Düsman ${pet.nick} -> Düsman takimina +${2 * m}/+${2 * m} KALICI`]);
-            setET([...ee]);
+            syncBattleTeams(null, ee);
             await delay(1000);
             if (isCancelled) return;
           }
@@ -1249,7 +1254,7 @@ const xpBreakdown = [
             if (a.tempAtk) pp[i].atk += a.tempAtk;
             if (a.tempHp) pp[i].curHp += a.tempHp;
             setLog((l) => [...l, `✨ ${a.nick} +${a.tempAtk || 0} ATK / +${a.tempHp || 0} HP (Gecici)`]);
-            setPT([...pp]);
+            syncBattleTeams(pp, null);
             await delay(800);
             if (isCancelled) return;
           }
@@ -1276,7 +1281,7 @@ const xpBreakdown = [
           else if (a.ability === "start_tank") { pp[i].curHp += 3 * m; setLog((l) => [...l, `🦀 ${a.nick} -> +${3 * m} HP`]); }
           triggerAnim(a.id, "ability");
           spawnParticles(a.id, "buff");
-          setPT([...pp]);
+          syncBattleTeams(pp, null);
           await delay(600);
           if (isCancelled) return;
         }
@@ -1292,7 +1297,7 @@ const xpBreakdown = [
           else if (a.ability === "start_tank") { ee[i].curHp += 3 * m; setLog((l) => [...l, `🦀 Düsman ${a.nick} -> +${3 * m} HP`]); }
           triggerAnim(a.id, "ability");
           spawnParticles(a.id, "buff");
-          setET([...ee]);
+          syncBattleTeams(null, ee);
           await delay(600);
           if (isCancelled) return;
         }
@@ -1439,8 +1444,7 @@ const xpBreakdown = [
           } else {
             pp = pp.filter((x) => x.curHp > 0);
           }
-          setPT([...pp]);
-          setET([...ee]);
+          syncBattleTeams(pp, ee);
           if (isCancelled) return;
         }
         pp = pp.filter((x) => x.curHp > 0);
@@ -1448,8 +1452,7 @@ const xpBreakdown = [
         setPT([...pp]);
         setET([...ee]);
         if (pp.length === 0 || ee.length === 0) {
-          setPT([...pp]);
-          setET([...ee]);
+          syncBattleTeams(pp, ee);
           if (isDebugBattle) {
             announceDebugWinner(pp.length, ee.length);
             scheduleDebugBattleReset();
@@ -1785,8 +1788,7 @@ const xpBreakdown = [
       const newE = [...eS, ...e].filter((x) => x.curHp > 0);
 
       if (newP.length === 0 || newE.length === 0) {
-        setPT(newP);
-        setET(newE);
+        syncBattleTeams(newP, newE);
         if (isDebugBattle) {
           const winner = newE.length === 0 && newP.length > 0 ? "🎉 SEN KAZANDIN!" : newP.length === 0 && newE.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
           announceDebugWinner(newP.length, newE.length);
@@ -1812,6 +1814,7 @@ const xpBreakdown = [
   }, [phase, step]);
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+
 
 
 
