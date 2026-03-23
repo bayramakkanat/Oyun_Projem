@@ -72,6 +72,7 @@ export default function App() {
   const [eT, setET] = useState([]);
   const [step, setStep] = useState(0);
   const [sel, setSel] = useState(null);
+  const [targetBuffHint, setTargetBuffHint] = useState(false);
   const [selI, setSelI] = useState(null);
   const [over, setOver] = useState(false);
   const [victory, setVictory] = useState(false);
@@ -1161,6 +1162,11 @@ title="Koleksiyon Defteri"
     : null
   }
 </div>
+{sel?.pendingTargetBuff && (
+  <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center animate-pulse">
+    🎯 Buff vermek istediğin hayvana tıkla!
+  </div>
+)}
             <div className="flex gap-2.5 justify-center px-1 py-3">
                 {team.map((a, i) => {
                   // ← GÜNCELLENDİ: Tur 7 ve Tur 9
