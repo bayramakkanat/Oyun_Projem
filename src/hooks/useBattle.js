@@ -1252,6 +1252,27 @@ const xpBreakdown = [
         }
         return { cancelled: false, playerTeam: nextTeam };
       };
+
+      const runEnemySelfBuffPhase = async (enemyTeam) => {
+        let nextTeam = [...enemyTeam];
+        for (let i = 0; i < nextTeam.length; i++) {
+          const a = nextTeam[i];
+          if (!a || !selfBuffAbilities.includes(a.ability)) continue;
+          const m = pwr(a);
+          if (a.ability === "start_buff") { nextTeam[i].atk += m; setLog((l) => [...l, `⚡ Düsman ${a.nick} -> +${m} ATK`]); }
+          else if (a.ability === "start_team_shield") { nextTeam = nextTeam.map((x) => x ? { ...x, hp: clampStat(x.hp + m), curHp: clampStat(x.curHp + m) } : x); setLog((l) => [...l, `🛡️ Düsman ${a.nick} -> Tüm takima +${m} HP`]); }
+          else if (a.ability === "start_all_perm") { nextTeam = nextTeam.map((x) => x ? { ...x, atk: clampStat(x.atk + 2 * m) } : x); setLog((l) => [...l, `🦅 Düsman ${a.nick} -> Tüm takima +${2 * m} ATK`]); }
+          else if (a.ability === "start_trample") { nextTeam[i].atk += 5 * m; nextTeam[i].trample = true; setLog((l) => [...l, `🦏 Düsman ${a.nick} -> +${5 * m} ATK`]); }
+          else if (a.ability === "start_charge") { nextTeam[i].curHp += 2 * m; setLog((l) => [...l, `🐗 Düsman ${a.nick} -> +${2 * m} HP`]); }
+          else if (a.ability === "start_tank") { nextTeam[i].curHp += 3 * m; setLog((l) => [...l, `🦀 Düsman ${a.nick} -> +${3 * m} HP`]); }
+          triggerAnim(a.id, "ability");
+          spawnParticles(a.id, "buff");
+          syncBattleTeams(null, nextTeam);
+          await delay(600);
+          if (isCancelled) return { cancelled: true, enemyTeam: nextTeam };
+        }
+        return { cancelled: false, enemyTeam: nextTeam };
+      };
       // Step 0: Savaş başı yetenekleri
       if (step === 0) {
         await delay(1200);
@@ -1295,22 +1316,9 @@ const xpBreakdown = [
         const playerSelfBuffPhase = await runPlayerSelfBuffPhase(pp);
         if (playerSelfBuffPhase.cancelled) return;
         pp = playerSelfBuffPhase.playerTeam;
-        for (let i = 0; i < ee.length; i++) {
-          const a = ee[i];
-          if (!a || !selfBuffAbilities.includes(a.ability)) continue;
-          const m = pwr(a);
-          if (a.ability === "start_buff") { ee[i].atk += m; setLog((l) => [...l, `⚡ Düsman ${a.nick} -> +${m} ATK`]); }
-          else if (a.ability === "start_team_shield") { ee = ee.map((x) => x ? { ...x, hp: clampStat(x.hp + m), curHp: clampStat(x.curHp + m) } : x); setLog((l) => [...l, `🛡️ Düsman ${a.nick} -> Tüm takima +${m} HP`]); }
-          else if (a.ability === "start_all_perm") { ee = ee.map((x) => x ? { ...x, atk: clampStat(x.atk + 2 * m) } : x); setLog((l) => [...l, `🦅 Düsman ${a.nick} -> Tüm takima +${2 * m} ATK`]); }
-          else if (a.ability === "start_trample") { ee[i].atk += 5 * m; ee[i].trample = true; setLog((l) => [...l, `🦏 Düsman ${a.nick} -> +${5 * m} ATK`]); }
-          else if (a.ability === "start_charge") { ee[i].curHp += 2 * m; setLog((l) => [...l, `🐗 Düsman ${a.nick} -> +${2 * m} HP`]); }
-          else if (a.ability === "start_tank") { ee[i].curHp += 3 * m; setLog((l) => [...l, `🦀 Düsman ${a.nick} -> +${3 * m} HP`]); }
-          triggerAnim(a.id, "ability");
-          spawnParticles(a.id, "buff");
-          syncBattleTeams(null, ee);
-          await delay(600);
-          if (isCancelled) return;
-        }
+        const enemySelfBuffPhase = await runEnemySelfBuffPhase(ee);
+        if (enemySelfBuffPhase.cancelled) return;
+        ee = enemySelfBuffPhase.enemyTeam;
 
         // 4. Saldırı yetenekleri - ATK'ya göre sıralı, birleşik
         const attackAbilities = ["start_fire", "start_fear", "start_snipe", "start_multi_snipe", "start_dmg", "start_poison", "start_freeze_enemy", "weaken_strong"];
