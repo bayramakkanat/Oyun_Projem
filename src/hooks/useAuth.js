@@ -37,11 +37,32 @@ export function useAuth({
 
   // Firebase Auth Observer
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      if (u) setShowAuthModal(false);
-      setStats(loadStats(u?.uid));
-    });
+   const unsub = onAuthStateChanged(auth, async (u) => {
+  setUser(u);
+  if (u) {
+    setShowAuthModal(false);
+    const base = loadStats(u?.uid);
+    setStats(base);
+    // Firebase'den başarımları yükle
+    try {
+      const { doc, getDoc } = await import("firebase/firestore");
+      const { db } = await import("../firebase");
+      const profileSnap = await getDoc(doc(db, "user_profiles", u.uid));
+      if (profileSnap.exists()) {
+        const fbAchievements = profileSnap.data().achievements || [];
+        setStats(prev => ({ ...prev, achievements: fbAchievements }));
+        // Local'e de yaz ki unlockAchievement kontrolü çalışsın
+        const updated = { ...base, achievements: fbAchievements };
+        const { saveStats } = await import("../utils/helpers");
+        saveStats(updated, u.uid);
+      }
+    } catch (e) {
+      console.error("Firebase achievements yüklenemedi:", e);
+    }
+  } else {
+    setStats(loadStats(null));
+  }
+});
     return () => unsub();
   }, []);
 
