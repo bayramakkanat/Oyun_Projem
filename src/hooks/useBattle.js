@@ -1329,7 +1329,7 @@ const xpBreakdown = [
             const alive = currentTargets.filter((x) => x.curHp > 0);
             if (alive.length === 0) continue;
             {
-    const t = alive[Math.floor(Math.random() * alive.length)];
+              const t = alive[Math.floor(Math.random() * alive.length)];
               t.curHp -= 2 * m;
               spawnProjectile(a.id, t.id, "start_dmg", null, true);
               triggerAnim(t.id, "damage");
@@ -1391,39 +1391,39 @@ const xpBreakdown = [
         if (pp.length === 0 || ee.length === 0) {
           setPT([...pp]);
           setET([...ee]);
-  if (isDebugBattle) {
-    setIsDebugBattle(false);
-    setIsBattleOver(true);
+          if (isDebugBattle) {
+            setIsDebugBattle(false);
+            setIsBattleOver(true);
     const winner = ee.length === 0 && pp.length > 0 ? "🎉 SEN KAZANDIN!" : pp.length === 0 && ee.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
     setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
-    setTimeout(() => {
-      setIsBattleOver(false);
-      lastProcessedStepRef.current = -1;
-      setPT([]);
-      setET([]);
-      setStep(0);
-      setLog([]);
-      setPhase("shop");
-      setGameStarted(false);
-      setTimeout(() => setShowDebugPanel(true), 50);
-    }, 4000);
-    return;
-  }
-  setStep((s) => s + 1);
-  return;
-}
-setStep((s) => s + 1);
-await delay(500);
-if (isCancelled) return;
+            setTimeout(() => {
+              setIsBattleOver(false);
+              lastProcessedStepRef.current = -1;
+              setPT([]);
+              setET([]);
+              setStep(0);
+              setLog([]);
+              setPhase("shop");
+              setGameStarted(false);
+              setTimeout(() => setShowDebugPanel(true), 50);
+            }, 4000);
+            return;
+          }
+          setStep((s) => s + 1);
+          return;
+        }
+        setStep((s) => s + 1);
+        await delay(500);
+        if (isCancelled) return;
       }
       // Standart Savaş Turu
-     if (step === 0) return;
-let p = [...pT].filter((x) => x.curHp > 0);
-let e = [...eT].filter((x) => x.curHp > 0);
-if (p.length === 0 || e.length === 0) {
-  setIsBattleOver(true);
-  return;
-}
+      if (step === 0) return;
+      let p = [...pT].filter((x) => x.curHp > 0);
+      let e = [...eT].filter((x) => x.curHp > 0);
+      if (p.length === 0 || e.length === 0) {
+        setIsBattleOver(true);
+        return;
+      }
 
       let lg = [];
       const a = p[0];
@@ -1435,7 +1435,7 @@ if (p.length === 0 || e.length === 0) {
       let aD = a.atk;
       let dD = d.atk;
 
-     triggerAnim(a.id, "attackLeft");
+      triggerAnim(a.id, "attackLeft");
       triggerAnim(d.id, "attackRight");
       await delay(2000);
       if (isCancelled) return;
@@ -1487,16 +1487,16 @@ if (p.length === 0 || e.length === 0) {
         setLog((l) => [...l, `🐗 ${a.nick} -> +${2 * pwr(a)} ATK`]);
         await delay(500);
       }
-     if (a.ability === "faint_weaken_all" && p[0].curHp <= 0) {
-  const debuff = getFaintWeakenAllDebuff(pwr(a));
-  e.forEach((enemy) => {
-    enemy.atk = Math.max(1, enemy.atk - debuff);
-    enemy.curHp = Math.max(0, enemy.curHp - debuff);
-  });
-  applyDamageAnimToTeam(e);
+      if (a.ability === "faint_weaken_all" && p[0].curHp <= 0) {
+        const debuff = getFaintWeakenAllDebuff(pwr(a));
+        e.forEach((enemy) => {
+          enemy.atk = Math.max(1, enemy.atk - debuff);
+          enemy.curHp = Math.max(0, enemy.curHp - debuff);
+        });
+        applyDamageAnimToTeam(e);
   setLog((l) => [...l, `${a.nick} faint_weaken_all -> enemy team -${debuff}/-${debuff}`]);
-  await delay(600);
-}
+        await delay(600);
+      }
       if (a.ability === "hurt_team_buff" && p[0].curHp > 0 && dD > 0) {
         const m = pwr(a);
         applyHurtTeamBuff(p, 3 * m);
