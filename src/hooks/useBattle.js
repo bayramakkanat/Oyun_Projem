@@ -1394,8 +1394,8 @@ const xpBreakdown = [
           if (isDebugBattle) {
             setIsDebugBattle(false);
             setIsBattleOver(true);
-    const winner = ee.length === 0 && pp.length > 0 ? "🎉 SEN KAZANDIN!" : pp.length === 0 && ee.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
-    setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
+            const winner = ee.length === 0 && pp.length > 0 ? "🎉 SEN KAZANDIN!" : pp.length === 0 && ee.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
+            setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
             setTimeout(() => {
               setIsBattleOver(false);
               lastProcessedStepRef.current = -1;
@@ -1494,7 +1494,7 @@ const xpBreakdown = [
           enemy.curHp = Math.max(0, enemy.curHp - debuff);
         });
         applyDamageAnimToTeam(e);
-  setLog((l) => [...l, `${a.nick} faint_weaken_all -> enemy team -${debuff}/-${debuff}`]);
+        setLog((l) => [...l, `${a.nick} faint_weaken_all -> enemy team -${debuff}/-${debuff}`]);
         await delay(600);
       }
       if (a.ability === "hurt_team_buff" && p[0].curHp > 0 && dD > 0) {
@@ -1529,14 +1529,14 @@ const xpBreakdown = [
           await delay(600);
         }
       }
-     if (a.ability === "hurt_reflect" && p[0].curHp > 0 && dD > 0 && p[0].id === a.id) {
-  const pct = pwr(a) === 1 ? 0.33 : pwr(a) === 2 ? 0.66 : 0.99;
-  const reflectDmg = Math.max(1, Math.floor(dD * pct));
-  e[0].curHp = Math.max(0, e[0].curHp - reflectDmg);
-  triggerAnim(e[0].id, "damage");
-  setLog((l) => [...l, `🪞 ${a.nick} -> ${e[0].nick} e ${reflectDmg} yansıma hasarı`]);
-  await delay(500);
-}
+      if (a.ability === "hurt_reflect" && p[0].curHp > 0 && dD > 0 && p[0].id === a.id) {
+      const pct = pwr(a) === 1 ? 0.33 : pwr(a) === 2 ? 0.66 : 0.99;
+      const reflectDmg = Math.max(1, Math.floor(dD * pct));
+      e[0].curHp = Math.max(0, e[0].curHp - reflectDmg);
+      triggerAnim(e[0].id, "damage");
+      setLog((l) => [...l, `🪞 ${a.nick} -> ${e[0].nick} e ${reflectDmg} yansıma hasarı`]);
+      await delay(500);
+      }
       if (a.ability === "kill_buff" && e[0].curHp <= 0) {
         p[0].atk = clampStat(p[0].atk + 3 * pwr(a));
         p[0].curHp = clampStat(p[0].curHp + 3 * pwr(a));
@@ -1562,11 +1562,11 @@ const xpBreakdown = [
         setLog((l) => [...l, `🦭 ${a.nick} -> Takıma +${3 * pwr(a)}/+${3 * pwr(a)} KALICI`]);
         await delay(800);
       }
-     if (a.ability === "kill_fear_all" && e[0].curHp <= 0 && p[0].id === a.id) {
-  const debuff = applyFearToTeam(e, pwr(a));
-  e.forEach((enemy) => {
-    spawnProjectile(a.id, enemy.id, "kill_fear_all");
-  });
+      if (a.ability === "kill_fear_all" && e[0].curHp <= 0 && p[0].id === a.id) {
+      const debuff = applyFearToTeam(e, pwr(a));
+      e.forEach((enemy) => {
+      spawnProjectile(a.id, enemy.id, "kill_fear_all");
+      });
         setLog((l) => [...l, `${a.nick} fear -> enemy team -${debuff}/-${debuff}`]);
         await delay(500);
       }
@@ -1599,57 +1599,57 @@ const xpBreakdown = [
         setLog((l) => [...l, `🦭 Düşman ${d.nick} -> Takıma +${3 * km}/+${3 * km} KALICI`]);
         await delay(800);
       }
-     if (d.ability === "kill_fear_all" && p[0].curHp <= 0) {
-  const debuff = applyFearToTeam(
-    p.filter((pet) => pet.curHp > 0),
-    pwr(d),
-    1
-  );
-  setLog((l) => [...l, `${d.nick} fear -> player team -${debuff}/-${debuff}`]);
-  await delay(500);
-}
+      if (d.ability === "kill_fear_all" && p[0].curHp <= 0) {
+      const debuff = applyFearToTeam(
+      p.filter((pet) => pet.curHp > 0),
+      pwr(d),
+      1
+      );
+      setLog((l) => [...l, `${d.nick} fear -> player team -${debuff}/-${debuff}`]);
+      await delay(500);
+      }
       if (d.ability === "atk_buff" && e[0].curHp > 0) {
         e[0].atk = clampStat(e[0].atk + pwr(d));
         triggerAnim(d.id, "buff");
         setLog((l) => [...l, `💪 Düşman ${d.nick} -> +${pwr(d)} ATK`]);
         await delay(500);
       }
-     if (d.ability === "faint_weaken_all" && e[0].curHp <= 0) {
-  const debuff = applyFaintWeakenToTeam(p, pwr(d));
-  setLog((l) => [...l, `${d.nick} faint_weaken_all -> player team -${debuff}/-${debuff}`]);
-  await delay(600);
-}
+      if (d.ability === "faint_weaken_all" && e[0].curHp <= 0) {
+      const debuff = applyFaintWeakenToTeam(p, pwr(d));
+      setLog((l) => [...l, `${d.nick} faint_weaken_all -> player team -${debuff}/-${debuff}`]);
+      await delay(600);
+      }
       if (d.ability === "hurt_team_buff" && e[0].curHp > 0 && aD > 0) {
         const htm = pwr(d);
         applyHurtTeamBuff(e, 3 * htm);
         setLog((l) => [...l, `🦬 Düşman ${d.nick} hasar aldı -> Takıma +${3 * pwr(d)}/+${3 * pwr(d)}`]);
         await delay(500);
       }
-     if (d.ability === "hurt_reflect" && e[0].curHp > 0 && aD > 0 && e[0].id === d.id) {
-  const dpct = pwr(d) === 1 ? 0.33 : pwr(d) === 2 ? 0.66 : 0.99;
-  const dreflectDmg = Math.max(1, Math.floor(aD * dpct));
-  p[0].curHp = Math.max(0, p[0].curHp - dreflectDmg);
-  triggerAnim(p[0].id, "damage");
-  setLog((l) => [...l, `🪞 Düşman ${d.nick} -> ${p[0].nick} e ${dreflectDmg} yansıma hasarı`]);
-  await delay(500);
-}
+      if (d.ability === "hurt_reflect" && e[0].curHp > 0 && aD > 0 && e[0].id === d.id) {
+      const dpct = pwr(d) === 1 ? 0.33 : pwr(d) === 2 ? 0.66 : 0.99;
+      const dreflectDmg = Math.max(1, Math.floor(aD * dpct));
+      p[0].curHp = Math.max(0, p[0].curHp - dreflectDmg);
+      triggerAnim(p[0].id, "damage");
+      setLog((l) => [...l, `🪞 Düşman ${d.nick} -> ${p[0].nick} e ${dreflectDmg} yansıma hasarı`]);
+      await delay(500);
+      }
       if (d.ability === "start_charge" && e[0].curHp > 0) {
         e[0].atk = clampStat(e[0].atk + 2 * pwr(d));
         triggerAnim(d.id, "buff");
         setLog((l) => [...l, `🐗 Düşman ${d.nick} -> +${2 * pwr(d)} ATK`]);
         await delay(500);
       }
-    if (a.ability === "devour" && e[0].curHp <= 0 && p[0].curHp > 0) {
-  const pct = (30 + 10 * pwr(a)) / 100;
-  const atkGain = Math.floor(e[0].atk * pct);
-  const hpGain = Math.floor((e[0].hp || e[0].curHp) * pct);
-  p[0].atk = clampStat(p[0].atk + atkGain);
-  p[0].hp = clampStat(p[0].hp + hpGain);
-  p[0].curHp = clampStat(p[0].curHp + hpGain);
- spawnProjectile(e[0].id, a.id, "devour");
-  triggerAnim(a.id, "buff");
-        setLog((l) => [...l, `👹 ${a.nick} -> yuttu, +${atkGain}/+${hpGain} stat kazandı`]);
-        await delay(500);
+      if (a.ability === "devour" && e[0].curHp <= 0 && p[0].curHp > 0) {
+      const pct = (30 + 10 * pwr(a)) / 100;
+      const atkGain = Math.floor(e[0].atk * pct);
+      const hpGain = Math.floor((e[0].hp || e[0].curHp) * pct);
+      p[0].atk = clampStat(p[0].atk + atkGain);
+      p[0].hp = clampStat(p[0].hp + hpGain);
+      p[0].curHp = clampStat(p[0].curHp + hpGain);
+      spawnProjectile(e[0].id, a.id, "devour");
+      triggerAnim(a.id, "buff");
+      setLog((l) => [...l, `👹 ${a.nick} -> yuttu, +${atkGain}/+${hpGain} stat kazandı`]);
+      await delay(500);
       }
 
       // Ara ölüm kontrolleri
@@ -1728,16 +1728,16 @@ const xpBreakdown = [
           setIsBattleOver(true);
           const winner = newE.length === 0 && newP.length > 0 ? "🎉 SEN KAZANDIN!" : newP.length === 0 && newE.length > 0 ? "💀 DÜŞMAN KAZANDI!" : "🤝 BERABERLİK!";
           setLog((l) => [...l, `━━━━━━━━━━━━━━━━━━`, winner, `━━━━━━━━━━━━━━━━━━`]);
-         setTimeout(() => {
-  setIsBattleOver(false);
-  lastProcessedStepRef.current = -1;
-  setPT([]);
-  setET([]);
-  setStep(0);
-  setLog([]);
-  setPhase("shop");
-  setGameStarted(false);
-  setTimeout(() => setShowDebugPanel(true), 50);
+          setTimeout(() => {
+          setIsBattleOver(false);
+          lastProcessedStepRef.current = -1;
+          setPT([]);
+          setET([]);
+          setStep(0);
+          setLog([]);
+          setPhase("shop");
+          setGameStarted(false);
+          setTimeout(() => setShowDebugPanel(true), 50);
 }, 4000);
           return;
         }
