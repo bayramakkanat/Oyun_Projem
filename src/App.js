@@ -1163,7 +1163,7 @@ title="Koleksiyon Defteri"
   }
 </div>
 {sel?.pendingTargetBuff && (
-  <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center animate-pulse">
+  <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center opacity-90">
     🎯 Buff vermek istediğin hayvana tıkla!
   </div>
 )}
