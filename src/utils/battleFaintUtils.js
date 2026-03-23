@@ -149,3 +149,21 @@ export const applyTeamWideFaintEffect = ({
   }
   return false;
 };
+
+export const applySelfFaintBuffEffect = ({ deadUnit, power, allyTeam, clampStat, logs, logPrefix = "", logSuffix = "" }) => {
+  let applied = false;
+  allyTeam.forEach((pet) => {
+    if (pet.id === deadUnit.id) {
+      pet.atk = clampStat(pet.atk + 2 * power);
+      pet.curHp = clampStat(pet.curHp + 2 * power);
+      if (typeof pet.hp === "number") {
+        pet.hp = clampStat(pet.hp + 2 * power);
+      }
+      applied = true;
+    }
+  });
+  if (applied) {
+    logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}+${2 * power}/+${2 * power} kalıcı`);
+  }
+  return applied;
+};
