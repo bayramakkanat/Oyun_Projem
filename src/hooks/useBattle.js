@@ -126,6 +126,36 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
     });
   };
 
+  const applyDodoTeamRetrigger = ({
+    ability,
+    sourceNick,
+    power,
+    allyTeam,
+    enemyTeam,
+    enemyLabel,
+    logs,
+  }) => {
+    if (ability === "faint_rage" || ability === "cheetah_faint") {
+      const buff = getTeamBuffAmount(power);
+      applyTeamBuff(allyTeam, buff, clampStat);
+      logs.push(`Dodo retrigger -> ${sourceNick} -> team +${buff}/+${buff}`);
+      return true;
+    }
+    if (ability === "faint_wave") {
+      const damage = getWaveDamage(power);
+      applyTeamDamage(enemyTeam, damage);
+      logs.push(`Dodo retrigger -> ${sourceNick} -> ${enemyLabel} ${damage} damage`);
+      return true;
+    }
+    if (ability === "faint_weaken_all") {
+      const debuff = getFaintWeakenAllDebuff(power);
+      applyTeamDebuff(enemyTeam, debuff);
+      logs.push(`Dodo retrigger -> ${sourceNick} -> ${enemyLabel} -${debuff}/-${debuff}`);
+      return true;
+    }
+    return false;
+  };
+
   const faint = (d, al, en, isP, killer) => {
     if (!d) return { lg: [], sm: [], gG: 0 };
     if (d.isDead) return { lg: [], sm: [], gG: 0 };
@@ -271,21 +301,15 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
               lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Takıma +${2 * m} HP`);
             }
-            if (d.ability === "faint_rage" || d.ability === "cheetah_faint") {
-              const buff = getTeamBuffAmount(m);
-              applyTeamBuff(al, buff, clampStat);
-              lg.push(`Dodo retrigger -> ${d.nick} -> team +${buff}/+${buff}`);
-            }
-            if (d.ability === "faint_wave") {
-              const damage = getWaveDamage(m);
-              applyTeamDamage(en, damage);
-              lg.push(`Dodo retrigger -> ${d.nick} -> player team ${damage} damage`);
-            }
-            if (d.ability === "faint_weaken_all") {
-              const debuff = getFaintWeakenAllDebuff(m);
-              applyTeamDebuff(en, debuff);
-              lg.push(`Dodo retrigger -> ${d.nick} -> player team -${debuff}/-${debuff}`);
-            }
+            applyDodoTeamRetrigger({
+              ability: d.ability,
+              sourceNick: d.nick,
+              power: m,
+              allyTeam: al,
+              enemyTeam: en,
+              enemyLabel: "player team",
+              logs: lg,
+            });
             if (d.ability === "faint_summon") {
              const extraSummon = {
   name: "🥚", nick: "Düş.Yavru",
@@ -478,21 +502,15 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
               lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Takıma +${2 * m} HP`);
             }
-            if (d.ability === "faint_rage" || d.ability === "cheetah_faint") {
-              const buff = getTeamBuffAmount(m);
-              applyTeamBuff(al, buff, clampStat);
-              lg.push(`Dodo retrigger -> ${d.nick} -> team +${buff}/+${buff}`);
-            }
-            if (d.ability === "faint_wave") {
-              const damage = getWaveDamage(m);
-              applyTeamDamage(en, damage);
-              lg.push(`Dodo retrigger -> ${d.nick} -> enemy team ${damage} damage`);
-            }
-            if (d.ability === "faint_weaken_all") {
-              const debuff = getFaintWeakenAllDebuff(m);
-              applyTeamDebuff(en, debuff);
-              lg.push(`Dodo retrigger -> ${d.nick} -> enemy team -${debuff}/-${debuff}`);
-            }
+            applyDodoTeamRetrigger({
+              ability: d.ability,
+              sourceNick: d.nick,
+              power: m,
+              allyTeam: al,
+              enemyTeam: en,
+              enemyLabel: "enemy team",
+              logs: lg,
+            });
             if (d.ability === "faint_copy" && al.length > 0) {
               const i = Math.floor(Math.random() * al.length);
               const pct = m === 1 ? 0.25 : m === 2 ? 0.5 : 1;
