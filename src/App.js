@@ -779,7 +779,7 @@ const et = [...enemyTeam].map((x) => ({ ...x, curHp: x.hp }));
 </span>
     </div>
     {/* Kademe */}
-  <div className="flex flex-col items-center bg-purple-900/60 border border-purple-400/30 px-3 py-1.5 rounded-2xl shadow-inner min-h-[52px] justify-center">
+ <div className="flex flex-col items-center bg-purple-900/60 border border-purple-400/30 px-3 rounded-2xl shadow-inner h-[52px] justify-center">
   <span className="text-[9px] text-purple-300 uppercase tracking-widest font-black mb-1">KADEME</span>
 <div className="flex gap-1">
   {[1,2,3,4,5,6].map(i => (
