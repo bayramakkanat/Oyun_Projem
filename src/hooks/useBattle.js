@@ -1451,7 +1451,7 @@ if (p.length === 0 || e.length === 0) {
         setLog((l) => [...l, `😱 ${a.nick} -> Tüm düşmanlara -${5 * m}/-${5 * m}`]);
         await delay(500);
       }
-      if (d.ability === "devour" && p[0].curHp <= 0) {
+      if (d.ability === "devour" && p[0].curHp <= 0 && e[0].curHp > 0) {
         const pctD = (30 + 10 * pwr(d)) / 100;
         const atkGainD = Math.floor(p[0].atk * pctD);
         const hpGainD = Math.floor((p[0].hp || p[0].curHp) * pctD);
