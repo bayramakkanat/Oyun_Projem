@@ -397,8 +397,16 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               });
             }
             if (d.ability === "faint_shield") {
-              al.forEach((x) => { x.curHp = clampStat(x.curHp + 2 * m); });
-              lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Takıma +${2 * m} HP`);
+              applyFaintShieldEffect({
+                deadUnit: d,
+                power: m,
+                allyTeam: al,
+                clampStat,
+                logs: lg,
+                logPrefix: "🦤 Düşman Dodo -> ",
+                targetLabel: "Takıma",
+                logSuffix: " efekti tekrar! ",
+              });
             }
             applyDodoTeamRetrigger({
               ability: d.ability,
