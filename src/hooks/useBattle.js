@@ -1157,6 +1157,12 @@ const xpBreakdown = [
       };
       if (isCancelled) return;
 
+      const resolveFaintResult = async (result, waitMs) => {
+        await playBattleLogs(result.lg, waitMs);
+        if (result.gG > 0) battleGoldRef.current += result.gG;
+        return result.sm;
+      };
+
       // Step 0: Savaş başı yetenekleri
       if (step === 0) {
         await delay(1200);
@@ -1671,9 +1677,7 @@ const xpBreakdown = [
           const deadPet = p[i];
           p = p.filter((_, idx) => idx !== i);
           const r = faint(deadPet, p, e, true, e.length > 0 ? e[0] : null);
-          await playBattleLogs(r.lg, 800);
-          pS = [...pS, ...r.sm];
-          if (r.gG > 0) battleGoldRef.current += r.gG;
+          pS = [...pS, ...(await resolveFaintResult(r, 800))];
           i--;
         }
       }
@@ -1683,8 +1687,7 @@ const xpBreakdown = [
           const deadEnemy = e[i];
           e = e.filter((_, idx) => idx !== i);
           const r = faint(deadEnemy, e, p, false, null);
-          await playBattleLogs(r.lg, 300);
-          eS = [...eS, ...r.sm];
+          eS = [...eS, ...(await resolveFaintResult(r, 300))];
           i--;
         }
       }
@@ -1695,9 +1698,7 @@ const xpBreakdown = [
         const deadPet = p[0];
         p = p.slice(1);
         const r = faint(deadPet, p, e, true, e.length > 0 && e[0].curHp > 0 ? e[0] : null);
-        await playBattleLogs(r.lg, 800);
-        pS = [...pS, ...r.sm];
-        if (r.gG > 0) battleGoldRef.current += r.gG;
+        pS = [...pS, ...(await resolveFaintResult(r, 800))];
         await delay(500);
       }
       if (e[0] && e[0].curHp <= 0) {
@@ -1718,8 +1719,7 @@ const xpBreakdown = [
           const deadEnemy = eS[i];
           eS = eS.filter((_, idx) => idx !== i);
           const r = faint(deadEnemy, [...eS, ...e], p, false, null);
-          await playBattleLogs(r.lg, 300);
-          eS = [...eS, ...r.sm];
+          eS = [...eS, ...(await resolveFaintResult(r, 300))];
           i--;
         }
       }
@@ -1769,6 +1769,7 @@ setET(newE);
 
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+
 
 
 
