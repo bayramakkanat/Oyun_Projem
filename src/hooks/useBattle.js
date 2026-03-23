@@ -213,12 +213,6 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         killer.curHp = clampStat(killer.curHp + 3 * km);
         lg.push(`🦈 Düşman ${killer.nick} -> öldürdü, +${3 * km}/+${3 * km}`);
       }
-      if (killer && killer.ability === "devour") {
-        const pct = (30 + 10 * pwr(killer)) / 100;
-        killer.atk = clampStat(killer.atk + Math.floor(d.atk * pct));
-        killer.curHp = clampStat(killer.curHp + Math.floor((d.hp || d.curHp) * pct));
-        lg.push(`👹 Düşman ${killer.nick} -> yuttu, stat kazandı`);
-      }
      if (killer && killer.ability === "kill_fear_all" && en.length > 0) {
   const km = pwr(killer);
   en.forEach((x) => {
@@ -1544,7 +1538,7 @@ if (p.length === 0 || e.length === 0) {
   p[0].curHp = clampStat(p[0].curHp + hpGain);
  spawnProjectile(e[0].id, a.id, "devour");
   triggerAnim(a.id, "buff");
-        setLog((l) => [...l, `👹 ${a.nick} -> +${atkGain}/+${hpGain}`]);
+        setLog((l) => [...l, `👹 ${a.nick} -> yuttu, +${atkGain}/+${hpGain} stat kazandı`]);
         await delay(500);
       }
 
