@@ -321,31 +321,69 @@ export function useShop({
     };
 
     if (!a.isR && gold < a.cost) return;
-   if (a.ability === "buy_target_buff" && !a.pendingTargetBuff) {
-  const nt = [...team];
-  if (nt[slot] !== null) return;
-  const m = pwr({ ...a, lvl: a.lvl || 1 });
-  const buffAmount = m === 1 ? 1 : m === 2 ? 2 : 4;
-  nt[slot] = {
-    ...a,
-    lvl: a.lvl || 1,
-    exp: a.exp || 0,
-    curHp: a.curHp || a.hp,
-    isR: undefined,
-    rT: undefined,
-    grp: undefined,
-  };
-  if (!a.isR) {
-    setGold((g) => g - a.cost);
-    setShop(shop.filter((x) => x.id !== a.id));
-  } else {
-    setRewards(rewards.filter((x) => x.grp !== a.grp));
-  }
-  setTeam(nt);
-  setSel({ ...a, pendingTargetBuff: true, buffAmount, sourceSlot: slot });
-  setSelI(null);
-  return;
-}
+    if (a.ability === "buy_target_buff" && !a.pendingTargetBuff) {
+      const nt = [...team];
+      const targetPet = nt[slot];
+
+      if (
+        targetPet &&
+        targetPet.name === a.name &&
+        targetPet.tier === a.tier &&
+        targetPet.lvl < 3
+      ) {
+        const { merged, rewards: newRewards } = merge(targetPet, a);
+        const mergedPower = pwr(merged);
+        const buffAmount =
+          mergedPower === 1 ? 1 : mergedPower === 2 ? 2 : 4;
+
+        nt[slot] = merged;
+        setTeam(nt);
+        if (!a.isR) {
+          setGold((g) => g - a.cost);
+          setShop(shop.filter((x) => x.id !== a.id));
+        } else {
+          setRewards((prev) => [
+            ...prev.filter((x) => x.grp !== a.grp),
+            ...newRewards,
+          ]);
+        }
+        if (!a.isR && newRewards.length > 0) {
+          setRewards((prev) => [...prev, ...newRewards]);
+        }
+        setSel({
+          ...merged,
+          pendingTargetBuff: true,
+          buffAmount,
+          sourceSlot: slot,
+        });
+        setSelI(null);
+        return;
+      }
+
+      if (targetPet !== null) return;
+
+      const m = pwr({ ...a, lvl: a.lvl || 1 });
+      const buffAmount = m === 1 ? 1 : m === 2 ? 2 : 4;
+      nt[slot] = {
+        ...a,
+        lvl: a.lvl || 1,
+        exp: a.exp || 0,
+        curHp: a.curHp || a.hp,
+        isR: undefined,
+        rT: undefined,
+        grp: undefined,
+      };
+      if (!a.isR) {
+        setGold((g) => g - a.cost);
+        setShop(shop.filter((x) => x.id !== a.id));
+      } else {
+        setRewards(rewards.filter((x) => x.grp !== a.grp));
+      }
+      setTeam(nt);
+      setSel({ ...a, pendingTargetBuff: true, buffAmount, sourceSlot: slot });
+      setSelI(null);
+      return;
+    }
     if (a.tier >= 5) unlockAchievement("lion_heart");
     if (a.name === "🐉") unlockAchievement("dragon");
     const nt = [...team];

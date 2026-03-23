@@ -246,6 +246,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               en.forEach((x) => { x.curHp -= 9 * m; });
               lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Oyuncu takımına ${9 * m} hasar`);
             }
+            if (d.ability === "faint_weaken_all") {
+              const debuff = m === 1 ? 3 : m === 2 ? 5 : 8;
+              en.forEach((x) => {
+                x.atk = Math.max(1, x.atk - debuff);
+                x.curHp = Math.max(0, x.curHp - debuff);
+              });
+              lg.push(`ğŸ¦¤ DÃ¼ÅŸman Dodo -> ${d.nick} efekti tekrar! Oyuncu takÄ±mÄ±na -${debuff}/-${debuff}`);
+            }
             if (d.ability === "faint_summon") {
              const extraSummon = {
   name: "🥚", nick: "Düş.Yavru",
@@ -449,6 +457,14 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
             if (d.ability === "faint_wave") {
               en.forEach((x) => { x.curHp -= 9 * m; });
               lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Tüm düşmanlara ${9 * m} hasar`);
+            }
+            if (d.ability === "faint_weaken_all") {
+              const debuff = m === 1 ? 3 : m === 2 ? 5 : 8;
+              en.forEach((x) => {
+                x.atk = Math.max(1, x.atk - debuff);
+                x.curHp = Math.max(0, x.curHp - debuff);
+              });
+              lg.push(`ğŸ¦¤ Dodo -> ${d.nick} efekti tekrar! TÃ¼m dÃ¼ÅŸmanlara -${debuff}/-${debuff}`);
             }
             if (d.ability === "faint_copy" && al.length > 0) {
               const i = Math.floor(Math.random() * al.length);
