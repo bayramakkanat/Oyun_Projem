@@ -24,3 +24,18 @@ export const applyFaintBuffEffect = ({ deadUnit, power, allyTeam, clampStat, log
   logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick} e +${power}/+${power}`);
   return true;
 };
+
+export const createFaintSummonUnit = ({ name, nick, power, img, flip = false }) => ({
+  name,
+  nick,
+  atk: 4 * power,
+  hp: 4 * power,
+  curHp: 4 * power,
+  ability: "none",
+  tier: 1,
+  lvl: 1,
+  exp: 0,
+  id: Math.random(),
+  img,
+  flip,
+});

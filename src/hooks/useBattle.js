@@ -25,7 +25,7 @@ import {
   getTeamBuffAmount,
   getWaveDamage,
 } from "../utils/battleEffectUtils";
-import { applyFaintBuffEffect, applyFaintDamageEffect, applyFaintShieldEffect } from "../utils/battleFaintUtils";
+import { applyFaintBuffEffect, applyFaintDamageEffect, applyFaintShieldEffect, createFaintSummonUnit } from "../utils/battleFaintUtils";
 
 export function useBattle({
   // State değerleri
@@ -157,20 +157,6 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
     return false;
   };
 
-  const createFaintSummon = ({ name, nick, power, img, flip = false }) => ({
-    name,
-    nick,
-    atk: 4 * power,
-    hp: 4 * power,
-    curHp: 4 * power,
-    ability: "none",
-    tier: 1,
-    lvl: 1,
-    exp: 0,
-    id: Math.random(),
-    img,
-    flip,
-  });
 
   const pushFaintDuplicate = ({ deadUnit, allyTeam, summons, logs, logPrefix = "" }) => {
     if (allyTeam.length === 0) return false;
@@ -305,7 +291,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
         lg.push(`🦬 Düşman ${d.nick} -> Takıma +${3 * m}/+${3 * m}`);
       }
       if (d.ability === "faint_summon") {
-        const newSummon = createFaintSummon({
+        const newSummon = createFaintSummonUnit({
           name: "🥚",
           nick: "Düş.Yavru",
           power: m,
@@ -409,7 +395,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               logs: lg,
             });
             if (d.ability === "faint_summon") {
-              const extraSummon = createFaintSummon({
+              const extraSummon = createFaintSummonUnit({
                 name: "🥚",
                 nick: "Düş.Yavru",
                 power: m,
@@ -519,7 +505,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
       lg.push(`💨 ${d.nick} -> Tüm takıma +${buff}/+${buff}`);
     }
     if (d.ability === "faint_summon") {
-      const newSummon = createFaintSummon({
+      const newSummon = createFaintSummonUnit({
         name: "🥚",
         nick: "Yavru",
         power: m,
@@ -660,7 +646,7 @@ useEffect(() => { phaseRef.current = phase; }, [phase]);
               });
             }
             if (d.ability === "faint_summon") {
-              const extraSummon = createFaintSummon({
+              const extraSummon = createFaintSummonUnit({
                 name: "🥚",
                 nick: "Yavru",
                 power: m,
