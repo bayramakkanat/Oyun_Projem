@@ -185,13 +185,19 @@ const faint = (d, al, en, isP, killer) =>
     const teamKey = role === "host" ? "hostTeam" : "guestTeam";
     const currentTeam = team
       .filter((x) => x)
-      .map((p) => ({
-        name: p.name, nick: p.nick,
-        atk: p.atk, hp: p.hp, curHp: p.hp,
-        ability: p.ability || "none",
-        tier: p.tier, lvl: p.lvl || 1, exp: p.exp || 0,
-        id: Math.random(), isBossUnit: false,
-      }));
+      .map((p) => {
+        const allAnimals = Object.values(TIERS).flat();
+        const animalData = allAnimals.find((a) => a.name === p.name);
+        return {
+          name: p.name, nick: p.nick,
+          atk: p.atk, hp: p.hp, curHp: p.hp,
+          ability: p.ability || "none",
+          tier: p.tier, lvl: p.lvl || 1, exp: p.exp || 0,
+          img: p.img || animalData?.img || null,
+          flip: p.flip || animalData?.flip || false,
+          id: Math.random(), isBossUnit: false,
+        };
+      });
     try {
       await updateDoc(doc(db, "versus_rooms", code), {
         [readyTurnField]: turnRef.current,
@@ -313,11 +319,26 @@ if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
 
       unsub();
 
-      const myTeam = role === "host" ? data.hostTeam : data.guestTeam;
-      const theirTeam = role === "host" ? data.guestTeam : data.hostTeam;
+      const myTeamRaw = role === "host" ? data.hostTeam : data.guestTeam;
+      const theirTeamRaw = role === "host" ? data.guestTeam : data.hostTeam;
       const opponentName = role === "host"
         ? data.guest?.name || "Rakip"
         : data.host?.name || "Rakip";
+
+      const allAnimals = Object.values(TIERS).flat();
+      const processTeam = (teamArray) => {
+        return teamArray.map((p) => {
+           const animalData = allAnimals.find((a) => a.name === p.name);
+           return { 
+             ...p, 
+             img: p.img || animalData?.img || null, 
+             flip: p.flip !== undefined ? p.flip : (animalData?.flip || false) 
+           };
+        });
+      };
+
+      const myTeam = processTeam(myTeamRaw || []);
+      const theirTeam = processTeam(theirTeamRaw || []);
 
       setArenaOpponent({ userName: opponentName });
       startVersusBattle(myTeam, theirTeam);
