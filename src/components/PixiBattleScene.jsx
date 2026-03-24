@@ -205,7 +205,12 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
        const numId = Number(id);
        if (!currentIds.has(numId) && !currentIds.has(id)) {
            const pData = mapRef.current[id];
-           if (pData && pData.container.parent) {
+           if (pData && pData.container && pData.container.parent) {
+               // Animasyonlar hala çalışıyorsa (özellikle aşağı düşme/ölüm efekti) durdur ki null hatası vermesin
+               gsap.killTweensOf(pData.container);
+               gsap.killTweensOf(pData.container.scale);
+               gsap.killTweensOf(pData.cardBg);
+               
                pData.container.parent.removeChild(pData.container);
                pData.container.destroy({ children: true });
            }
