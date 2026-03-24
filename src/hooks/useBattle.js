@@ -279,6 +279,11 @@ const faint = (d, al, en, isP, killer) =>
         }
         return;
       }
+      if (data.disconnected && data.disconnected !== role) {
+        setLog((l) => [...l, "⚠️ Rakip bağlantısı koptu! Zafer sayılıyor..."]);
+        setTimeout(() => setVictory(true), 2000);
+        return;
+      }
 
       if (phaseRef.current !== "shop") return;
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db } from "../firebase";
 import {
   collection,
@@ -17,6 +17,7 @@ export default function VersusLobby({ user, onRoomReady, onCancel }) {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [unsubscribe, setUnsubscribe] = useState(null);
+  const timeoutRef = useRef(null);
 
   const userName = user?.displayName || user?.email?.split("@")[0] || "Oyuncu";
 
@@ -35,14 +36,22 @@ export default function VersusLobby({ user, onRoomReady, onCancel }) {
     console.log("Oda oluşturuluyor, kod:", code, "db:", db);
     try {
       console.log("setDoc çağrılıyor...");
-      await setDoc(doc(db, "versus_rooms", code), {
+     await setDoc(doc(db, "versus_rooms", code), {
         code,
         host: { uid: user.uid, name: userName },
         guest: null,
         status: "waiting",
+        disconnected: null,
         createdAt: serverTimestamp(),
       });
       setStatus("Oda hazır! Rakibini bekliyor...");
+      timeoutRef.current = setTimeout(() => {
+        unsub();
+        setMode(null);
+        setRoomCode("");
+        setStatus("");
+        setError("Süre doldu. Kimse katılmadı.");
+      }, 120000);
 
       const unsub = onSnapshot(doc(db, "versus_rooms", code), (snap) => {
         const data = snap.data();
@@ -51,6 +60,7 @@ export default function VersusLobby({ user, onRoomReady, onCancel }) {
           setStatus(`${data.guest.name} odaya katıldı! Hazırlanıyor...`);
         }
         if (data.status === "ready") {
+          clearTimeout(timeoutRef.current);
           unsub();
           onRoomReady({ code, role: "host", roomData: data });
         }
@@ -86,10 +96,11 @@ export default function VersusLobby({ user, onRoomReady, onCancel }) {
         setStatus("");
         return;
       }
-      await setDoc(roomRef, {
+     await setDoc(roomRef, {
         ...data,
         guest: { uid: user.uid, name: userName },
         status: "ready",
+        disconnected: null,
       });
       setStatus("Odaya katıldın! Oyun başlıyor...");
       onRoomReady({
@@ -106,9 +117,10 @@ export default function VersusLobby({ user, onRoomReady, onCancel }) {
     }
   };
 
-  useEffect(() => {
+ useEffect(() => {
     return () => {
       if (unsubscribe) unsubscribe();
+      clearTimeout(timeoutRef.current);
     };
   }, [unsubscribe]);
 
