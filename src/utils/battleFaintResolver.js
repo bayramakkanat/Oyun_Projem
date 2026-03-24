@@ -152,10 +152,6 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
       Object.assign(newSummon, buffedSummon);
     }, 800);
   }
-  if (d.ability === "faint_gold" && isP) {
-    gG = m;
-    lg.push(`💰 ${d.nick} -> +${m} altın`);
-  }
   if (d.ability === "stag_combo") {
     const m2 = pwr(d);
     applyStagComboEffect({ deadUnit: d, power: m2, allyTeam: al, clampStat, logs: lg, logPrefix: "🦌 ", targetLabel: "Takıma " });

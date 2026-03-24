@@ -596,7 +596,6 @@ export const ABILITY_ICONS = {
   none: "",
   start_buff: "⚡",
   end_heal_one: "🏥",
-  faint_gold: "💰",
   sell_gold: "💵",
   buy_buff_random: "🎲",
   start_team_shield: "🛡️",
