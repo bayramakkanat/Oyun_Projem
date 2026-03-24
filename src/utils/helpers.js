@@ -217,3 +217,17 @@ export const initTasks = (userId) => {
   saveTasks(saved, userId);
   return saved;
 };
+export const saveFeedback = (data, userId) => {
+  try {
+    import("../firebase").then(({ db }) => {
+      import("firebase/firestore").then(({ collection, addDoc, serverTimestamp }) => {
+        addDoc(collection(db, "feedback"), {
+          userId: userId || "guest",
+          category: data.category,
+          message: data.message,
+          createdAt: serverTimestamp(),
+        });
+      });
+    });
+  } catch {}
+};

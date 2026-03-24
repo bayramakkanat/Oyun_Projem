@@ -468,6 +468,20 @@ return;
           collection[key] = data;
         });
         saveCollection(collection, user?.uid);
+        if (user?.uid) {
+  import("../firebase").then(({ db }) => {
+    import("firebase/firestore").then(({ doc, getDoc, setDoc, increment }) => {
+      updatedTeam.forEach(async (pet) => {
+        if (!pet) return;
+        const ref = doc(db, "animal_stats", pet.nick);
+        await setDoc(ref, {
+          used: increment(1),
+          wins: increment(won ? 1 : 0),
+        }, { merge: true });
+      });
+    });
+  });
+}
         
 if (gameMode === "arena") {
   const toId = (nick) => nick

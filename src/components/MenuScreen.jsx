@@ -11,6 +11,7 @@ import LeaderboardScreen from "./LeaderboardScreen";
 import CollectionScreen from "./CollectionScreen";
 import TasksScreen from "./TasksScreen";
 import ProfileScreen from "./ProfileScreen";
+import FeedbackScreen from "./FeedbackScreen";
 
 export default function MenuScreen({
   menuView,
@@ -226,6 +227,13 @@ saveTasksToDB,
       Koleksiyon
     </span>
   </button>
+  <button
+  onClick={() => setMenuView("feedback")}
+  className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-all active:scale-95"
+>
+  <span className="text-2xl">💬</span>
+  <span className="text-xs uppercase tracking-widest opacity-60">Geri Bildirim</span>
+</button>
 </div>
               <button
                 onClick={() => setSoundEnabled((s) => !s)}
@@ -510,6 +518,14 @@ saveTasksToDB,
             />
           </div>
         )}
+        {menuView === "feedback" && (
+  <div className="fixed inset-0 z-50 overflow-y-auto">
+    <FeedbackScreen
+      onClose={() => setMenuView("main")}
+      user={user}
+    />
+  </div>
+)}
       </div>
       <div className="absolute bottom-6 left-6 z-20">
         <button
