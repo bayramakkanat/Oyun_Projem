@@ -29,7 +29,6 @@ if (snap.exists()) {
   setArenaWins(snap.data().totalWins || 0);
   setTotalGames(snap.data().totalGames || 0);
 setTotalTurns(snap.data().totalTurns || 0);
-setArenaWins(snap.data().totalWins || 0);
 }
 
 const profileRef = doc(db, "user_profiles", user.uid);
