@@ -1,13 +1,6 @@
 import React from "react";
 import { useGameContext } from "../context/GameContext";
-import { useState, useEffect, useRef, useCallback } from "react";
 
-import {
-  logError,
-  safeNumber,
-  loadStats,
-  saveStats,
-} from "../utils/helpers";
 import Card from "./Card";
 import StarField from "./StarField";
 import BattleView from "./BattleView";
@@ -21,40 +14,16 @@ import MenuScreen from "./MenuScreen";
 import CollectionScreen from "./CollectionScreen";
 import VersusLobby from "./VersusLobby";
 import DebugPanel from "./DebugPanel";
-import { getDesc } from "../utils/getDesc";
-import { applyEndTurnBuffs } from "../utils/battleUtils";
-import { playSound } from "../hooks/useSound";
-import { useBattle } from "../hooks/useBattle";
-import { useShop } from "../hooks/useShop";
-import { useAuth } from "../hooks/useAuth";
-import { useArena } from "../hooks/useArena";
-import { calcArenaXP, getRank } from "../utils/helpers";
-import { useEndTurn } from "../hooks/useEndTurn";
-import { useMusic } from "../hooks/useMusic";
-import { spawnParticles, spawnBuffAnimation } from "../utils/animations";
-import { auth, db } from "../firebase";
 
-import {
-  collection,
-  setDoc,
-  doc,
-  getDocs,
-  query,
-  where,
-  limit,
-  serverTimestamp,
-  onSnapshot,
-  updateDoc,
-} from "firebase/firestore";
+import { getDesc } from "../utils/getDesc";
+import { playSound } from "../hooks/useSound";
+
 import {
   ABILITY_ICONS,
   DIFFICULTY_CONFIGS,
-  ACHIEVEMENTS_DEF,
   BOSSES,
-  MAX_STAT,
   WIN_TURN,
 } from "../data/gameData";
-import SettingsModal from "./SettingsModal";
 
 
 
