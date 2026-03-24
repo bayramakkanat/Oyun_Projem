@@ -543,22 +543,22 @@ saveTasksToDB={saveTasksToDB}
     );
   }
   if (victory) {
-    return (
-      <VictoryScreen
-        wins={wins}
-        lives={lives}
-        team={team}
-        perfectRun={
-          lives === (DIFFICULTY_CONFIGS[difficultyLevel]?.startingLives || 5)
-        }
-        onRestart={reset}
-        onMenu={() => {
-          reset();
-          setGameStarted(false);
-        }}
-      />
-    );
-  }
+  return (
+    <VictoryScreen
+      wins={wins}
+      lives={lives}
+      team={team}
+      perfectRun={lives === (DIFFICULTY_CONFIGS[difficultyLevel]?.startingLives || 5)}
+      onRestart={reset}
+      onMenu={() => { reset(); setGameStarted(false); }}
+      gameMode={gameMode}
+      onRematch={() => {
+        reset();
+        setVersusPhase("lobby");
+      }}
+    />
+  );
+}
 if (arenaResult) {
   const { reachedTurn, totalWins, totalLosses, earnedXP, isNewRecord, xpBreakdown } = arenaResult;
   return (
@@ -612,21 +612,23 @@ if (arenaResult) {
     </div>
   );
 }
-  if (over) {
-    return (
-      <GameOverScreen
-        turn={turn}
-        wins={wins}
-        stats={stats}
-        team={team}
-        onRestart={reset}
-        onMenu={() => {
-          reset();
-          setGameStarted(false);
-        }}
-      />
-    );
-  }
+ if (over) {
+  return (
+    <GameOverScreen
+      turn={turn}
+      wins={wins}
+      stats={stats}
+      team={team}
+      onRestart={reset}
+      onMenu={() => { reset(); setGameStarted(false); }}
+      gameMode={gameMode}
+      onRematch={() => {
+        reset();
+        setVersusPhase("lobby");
+      }}
+    />
+  );
+}
  if (bossChallenge === "offer" && gameMode === "standard") {
     return (
       <BossOfferScreen

@@ -10,6 +10,8 @@ export default function VictoryScreen({
   perfectRun,
   onRestart,
   onMenu,
+  gameMode,
+  onRematch,
 }) {
   const teamSnapshot = team.filter((x) => x);
   return (
@@ -90,20 +92,23 @@ export default function VictoryScreen({
             ? "⚔️ Zorlu bir yolculuktu ama sonunda kazandın!"
             : "💀 Son nefeste bile pes etmedin. Gerçek bir savaşçı!"}
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={onRestart}
-            className="flex-1 py-4 bg-yellow-500 text-black rounded-2xl font-black text-lg hover:scale-105 active:scale-95 transition-all shadow-xl"
-          >
-            🔄 Tekrar Oyna
-          </button>
-          <button
-            onClick={onMenu}
-            className="flex-1 py-4 bg-white/10 border border-white/20 rounded-2xl font-black text-lg hover:scale-105 active:scale-95 transition-all"
-          >
-            🏠 Ana Menü
-          </button>
-        </div>
+       <div className="flex gap-3">
+  {gameMode === "versus" && onRematch ? (
+    <button
+      onClick={onRematch}
+      className="flex-1 py-4 bg-purple-600 border border-purple-400/50 rounded-2xl font-black text-lg hover:scale-105 active:scale-95 transition-all shadow-xl"
+    >
+      ⚡ Tekrar Oyna
+    </button>
+  ) : (
+    <button onClick={onRestart} className="flex-1 py-4 bg-yellow-500 text-black rounded-2xl font-black text-lg hover:scale-105 active:scale-95 transition-all shadow-xl">
+      🔄 Tekrar Oyna
+    </button>
+  )}
+  <button onClick={onMenu} className="flex-1 py-4 bg-white/10 border border-white/20 rounded-2xl font-black text-lg hover:scale-105 active:scale-95 transition-all">
+    🏠 Ana Menü
+  </button>
+</div>
       </div>
     </div>
   );
