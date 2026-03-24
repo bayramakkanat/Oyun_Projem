@@ -90,57 +90,82 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
         // İlk kez oluşturuluyor
         const container = new PIXI.Container();
         container.x = targetX;
-        container.y = targetY - 200; // Yukarıdan düşme efekti için
+        container.y = targetY - 200; // Yukarıdan düşme
         container.alpha = 0;
-        
-        // Pivot'ı tam merkeze al
         container.pivot.x = 55;
         container.pivot.y = 75;
 
-        // Kart Arka Planı
-        const isDead = pet.curHp <= 0;
-        const bgColor = isPlayer ? 0x1e3a8a : 0x7f1d1d; // Mavi vs Kırmızımtırak
+        // Kart Arka Planı (Premium Tarzı)
+        const bgColor = isPlayer ? 0x1e3a8a : 0x7f1d1d; 
         const cardBg = new PIXI.Graphics();
         cardBg.roundRect(0, 0, 110, 150, 16);
         cardBg.fill({ color: bgColor, alpha: 0.8 });
-        cardBg.stroke({ width: 3, color: isPlayer ? 0x3b82f6 : 0xef4444, alpha: 0.5 });
+        cardBg.stroke({ width: 3, color: isPlayer ? 0x60a5fa : 0xf87171, alpha: 1 });
         container.addChild(cardBg);
-
-        // Emoji / Görsel (Geçici olarak PixiJS Text kullanılarak emojiler harika işleniyor)
-        const emojiText = new PIXI.Text({
-          text: pet.img ? "🐾" : pet.name, // Resim eklenene dek emoji veya fallback
-          style: { fontSize: 50, align: "center" }
+        
+        // Seviye Göstergesi
+        const lvlIcon = pet.lvl === 3 ? "👑" : pet.lvl === 2 ? "💎" : "⭐";
+        const lvlText = new PIXI.Text({
+           text: lvlIcon,
+           style: { fontSize: 16 }
         });
-        emojiText.anchor.set(0.5);
-        emojiText.x = 55;
-        emojiText.y = 55;
-        if (!isPlayer && !pet.flip) emojiText.scale.x = -1; // Rakip hayvana ters bakma (CSS flip eşdeğeri)
-        container.addChild(emojiText);
+        lvlText.anchor.set(0.5);
+        lvlText.x = 55;
+        lvlText.y = 15;
+        container.addChild(lvlText);
 
-        // İstatistik Arkaplanları
+        // Görsel (Resim Varsa Sprite, Yoksa Emoji Text)
+        if (pet.img) {
+            const sprite = PIXI.Sprite.from(`/images/animals/${pet.img}`);
+            sprite.anchor.set(0.5);
+            sprite.x = 55;
+            sprite.y = 65;
+            sprite.width = 65;
+            sprite.height = 65;
+            
+            // Eğer isPlayer false ise ve pet.flip false ise rakibe baksın diye çeviriyoruz
+            // Tam tersi, isPlayer false ise sola bakması gerekir. 
+            // Orijinal resimler genelde sağa bakar.
+            if (!isPlayer && !pet.flip) sprite.scale.x *= -1;
+            if (isPlayer && pet.flip) sprite.scale.x *= -1;
+            
+            container.addChild(sprite);
+        } else {
+            const emojiText = new PIXI.Text({
+              text: pet.name || "🐾",
+              style: { fontSize: 50, align: "center", fill: "#ffffff" }
+            });
+            emojiText.anchor.set(0.5);
+            emojiText.x = 55;
+            emojiText.y = 65;
+            if (!isPlayer && !pet.flip) emojiText.scale.x = -1;
+            container.addChild(emojiText);
+        }
+
+        // İstatistik Arkaplanı
         const statBg = new PIXI.Graphics();
-        statBg.roundRect(5, 110, 100, 32, 8);
-        statBg.fill({ color: 0x000000, alpha: 0.6 });
+        statBg.roundRect(5, 115, 100, 30, 8);
+        statBg.fill({ color: 0x000000, alpha: 0.7 });
         container.addChild(statBg);
 
-        // ATK Metni
+        // ATK Metni (Düzeltildi)
         const atkText = new PIXI.Text({
-          text: `⚔️ ${pet.atk}`,
-          style: { fontSize: 16, fill: 0xfca5a5, fontWeight: "bold" }
+          text: `⚔️${pet.atk}`,
+          style: { fontSize: 18, fill: "#fca5a5", fontWeight: "900", stroke: { color: "#000000", width: 4 } }
         });
         atkText.anchor.set(0.5);
         atkText.x = 30;
-        atkText.y = 126;
+        atkText.y = 130;
         container.addChild(atkText);
 
-        // HP Metni
+        // HP Metni (Düzeltildi)
         const hpText = new PIXI.Text({
-          text: `❤️ ${Math.max(0, pet.curHp)}`,
-          style: { fontSize: 16, fill: 0x86efac, fontWeight: "bold" }
+          text: `❤️${Math.max(0, pet.curHp)}`,
+          style: { fontSize: 18, fill: "#86efac", fontWeight: "900", stroke: { color: "#000000", width: 4 } }
         });
         hpText.anchor.set(0.5);
         hpText.x = 80;
-        hpText.y = 126;
+        hpText.y = 130;
         container.addChild(hpText);
 
         petsLayer.addChild(container);
@@ -148,7 +173,6 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
         pData = { container, atkText, hpText, baseScale: 1, cardBg };
         mapRef.current[pet.id] = pData;
 
-        // Düşüş Animasyonu (Doğuş)
         gsap.to(container, { y: targetY, alpha: 1, duration: 0.6, delay: index * 0.1, ease: "bounce.out" });
       } else {
         // Güncelleme
