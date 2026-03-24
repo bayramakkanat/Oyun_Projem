@@ -388,7 +388,7 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
   };
 
   const updateStatsOnEnd = (won, currentTurn, currentWins, currentLives) => {
-    setStats((prev) => {
+   setStats((prev) => {
       const next = {
         ...prev,
         totalGames: prev.totalGames + 1,
@@ -397,16 +397,16 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
         bestWins: Math.max(prev.bestWins, currentWins),
       };
       saveStats(next, user?.uid);
+      // Gizli başarım: tüm başarımları topla
+      const nonSecretIds = ACHIEVEMENTS_DEF
+        .filter(a => !a.secret)
+        .map(a => a.id);
+      const hasAll = nonSecretIds.every(id =>
+        (next.achievements || []).includes(id)
+      );
+      if (hasAll) unlockAchievement("secret_all");
       return next;
     });
-    // Gizli başarım: tüm başarımları topla
-const nonSecretIds = ACHIEVEMENTS_DEF
-  .filter(a => !a.secret)
-  .map(a => a.id);
-const hasAll = nonSecretIds.every(id =>
-  (next.achievements || []).includes(id)
-);
-if (hasAll) unlockAchievement("secret_all");
     unlockAchievement("first_game");
     if (won) unlockAchievement("first_win");
     if (won && currentTurn >= WIN_TURN) unlockAchievement("champion");
