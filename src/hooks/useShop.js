@@ -338,6 +338,7 @@ export function useShop({
           mergedPower === 1 ? 1 : mergedPower === 2 ? 2 : 4;
 
         nt[slot] = merged;
+        applyBuyBuffs(nt, slot);
         setTeam(nt);
         if (!a.isR) {
           setGold((g) => g - a.cost);
@@ -380,6 +381,7 @@ export function useShop({
       } else {
         setRewards(rewards.filter((x) => x.grp !== a.grp));
       }
+      applyBuyBuffs(nt, slot);
       setTeam(nt);
       setSel({ ...a, pendingTargetBuff: true, buffAmount, sourceSlot: slot });
       setSelI(null);
