@@ -107,6 +107,18 @@ export const saveCollection = (data, userId) => {
   try {
     const key = "oyunKoleksiyon_" + (userId || "guest");
     localStorage.setItem(key, JSON.stringify(data));
+
+    if (userId) {
+      import("../firebase").then(({ db }) => {
+        import("firebase/firestore").then(({ doc, setDoc }) => {
+          setDoc(
+            doc(db, "user_profiles", userId),
+            { collection: data },
+            { merge: true }
+          );
+        });
+      });
+    }
   } catch {}
 };
 
