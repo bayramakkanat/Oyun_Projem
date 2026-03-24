@@ -7,6 +7,28 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
   const playerRefs = useRef({});
   const enemyRefs = useRef({});
   const animStateRef = useRef({});
+  const cameraRef = useRef(null);
+
+  // Dinamik Kamera (Zoom) Efekti
+  useEffect(() => {
+     if (!cameraRef.current) return;
+     const totalAlive = pT.filter(p => p.curHp > 0).length + eT.filter(e => e.curHp > 0).length;
+     
+     let targetScale = 1;
+     if (totalAlive <= 2) targetScale = 1.35;      // 1v1 (Devasa Yakınlaşma)
+     else if (totalAlive <= 4) targetScale = 1.2;  // 2v2 (Yakın)
+     else if (totalAlive <= 6) targetScale = 1.05; // 3v3 (Standart)
+     else if (totalAlive <= 8) targetScale = 0.95; // 4v4 (Uzak)
+     else targetScale = 0.85;                      // Tam dolu kalabalık takım (En uzak)
+
+     // Kamera Zoom GSAP Tween
+     gsap.to(cameraRef.current, {
+         scale: targetScale,
+         duration: 1.2,
+         ease: "power2.inOut",
+         transformOrigin: "center center"
+     });
+  }, [pT, eT]);
 
   // Oyuna giriş (Drop-in) ve Hasar animasyonlarının Gsap ile yönetilmesi
   useEffect(() => {
@@ -68,7 +90,8 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
   }, [pT, eT, anims, step]);
 
   return (
-    <div className="flex flex-row items-center justify-center w-full gap-4 relative py-6">
+    <div className="w-full flex justify-center items-center py-6 min-h-[350px] overflow-visible perspective-[1000px]">
+      <div ref={cameraRef} className="flex flex-row items-center justify-center w-full gap-4 relative">
       
       {/* Oyuncu Takımı (SOL YARI) */}
       <div className="flex items-center justify-start flex-nowrap flex-row-reverse min-h-[160px] pb-4 relative z-20 w-[45%] pr-4 gap-1 sm:gap-2">
@@ -171,6 +194,7 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
         })}
       </div>
 
+      </div>
     </div>
   );
 }
