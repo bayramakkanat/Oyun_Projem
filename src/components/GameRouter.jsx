@@ -502,8 +502,7 @@ if (arenaResult) {
     );
   }
 
-  const empty = team.filter((x) => x === null).length;
-  const hasR = rewards.length > 0;
+
 
   return (
 <div className="min-h-screen text-white p-2 flex flex-col justify-center" style={{
