@@ -193,7 +193,6 @@ export default function GameRouter() {
     triggerAnim,
     turn,
     turnRef,
-    turnRef2,
     unlockAchievement,
     updateLeaderboard,
     updateStatsOnEnd,
