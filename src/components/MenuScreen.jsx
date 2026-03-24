@@ -227,13 +227,6 @@ saveTasksToDB,
       Koleksiyon
     </span>
   </button>
-  <button
-  onClick={() => setMenuView("feedback")}
-  className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-all active:scale-95"
->
-  <span className="text-2xl">💬</span>
-  <span className="text-xs uppercase tracking-widest opacity-60">Geri Bildirim</span>
-</button>
 </div>
               <button
                 onClick={() => setSoundEnabled((s) => !s)}
@@ -533,6 +526,12 @@ saveTasksToDB,
           className="px-4 py-2 bg-purple-900/40 border border-purple-500/20 rounded-xl text-purple-400 text-xs font-bold hover:bg-purple-800/60 transition-all"
         >
           🧪 Debug
+        </button>
+        <button
+          onClick={() => setMenuView("feedback")}
+          className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-gray-400 text-xs font-bold hover:bg-white/10 transition-all"
+        >
+          💬 Geri Bildirim
         </button>
       </div>
       {showSettingsModal && (
