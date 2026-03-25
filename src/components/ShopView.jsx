@@ -42,6 +42,8 @@ export default function ShopView() {
     setRewards,
     setSel,
     setSelI,
+    setTeam,
+    setGold,
     setShowCollection,
     setSoundEnabled,
     setVersusPhase,

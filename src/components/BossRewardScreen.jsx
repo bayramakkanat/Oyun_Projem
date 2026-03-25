@@ -11,7 +11,7 @@ export default function BossRewardScreen({
 }) {
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br ${boss.color} text-white flex flex-col items-center justify-center p-4 relative overflow-hidden`}
+       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm overflow-auto"
     >
       <StarField />
       <div className="relative z-10 max-w-2xl w-full text-center">
