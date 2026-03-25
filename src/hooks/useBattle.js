@@ -153,7 +153,7 @@ export function useBattle({
     const pt = applyPermanentBuffs(team)
       .filter(Boolean)
       .reverse()
-      .map((x) => ({ ...x, curHp: x.hp }));
+      .map((x) => ({ ...x, curHp: x.hp, trample: false }));
     if (pt.length === 0) return;
     const et = boss.team.map((b) => ({ ...b, id: Math.random() }));
     setET(et);
@@ -225,7 +225,7 @@ export function useBattle({
     const pt = applyPermanentBuffs(team)
       .filter(Boolean)
       .reverse()
-      .map((x) => ({ ...x, curHp: x.hp }));
+      .map((x) => ({ ...x, curHp: x.hp, trample: false }));
     if (pt.length === 0) return;
 
     let et;
@@ -368,6 +368,7 @@ export function useBattle({
         if (won) {
           setBossResult("win");
           setBossChallenge("reward");
+          setPhase("shop");
           const rewardTier = turn === 5 ? 5 : 6;
           const shuffled   = [...TIERS[rewardTier]].sort(() => Math.random() - 0.5).slice(0, 3);
           setBossRewards(
