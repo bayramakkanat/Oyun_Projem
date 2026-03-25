@@ -73,6 +73,7 @@ const {
   settingsUsername, setSettingsUsername,
   settingsAvatar, setSettingsAvatar,
   displayName, setDisplayName,
+  stats, setStats,
   handleGoogleLogin,
   handleEmailAuth,
   handleLogout,
@@ -82,7 +83,6 @@ const {
   const [gameStarted, setGameStarted] = useState(false);
   const [menuView, setMenuView] = useState("main"); // "main", "play_setup", "achievements", "stats"
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [stats, setStats] = useState(loadStats);
   const [achievementPopup, setAchievementPopup] = useState(null);
   const [gold, setGold] = useState(10);
   const [turn, setTurn] = useState(1);
