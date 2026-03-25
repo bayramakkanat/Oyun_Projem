@@ -1,3 +1,4 @@
+import { AB } from "../data/gameData";
 import { applyTeamBuff, applyTeamDamage, applyTeamDebuff, getFaintWeakenAllDebuff, getTeamBuffAmount, getWaveDamage } from "./battleEffectUtils";
 
 export const applyFaintDamageEffect = ({ deadUnit, power, enemyTeam, logs, logPrefix = "", targetLabel = "", logSuffix = "" }) => {
@@ -33,7 +34,7 @@ export const createFaintSummonUnit = ({ name, nick, power, img, flip = false }) 
   atk: 4 * power,
   hp: 4 * power,
   curHp: 4 * power,
-  ability: "none",
+  ability: AB.NONE,
   tier: 1,
   lvl: 1,
   exp: 0,
@@ -49,7 +50,7 @@ export const pushFaintDuplicateEffect = ({ deadUnit, allyTeam, summons, logs, lo
     ...allyTeam[i],
     id: Math.random(),
     curHp: allyTeam[i].hp,
-    ability: allyTeam[i].ability === "faint_duplicate" ? "none" : allyTeam[i].ability,
+    ability: allyTeam[i].ability === AB.FAINT_DUPLICATE ? AB.NONE : allyTeam[i].ability,
   });
   logs.push(`${logPrefix}${deadUnit.nick} -> ${allyTeam[i].nick} kopyalandi`);
   return true;
@@ -75,19 +76,19 @@ export const applyFaintCopyEffect = ({ deadUnit, power, allyTeam, clampStat, log
 };
 
 export const applyDodoTeamRetriggerEffect = ({ ability, sourceNick, power, allyTeam, enemyTeam, enemyLabel, clampStat, logs }) => {
-  if (ability === "faint_rage" || ability === "cheetah_faint") {
+  if (ability === AB.FAINT_RAGE || ability === AB.CHEETAH_FAINT) {
     const buff = getTeamBuffAmount(power);
     applyTeamBuff(allyTeam, buff, clampStat);
     logs.push(`Dodo retrigger -> ${sourceNick} -> team +${buff}/+${buff}`);
     return true;
   }
-  if (ability === "faint_wave") {
+  if (ability === AB.FAINT_WAVE) {
     const damage = getWaveDamage(power);
     applyTeamDamage(enemyTeam, damage);
     logs.push(`Dodo retrigger -> ${sourceNick} -> ${enemyLabel} ${damage} damage`);
     return true;
   }
-  if (ability === "faint_weaken_all") {
+  if (ability === AB.FAINT_WEAKEN_ALL) {
     const debuff = getFaintWeakenAllDebuff(power);
     applyTeamDebuff(enemyTeam, debuff);
     logs.push(`Dodo retrigger -> ${sourceNick} -> ${enemyLabel} -${debuff}/-${debuff}`);
@@ -111,7 +112,7 @@ export const createFriendSummonUnit = ({ allyUnit, power, name, nick, img, flip 
     atk: power * 2,
     hp: power * 3,
     curHp: power * 3,
-    ability: "none",
+    ability: AB.NONE,
     tier: 1,
     lvl: 1,
     exp: 0,
@@ -135,13 +136,13 @@ export const applyTeamWideFaintEffect = ({
   teamBuffLabel = "team",
   enemyLabel = "enemy team",
 }) => {
-  if (ability === "faint_rage" || ability === "cheetah_faint") {
+  if (ability === AB.FAINT_RAGE || ability === AB.CHEETAH_FAINT) {
     const buff = getTeamBuffAmount(power);
     applyTeamBuff(allyTeam, buff, clampStat);
     logs.push(`${sourceNick} ${ability} -> ${teamBuffLabel} +${buff}/+${buff}`);
     return true;
   }
-  if (ability === "faint_wave") {
+  if (ability === AB.FAINT_WAVE) {
     const damage = getWaveDamage(power);
     applyTeamDamage(enemyTeam, damage);
     logs.push(`${sourceNick} ${ability} -> ${enemyLabel} ${damage} damage`);

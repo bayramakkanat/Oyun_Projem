@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { TIERS } from "../data/gameData";
+import { TIERS, AB } from "../data/gameData";
 import { logError, safeNumber } from "../utils/helpers";
 import {
   spawnParticles,
@@ -62,7 +62,7 @@ export function useShop({
         let hasChanges  = false;
 
         newTeam.forEach((pet, index) => {
-          if (!pet || pet.ability !== "friend_levelup_buff" || pet.id === leveledPetId) return;
+          if (!pet || pet.ability !== AB.FRIEND_LEVELUP_BUFF || pet.id === leveledPetId) return;
           const m = pwr(pet);
           newTeam[index] = {
             ...pet,
@@ -118,7 +118,7 @@ export function useShop({
 
       const b = nL - oL + 1;
       let atkBonus = b, hpBonus = b;
-      if (newBase.ability === "levelup_buff_self" && nL > oL) {
+      if (newBase.ability === AB.LEVELUP_BUFF_SELF && nL > oL) {
         const m = pwr({ ...newBase, lvl: nL });
         atkBonus += m * 2;
         hpBonus  += m * 2;
@@ -149,7 +149,7 @@ export function useShop({
   const applyBuyBuffs = (nt, newPetIndex) => {
     // buy_buff_random: rastgele bir müttefike buff
     nt.forEach((pet, idx) => {
-      if (!pet || pet.ability !== "buy_buff_random" || idx === newPetIndex) return;
+      if (!pet || pet.ability !== AB.BUY_BUFF_RANDOM || idx === newPetIndex) return;
       const m       = pwr(pet);
       const allies  = nt.filter((t, i) => t && i !== idx);
       if (allies.length === 0) return;
@@ -174,7 +174,7 @@ export function useShop({
 
     // buy_buff_behind: arkadaki hayvana buff
     nt.forEach((pet, idx) => {
-      if (!pet || pet.ability !== "buy_buff_behind") return;
+      if (!pet || pet.ability !== AB.BUY_BUFF_BEHIND) return;
       if (idx === 0 || !nt[idx - 1]) return;
       const behindId = nt[idx - 1].id;
       const m        = pwr(pet);
@@ -214,11 +214,11 @@ export function useShop({
       const a = pool[Math.floor(Math.random() * pool.length)];
       let cost = a.cost;
       team.forEach((pet) => {
-        if (pet && pet.ability === "buy_discount_next") cost = Math.max(1, cost - pwr(pet));
+        if (pet && pet.ability === AB.BUY_DISCOUNT_NEXT) cost = Math.max(1, cost - pwr(pet));
       });
       if (discountNext) {
         team.forEach((pet) => {
-          if (pet && pet.ability === "shop_discount") {
+          if (pet && pet.ability === AB.SHOP_DISCOUNT) {
             const pct = pwr(pet) === 1 ? 0.33 : pwr(pet) === 2 ? 0.66 : 0.99;
             cost = Math.max(1, Math.floor(cost * (1 - pct)));
           }
@@ -257,7 +257,7 @@ export function useShop({
     if (!a.isR && gold < a.cost) return;
 
     // buy_target_buff durumu
-    if (a.ability === "buy_target_buff" && !a.pendingTargetBuff) {
+    if (a.ability === AB.BUY_TARGET_BUFF && !a.pendingTargetBuff) {
       const nt = [...team];
       const targetPet = nt[slot];
 
@@ -311,7 +311,7 @@ export function useShop({
       if (!a.isR) {
         setGold((g) => g - a.cost);
         setShop(shop.filter((x) => x.id !== a.id));
-        if (merged.ability === "shop_discount") setDiscountNext(true);
+        if (merged.ability === AB.SHOP_DISCOUNT) setDiscountNext(true);
         if (newRewards.length > 0) setRewards((prev) => [...prev, ...newRewards]);
       } else {
         setRewards((prev) => [...prev.filter((x) => x.grp !== a.grp), ...newRewards]);
@@ -331,7 +331,7 @@ export function useShop({
     } else {
       setRewards(rewards.filter((x) => x.grp !== a.grp));
     }
-    if (a.ability === "shop_discount") setDiscountNext(true);
+    if (a.ability === AB.SHOP_DISCOUNT) setDiscountNext(true);
     applyBuyBuffs(nt, slot);
     setTeam(nt);
 
@@ -362,7 +362,7 @@ export function useShop({
       nt[fi] = null;
       setTeam(nt);
       if (newRewards.length > 0) setRewards((prev) => [...prev, ...newRewards]);
-      if (leveledUp && merged.ability === "buy_target_buff") {
+      if (leveledUp && merged.ability === AB.BUY_TARGET_BUFF) {
         const mergedPower = pwr(merged);
         const buffAmount  = mergedPower === 1 ? 1 : mergedPower === 2 ? 2 : 4;
         setSel({ ...merged, pendingTargetBuff: true, buffAmount, sourceSlot: ti });
@@ -380,10 +380,10 @@ export function useShop({
     let goldGain  = sellP(pet);
     const nt      = [...team];
 
-    if (pet.ability === "sell_gold") goldGain += pwr(pet);
+    if (pet.ability === AB.SELL_GOLD) goldGain += pwr(pet);
 
     // sell_buff_friend: müttefiklere uçan buff
-    if (pet.ability === "sell_buff_friend") {
+    if (pet.ability === AB.SELL_BUFF_FRIEND) {
       const m       = pwr(pet);
       const allies  = nt.filter((t, idx) => t && idx !== i);
       if (allies.length > 0) {
@@ -434,7 +434,7 @@ export function useShop({
     }
 
     // sell_heal_team: müttefiklere iyileştirme uçuşu
-    if (pet.ability === "sell_heal_team") {
+    if (pet.ability === AB.SELL_HEAL_TEAM) {
       const m          = pwr(pet);
       const healAmount = m * 2;
       const fromCenter = getPetCenter(pet.id);
@@ -475,7 +475,7 @@ export function useShop({
     }
 
     // sell_buff_shop: mağazadaki hayvanlara buff uçuşu
-    if (pet.ability === "sell_buff_shop") {
+    if (pet.ability === AB.SELL_BUFF_SHOP) {
       const m          = pwr(pet);
       const fromCenter = getPetCenter(pet.id);
       setShop((prevShop) => {

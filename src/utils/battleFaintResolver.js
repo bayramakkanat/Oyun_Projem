@@ -1,4 +1,5 @@
 // src/utils/battleFaintResolver.js
+import { AB } from "../data/gameData";
 import { applySummonBuffs } from "./battleUtils";
 import {
   applyDodoTeamRetriggerEffect,
@@ -24,53 +25,53 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
   let lg = [], sm = [], gG = 0;
 
   if (!isP) {
-    if (d.ability === "faint_buff" && al.length > 0) {
+    if (d.ability === AB.FAINT_BUFF && al.length > 0) {
       applyFaintBuffEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "💀 Düşman ", logSuffix: " -> " });
     }
-    if (d.ability === "faint_dmg" && en.length > 0) {
+    if (d.ability === AB.FAINT_DMG && en.length > 0) {
       applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: "☠️ Düşman ", targetLabel: "Oyuncu takımına", logSuffix: " -> " });
     }
-    if (d.ability === "faint_shield" && al.length > 0) {
+    if (d.ability === AB.FAINT_SHIELD && al.length > 0) {
       applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🛡️ Düşman ", targetLabel: "Düşman takımına", logSuffix: " -> " });
     }
     applyTeamWideFaintEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, clampStat, logs: lg, teamBuffLabel: "enemy team", enemyLabel: "player team" });
-    if (d.ability === "faint_gold") {
+    if (d.ability === AB.FAINT_GOLD) {
       lg.push(`💰 Düşman ${d.nick} -> +${m} altın (oyuncuya etkisi yok)`);
     }
-    if (d.ability === "stag_combo" && al.length > 0) {
+    if (d.ability === AB.STAG_COMBO && al.length > 0) {
       const buff = 2 * m;
       al.forEach((pet) => { pet.atk = clampStat(pet.atk + buff); pet.curHp = clampStat(pet.curHp + buff); });
       lg.push(`🦌 Düşman ${d.nick} -> Düşman takımına +${buff}/+${buff} KALICI`);
     }
-    if (d.ability === "faint_buff_self" && al.length > 0) {
+    if (d.ability === AB.FAINT_BUFF_SELF && al.length > 0) {
       al.forEach((pet) => { if (pet.id === d.id) { pet.atk = clampStat(pet.atk + 2 * m); pet.curHp = clampStat(pet.curHp + 2 * m); } });
       lg.push(`🦡 Düşman ${d.nick} -> Kendine +${2 * m}/+${2 * m} kalıcı`);
     }
-    if (d.ability === "start_trample" && al.length > 0) {
+    if (d.ability === AB.START_TRAMPLE && al.length > 0) {
       const buff = 5 * m;
       al[0].atk = clampStat(al[0].atk + buff);
       al[0].trample = true;
       lg.push(`🦏 Düşman ${d.nick} -> +${buff} ATK (çiğneme aktif)`);
     }
-    if (d.ability === "hurt_team_buff" && al.length > 0) {
+    if (d.ability === AB.HURT_TEAM_BUFF && al.length > 0) {
       al.forEach((pet) => { pet.atk = clampStat(pet.atk + 3 * m); pet.curHp = clampStat(pet.curHp + 3 * m); });
       lg.push(`🦬 Düşman ${d.nick} -> Takıma +${3 * m}/+${3 * m}`);
     }
-    if (d.ability === "faint_summon") {
+    if (d.ability === AB.FAINT_SUMMON) {
       const newSummon = createFaintSummonUnit({ name: "🥚", nick: "Düş.Yavru", power: m, img: "baby_crocodile.png", flip: false });
       applySummonBuffs([newSummon], al, lg, { triggerAnim, spawnParticles });
       sm.push(newSummon);
       lg.push(`🥚 Düşman ${d.nick} -> ${4 * m}/${4 * m} yavru çağırdı`);
     }
-    if (d.ability === "faint_copy" && al.length > 0) {
+    if (d.ability === AB.FAINT_COPY && al.length > 0) {
       applyFaintCopyEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "📋 Düşman ", logSuffix: " -> " });
     }
     al.forEach((a) => {
-      if (a.ability === "friend_faint") {
+      if (a.ability === AB.FRIEND_FAINT) {
         const am = pwr(a);
         applyFriendFaintEffect({ allyUnit: a, power: am, clampStat, logs: lg, logPrefix: "🐺 Düşman ", logSuffix: " (dost öldü)" });
       }
-      if (a.ability === "friend_summon" && !a.isSummon) {
+      if (a.ability === AB.FRIEND_SUMMON && !a.isSummon) {
         if (!a.summonCount) a.summonCount = 0;
         if (a.summonCount < 3) {
           const am = pwr(a);
@@ -82,27 +83,27 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
         }
       }
     });
-    if (killer && killer.ability === "kill_buff") {
+    if (killer && killer.ability === AB.KILL_BUFF) {
       const km = pwr(killer);
       killer.atk = clampStat(killer.atk + 3 * km);
       killer.curHp = clampStat(killer.curHp + 3 * km);
       lg.push(`🦈 Düşman ${killer.nick} -> öldürdü, +${3 * km}/+${3 * km}`);
     }
     al.forEach((ally) => {
-      if (ally && ally.ability === "summon_retrigger") {
+      if (ally && ally.ability === AB.SUMMON_RETRIGGER) {
         const dodoM = pwr(ally);
         for (let dodoI = 0; dodoI < dodoM; dodoI++) {
-          if (d.ability === "faint_buff" && al.length > 0) {
+          if (d.ability === AB.FAINT_BUFF && al.length > 0) {
             applyFaintBuffEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🦤 Düşman Dodo -> ", logSuffix: " efekti tekrar! " });
           }
-          if (d.ability === "faint_dmg") {
+          if (d.ability === AB.FAINT_DMG) {
             applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: "🦤 Düşman Dodo -> ", targetLabel: "Oyuncu takımına", logSuffix: " efekti tekrar! " });
           }
-          if (d.ability === "faint_shield") {
+          if (d.ability === AB.FAINT_SHIELD) {
             applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🦤 Düşman Dodo -> ", targetLabel: "Takıma", logSuffix: " efekti tekrar! " });
           }
           applyDodoTeamRetriggerEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, enemyLabel: "player team", logs: lg, clampStat });
-          if (d.ability === "faint_summon") {
+          if (d.ability === AB.FAINT_SUMMON) {
             const extraSummon = createFaintSummonUnit({ name: "🥚", nick: "Düş.Yavru", power: m, img: "baby_crocodile.png", flip: false });
             applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
             sm.push(extraSummon);
@@ -111,27 +112,27 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
         }
       }
     });
-    if (d.ability === "faint_duplicate") {
+    if (d.ability === AB.FAINT_DUPLICATE) {
       pushFaintDuplicateEffect({ deadUnit: d, allyTeam: al, summons: sm, logs: lg, logPrefix: "🐙 Düşman " });
     }
     return { lg, sm, gG: 0 };
   }
 
   // isP === true (oyuncu tarafı)
-  if (d.ability === "faint_buff" && al.length > 0) {
+  if (d.ability === AB.FAINT_BUFF && al.length > 0) {
     applyFaintBuffEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "💀 ", logSuffix: " -> " });
   }
-  if (d.ability === "faint_copy" && al.length > 0) {
+  if (d.ability === AB.FAINT_COPY && al.length > 0) {
     applyFaintCopyEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🦛 ", temporary: true, logSuffix: " -> " });
   }
-  if (d.ability === "faint_dmg") {
+  if (d.ability === AB.FAINT_DMG) {
     applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: "☠️ ", targetLabel: "Tüm düşmanlara", logSuffix: " -> " });
   }
-  if (d.ability === "faint_shield") {
+  if (d.ability === AB.FAINT_SHIELD) {
     applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🛡️ ", targetLabel: "Tüm takıma", logSuffix: " -> " });
   }
   applyTeamWideFaintEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, clampStat, logs: lg, teamBuffLabel: "player team", enemyLabel: "enemy team" });
-  if (d.ability === "faint_buff_self" && isP) {
+  if (d.ability === AB.FAINT_BUFF_SELF && isP) {
     const m2 = pwr(d);
     applySelfFaintBuffEffect({ deadUnit: d, power: m2, allyTeam: al, clampStat, logs: lg, logPrefix: "🦡 ", logSuffix: " -> " });
     setTeam((prevTeam) =>
@@ -142,7 +143,7 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
       )
     );
   }
-  if (d.ability === "faint_summon") {
+  if (d.ability === AB.FAINT_SUMMON) {
     const newSummon = createFaintSummonUnit({ name: "🥚", nick: "Yavru", power: m, img: "baby_crocodile.png" });
     lg.push(`🥚 ${d.nick} -> ${4 * m}/${4 * m} yavru çağırdı`);
     sm.push(newSummon);
@@ -152,7 +153,7 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
       Object.assign(newSummon, buffedSummon);
     }, 800);
   }
-  if (d.ability === "stag_combo") {
+  if (d.ability === AB.STAG_COMBO) {
     const m2 = pwr(d);
     applyStagComboEffect({ deadUnit: d, power: m2, allyTeam: al, clampStat, logs: lg, logPrefix: "🦌 ", targetLabel: "Takıma " });
     setTeam((prevTeam) =>
@@ -165,11 +166,11 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
   }
   if (isP) {
     al.forEach((a) => {
-      if (a.ability === "friend_faint") {
+      if (a.ability === AB.FRIEND_FAINT) {
         const am = pwr(a);
         applyFriendFaintEffect({ allyUnit: a, power: am, clampStat, logs: lg, logPrefix: "🐺 " });
       }
-      if (a.ability === "friend_summon" && !a.isSummon) {
+      if (a.ability === AB.FRIEND_SUMMON && !a.isSummon) {
         if (!a.summonCount) a.summonCount = 0;
         if (a.summonCount < 3) {
           const am = pwr(a);
@@ -182,28 +183,28 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
       }
     });
   }
-  if (d.ability === "faint_duplicate" && isP) {
+  if (d.ability === AB.FAINT_DUPLICATE && isP) {
     pushFaintDuplicateEffect({ deadUnit: d, allyTeam: al, summons: sm, logs: lg, logPrefix: "🐙 " });
   }
   if (isP) {
     al.forEach((ally) => {
-      if (ally && ally.ability === "summon_retrigger") {
+      if (ally && ally.ability === AB.SUMMON_RETRIGGER) {
         const dodoM = pwr(ally);
         for (let dodoI = 0; dodoI < dodoM; dodoI++) {
-          if (d.ability === "faint_buff" && al.length > 0) {
+          if (d.ability === AB.FAINT_BUFF && al.length > 0) {
             applyFaintBuffEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🦤 Dodo -> ", logSuffix: " efekti tekrar! " });
           }
-          if (d.ability === "faint_dmg") {
+          if (d.ability === AB.FAINT_DMG) {
             applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: "🦤 Dodo -> ", targetLabel: "Tüm düşmanlara", logSuffix: " efekti tekrar! " });
           }
-          if (d.ability === "faint_shield") {
+          if (d.ability === AB.FAINT_SHIELD) {
             applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🦤 Dodo -> ", targetLabel: "Takıma", logSuffix: " efekti tekrar! " });
           }
           applyDodoTeamRetriggerEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, enemyLabel: "enemy team", logs: lg, clampStat });
-          if (d.ability === "faint_copy" && al.length > 0) {
+          if (d.ability === AB.FAINT_COPY && al.length > 0) {
             applyFaintCopyEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🦤 Dodo -> ", logSuffix: " efekti tekrar! " });
           }
-          if (d.ability === "faint_summon") {
+          if (d.ability === AB.FAINT_SUMMON) {
             const extraSummon = createFaintSummonUnit({ name: "🥚", nick: "Yavru", power: m, img: "baby_crocodile.png", flip: false });
             applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
             sm.push(extraSummon);

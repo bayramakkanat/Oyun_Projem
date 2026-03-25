@@ -1,4 +1,4 @@
-import { TIERS } from "../data/gameData";
+import { TIERS, AB } from "../data/gameData";
 
 const MAX_STAT = 500;
 
@@ -23,7 +23,7 @@ const pwr = (a) => {
 export const applyPermanentBuffs = (teamArray) => {
   let newTeam = [...teamArray];
   newTeam.forEach((pet, idx) => {
-    if (pet && pet.ability === "start_fire") {
+    if (pet && pet.ability === AB.START_FIRE) {
       const m = pwr(pet);
       newTeam[idx] = {
         ...newTeam[idx],
@@ -63,16 +63,16 @@ export const genE = (turn, maxT, teamSlots, difficulty, difficultyLevel) => {
   });
   return enemies.sort((a, b) => {
     const aFB = [
-      "friend_faint",
-      "friend_summon",
-      "faint_buff",
-      "end_team_buff",
+      AB.FRIEND_FAINT,
+      AB.FRIEND_SUMMON,
+      AB.FAINT_BUFF,
+      AB.END_TEAM_BUFF,
     ].includes(a.ability);
     const bFB = [
-      "friend_faint",
-      "friend_summon",
-      "faint_buff",
-      "end_team_buff",
+      AB.FRIEND_FAINT,
+      AB.FRIEND_SUMMON,
+      AB.FAINT_BUFF,
+      AB.END_TEAM_BUFF,
     ].includes(b.ability);
     if (difficultyLevel === "hard") {
       if (aFB && !bFB) return 1;
@@ -90,7 +90,7 @@ export const applyEndTurnBuffs = (currentTeam) => {
     if (!a) return;
     const m = pwr(a);
 
-    if (a.ability === "end_heal_one") {
+    if (a.ability === AB.END_HEAL_ONE) {
       const allies = nt.filter((t, idx) => t && idx !== i);
       if (allies.length > 0) {
         const randomAlly = allies[Math.floor(Math.random() * allies.length)];
@@ -105,7 +105,7 @@ export const applyEndTurnBuffs = (currentTeam) => {
       }
     }
 
-    if (a.ability === "end_team_buff") {
+    if (a.ability === AB.END_TEAM_BUFF) {
       const targets = nt
         .slice(0, i)
         .filter((x) => x)
@@ -123,7 +123,7 @@ export const applyEndTurnBuffs = (currentTeam) => {
       });
     }
 
-    if (a.ability === "end_all") {
+    if (a.ability === AB.END_ALL) {
       nt.forEach((t, j) => {
         if (t) {
           nt[j] = {
@@ -135,7 +135,7 @@ export const applyEndTurnBuffs = (currentTeam) => {
       });
     }
 
-    if (a.ability === "end_buff_ahead") {
+    if (a.ability === AB.END_BUFF_AHEAD) {
       const targets = nt
         .slice(i + 1)
         .filter((x) => x)
@@ -153,7 +153,7 @@ export const applyEndTurnBuffs = (currentTeam) => {
       });
     }
 
-    if (a.ability === "end_self_buff") {
+    if (a.ability === AB.END_SELF_BUFF) {
       nt[i] = {
         ...nt[i],
         atk: clampStat(nt[i].atk + m * 3),
@@ -171,7 +171,7 @@ export const appStart = (p, e, callbacks) => {
   let lg = [];
 
   pp.forEach((pet) => {
-   if (pet && pet.ability === "stag_combo") {
+   if (pet && pet.ability === AB.STAG_COMBO) {
       const m = pwr(pet);
       pp = pp.map((ally) =>
         ally && ally.id !== pet.id
@@ -200,13 +200,13 @@ export const appStart = (p, e, callbacks) => {
 
   pp.forEach((a, i) => {
     const m = pwr(a);
-    if (a.ability === "start_buff") {
+    if (a.ability === AB.START_BUFF) {
       pp[i].atk += m;
       triggerAnim(a.id, "buff");
       spawnParticles(a.id, "buff");
       lg.push(`⚡ ${a.nick} → +${m} ATK (savaş başı)`);
     }
-    if (a.ability === "start_team_shield") {
+    if (a.ability === AB.START_TEAM_SHIELD) {
       pp.forEach((x, j) => {
         pp[j].curHp = clampStat(pp[j].curHp + m);
         pp[j].hp = clampStat(pp[j].hp + m);
@@ -215,19 +215,19 @@ export const appStart = (p, e, callbacks) => {
       spawnParticles(a.id, "shield");
       lg.push(`🛡️ ${a.nick} → Tüm takıma +${m} HP`);
     }
-    if (a.ability === "start_triple") {
+    if (a.ability === AB.START_TRIPLE) {
       pp[i].tripleAttackCount = m;
       triggerAnim(a.id, "buff");
       lg.push(`⚔️⚔️⚔️ ${a.nick} → İlk ${m} saldırı 3x hasar!`);
     }
-    if (a.ability === "start_all_perm") {
+    if (a.ability === AB.START_ALL_PERM) {
       pp.forEach((x) => {
         triggerAnim(x.id, "buff");
       });
       spawnParticles(a.id, "buff");
       lg.push(`🦅 ${a.nick} → Tüm takıma +${2 * m} ATK KALICI`);
     }
-    if (a.ability === "start_snipe" && ee.length > 0) {
+    if (a.ability === AB.START_SNIPE && ee.length > 0) {
       const t = ee.length > 1 ? ee.length - 1 : 0;
       ee[t].curHp -= 3 * m;
       triggerAnim(ee[t].id, "damage");
@@ -235,7 +235,7 @@ export const appStart = (p, e, callbacks) => {
       lg.push(`🎯 ${a.nick} → Arka düşmana ${3 * m} hasar`);
       ee = ee.filter((x) => x.curHp > 0);
     }
-    if (a.ability === "start_multi_snipe" && ee.length > 0) {
+    if (a.ability === AB.START_MULTI_SNIPE && ee.length > 0) {
       const targetCount = Math.min(m + 1, ee.length);
       spawnParticles(a.id, "attack");
       for (let j = 0; j < targetCount; j++) {
@@ -248,7 +248,7 @@ export const appStart = (p, e, callbacks) => {
         }
       }
     }
-    if (a.ability === "start_fear" && ee.length > 0) {
+    if (a.ability === AB.START_FEAR && ee.length > 0) {
       ee[0].atk = Math.max(1, ee[0].atk - 10 * m);
       triggerAnim(ee[0].id, "damage");
       if (ee.length > 1) {
@@ -258,7 +258,7 @@ export const appStart = (p, e, callbacks) => {
       spawnParticles(a.id, "attack");
       lg.push(`🦁 ${a.nick} → Ön 2 düşmana -${10 * m} ATK!`);
     }
-    if (a.ability === "start_fire") {
+    if (a.ability === AB.START_FIRE) {
       ee.forEach((x) => {
         x.curHp -= 6 * m;
         triggerAnim(x.id, "damage");
@@ -272,23 +272,23 @@ export const appStart = (p, e, callbacks) => {
       );
       ee = ee.filter((x) => x.curHp > 0);
     }
-    if (a.ability === "start_trample") {
+    if (a.ability === AB.START_TRAMPLE) {
       pp[i].atk += 5 * m;
       pp[i].trample = true;
       triggerAnim(a.id, "buff");
       lg.push(`🦏 ${a.nick} → +${5 * m} ATK (çiğneme aktif)`);
     }
-    if (a.ability === "start_charge") {
+    if (a.ability === AB.START_CHARGE) {
       pp[i].curHp += 2 * m;
       triggerAnim(a.id, "buff");
       lg.push(`🐗 ${a.nick} → +${2 * m} HP`);
     }
-    if (a.ability === "start_tank") {
+    if (a.ability === AB.START_TANK) {
       pp[i].curHp += 3 * m;
       triggerAnim(a.id, "buff");
       lg.push(`🦀 ${a.nick} → +${3 * m} HP (tank)`);
     }
-    if (a.ability === "start_dmg" && ee.length > 0) {
+    if (a.ability === AB.START_DMG && ee.length > 0) {
       const t = Math.floor(Math.random() * ee.length);
       ee[t].curHp -= 2 * m;
       triggerAnim(ee[t].id, "damage");
@@ -296,11 +296,11 @@ export const appStart = (p, e, callbacks) => {
       lg.push(`💥 ${a.nick} → ${ee[t].nick}'e ${2 * m} hasar`);
       ee = ee.filter((x) => x.curHp > 0);
     }
-    if (a.ability === "start_poison" && ee.length > 0) {
+    if (a.ability === AB.START_POISON && ee.length > 0) {
       ee[0].atk = Math.max(1, ee[0].atk - m * 2);
       lg.push(`🐍 ${a.nick} → Ön düşmana -${m * 2} ATK`);
     }
-    if (a.ability === "weaken_strong" && ee.length > 0) {
+    if (a.ability === AB.WEAKEN_STRONG && ee.length > 0) {
       let mxI = 0,
         mxP = 0;
       ee.forEach((en, idx) => {
@@ -315,7 +315,7 @@ export const appStart = (p, e, callbacks) => {
       triggerAnim(ee[mxI].id, "damage");
       lg.push(`🐧 ${a.nick} → ${ee[mxI].nick}'i %${25 * m} zayıflattı`);
     }
-    if (a.ability === "start_freeze_enemy" && ee.length > 0) {
+    if (a.ability === AB.START_FREEZE_ENEMY && ee.length > 0) {
       const reduction = (m * 30) / 100;
       ee[0].atk = Math.max(1, Math.floor(ee[0].atk * (1 - reduction)));
       triggerAnim(ee[0].id, "damage");
@@ -332,33 +332,33 @@ export const appStart = (p, e, callbacks) => {
 
   ee.forEach((a, i) => {
     const m = pwr(a);
-    if (a.ability === "start_buff") {
+    if (a.ability === AB.START_BUFF) {
       ee[i].atk += m;
       lg.push(`⚡ Düşman ${a.nick} → +${m} ATK (savaş başı)`);
     }
-    if (a.ability === "start_team_shield") {
+    if (a.ability === AB.START_TEAM_SHIELD) {
       ee.forEach((x, j) => {
         ee[j].curHp = clampStat(ee[j].curHp + m);
       });
       lg.push(`🛡️ Düşman ${a.nick} → Tüm düşman takımına +${m} HP`);
     }
-    if (a.ability === "start_tank") {
+    if (a.ability === AB.START_TANK) {
       ee[i].curHp += 3 * m;
       lg.push(`🦀 Düşman ${a.nick} → +${3 * m} HP (tank)`);
     }
-    if (a.ability === "start_dmg" && pp.length > 0) {
+    if (a.ability === AB.START_DMG && pp.length > 0) {
       const t = Math.floor(Math.random() * pp.length);
       pp[t].curHp -= 2 * m;
       lg.push(`💥 Düşman ${a.nick} → ${pp[t].nick}'e ${2 * m} hasar`);
       pp = pp.map((x) => ({ ...x, curHp: Math.max(1, x.curHp) }));
     }
-    if (a.ability === "start_snipe" && pp.length > 0) {
+    if (a.ability === AB.START_SNIPE && pp.length > 0) {
       const t = pp.length > 1 ? pp.length - 1 : 0;
       pp[t].curHp -= 3 * m;
       lg.push(`🎯 Düşman ${a.nick} → Arka oyuncu birimine ${3 * m} hasar`);
       pp = pp.map((x) => ({ ...x, curHp: Math.max(1, x.curHp) }));
     }
-    if (a.ability === "start_multi_snipe" && pp.length > 0) {
+    if (a.ability === AB.START_MULTI_SNIPE && pp.length > 0) {
       const targetCount = Math.min(m + 1, pp.length);
       for (let j = 0; j < targetCount; j++) {
         if (pp.length > 0) {
@@ -371,12 +371,12 @@ export const appStart = (p, e, callbacks) => {
         }
       }
     }
-    if (a.ability === "start_fear" && pp.length > 0) {
+    if (a.ability === AB.START_FEAR && pp.length > 0) {
       pp[0].atk = Math.max(1, pp[0].atk - 10 * m);
       if (pp.length > 1) pp[1].atk = Math.max(1, pp[1].atk - 10 * m);
       lg.push(`😱 Düşman ${a.nick} → Ön 2 oyuncu birimine -${10 * m} ATK`);
     }
-    if (a.ability === "start_fire") {
+    if (a.ability === AB.START_FIRE) {
       pp.forEach((x) => {
         x.curHp -= 6 * m;
       });
@@ -384,26 +384,26 @@ export const appStart = (p, e, callbacks) => {
       lg.push(`🐉 Düşman ${a.nick} → Tüm oyuncu takımına ${6 * m} hasar`);
       pp = pp.map((x) => ({ ...x, curHp: Math.max(1, x.curHp) }));
     }
-    if (a.ability === "start_poison" && pp.length > 0) {
+    if (a.ability === AB.START_POISON && pp.length > 0) {
       pp[0].atk = Math.max(1, pp[0].atk - m * 2);
       lg.push(`🐍 Düşman ${a.nick} → Ön oyuncu birimine -${m * 2} ATK`);
     }
-    if (a.ability === "start_charge") {
+    if (a.ability === AB.START_CHARGE) {
       ee[i].curHp += 2 * m;
       lg.push(`🐗 Düşman ${a.nick} → +${2 * m} HP`);
     }
-    if (a.ability === "start_trample") {
+    if (a.ability === AB.START_TRAMPLE) {
       ee[i].atk += 5 * m;
       ee[i].trample = true;
       lg.push(`🦏 Düşman ${a.nick} → +${5 * m} ATK (çiğneme)`);
     }
-    if (a.ability === "start_all_perm") {
+    if (a.ability === AB.START_ALL_PERM) {
       ee.forEach((x, j) => {
         ee[j].atk = clampStat(ee[j].atk + 2 * m);
       });
       lg.push(`🦅 Düşman ${a.nick} → Tüm düşman takımına +${2 * m} ATK`);
     }
-    if (a.ability === "start_freeze_enemy" && pp.length > 0) {
+    if (a.ability === AB.START_FREEZE_ENEMY && pp.length > 0) {
       const reduction = (m * 30) / 100;
       pp[0].atk = Math.max(1, Math.floor(pp[0].atk * (1 - reduction)));
       if (pp.length > 1)
@@ -415,7 +415,7 @@ export const appStart = (p, e, callbacks) => {
         `🦣 Düşman ${a.nick} → Ön ve arka oyuncu birimini %${m * 30} yavaşlattı`
       );
     }
-    if (a.ability === "weaken_strong" && pp.length > 0) {
+    if (a.ability === AB.WEAKEN_STRONG && pp.length > 0) {
       let mxI = 0,
         mxP = 0;
       pp.forEach((en, idx) => {
@@ -440,7 +440,7 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
 
   newSummons.forEach((summon) => {
     alliedTeam.forEach((pet) => {
-      if (pet && pet.ability === "summon_buff") {
+      if (pet && pet.ability === AB.SUMMON_BUFF) {
         const m = pwr(pet);
         const buff = 5 * m;
         summon.atk = clampStat(summon.atk + buff);
@@ -473,10 +473,10 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
     });
 
     alliedTeam.forEach((pet) => {
-      if (pet && pet.ability === "summon_retrigger") {
+      if (pet && pet.ability === AB.SUMMON_RETRIGGER) {
         const dodoM = pwr(pet);
         alliedTeam.forEach((buffPet) => {
-          if (buffPet && buffPet.ability === "summon_buff") {
+          if (buffPet && buffPet.ability === AB.SUMMON_BUFF) {
             const bearM = pwr(buffPet);
             const extraBuff = 5 * bearM * dodoM;
             summon.atk = clampStat(summon.atk + extraBuff);

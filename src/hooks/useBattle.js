@@ -16,7 +16,7 @@ import {
   spawnDeathEffect,
   spawnProjectile,
 } from "../utils/animations";
-import { BOSSES, TIERS, WIN_TURN } from "../data/gameData";
+import { BOSSES, TIERS, WIN_TURN, AB } from "../data/gameData";
 import { useBattleResults } from "./useBattleResults";
 
 export function useBattle({
@@ -101,17 +101,17 @@ export function useBattle({
       if (!pet) return pet;
       const battlePet = currentPT.find((p) => p?.id === pet.id);
       if (!battlePet) {
-        if (pet.ability === "start_fire") {
+        if (pet.ability === AB.START_FIRE) {
           const m = pwr(pet);
           return { ...pet, atk: clampStat(pet.atk + 4 * m), curHp: pet.hp };
         }
         return { ...pet, curHp: pet.hp };
       }
-      if (pet.ability === "start_multi_snipe") {
+      if (pet.ability === AB.START_MULTI_SNIPE) {
         const m = pwr(pet);
         return { ...pet, atk: clampStat(pet.atk + m * 5), hp: clampStat(pet.hp + m * 5), curHp: pet.hp };
       }
-      if (pet.ability === "start_all_perm" || pet.ability === "start_fire") {
+      if (pet.ability === AB.START_ALL_PERM || pet.ability === AB.START_FIRE) {
         return { ...pet, atk: battlePet.atk, curHp: pet.hp };
       }
       return { ...pet, curHp: pet.hp };
@@ -126,7 +126,7 @@ export function useBattle({
 
     let camelBonus = 0;
     updatedTeam.forEach((pet) => {
-      if (pet && pet.ability === "end_gain_gold") camelBonus += pwr(pet);
+      if (pet && pet.ability === AB.END_GAIN_GOLD) camelBonus += pwr(pet);
     });
     setGold((g) => g + 10 + battleGoldRef.current + camelBonus);
     setTeam(updatedTeam);
@@ -193,7 +193,7 @@ export function useBattle({
       return {
         name: p.name, nick: p.nick,
         atk: p.atk, hp: p.hp, curHp: p.hp,
-        ability: p.ability || "none",
+        ability: p.ability || AB.NONE,
         tier: p.tier, lvl: p.lvl || 1, exp: p.exp || 0,
         img: p.img || animalData?.img || null,
         flip: p.flip || animalData?.flip || false,
