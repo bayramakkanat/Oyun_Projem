@@ -11,7 +11,6 @@ import BossOfferScreen from "./BossOfferScreen";
 import NewTierScreen from "./NewTierScreen";
 import ShopView from "./ShopView";
 import ArenaResultScreen from "./ArenaResultScreen";
-import ArenaResultScreen from "./ArenaResultScreen";
 import StarField from "./StarField";
 import DebugPanel from "./DebugPanel";
 import { playSound } from "../hooks/useSound";
