@@ -545,7 +545,24 @@ useEffect(() => {
     versusRoom,
     versusSetReady,
     victory,
-    wins
+    wins,
+    // Auth değerleri (AuthContext'ten)
+    user,
+    displayName,
+    stats, setStats,
+    showAuthModal, setShowAuthModal,
+    authEmail, setAuthEmail,
+    authPass, setAuthPass,
+    authMode, setAuthMode,
+    authUsername, setAuthUsername,
+    authAvatar, setAuthAvatar,
+    showSettingsModal, setShowSettingsModal,
+    settingsUsername, setSettingsUsername,
+    settingsAvatar, setSettingsAvatar,
+    handleGoogleLogin,
+    handleEmailAuth,
+    handleLogout,
+    handleUpdateProfile,
     }}>
       {children}
     </GameContext.Provider>

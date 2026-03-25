@@ -1,6 +1,5 @@
 import React from "react";
 import { useGameContext } from "../context/GameContext";
-import { useAuthContext } from "../context/AuthContext";
 import Card from "./Card";
 import StarField from "./StarField";
 import BattleView from "./BattleView";
@@ -175,27 +174,25 @@ export default function GameRouter() {
     versusRoom,
     versusSetReady,
     victory,
-    wins
+    wins,
+    // Auth değerleri
+    user,
+    displayName,
+    stats,
+    showAuthModal, setShowAuthModal,
+    authEmail, setAuthEmail,
+    authPass, setAuthPass,
+    authMode, setAuthMode,
+    authUsername, setAuthUsername,
+    authAvatar, setAuthAvatar,
+    showSettingsModal, setShowSettingsModal,
+    settingsUsername, setSettingsUsername,
+    settingsAvatar, setSettingsAvatar,
+    handleGoogleLogin,
+    handleEmailAuth,
+    handleLogout,
+    handleUpdateProfile,
   } = context;
-
-  const {
-  user,
-  showAuthModal, setShowAuthModal,
-  authEmail, setAuthEmail,
-  authPass, setAuthPass,
-  authMode, setAuthMode,
-  authUsername, setAuthUsername,
-  authAvatar, setAuthAvatar,
-  showSettingsModal, setShowSettingsModal,
-  settingsUsername, setSettingsUsername,
-  settingsAvatar, setSettingsAvatar,
-  displayName,
-  stats,
-  handleGoogleLogin,
-  handleEmailAuth,
-  handleLogout,
-  handleUpdateProfile,
-} = useAuthContext();
 
   if (gameMode === "versus" && versusPhase === "lobby") {
     return (
