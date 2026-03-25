@@ -1,4 +1,6 @@
+import { loadStats } from "../utils/helpers";
 import React, { createContext, useContext, useState } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 export const AuthContext = createContext();
 
@@ -14,6 +16,27 @@ export const AuthProvider = ({ children }) => {
   const [settingsUsername, setSettingsUsername] = useState("");
   const [settingsAvatar, setSettingsAvatar] = useState("🐺");
   const [displayName, setDisplayName] = useState("");
+  const [stats, setStats] = useState(loadStats);
+
+  const {
+    handleGoogleLogin,
+    handleEmailAuth,
+    handleLogout,
+    handleUpdateProfile,
+  } = useAuth({
+    authMode,
+    authEmail,
+    authPass,
+    authUsername,
+    authAvatar,
+    settingsUsername,
+    settingsAvatar,
+    setUser,
+    setShowAuthModal,
+    setDisplayName,
+    setShowSettingsModal,
+    setStats,
+  });
 
   return (
     <AuthContext.Provider value={{
@@ -28,6 +51,11 @@ export const AuthProvider = ({ children }) => {
       settingsUsername, setSettingsUsername,
       settingsAvatar, setSettingsAvatar,
       displayName, setDisplayName,
+      stats, setStats,
+      handleGoogleLogin,
+      handleEmailAuth,
+      handleLogout,
+      handleUpdateProfile,
     }}>
       {children}
     </AuthContext.Provider>

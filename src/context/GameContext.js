@@ -26,7 +26,6 @@ import { applyEndTurnBuffs } from "../utils/battleUtils";
 import { playSound } from "../hooks/useSound";
 import { useBattle } from "../hooks/useBattle";
 import { useShop } from "../hooks/useShop";
-import { useAuth } from "../hooks/useAuth";
 import { useArena } from "../hooks/useArena";
 import { calcArenaXP, getRank } from "../utils/helpers";
 import { useEndTurn } from "../hooks/useEndTurn";
@@ -62,7 +61,7 @@ export const GameContext = createContext();
 
 export const GameProvider = ({ children }) => {
 
-  const {
+const {
   user, setUser,
   showAuthModal, setShowAuthModal,
   authEmail, setAuthEmail,
@@ -74,6 +73,10 @@ export const GameProvider = ({ children }) => {
   settingsUsername, setSettingsUsername,
   settingsAvatar, setSettingsAvatar,
   displayName, setDisplayName,
+  handleGoogleLogin,
+  handleEmailAuth,
+  handleLogout,
+  handleUpdateProfile,
 } = useAuthContext();
 
   const [gameStarted, setGameStarted] = useState(false);
@@ -309,20 +312,6 @@ const { battle, startBossBattle, startVersusBattle, versusSetReady } = useBattle
   user,
   difficultyLevel, maxT, teamSlots, difficulty,
   setPGold,
-});
-const { handleGoogleLogin, handleEmailAuth, handleLogout, handleUpdateProfile } = useAuth({
-  authMode,
-  authEmail,
-  authPass,
-  authUsername,
-  authAvatar,
-  settingsUsername,
-  settingsAvatar,
-  setUser,
-  setShowAuthModal,
-  setStats,
-  setDisplayName,
-  setShowSettingsModal,
 });
 const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
   team, setTeam,
