@@ -5,7 +5,6 @@ import "../styles.css";
 import {
   logError,
   safeNumber,
-  loadStats,
   saveStats,
 } from "../utils/helpers";
 import Card from "../components/Card";
@@ -27,24 +26,10 @@ import { playSound } from "../hooks/useSound";
 import { useBattle } from "../hooks/useBattle";
 import { useShop } from "../hooks/useShop";
 import { useArena } from "../hooks/useArena";
-import { calcArenaXP, getRank } from "../utils/helpers";
 import { useEndTurn } from "../hooks/useEndTurn";
 import { useMusic } from "../hooks/useMusic";
 import { spawnParticles, spawnBuffAnimation } from "../utils/animations";
-import { auth, db } from "../firebase";
 
-import {
-  collection,
-  setDoc,
-  doc,
-  getDocs,
-  query,
-  where,
-  limit,
-  serverTimestamp,
-  onSnapshot,
-  updateDoc,
-} from "firebase/firestore";
 import {
   ABILITY_ICONS,
   DIFFICULTY_CONFIGS,
@@ -53,9 +38,6 @@ import {
   MAX_STAT,
   WIN_TURN,
 } from "../data/gameData";
-import SettingsModal from "../components/SettingsModal";
-
-
 
 export const GameContext = createContext();
 
