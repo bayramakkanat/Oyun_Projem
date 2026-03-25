@@ -1,12 +1,15 @@
 import { useAuthContext } from "./AuthContext";
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 
-import {
-  logError,
-  safeNumber,
-  saveStats,
-} from "../utils/helpers";
-
+import { logError, safeNumber, saveStats } from "../utils/helpers";
 import { playSound } from "../hooks/useSound";
 import { useBattle } from "../hooks/useBattle";
 import { useShop } from "../hooks/useShop";
@@ -26,143 +29,123 @@ import {
 export const GameContext = createContext();
 
 export const GameProvider = ({ children }) => {
+  // ─── Auth (AuthContext'ten) ──────────────────────────────────────────────
+  const {
+    user, setUser,
+    showAuthModal, setShowAuthModal,
+    authEmail, setAuthEmail,
+    authPass, setAuthPass,
+    authMode, setAuthMode,
+    authUsername, setAuthUsername,
+    authAvatar, setAuthAvatar,
+    showSettingsModal, setShowSettingsModal,
+    settingsUsername, setSettingsUsername,
+    settingsAvatar, setSettingsAvatar,
+    displayName, setDisplayName,
+    stats, setStats,
+    handleGoogleLogin,
+    handleEmailAuth,
+    handleLogout,
+    handleUpdateProfile,
+  } = useAuthContext();
 
-const {
-  user, setUser,
-  showAuthModal, setShowAuthModal,
-  authEmail, setAuthEmail,
-  authPass, setAuthPass,
-  authMode, setAuthMode,
-  authUsername, setAuthUsername,
-  authAvatar, setAuthAvatar,
-  showSettingsModal, setShowSettingsModal,
-  settingsUsername, setSettingsUsername,
-  settingsAvatar, setSettingsAvatar,
-  displayName, setDisplayName,
-  stats, setStats,
-  handleGoogleLogin,
-  handleEmailAuth,
-  handleLogout,
-  handleUpdateProfile,
-} = useAuthContext();
+  // ─── Oyun durumu ─────────────────────────────────────────────────────────
+  const [gameStarted,         setGameStarted]         = useState(false);
+  const [menuView,             setMenuView]             = useState("main");
+  const [soundEnabled,         setSoundEnabled]         = useState(true);
+  const [achievementPopup,     setAchievementPopup]     = useState(null);
+  const [gold,                 setGold]                 = useState(10);
+  const [turn,                 setTurn]                 = useState(1);
+  const [wins,                 setWins]                 = useState(0);
+  const [lives,                setLives]                = useState(5);
+  const [team,                 setTeam]                 = useState([null, null, null, null, null, null]);
+  const [shop,                 setShop]                 = useState([]);
+  const [phase,                setPhase]                = useState("shop");
+  const [log,                  setLog]                  = useState([]);
+  const [pT,                   setPT]                   = useState([]);
+  const [eT,                   setET]                   = useState([]);
+  const [step,                 setStep]                 = useState(0);
+  const [sel,                  setSel]                  = useState(null);
+  const [targetBuffHint,       setTargetBuffHint]       = useState(false);
+  const [selI,                 setSelI]                 = useState(null);
+  const [over,                 setOver]                 = useState(false);
+  const [victory,              setVictory]              = useState(false);
+  const [rewards,              setRewards]              = useState([]);
+  const [newTier,              setNewTier]              = useState(null);
+  const [lastT,                setLastT]                = useState(1);
+  const [arenaResult,          setArenaResult]          = useState(null);
+  const [pGold,                setPGold]                = useState(0);
+  const [showSwordClash,       setShowSwordClash]       = useState(false);
+  const [guide,                setGuide]                = useState(false);
+  const [guideLvl,             setGuideLvl]             = useState({});
+  const [anims,                setAnims]                = useState({});
+  const [isBattleOver,         setIsBattleOver]         = useState(false);
+  const [discountNext,         setDiscountNext]         = useState(false);
+  const [openTiers,            setOpenTiers]            = useState([1, 2, 3, 4, 5, 6]);
+  const [bossChallenge,        setBossChallenge]        = useState(null);
+  const [bossResult,           setBossResult]           = useState(null);
+  const [bossRewards,          setBossRewards]          = useState([]);
+  const [gameMode,             setGameMode]             = useState("standard");
+  const [versusPhase,          setVersusPhase]          = useState(null);
+  const [versusRoom,           setVersusRoom]           = useState(null);
+  const [versusReady,          setVersusReady]          = useState(false);
+  const [opponentReady,        setOpponentReady]        = useState(false);
+  const [showDebugPanel,       setShowDebugPanel]       = useState(false);
+  const [isDebugBattle,        setIsDebugBattle]        = useState(false);
+  const [newlyOpenedSlot,      setNewlyOpenedSlot]      = useState(null);
+  const [lastError,            setLastError]            = useState(null);
+  const [arenaOpponent,        setArenaOpponent]        = useState(null);
+  const [pendingEndTurnAnims,  setPendingEndTurnAnims]  = useState(false);
+  const [shopResetKey,         setShopResetKey]         = useState(0);
+  const [showCollection,       setShowCollection]       = useState(false);
+  const [isPaused,             setIsPaused]             = useState(false);
+  const [difficultyLevel,      setDifficultyLevel]      = useState(
+    () => localStorage.getItem("petgame_difficulty") || "normal"
+  );
 
-  const [gameStarted, setGameStarted] = useState(false);
-  const [menuView, setMenuView] = useState("main"); // "main", "play_setup", "achievements", "stats"
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [achievementPopup, setAchievementPopup] = useState(null);
-  const [gold, setGold] = useState(10);
-  const [turn, setTurn] = useState(1);
-  const [wins, setWins] = useState(0);
-  const [lives, setLives] = useState(5);
-  const [team, setTeam] = useState([null, null, null, null, null, null]);
-  const [shop, setShop] = useState([]);
-  const [phase, setPhase] = useState("shop");
-  const [log, setLog] = useState([]);
-  const [pT, setPT] = useState([]);
-  const [eT, setET] = useState([]);
-  const [step, setStep] = useState(0);
-  const [sel, setSel] = useState(null);
-  const [targetBuffHint, setTargetBuffHint] = useState(false);
-  const [selI, setSelI] = useState(null);
-  const [over, setOver] = useState(false);
-  const [victory, setVictory] = useState(false);
-  const [rewards, setRewards] = useState([]);
-  const [newTier, setNewTier] = useState(null);
-  const [lastT, setLastT] = useState(1);
-  const [arenaResult, setArenaResult] = useState(null);
-  const [pGold, setPGold] = useState(0);
-  const [showSwordClash, setShowSwordClash] = useState(false);
-  const [guide, setGuide] = useState(false);
-  const [guideLvl, setGuideLvl] = useState({});
-  const [anims, setAnims] = useState({});
-  const [isBattleOver, setIsBattleOver] = useState(false);
-  const [discountNext, setDiscountNext] = useState(false);
-  const [openTiers, setOpenTiers] = useState([1, 2, 3, 4, 5, 6]);
-  const logR = useRef(null);
-  const battleGoldRef = useRef(0);
-  const turnRef = useRef(turn);
-const setTurnAndRef = (newTurn) => {
-  setTurn(newTurn);
-  turnRef.current = newTurn;
-};
- const [bossChallenge, setBossChallenge] = useState(null); // null, "offer", "battle", "reward"
-  const [bossResult, setBossResult] = useState(null); // "win", "lose"
-  const [bossRewards, setBossRewards] = useState([]);
-   const [gameMode, setGameMode] = useState("standard"); // "standard" | "arena" | "versus"
-  const [versusPhase, setVersusPhase] = useState(null); // null | "lobby" | "playing"
-  const [versusRoom, setVersusRoom] = useState(null); // { code, role, roomData }
-  const [versusReady, setVersusReady] = useState(false); // bu oyuncu hazır mı
-  const [opponentReady, setOpponentReady] = useState(false); // rakip hazır mı
+  // ─── Ref'ler ──────────────────────────────────────────────────────────────
+  const logR                 = useRef(null);
+  const battleGoldRef        = useRef(0);
+  const turnRef              = useRef(turn);
   const lastProcessedStepRef = useRef(-1);
-  const lastBattleIdRef = useRef(null);
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
-  const [isDebugBattle, setIsDebugBattle] = useState(false);
-  const [newlyOpenedSlot, setNewlyOpenedSlot] = useState(null);
-  const [lastError, setLastError] = useState(null);
-  const [difficultyLevel, setDifficultyLevel] = useState(() => {
-    return localStorage.getItem("petgame_difficulty") || "normal";
-  });
-  const battleSpeedRef = useRef(
+  const lastBattleIdRef      = useRef(null);
+  const isPausedRef          = useRef(false);
+  const battleSpeedRef       = useRef(
     parseFloat(localStorage.getItem("petgame_battle_speed")) || 1
   );
-  const isPausedRef = useRef(false);
-const [isPaused, setIsPaused] = useState(false);
-useEffect(() => {
-  if (phase === "shop") {
-    isPausedRef.current = false;
-    setIsPaused(false);
-    if (gameMode === "versus") {
-      setVersusReady(false);
-      setOpponentReady(false);
-    }
-  }
-}, [phase]);
+  const achievementQueueRef   = useRef([]);
+  const achievementShowingRef = useRef(false);
 
-  const [arenaOpponent, setArenaOpponent] = useState(null);
-  const [pendingEndTurnAnims, setPendingEndTurnAnims] = useState(false);
-  const [shopResetKey, setShopResetKey] = useState(0);
-  const [showCollection, setShowCollection] = useState(false);
+  // ─── Türetilmiş değerler (useMemo) ───────────────────────────────────────
+  const maxT = useMemo(() => Math.min(Math.ceil(turn / 2), 6), [turn]);
 
-  // Global hata yakalayıcı
-  // Resim ön yükleme (düzeltildi - useEffect dışına taşındı)
-  useEffect(() => {
-    const images = [
-      "/images/animals/phoenix.png",
-      "https://i.ibb.co/BVvZ1GnD/Erlik.png",
-      "https://i.ibb.co/MDrgjfTR/Asena-Canva.png",
-    ];
-    images.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-    });
-  }, []);
-
-  // Global hata yakalayıcı
-  useEffect(() => {
-    const errorHandler = (event) => {
-      console.error("Global hata:", event.error);
-      setLastError({
-        message: event.error?.message || "Bilinmeyen hata",
-        stack: event.error?.stack,
-      });
-      setTimeout(() => setLastError(null), 3000);
+  const { currentDiffConfig, diffMult, difficulty } = useMemo(() => {
+    const cfg  = DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
+    return {
+      currentDiffConfig: cfg,
+      diffMult:          cfg.enemyStatMultiplier,
+      difficulty:        (1 + Math.floor(turn / 3) * 0.2) * cfg.enemyStatMultiplier,
     };
-    window.addEventListener("error", errorHandler);
-    return () => window.removeEventListener("error", errorHandler);
+  }, [difficultyLevel, turn]);
+
+  const teamSlots = useMemo(() => (turn >= 7 ? 6 : turn >= 5 ? 5 : 4), [turn]);
+  const shopSlots = useMemo(() => (turn >= 7 ? 5 : turn >= 5 ? 4 : 3), [turn]);
+  const isBossTurn = useMemo(
+    () => [5, 10, 15].includes(turn) && gameMode === "standard",
+    [turn, gameMode]
+  );
+  const empty = useMemo(() => team.filter((x) => x === null).length, [team]);
+  const hasR  = useMemo(() => rewards.length > 0, [rewards]);
+
+  // ─── turnRef senkronizasyonu ──────────────────────────────────────────────
+  const setTurnAndRef = useCallback((newTurn) => {
+    setTurn(newTurn);
+    turnRef.current = newTurn;
   }, []);
-  const maxT = Math.min(Math.ceil(turn / 2), 6);
-  const currentDiffConfig =
-    DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
-  const diffMult = currentDiffConfig.enemyStatMultiplier;
-  const difficulty = (1 + Math.floor(turn / 3) * 0.2) * diffMult;
-  // ← GÜNCELLENDİ: Tur 9→7 ve Tur 11→9
-  const teamSlots = turn >= 7 ? 6 : turn >= 5 ? 5 : 4;
-  const shopSlots = turn >= 7 ? 5 : turn >= 5 ? 4 : 3;
 
-  useEffect(() => {
-    if (gold >= 15) unlockAchievement("rich");
-  }, [gold]);
+  useEffect(() => { turnRef.current = turn; }, [turn]);
 
+  // ─── localStorage kalıcılığı ──────────────────────────────────────────────
   useEffect(() => {
     localStorage.setItem("petgame_difficulty", difficultyLevel);
   }, [difficultyLevel]);
@@ -170,14 +153,72 @@ useEffect(() => {
   useEffect(() => {
     localStorage.setItem("petgame_battle_speed", battleSpeedRef.current);
   }, []);
+
+  // ─── Pause sıfırlama (shop fazına geçince) ───────────────────────────────
   useEffect(() => {
-    turnRef.current = turn;
-  }, [turn]);
+    if (phase === "shop") {
+      isPausedRef.current = false;
+      setIsPaused(false);
+      if (gameMode === "versus") {
+        setVersusReady(false);
+        setOpponentReady(false);
+      }
+    }
+  }, [phase]);
 
-  const achievementQueueRef = useRef([]);
-  const achievementShowingRef = useRef(false);
+  // ─── Resim ön yükleme ─────────────────────────────────────────────────────
+  useEffect(() => {
+    [
+      "/images/animals/phoenix.png",
+      "https://i.ibb.co/BVvZ1GnD/Erlik.png",
+      "https://i.ibb.co/MDrgjfTR/Asena-Canva.png",
+    ].forEach((src) => { const img = new Image(); img.src = src; });
+  }, []);
 
-  const showNextAchievement = () => {
+  // ─── Global hata yakalayıcı ───────────────────────────────────────────────
+  useEffect(() => {
+    const handler = (event) => {
+      console.error("Global hata:", event.error);
+      setLastError({ message: event.error?.message || "Bilinmeyen hata", stack: event.error?.stack });
+      setTimeout(() => setLastError(null), 3000);
+    };
+    window.addEventListener("error", handler);
+    return () => window.removeEventListener("error", handler);
+  }, []);
+
+  // ─── Yardımcı fonksiyonlar (useCallback) ─────────────────────────────────
+  const pwr = useCallback((a) => {
+    if (!a) return 1;
+    if (a.lvl === 3) return 3;
+    if (a.lvl === 2) return 2;
+    return 1;
+  }, []);
+
+  const sellP = useCallback(
+    (a) => Math.ceil(a.lvl + (a.exp >= 1 ? 0.5 : 0)),
+    []
+  );
+
+  const clampStat = useCallback((v) => {
+    try {
+      return Math.min(Math.max(safeNumber(v, 0), 0), MAX_STAT);
+    } catch (e) {
+      logError(e, "clampStat");
+      return 0;
+    }
+  }, []);
+
+  const triggerAnim = useCallback((id, type) => {
+    setAnims((prev) => ({ ...prev, [id]: type }));
+    setTimeout(
+      () => setAnims((prev) => ({ ...prev, [id]: null })),
+      1000 / battleSpeedRef.current
+    );
+    playSound(type);
+  }, []);
+
+  // ─── Başarım sistemi ──────────────────────────────────────────────────────
+  const showNextAchievement = useCallback(() => {
     if (achievementQueueRef.current.length === 0) {
       achievementShowingRef.current = false;
       return;
@@ -190,9 +231,9 @@ useEffect(() => {
       setAchievementPopup(null);
       setTimeout(() => showNextAchievement(), 400);
     }, 3000);
-  };
+  }, []);
 
-  const unlockAchievement = (id) => {
+  const unlockAchievement = useCallback((id) => {
     setStats((prev) => {
       if (prev.achievements.includes(id)) return prev;
       const next = { ...prev, achievements: [...prev.achievements, id] };
@@ -206,17 +247,14 @@ useEffect(() => {
       }
       return next;
     });
-  };
+  }, [user, showNextAchievement]);
 
-  const triggerAnim = (id, type) => {
-    setAnims((prev) => ({ ...prev, [id]: type }));
-    setTimeout(
-      () => setAnims((prev) => ({ ...prev, [id]: null })),
-      1000 / battleSpeedRef.current
-    );
-    playSound(type);
-  };
+  // ─── Altın başarımı ───────────────────────────────────────────────────────
+  useEffect(() => {
+    if (gold >= 15) unlockAchievement("rich");
+  }, [gold]);
 
+  // ─── Yeni kademe bildirimi ────────────────────────────────────────────────
   useEffect(() => {
     const currentMaxT = Math.min(Math.ceil(turn / 2), 6);
     if (currentMaxT > lastT && phase === "shop") {
@@ -225,104 +263,90 @@ useEffect(() => {
     }
   }, [turn, phase, lastT]);
 
-  const pwr = (a) => {
-    if (!a) return 1;
-    if (a.lvl === 3) return 3;
-    if (a.lvl === 2) return 2;
-    return 1;
-  };
-  const sellP = (a) => Math.ceil(a.lvl + (a.exp >= 1 ? 0.5 : 0));
-  const clampStat = (v) => {
-    try {
-      const num = safeNumber(v, 0);
-      return Math.min(Math.max(num, 0), MAX_STAT);
-    } catch (e) {
-      logError(e, "clampStat");
-      return 0;
-    }
-  };
-  useMusic({ soundEnabled, phase, gameStarted });
-const { saveArenaTeam, fetchArenaOpponent, updateLeaderboard, loadTasksFromDB, saveTasksToDB } = useArena({ user, turnRef });
-  useEndTurn({
-  phase,
-  pendingEndTurnAnims,
-  setPendingEndTurnAnims,
-  team,
-  setTeam,
-  pwr,
-  clampStat,
-  triggerAnim,
-});
-const { battle, startBossBattle, startVersusBattle, versusSetReady } = useBattle({
-  phase, setPhase,
-  step, setStep,
-  pT, setPT, eT, setET,
-  log, setLog,
-  team, setTeam,
-  lives, setLives,
-  wins, setWins,
-  turn, gold, setGold,
-  isBattleOver, setIsBattleOver,
-  bossChallenge, setBossChallenge, setBossResult, setBossRewards,
-  gameMode, isDebugBattle, setIsDebugBattle,setPGold,setRewards,
-  setOver, setVictory, setGameStarted, setShowDebugPanel,
-  setNewTier, setLastT, lastT,
-  setNewlyOpenedSlot, setPendingEndTurnAnims, setShowSwordClash,
-  setArenaOpponent, setVersusReady, setOpponentReady,
-  versusReady, versusRoom, versusPhase,
-  battleSpeedRef, isPausedRef, battleGoldRef, lastProcessedStepRef,
-  turnRef, setTurnAndRef,
-  triggerAnim, clampStat, pwr, unlockAchievement, playSound,
-  spawnBuffAnimation,
-  saveArenaTeam, fetchArenaOpponent, updateLeaderboard, setArenaResult, saveTasksToDB,
-  user,
-  difficultyLevel, maxT, teamSlots, difficulty,
-  setPGold,
-});
-const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
-  team, setTeam,
-  shop, setShop,
-  gold, setGold,
-  rewards, setRewards,
-  turn,
-  discountNext, setDiscountNext,
-  sel, setSel,
-  selI, setSelI,
-  shopResetKey,
-  maxT,
-  shopSlots,
-  difficultyLevel,
-  pwr,
-  sellP,
-  clampStat,
-  triggerAnim,
-  unlockAchievement,
-  spawnBuffAnimation,
-});
-  const isBossTurn = [5, 10, 15].includes(turn) && gameMode === "standard";
-
-  const offerBoss = () => {
-    setBossChallenge("offer");
-  };
-
-  const acceptBoss = () => {
-    setBossChallenge("battle");
-    startBossBattle();
-  };
-
-  const declineBoss = () => {
-    setBossChallenge(null);
-    battle();
-  };
-
+  // ─── Log otomatik kaydırma ────────────────────────────────────────────────
   useEffect(() => {
     if (logR.current) logR.current.scrollTop = logR.current.scrollHeight;
   }, [log]);
 
+  // ─── Hook'lar ─────────────────────────────────────────────────────────────
+  useMusic({ soundEnabled, phase, gameStarted });
 
-  const reset = () => {
-    const cfg =
-      DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
+  const {
+    saveArenaTeam,
+    fetchArenaOpponent,
+    updateLeaderboard,
+    loadTasksFromDB,
+    saveTasksToDB,
+  } = useArena({ user, turnRef });
+
+  useEndTurn({
+    phase,
+    pendingEndTurnAnims,
+    setPendingEndTurnAnims,
+    team,
+    setTeam,
+    pwr,
+    clampStat,
+    triggerAnim,
+  });
+
+  const { battle, startBossBattle, startVersusBattle, versusSetReady } = useBattle({
+    phase, setPhase,
+    step, setStep,
+    pT, setPT,
+    eT, setET,
+    log, setLog,
+    team, setTeam,
+    lives, setLives,
+    wins, setWins,
+    turn, gold, setGold,
+    isBattleOver, setIsBattleOver,
+    bossChallenge, setBossChallenge, setBossResult, setBossRewards,
+    gameMode, isDebugBattle, setIsDebugBattle, setPGold, setRewards,
+    setOver, setVictory, setGameStarted, setShowDebugPanel,
+    setNewTier, setLastT, lastT,
+    setNewlyOpenedSlot, setPendingEndTurnAnims, setShowSwordClash,
+    setArenaOpponent, setVersusReady, setOpponentReady,
+    versusReady, versusRoom, versusPhase,
+    battleSpeedRef, isPausedRef, battleGoldRef, lastProcessedStepRef,
+    turnRef, setTurnAndRef,
+    triggerAnim, clampStat, pwr, unlockAchievement, playSound,
+    spawnBuffAnimation,
+    saveArenaTeam, fetchArenaOpponent, updateLeaderboard, setArenaResult, saveTasksToDB,
+    user,
+    difficultyLevel, maxT, teamSlots, difficulty,
+    setPGold,
+  });
+
+  const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
+    team, setTeam,
+    shop, setShop,
+    gold, setGold,
+    rewards, setRewards,
+    turn,
+    discountNext, setDiscountNext,
+    sel, setSel,
+    selI, setSelI,
+    shopResetKey,
+    maxT,
+    shopSlots,
+    difficultyLevel,
+    pwr,
+    sellP,
+    clampStat,
+    triggerAnim,
+    unlockAchievement,
+    spawnBuffAnimation,
+  });
+
+  // ─── Boss fonksiyonları ───────────────────────────────────────────────────
+  const offerBoss   = useCallback(() => setBossChallenge("offer"), []);
+  const acceptBoss  = useCallback(() => { setBossChallenge("battle"); startBossBattle(); }, [startBossBattle]);
+  const declineBoss = useCallback(() => { setBossChallenge(null); battle(); }, [battle]);
+
+  // ─── Oyunu sıfırla ────────────────────────────────────────────────────────
+  const reset = useCallback(() => {
+    const cfg = DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
     setGold(cfg.startingGold);
     setTurnAndRef(1);
     setWins(0);
@@ -345,26 +369,23 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
     lastProcessedStepRef.current = -1;
     setIsBattleOver(false);
     playSound("shop_open");
-  };
+  }, [difficultyLevel, setTurnAndRef]);
 
-  const updateStatsOnEnd = (won, currentTurn, currentWins, currentLives) => {
-   setStats((prev) => {
+  // ─── Oyun sonu istatistik güncellemesi ───────────────────────────────────
+  const updateStatsOnEnd = useCallback((won, currentTurn, currentWins, currentLives) => {
+    setStats((prev) => {
       const next = {
         ...prev,
         totalGames: prev.totalGames + 1,
-        totalWins: prev.totalWins + (won ? 1 : 0),
-        bestTurn: Math.max(prev.bestTurn, currentTurn),
-        bestWins: Math.max(prev.bestWins, currentWins),
+        totalWins:  prev.totalWins + (won ? 1 : 0),
+        bestTurn:   Math.max(prev.bestTurn, currentTurn),
+        bestWins:   Math.max(prev.bestWins, currentWins),
       };
       saveStats(next, user?.uid);
-      // Gizli başarım: tüm başarımları topla
-      const nonSecretIds = ACHIEVEMENTS_DEF
-        .filter(a => !a.secret)
-        .map(a => a.id);
-      const hasAll = nonSecretIds.every(id =>
-        (next.achievements || []).includes(id)
-      );
-      if (hasAll) unlockAchievement("secret_all");
+      const nonSecretIds = ACHIEVEMENTS_DEF.filter((a) => !a.secret).map((a) => a.id);
+      if (nonSecretIds.every((id) => (next.achievements || []).includes(id))) {
+        unlockAchievement("secret_all");
+      }
       return next;
     });
     unlockAchievement("first_game");
@@ -373,182 +394,83 @@ const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
     if (won && currentLives === 5) unlockAchievement("perfect");
     if (currentWins >= 5) unlockAchievement("five_wins");
     if (currentLives <= 1) unlockAchievement("survivor");
-  };
+  }, [user, unlockAchievement]);
 
+  // ─── Zafer / yenilgi efektleri ────────────────────────────────────────────
   useEffect(() => {
-  if (victory) {
+    if (!victory) return;
     playSound("victory");
     updateStatsOnEnd(true, turn, wins, lives);
     if (gameMode === "arena") {
-      const isNewBestTurn = turn > (stats.bestTurn || 0);
-      updateLeaderboard({ won: true, isNewBestTurn });
+      updateLeaderboard({ won: true, isNewBestTurn: turn > (stats.bestTurn || 0) });
     }
-  }
-}, [victory]);
-useEffect(() => {
-  if (over) {
+  }, [victory]);
+
+  useEffect(() => {
+    if (!over) return;
     playSound("defeat");
     updateStatsOnEnd(false, turn, wins, lives);
     if (gameMode === "arena") {
-      const isNewBestTurn = turn > (stats.bestTurn || 0);
-      updateLeaderboard({ won: false, isNewBestTurn });
+      updateLeaderboard({ won: false, isNewBestTurn: turn > (stats.bestTurn || 0) });
     }
-  }
-}, [over]);
+  }, [over]);
 
-  const empty = team.filter((x) => x === null).length;
-  const hasR = rewards.length > 0;
-
-  return (
-    <GameContext.Provider value={{
-        acceptBoss,
-    achievementPopup,
-    achievementQueueRef,
-    achievementShowingRef,
+  // ─── Context value (useMemo ile sabitlenmiş) ─────────────────────────────
+  const value = useMemo(() => ({
+    // Boss
+    acceptBoss, declineBoss, offerBoss,
+    // Başarımlar
+    achievementPopup, achievementQueueRef, achievementShowingRef,
     anims,
-    arenaOpponent,
-    arenaResult,
-    battle,
-    battleGoldRef,
-    battleSpeedRef,
-    bossChallenge,
-    bossResult,
-    bossRewards,
-    buy,
+    // Arena
+    arenaOpponent, arenaResult,
+    fetchArenaOpponent, saveArenaTeam,
+    updateLeaderboard, loadTasksFromDB, saveTasksToDB,
+    // Savaş
+    battle, battleGoldRef, battleSpeedRef,
+    bossChallenge, bossResult, bossRewards,
+    // Shop
+    buy, refresh, toggleFreeze, mergeT, sell, swap,
     clampStat,
-    currentDiffConfig,
-    declineBoss,
-    diffMult,
-    difficulty,
-    difficultyLevel,
+    currentDiffConfig, diffMult, difficulty, difficultyLevel,
     discountNext,
-    eT,
-    empty,
-    fetchArenaOpponent,
-    gameMode,
-    gameStarted,
-    gold,
-    guide,
-    guideLvl,
+    eT, empty,
+    gameMode, gameStarted, gold,
+    guide, guideLvl,
     hasR,
-    isBattleOver,
-    isBossTurn,
-    isDebugBattle,
-    isPaused,
-    isPausedRef,
-    lastBattleIdRef,
-    lastError,
-    lastProcessedStepRef,
-    lastT,
-    lives,
-    loadTasksFromDB,
-    log,
-    logR,
-    maxT,
-    menuView,
-    mergeT,
-    newTier,
-    newlyOpenedSlot,
-    offerBoss,
-    openTiers,
-    opponentReady,
-    over,
-    pGold,
-    pT,
-    pendingEndTurnAnims,
-    phase,
-    pwr,
-    refresh,
-    reset,
-    rewards,
-    saveArenaTeam,
-    saveTasksToDB,
-    sel,
-    selI,
-    sell,
-    sellP,
-    setAchievementPopup,
-    setAnims,
-    setArenaOpponent,
-    setArenaResult,
-    setBossChallenge,
-    setBossResult,
-    setBossRewards,
-    setDifficultyLevel,
-    setDiscountNext,
-    setET,
-    setGameMode,
-    setGameStarted,
-    setGold,
-    setGuide,
-    setGuideLvl,
-    setIsBattleOver,
-    setIsDebugBattle,
-    setIsPaused,
-    setLastError,
-    setLastT,
-    setLives,
-    setLog,
-    setMenuView,
-    setNewTier,
-    setNewlyOpenedSlot,
-    setOpenTiers,
-    setOpponentReady,
-    setOver,
-    setPGold,
-    setPT,
-    setPendingEndTurnAnims,
-    setPhase,
-    setRewards,
-    setSel,
-    setSelI,
-    setShop,
-    setShopResetKey,
-    setShowCollection,
-    setShowDebugPanel,
-    setShowSwordClash,
-    setSoundEnabled,
-    setStep,
-    setTargetBuffHint,
-    setTeam,
-    setTurn,
-    setTurnAndRef,
-    setVersusPhase,
-    setVersusReady,
-    setVersusRoom,
-    setVictory,
-    setWins,
-    shop,
-    shopResetKey,
-    shopSlots,
-    showCollection,
-    showDebugPanel,
-    showNextAchievement,
-    showSwordClash,
-    soundEnabled,
-    startBossBattle,
-    startVersusBattle,
-    step,
-    swap,
-    targetBuffHint,
-    team,
-    teamSlots,
-    toggleFreeze,
-    triggerAnim,
-    turn,
-    turnRef,
-    unlockAchievement,
-    updateLeaderboard,
-    updateStatsOnEnd,
-    versusPhase,
-    versusReady,
-    versusRoom,
-    versusSetReady,
-    victory,
-    wins,
-    // Auth değerleri (AuthContext'ten)
-    user,
-    displayName,
+    isBattleOver, isBossTurn, isDebugBattle,
+    isPaused, isPausedRef,
+    lastBattleIdRef, lastError, lastProcessedStepRef, lastT,
+    lives, log, logR,
+    maxT, menuView,
+    newTier, newlyOpenedSlot,
+    openTiers, opponentReady, over,
+    pGold, pT, pendingEndTurnAnims, phase, pwr,
+    reset, rewards,
+    sel, selI, sellP,
+    setAchievementPopup, setAnims, setArenaOpponent, setArenaResult,
+    setBossChallenge, setBossResult, setBossRewards,
+    setDifficultyLevel, setDiscountNext,
+    setET, setGameMode, setGameStarted, setGold,
+    setGuide, setGuideLvl,
+    setIsBattleOver, setIsDebugBattle, setIsPaused, setLastError, setLastT,
+    setLives, setLog, setMenuView,
+    setNewTier, setNewlyOpenedSlot, setOpenTiers, setOpponentReady, setOver,
+    setPGold, setPT, setPendingEndTurnAnims, setPhase, setRewards,
+    setSel, setSelI, setShop, setShopResetKey,
+    setShowCollection, setShowDebugPanel, setShowSwordClash, setSoundEnabled,
+    setStep, setTargetBuffHint, setTeam, setTurn, setTurnAndRef,
+    setVersusPhase, setVersusReady, setVersusRoom, setVictory, setWins,
+    shop, shopResetKey, shopSlots, showCollection, showDebugPanel,
+    showNextAchievement, showSwordClash: showSwordClash, soundEnabled,
+    startBossBattle, startVersusBattle, step,
+    targetBuffHint, team, teamSlots,
+    triggerAnim, turn, turnRef,
+    unlockAchievement, updateLeaderboard, updateStatsOnEnd,
+    versusPhase, versusReady, versusRoom, versusSetReady,
+    victory, wins,
+    // Auth (AuthContext'ten köprülenenler)
+    user, displayName,
     stats, setStats,
     showAuthModal, setShowAuthModal,
     authEmail, setAuthEmail,
@@ -559,11 +481,35 @@ useEffect(() => {
     showSettingsModal, setShowSettingsModal,
     settingsUsername, setSettingsUsername,
     settingsAvatar, setSettingsAvatar,
-    handleGoogleLogin,
-    handleEmailAuth,
-    handleLogout,
-    handleUpdateProfile,
-    }}>
+    handleGoogleLogin, handleEmailAuth, handleLogout, handleUpdateProfile,
+  }), [
+    // Primitive state'ler — bunlar değişince context güncellenir
+    gold, turn, wins, lives, phase, step, over, victory,
+    gameMode, gameStarted, isBattleOver, isBossTurn, isPaused,
+    difficultyLevel, discountNext, lastT, newTier, newlyOpenedSlot,
+    bossChallenge, bossResult, versusPhase, versusReady, opponentReady,
+    soundEnabled, showDebugPanel, isDebugBattle, showCollection,
+    showSwordClash, pGold, arenaResult, menuView, guide, lastError,
+    achievementPopup, empty, hasR, maxT, teamSlots, shopSlots,
+    // Diziler / objeler — referans değişince güncellenir
+    team, shop, rewards, log, pT, eT, anims, bossRewards,
+    guideLvl, openTiers, sel, selI,
+    // Auth
+    user, displayName, stats,
+    showAuthModal, authEmail, authPass, authMode,
+    authUsername, authAvatar, showSettingsModal,
+    settingsUsername, settingsAvatar,
+    // Stabil callback'ler
+    pwr, sellP, clampStat, triggerAnim,
+    unlockAchievement, showNextAchievement,
+    reset, updateStatsOnEnd,
+    offerBoss, acceptBoss, declineBoss,
+    battle, startBossBattle, startVersusBattle, versusSetReady,
+    refresh, toggleFreeze, buy, mergeT, sell, swap,
+  ]);
+
+  return (
+    <GameContext.Provider value={value}>
       {children}
     </GameContext.Provider>
   );

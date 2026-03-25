@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { doc, updateDoc, addDoc, collection } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import { runBattleStartPhase } from "../utils/battleStartPhase";
@@ -9,39 +9,15 @@ import {
   applyPermanentBuffs,
   genE,
   applyEndTurnBuffs,
-  applySummonBuffs,
 } from "../utils/battleUtils";
-import { loadCollection, saveCollection, getDefaultAnimalData, loadTasks, saveTasks } from "../utils/helpers";
 import {
   spawnParticles,
   spawnFloatingText,
   spawnDeathEffect,
   spawnProjectile,
 } from "../utils/animations";
-import { BOSSES, TIERS, WIN_TURN, ACHIEVEMENTS_DEF } from "../data/gameData";
-import {
-  applyTeamBuff,
-  applyTeamDamage,
-  applyTeamDebuff,
-  getFaintWeakenAllDebuff,
-  getFearAllDebuff,
-  getTeamBuffAmount,
-  getWaveDamage,
-} from "../utils/battleEffectUtils";
-import {
-  applyDodoTeamRetriggerEffect,
-  applyFaintBuffEffect,
-  applyFaintCopyEffect,
-  applyFaintDamageEffect,
-  applyFaintShieldEffect,
-  applyFriendFaintEffect,
-  applyTeamWideFaintEffect,
-  applySelfFaintBuffEffect,
-  applyStagComboEffect,
-  createFaintSummonUnit,
-  createFriendSummonUnit,
-  pushFaintDuplicateEffect,
-} from "../utils/battleFaintUtils";
+import { BOSSES, TIERS, WIN_TURN } from "../data/gameData";
+import { useBattleResults } from "./useBattleResults";
 
 export function useBattle({
   // State değerleri
@@ -88,9 +64,9 @@ export function useBattle({
   // Harici async fonksiyonlar
   saveArenaTeam,
   fetchArenaOpponent,
-updateLeaderboard,
-setArenaResult,
-saveTasksToDB,
+  updateLeaderboard,
+  setArenaResult,
+  saveTasksToDB,
   // Hesaplanan değerler
   difficultyLevel,
   maxT,
@@ -100,53 +76,82 @@ saveTasksToDB,
   setRewards,
   user,
 }) {
-  const versusRoomRef = useRef(null);
-  const versusUnsubRef = useRef(null);
-  const lastBattleIdRef = useRef(null);
-  const phaseRef = useRef(phase);
-  useEffect(() => {
-    phaseRef.current = phase;
-  }, [phase]);
- 
-  const handleArenaGameOver = (wins, turn) => {
-  const freshTaskData = loadTasks(user?.uid);
-  const pendingTaskXP = freshTaskData ? [
-    ...(freshTaskData.daily?.tasks || []),
-    ...(freshTaskData.weekly?.tasks || []),
-  ].filter(t => t.done && !t.xpClaimed).reduce((s, t) => s + t.reward, 0) : 0;
+  const versusUnsubRef    = useRef(null);
+  const lastBattleIdRef   = useRef(null);
+  const phaseRef          = useRef(phase);
 
-  if (freshTaskData) {
-    freshTaskData.daily.tasks = freshTaskData.daily.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-    freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map(t => t.done ? { ...t, xpClaimed: true } : t);
-    saveTasks(freshTaskData, user?.uid);
-    if (saveTasksToDB) saveTasksToDB(freshTaskData);
-  }
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
 
-  updateLeaderboard({ won: wins > 0, totalWins: wins, totalTurns: turn, taskXP: pendingTaskXP }).then((result) => {
-    const isNewRecord = result?.isNewRecord || false;
-    const losses = turn - wins;
-    const xpBreakdown = [
-      { label: `${turn} Tur × 2 XP`, xp: turn * 2 },
-      { label: `${wins} Zafer × 5 XP`, xp: wins * 5 },
-      { label: `${losses} Yenilgi × -2 XP`, xp: -(losses * 2) },
-      ...(isNewRecord ? [{ label: `🏆 Yeni Rekor Bonusu`, xp: 50 }] : []),
-    ];
-    const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
-    setArenaResult({ reachedTurn: turn, totalWins: wins, totalLosses: turn - wins, earnedXP, isNewRecord, xpBreakdown });
-  });
-};
-const faint = (d, al, en, isP, killer) =>
+  // ─── useBattleResults: koleksiyon / görev / leaderboard ─────────────────
+  const { updateCollectionStats, updateTaskProgress, handleArenaGameOver, handleGameOver } =
+    useBattleResults({
+      user, gameMode, turn, lives, wins,
+      unlockAchievement, updateLeaderboard,
+      saveTasksToDB, setArenaResult,
+      setLives, setOver, versusRoom,
+    });
+
+  // ─── faint yardımcısı ───────────────────────────────────────────────────
+  const faint = (d, al, en, isP, killer) =>
     resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAnim, spawnParticles, setTeam });
-  // --- SAVAŞ BAŞLATMA FONKSİYONLARI ---
+
+  // ─── Takım durumunu savaş sonrası güncelle ──────────────────────────────
+  const buildUpdatedTeam = (currentTeam, currentPT) =>
+    currentTeam.map((pet) => {
+      if (!pet) return pet;
+      const battlePet = currentPT.find((p) => p?.id === pet.id);
+      if (!battlePet) {
+        if (pet.ability === "start_fire") {
+          const m = pwr(pet);
+          return { ...pet, atk: clampStat(pet.atk + 4 * m), curHp: pet.hp };
+        }
+        return { ...pet, curHp: pet.hp };
+      }
+      if (pet.ability === "start_multi_snipe") {
+        const m = pwr(pet);
+        return { ...pet, atk: clampStat(pet.atk + m * 5), hp: clampStat(pet.hp + m * 5), curHp: pet.hp };
+      }
+      if (pet.ability === "start_all_perm" || pet.ability === "start_fire") {
+        return { ...pet, atk: battlePet.atk, curHp: pet.hp };
+      }
+      return { ...pet, curHp: pet.hp };
+    });
+
+  // ─── Tur sonu geçişi ────────────────────────────────────────────────────
+  const transitionToShop = (updatedTeam, newTurn, delayMs) => {
+    const currentMaxT    = Math.min(Math.ceil(newTurn / 2), 6);
+    const willOpenNewTier = currentMaxT > lastT;
+
+    setTurnAndRef(newTurn);
+
+    let camelBonus = 0;
+    updatedTeam.forEach((pet) => {
+      if (pet && pet.ability === "end_gain_gold") camelBonus += pwr(pet);
+    });
+    setGold((g) => g + 10 + battleGoldRef.current + camelBonus);
+    setTeam(updatedTeam);
+    setShowSwordClash(false);
+
+    setTimeout(() => {
+      setPendingEndTurnAnims(true);
+      if (willOpenNewTier) {
+        setNewTier(currentMaxT);
+        setLastT(currentMaxT);
+      } else {
+        setPhase("shop");
+      }
+    }, delayMs);
+  };
+
+  // ─── SAVAŞ BAŞLATMA FONKSİYONLARI ──────────────────────────────────────
 
   const startBossBattle = () => {
     setIsBattleOver(false);
     lastProcessedStepRef.current = -1;
     battleGoldRef.current = 0;
     const boss = BOSSES[turn];
-    const teamWithPermBuffs = applyPermanentBuffs(team);
-    const pt = teamWithPermBuffs
-      .filter((x) => x)
+    const pt = applyPermanentBuffs(team)
+      .filter(Boolean)
       .reverse()
       .map((x) => ({ ...x, curHp: x.hp }));
     if (pt.length === 0) return;
@@ -167,8 +172,8 @@ const faint = (d, al, en, isP, killer) =>
     setPGold(0);
     setVersusReady(false);
     setOpponentReady(false);
-    const pt = myTeam.filter((x) => x).reverse().map((x) => ({ ...x, curHp: x.hp }));
-    const et = theirTeam.filter((x) => x).reverse().map((x) => ({ ...x, curHp: x.hp }));
+    const pt = myTeam.filter(Boolean).reverse().map((x) => ({ ...x, curHp: x.hp }));
+    const et = theirTeam.filter(Boolean).reverse().map((x) => ({ ...x, curHp: x.hp }));
     if (pt.length === 0) return;
     setET(et);
     setPT(pt);
@@ -178,26 +183,23 @@ const faint = (d, al, en, isP, killer) =>
   };
 
   const versusSetReady = useCallback(async () => {
-    if (versusReady) return;
-    if (!versusRoom) return;
+    if (versusReady || !versusRoom) return;
     const { code, role } = versusRoom;
     const readyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
-    const teamKey = role === "host" ? "hostTeam" : "guestTeam";
-    const currentTeam = team
-      .filter((x) => x)
-      .map((p) => {
-        const allAnimals = Object.values(TIERS).flat();
-        const animalData = allAnimals.find((a) => a.name === p.name);
-        return {
-          name: p.name, nick: p.nick,
-          atk: p.atk, hp: p.hp, curHp: p.hp,
-          ability: p.ability || "none",
-          tier: p.tier, lvl: p.lvl || 1, exp: p.exp || 0,
-          img: p.img || animalData?.img || null,
-          flip: p.flip || animalData?.flip || false,
-          id: Math.random(), isBossUnit: false,
-        };
-      });
+    const teamKey        = role === "host" ? "hostTeam"      : "guestTeam";
+    const allAnimals     = Object.values(TIERS).flat();
+    const currentTeam = team.filter(Boolean).map((p) => {
+      const animalData = allAnimals.find((a) => a.name === p.name);
+      return {
+        name: p.name, nick: p.nick,
+        atk: p.atk, hp: p.hp, curHp: p.hp,
+        ability: p.ability || "none",
+        tier: p.tier, lvl: p.lvl || 1, exp: p.exp || 0,
+        img: p.img || animalData?.img || null,
+        flip: p.flip || animalData?.flip || false,
+        id: Math.random(), isBossUnit: false,
+      };
+    });
     try {
       await updateDoc(doc(db, "versus_rooms", code), {
         [readyTurnField]: turnRef.current,
@@ -220,9 +222,8 @@ const faint = (d, al, en, isP, killer) =>
     setPGold(0);
     setRewards([]);
 
-    const teamWithPermBuffs = applyPermanentBuffs(team);
-    const pt = teamWithPermBuffs
-      .filter((x) => x)
+    const pt = applyPermanentBuffs(team)
+      .filter(Boolean)
       .reverse()
       .map((x) => ({ ...x, curHp: x.hp }));
     if (pt.length === 0) return;
@@ -236,12 +237,7 @@ const faint = (d, al, en, isP, killer) =>
         const allAnimals = Object.values(TIERS).flat();
         et = [...opponentData.team].reverse().map((p) => {
           const animalData = allAnimals.find((a) => a.name === p.name);
-          return {
-            ...p,
-            img: p.img || animalData?.img || null,
-            id: Math.random(),
-            curHp: p.hp,
-          };
+          return { ...p, img: p.img || animalData?.img || null, id: Math.random(), curHp: p.hp };
         });
       } else {
         et = genE(turn, maxT, teamSlots, difficulty, difficultyLevel);
@@ -258,31 +254,35 @@ const faint = (d, al, en, isP, killer) =>
     setStep(0);
     setPhase("battle");
   };
-  // --- VERSUS SHOP RESET ---
+
+  // ─── VERSUS SHOP RESET ──────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== "shop" || !versusRoom || versusPhase !== "playing") return;
     const { code, role } = versusRoom;
-    const myReadyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
-    const myTeamField = role === "host" ? "hostTeam" : "guestTeam";
     updateDoc(doc(db, "versus_rooms", code), {
-      [myReadyTurnField]: null,
-      [myTeamField]: null,
+      [role === "host" ? "hostReadyTurn" : "guestReadyTurn"]: null,
+      [role === "host" ? "hostTeam"      : "guestTeam"     ]: null,
     }).catch(console.error);
   }, [phase]);
-  // --- VERSUS SNAPSHOT LISTENER ---
+
+  // ─── VERSUS SNAPSHOT LISTENER ───────────────────────────────────────────
   useEffect(() => {
     if (!versusRoom || versusPhase !== "playing") return;
     const { code, role } = versusRoom;
+    const allAnimals = Object.values(TIERS).flat();
+
+    const processTeam = (arr) =>
+      arr.map((p) => {
+        const a = allAnimals.find((a) => a.name === p.name);
+        return { ...p, img: p.img || a?.img || null, flip: p.flip !== undefined ? p.flip : (a?.flip || false) };
+      });
 
     const unsub = onSnapshot(doc(db, "versus_rooms", code), async (snap) => {
       const data = snap.data();
       if (!data) return;
 
       if (data.loser) {
-        const iLost = data.loser === role;
-        if (!iLost) {
-          setVictory(true);
-        }
+        if (data.loser !== role) setVictory(true);
         return;
       }
       if (data.disconnected && data.disconnected !== role) {
@@ -294,122 +294,84 @@ const faint = (d, al, en, isP, killer) =>
       if (phaseRef.current !== "shop") return;
 
       const currentTurn = turnRef.current;
-      const hostReady = data.hostReadyTurn === currentTurn;
-      const guestReady = data.guestReadyTurn === currentTurn;
-      const theirReady = role === "host" ? guestReady : hostReady;
-      setOpponentReady(theirReady);
+      const hostReady   = data.hostReadyTurn === currentTurn;
+      const guestReady  = data.guestReadyTurn === currentTurn;
+      setOpponentReady(role === "host" ? guestReady : hostReady);
 
       if (!hostReady || !guestReady) return;
-if (!data.hostTeam || !data.guestTeam) return;
-if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
+      if (!data.hostTeam || !data.guestTeam) return;
+      if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
 
       if (role === "host" && !data.battleId) {
-        const newBattleId = `${code}_${turnRef.current}_${Date.now()}`;
-        try {
-          await updateDoc(doc(db, "versus_rooms", code), { battleId: newBattleId });
-        } catch (err) {
-          console.error("battleId yazma hatası:", err);
-        }
+        const newId = `${code}_${turnRef.current}_${Date.now()}`;
+        try { await updateDoc(doc(db, "versus_rooms", code), { battleId: newId }); }
+        catch (err) { console.error("battleId yazma hatası:", err); }
         return;
       }
-
       if (!data.battleId) return;
       if (lastBattleIdRef.current === data.battleId) return;
       lastBattleIdRef.current = data.battleId;
 
       unsub();
 
-      const myTeamRaw = role === "host" ? data.hostTeam : data.guestTeam;
-      const theirTeamRaw = role === "host" ? data.guestTeam : data.hostTeam;
-      const opponentName = role === "host"
-        ? data.guest?.name || "Rakip"
-        : data.host?.name || "Rakip";
-
-      const allAnimals = Object.values(TIERS).flat();
-      const processTeam = (teamArray) => {
-        return teamArray.map((p) => {
-           const animalData = allAnimals.find((a) => a.name === p.name);
-           return { 
-             ...p, 
-             img: p.img || animalData?.img || null, 
-             flip: p.flip !== undefined ? p.flip : (animalData?.flip || false) 
-           };
-        });
-      };
-
-      const myTeam = processTeam(myTeamRaw || []);
-      const theirTeam = processTeam(theirTeamRaw || []);
-
+      const myTeam    = processTeam(role === "host" ? data.hostTeam : data.guestTeam);
+      const theirTeam = processTeam(role === "host" ? data.guestTeam : data.hostTeam);
+      const opponentName = role === "host" ? (data.guest?.name || "Rakip") : (data.host?.name || "Rakip");
       setArenaOpponent({ userName: opponentName });
       startVersusBattle(myTeam, theirTeam);
 
-   if (role === "host") {
-  setTimeout(() => {
-    updateDoc(doc(db, "versus_rooms", code), {
-      battleId: null,
-      hostReadyTurn: null,
-      guestReadyTurn: null,
-      hostTeam: null,
-      guestTeam: null,
-    });
-  }, 2000);
-}
+      if (role === "host") {
+        setTimeout(() => {
+          updateDoc(doc(db, "versus_rooms", code), {
+            battleId: null, hostReadyTurn: null, guestReadyTurn: null,
+            hostTeam: null, guestTeam: null,
+          });
+        }, 2000);
+      }
     });
 
     versusUnsubRef.current = unsub;
     return () => { unsub(); };
   }, [versusRoom?.code, versusPhase, turn]);
 
-  // --- ANA SAVAŞ ADIM DÖNGÜSÜ ---
+  // ─── ANA SAVAŞ ADIM DÖNGÜSÜ ─────────────────────────────────────────────
   useEffect(() => {
     if (phase !== "battle" || isBattleOver) return;
     let isCancelled = false;
 
+    // Zaman aşımı
     if (step > 200) {
       setIsBattleOver(true);
       setLog((l) => [...l, "⏱️ Savaş zaman aşımı!"]);
-      setTimeout(() => {
+      setTimeout(async () => {
         const newLives = lives - 1;
         setLives(newLives);
-       if (newLives <= 0) {
-if (gameMode === "arena") {
-  handleArenaGameOver(wins, turn);
-  return;
-}
-setOver(true);
-if (gameMode === "versus" && versusRoom) {
-  const { code, role } = versusRoom;
-  updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
-}
-return;
-}
-        setTurnAndRef(turnRef.current + 1);
-        setGold((g) => g + 10);
-        const finalTeam = applyEndTurnBuffs(team);
-        setTeam(finalTeam);
-        setPendingEndTurnAnims(true);
+        const over = await handleGameOver(newLives, wins, turn);
+        if (over) return;
+        const updatedTeam = buildUpdatedTeam(team, pT);
+        transitionToShop(updatedTeam, turn + 1, 0);
         setPhase("shop");
       }, 2000);
       return;
     }
 
-   if (pT.length === 0 || eT.length === 0) {
+    // Savaş bitti: takımlardan biri boşaldı
+    if (pT.length === 0 || eT.length === 0) {
       if (isDebugBattle) return;
       setIsBattleOver(true);
-      const won = eT.length === 0 && pT.length > 0;
+      const won  = eT.length === 0 && pT.length > 0;
+      const draw = pT.length === 0 && eT.length === 0;
 
+      (async () => { 
+      // Boss savaşı sonu
       if (bossChallenge === "battle") {
         if (won) {
           setBossResult("win");
           setBossChallenge("reward");
           const rewardTier = turn === 5 ? 5 : 6;
-          const pool = [...TIERS[rewardTier]];
-          const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, 3);
+          const shuffled   = [...TIERS[rewardTier]].sort(() => Math.random() - 0.5).slice(0, 3);
           setBossRewards(
-            shuffled.map((a) => ({
-              ...a, id: Math.random(), lvl: 1, exp: 0, curHp: a.hp,
-              isR: true, grp: Math.random(), rT: rewardTier,
-            }))
+            shuffled.map((a) => ({ ...a, id: Math.random(), lvl: 1, exp: 0, curHp: a.hp, isR: true, grp: Math.random(), rT: rewardTier }))
           );
           setGold((g) => g + 5);
           for (let i = 0; i < 3; i++) {
@@ -421,174 +383,63 @@ return;
           setBossChallenge(null);
           const newLives = lives - 2;
           setLives(newLives);
-         if (newLives <= 0) {
-if (gameMode === "arena") {
-  handleArenaGameOver(wins, turn);
-  return;
-}
-setOver(true);
-if (gameMode === "versus" && versusRoom) {
-  const { code, role } = versusRoom;
-  updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
-}
-return;
-}
-          setTimeout(() => {
-            setTurnAndRef(turnRef.current + 1);
-            setGold((g) => g + 10);
-            const finalTeam = applyEndTurnBuffs(team);
-            setTeam(finalTeam);
-            setPendingEndTurnAnims(true);
-            setPhase("shop");
-          }, 3000);
+          const over = await handleGameOver(newLives, wins, turn);
+          if (over) return;
+          const updatedTeam = buildUpdatedTeam(team, pT);
+          transitionToShop(updatedTeam, turn + 1, 3000);
         }
         return;
       }
 
-      const draw = pT.length === 0 && eT.length === 0;
-     const updatedTeam = team.map((pet) => {
-  if (!pet) return pet;
-  const battlePet = pT.find((p) => p?.id === pet.id);
-  if (!battlePet) {
-    if (pet.ability === "start_fire") {
-      const m = pwr(pet);
-      return { ...pet, atk: clampStat(pet.atk + 4 * m), curHp: pet.hp };
-    }
-    return { ...pet, curHp: pet.hp };
-  }
-  if (pet.ability === "start_multi_snipe") {
-    const m = pwr(pet);
-    return { ...pet, atk: clampStat(pet.atk + m * 5), hp: clampStat(pet.hp + m * 5), curHp: pet.hp };
-  }
-  if (pet.ability === "start_all_perm") {
-    return { ...pet, atk: battlePet.atk, curHp: pet.hp };
-  }
-  if (pet.ability === "start_fire") {
-    return { ...pet, atk: battlePet.atk, curHp: pet.hp };
-  }
-  return { ...pet, curHp: pet.hp };
-});
+      // Normal savaş sonu
+      const updatedTeam = buildUpdatedTeam(team, pT);
       setTeam(updatedTeam);
 
-     if (won) {
+      if (won) {
         setWins((w) => w + 1);
         setLog((l) => [...l, "🎉 ZAFER!"]);
+      } else if (draw) {
+        setLog((l) => [...l, "🤝 Berabere"]);
+      } else {
+        setLog((l) => [...l, "💀 Yenilgi"]);
       }
+
+      // Arena: takımı kaydet
       if (gameMode === "arena") saveArenaTeam(updatedTeam, difficultyLevel);
 
-      // Koleksiyon istatistiklerini güncelle (sadece Arena'da)
-      if (gameMode === "arena") {
-        const collection = loadCollection(user?.uid);
-        updatedTeam.forEach((pet) => {
-          if (!pet) return;
-          const key = pet.nick;
-          const data = collection[key] || getDefaultAnimalData();
-          data.used += 1;
-          if (won) data.wins += 1;
-          if (pet.lvl > data.maxLvl) data.maxLvl = pet.lvl;
-          if (pet.lvl === 3) data.unlocked = true;
-          // Görev kontrolleri
-          if (data.used >= 3) data.task1 = true;
-          if (data.wins >= 5) data.task2 = true;
-          if (data.unlocked) data.task3 = true;
-          collection[key] = data;
-        });
-        saveCollection(collection, user?.uid);
-        if (user?.uid) {
-  import("../firebase").then(({ db }) => {
-    import("firebase/firestore").then(({ doc, getDoc, setDoc, increment }) => {
-      updatedTeam.forEach(async (pet) => {
-        if (!pet) return;
-        const ref = doc(db, "animal_stats", pet.nick);
-        await setDoc(ref, {
-          used: increment(1),
-          wins: increment(won ? 1 : 0),
-        }, { merge: true });
-      });
-    });
-  });
-}
-        
-if (gameMode === "arena") {
-  const toId = (nick) => nick
-    .toLowerCase()
-    .replace(/ş/g, "s").replace(/ğ/g, "g").replace(/ü/g, "u")
-    .replace(/ö/g, "o").replace(/ı/g, "i").replace(/ç/g, "c")
-    .replace(/\s+/g, "_");
+      // Koleksiyon & görev güncellemeleri
+      updateCollectionStats(updatedTeam, won);
+      updateTaskProgress(updatedTeam, won);
 
-  updatedTeam.forEach((pet) => {
-    if (!pet) return;
-    const col = collection[pet.nick];
-    if (!col) return;
-    const id = toId(pet.nick);
-    if (col.wins >= 1) unlockAchievement(`use_${id}`);
-    if (col.maxLvl >= 2 && col.wins >= 1) unlockAchievement(`lvl2_${id}`);
-    if (col.maxLvl >= 3) unlockAchievement(`lvl3_${id}`);
-  });
-}
+      // Arena başarımları
+      if (gameMode === "arena") {
+        const newTurn = turn + 1;
+        if (newTurn >= 5)  unlockAchievement("arena_turn5");
+        if (newTurn >= 10) unlockAchievement("arena_turn10");
+        if (newTurn >= 15) unlockAchievement("arena_turn15");
       }
-     // Görev ilerlemesini güncelle
-const taskData = loadTasks(user?.uid);
-if (taskData) {
-  const updateTask = (tasks) => tasks.map(t => {
-    if (t.done) return t;
-    let progress = t.progress;
-    if (t.type === "battles") progress += 1;
-    if (t.type === "wins" && won) progress += 1;
-    if (t.type === "arena_wins" && won && gameMode === "arena") progress += 1;
-    if (t.type === "tier1_wins" && won && updatedTeam.some(p => p?.tier === 1)) progress += 1;
-    if (t.type === "lvl2" && updatedTeam.some(p => p?.lvl >= 2)) progress = Math.max(progress, 1);
-    if (t.type === "comeback" && won && lives === 1) progress += 1;
-    if (t.type === "unique_animals") {
-      const used = new Set(updatedTeam.filter(p => p).map(p => p.nick));
-      progress = Math.max(progress, used.size);
-    }
-    if (t.type === "reach_turn10" && turn >= 10 && gameMode === "arena") progress = 1;
-    const done = progress >= t.target;
-    return { ...t, progress: Math.min(progress, t.target), done };
-  });
-  taskData.daily.tasks = updateTask(taskData.daily.tasks);
-  taskData.weekly.tasks = updateTask(taskData.weekly.tasks);
-  saveTasks(taskData, user?.uid);
-  if (saveTasksToDB) saveTasksToDB(taskData);
-}
-  if (turn === WIN_TURN) {
-  if (gameMode === "arena") {
-    setLives((l) => l + 1);
-    setLog((lg) => [...lg, `♾️ ${WIN_TURN}. tura ulaştın! +1 can ile devam ediyorsun...`]);
-  } else {
-    setTimeout(() => setVictory(true), 500);
-    return;
-  }
-}
-      if (draw) {
-        setLog((l) => [...l, "🤝 Berabere"]);
-      } else if (!won) {
+
+      // Yenilgi / can kaybı
+      if (!won && !draw) {
         const newLives = lives - 1;
         setLives(newLives);
-        setLog((l) => [...l, "💀 Yenilgi"]);
-      if (newLives <= 0) {
-if (gameMode === "arena") {
-  handleArenaGameOver(wins, turn);
-  return;
-}
-setOver(true);
-if (gameMode === "versus" && versusRoom) {
-  const { code, role } = versusRoom;
-  updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
-}
-return;
-}
+        const over = await handleGameOver(newLives, wins, turn);
+        if (over) return;
       }
 
+      // Zafer kontrolü
+      if (turn === WIN_TURN) {
+        if (gameMode === "arena") {
+          setLives((l) => l + 1);
+          setLog((lg) => [...lg, `♾️ ${WIN_TURN}. tura ulaştın! +1 can ile devam ediyorsun...`]);
+        } else {
+          setTimeout(() => setVictory(true), 500);
+          return;
+        }
+      }
+
+      // Slot açılımı bildirimi
       const newTurn = turn + 1;
-      if (gameMode === "arena") {
-  if (newTurn >= 5) unlockAchievement("arena_turn5");
-  if (newTurn >= 10) unlockAchievement("arena_turn10");
-  if (newTurn >= 15) unlockAchievement("arena_turn15");
-}
-      const currentMaxT = Math.min(Math.ceil(newTurn / 2), 6);
-      const willOpenNewTier = currentMaxT > lastT;
       if (newTurn === 5) {
         setNewlyOpenedSlot("shop_4_team_4");
         setTimeout(() => setNewlyOpenedSlot(null), 1200);
@@ -596,36 +447,16 @@ return;
         setNewlyOpenedSlot("shop_5_team_5");
         setTimeout(() => setNewlyOpenedSlot(null), 1200);
       }
-      setTurnAndRef(newTurn);
-      let camelBonus = 0;
-      updatedTeam.forEach((pet) => {
-        if (pet && pet.ability === "end_gain_gold") camelBonus += pwr(pet);
-      });
-      setGold((prevGold) => prevGold + 10 + battleGoldRef.current + camelBonus);
 
-      if (!willOpenNewTier) {
-        setTeam(updatedTeam);
-        setShowSwordClash(false);
-        setTimeout(() => { setPendingEndTurnAnims(true); setPhase("shop"); }, 3000);
-      } else {
-        setTeam(updatedTeam);
-        setShowSwordClash(false);
-        setTimeout(() => {
-          setPendingEndTurnAnims(true);
-          setNewTier(currentMaxT);
-          setLastT(currentMaxT);
-        }, 3000);
-      }
+      transitionToShop(updatedTeam, newTurn, 3000);
+      })(); 
       return;
     }
 
-    if (phase !== "battle" || isBattleOver) {
-      lastProcessedStepRef.current = -1;
-      return;
-    }
+    // Adım işleme — zaten işlendiyse atla
+    if (phase !== "battle" || isBattleOver) { lastProcessedStepRef.current = -1; return; }
     if (step === lastProcessedStepRef.current) return;
     lastProcessedStepRef.current = step;
-    isCancelled = false;
 
     const tmr = setTimeout(async () => {
       if (isCancelled) return;
@@ -642,28 +473,22 @@ return;
           check();
         });
 
-      // Battle playback helpers
-      const addBattleLog = (message) => {
-        setLog((l) => [...l, message]);
+      const addBattleLog    = (msg) => setLog((l) => [...l, msg]);
+      const playBattleLogs  = async (messages, waitMs) => {
+        for (const msg of messages) { addBattleLog(msg); await delay(waitMs); }
       };
-
-      const playBattleLogs = async (messages, waitMs) => {
-        for (const logMsg of messages) {
-          addBattleLog(logMsg);
-          await delay(waitMs);
-        }
-      };
-
-      const playDeathAnim = (petId, direction) => {
-        triggerAnim(petId, direction);
-        spawnDeathEffect(petId);
-      };
-      if (isCancelled) return;
-
+      const playDeathAnim   = (petId, dir) => { triggerAnim(petId, dir); spawnDeathEffect(petId); };
       const resolveFaintResult = async (result, waitMs) => {
         await playBattleLogs(result.lg, waitMs);
         if (result.gG > 0) battleGoldRef.current += result.gG;
         return result.sm;
+      };
+
+      if (isCancelled) return;
+
+      const syncBattleTeams = (playerTeam, enemyTeam) => {
+        if (playerTeam) setPT([...playerTeam]);
+        if (enemyTeam)  setET([...enemyTeam]);
       };
 
       const scheduleDebugBattleReset = () => {
@@ -672,110 +497,53 @@ return;
         setTimeout(() => {
           setIsBattleOver(false);
           lastProcessedStepRef.current = -1;
-          setPT([]);
-          setET([]);
-          setStep(0);
-          setLog([]);
+          setPT([]); setET([]); setStep(0); setLog([]);
           setPhase("shop");
           setGameStarted(false);
           setTimeout(() => setShowDebugPanel(true), 50);
         }, 4000);
       };
 
-      const announceDebugWinner = (playerAliveCount, enemyAliveCount) => {
-        const winner = enemyAliveCount === 0 && playerAliveCount > 0
-          ? "SEN KAZANDIN!"
-          : playerAliveCount === 0 && enemyAliveCount > 0
-            ? "DUSMAN KAZANDI!"
-            : "BERABERLIK!";
+      const announceDebugWinner = (playerAlive, enemyAlive) => {
+        const winner =
+          enemyAlive === 0 && playerAlive > 0 ? "SEN KAZANDIN!" :
+          playerAlive === 0 && enemyAlive > 0  ? "DUSMAN KAZANDI!" :
+          "BERABERLIK!";
         setLog((l) => [...l, "------------------", winner, "------------------"]);
       };
 
-
-      const syncBattleTeams = (playerTeam, enemyTeam) => {
-        if (playerTeam) setPT([...playerTeam]);
-        if (enemyTeam) setET([...enemyTeam]);
-      };
-      const runFaintResolution = async ({
-        deadUnit,
-        allyTeam,
-        enemyTeam,
-        isPlayer,
-        killer,
-        waitMs,
-      }) => {
-        const result = faint(deadUnit, allyTeam, enemyTeam, isPlayer, killer);
-        return resolveFaintResult(result, waitMs);
-      };
-    // Step 0: Savaş başı yetenekleri
+      // Step 0: Savaş başı yetenekleri
       if (step === 0) {
         await runBattleStartPhase({
-          pp: [...pT],
-          ee: [...eT],
-          delay,
-          isCancelled: () => isCancelled,
-          triggerAnim,
-          clampStat,
-          pwr,
-          spawnParticles,
-          spawnProjectile,
-          setLog,
-          setTeam,
-          syncBattleTeams,
-          isDebugBattle,
-          announceDebugWinner,
-          scheduleDebugBattleReset,
-          setStep,
+          pp: [...pT], ee: [...eT],
+          delay, isCancelled: () => isCancelled,
+          triggerAnim, clampStat, pwr,
+          spawnParticles, spawnProjectile,
+          setLog, setTeam, syncBattleTeams,
+          isDebugBattle, announceDebugWinner,
+          scheduleDebugBattleReset, setStep,
         });
         return;
       }
-// Standart Savaş Turu
-      if (step > 0) {
-        await runBattleTurnPhase({
-          pT, eT,
-          delay,
-          isCancelled: () => isCancelled,
-          triggerAnim, clampStat, pwr,
-          battleSpeedRef,
-          setLog, setPT, setET, setStep, setIsBattleOver, setTeam,
-          battleGoldRef,
-          faint,
-          isDebugBattle,
-          announceDebugWinner,
-          scheduleDebugBattleReset,
-        });
-      }
+
+      // Step > 0: Normal savaş turu
+      await runBattleTurnPhase({
+        pT, eT,
+        delay, isCancelled: () => isCancelled,
+        triggerAnim, clampStat, pwr,
+        battleSpeedRef,
+        setLog, setPT, setET, setStep, setIsBattleOver, setTeam,
+        battleGoldRef,
+        faint,
+        isDebugBattle, announceDebugWinner, scheduleDebugBattleReset,
+      });
     }, 300);
+
     return () => {
       isCancelled = true;
       clearTimeout(tmr);
     };
-
   }, [phase, step]);
+
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

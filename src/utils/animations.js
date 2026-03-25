@@ -1,398 +1,332 @@
 import { playSound } from "../hooks/useSound";
 
+// ─── AnimationManager ────────────────────────────────────────────────────────
+// Tüm DOM partikülleri burada takip edilir.
+// Bileşen unmount / savaş biterken animManager.clearAll() ile temizlenebilir.
+class AnimationManager {
+  constructor() {
+    this._particles = new Set();
+  }
+
+  /** Bir DOM elementi oluşturur, body'e ekler ve durationMs sonra otomatik kaldırır. */
+  spawn(cssText, durationMs) {
+    const el = document.createElement("div");
+    el.style.cssText = cssText;
+    el.style.pointerEvents = "none";
+    el.style.zIndex = "1000";
+    document.body.appendChild(el);
+    this._particles.add(el);
+    const id = setTimeout(() => {
+      el.remove();
+      this._particles.delete(el);
+    }, durationMs);
+    return {
+      el,
+      cancel: () => {
+        clearTimeout(id);
+        el.remove();
+        this._particles.delete(el);
+      },
+    };
+  }
+
+  /** Tüm aktif partikülleri anında kaldırır (savaş reset / unmount için). */
+  clearAll() {
+    this._particles.forEach((el) => el.remove());
+    this._particles.clear();
+  }
+}
+
+export const animManager = new AnimationManager();
+
+// ─── Yardımcı: pet elementinin merkez koordinatlarını al ─────────────────────
+const getCenter = (petId) => {
+  const el = document.querySelector(`[data-pet-id="${petId}"]`);
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { el, x: r.left + r.width / 2, y: r.top + r.height / 2, rect: r };
+};
+
+// ─── spawnParticles ───────────────────────────────────────────────────────────
 export const spawnParticles = (petId, abilityType) => {
   const colors = {
-    fire: ["🔥", "💥", "✨"],
+    fire:   ["🔥", "💥", "✨"],
     shield: ["🛡️", "✨", "💫"],
-    heal: ["💚", "✨", "💖"],
+    heal:   ["💚", "✨", "💖"],
     attack: ["⚔️", "💥", "⭐"],
-    buff: ["✨", "💫", "🌟"],
+    buff:   ["✨", "💫", "🌟"],
   };
-  const particles = colors[abilityType] || ["✨"];
+  const icons = colors[abilityType] || ["✨"];
+  const center = getCenter(petId);
+  const x = center ? center.x : window.innerWidth / 2;
+  const y = center ? center.y : window.innerHeight / 2;
+
   for (let i = 0; i < 6; i++) {
-    const particle = document.createElement("div");
-    particle.textContent = particles[i % particles.length];
-    particle.style.position = "fixed";
-    particle.style.fontSize = "24px";
-    particle.style.pointerEvents = "none";
-    particle.style.zIndex = "1000";
-    particle.style.setProperty("--px", `${(Math.random() - 0.5) * 100}px`);
-    particle.style.setProperty("--py", `${(Math.random() - 0.5) * 100}px`);
-    particle.style.animation = "particleBurst 0.8s ease-out forwards";
-    document.body.appendChild(particle);
-    setTimeout(() => particle.remove(), 800);
+    const el = animManager.spawn(
+      `position:fixed;left:${x}px;top:${y}px;font-size:24px;
+       --px:${(Math.random() - 0.5) * 100}px;
+       --py:${(Math.random() - 0.5) * 100}px;
+       animation:particleBurst 0.8s ease-out forwards;`,
+      800
+    ).el;
+    el.textContent = icons[i % icons.length];
   }
 };
 
+// ─── spawnFloatingText ────────────────────────────────────────────────────────
 export const spawnFloatingText = (text, x, y, type = "damage") => {
-  const floater = document.createElement("div");
-  floater.textContent = text;
-  floater.style.position = "fixed";
-  floater.style.left = `${x}px`;
-  floater.style.top = `${y}px`;
-  floater.style.pointerEvents = "none";
-  floater.style.zIndex = "1000";
-  floater.style.fontWeight = "900";
-  floater.style.letterSpacing = "-1px";
-  floater.style.textShadow = "0 2px 8px rgba(0,0,0,0.8)";
-  floater.style.fontFamily = "system-ui, sans-serif";
+  const el = animManager.spawn("position:fixed;", 1200).el;
+  el.textContent = text;
+  el.style.left         = `${x}px`;
+  el.style.top          = `${y}px`;
+  el.style.fontWeight   = "900";
+  el.style.letterSpacing = "-1px";
+  el.style.textShadow   = "0 2px 8px rgba(0,0,0,0.8)";
+  el.style.fontFamily   = "system-ui, sans-serif";
+
   if (type === "damage") {
     const num = parseInt(text.replace("-", "")) || 0;
-    const size = num >= 20 ? "42px" : num >= 10 ? "34px" : "26px";
-    floater.style.fontSize = size;
-    floater.style.color = "#ff3333";
-    floater.style.textShadow =
-      "0 0 10px rgba(255,50,50,0.8), 0 2px 8px rgba(0,0,0,0.8)";
-    floater.style.animation = "floatUpRed 1.2s ease-out forwards";
+    el.style.fontSize   = num >= 20 ? "42px" : num >= 10 ? "34px" : "26px";
+    el.style.color      = "#ff3333";
+    el.style.textShadow = "0 0 10px rgba(255,50,50,0.8), 0 2px 8px rgba(0,0,0,0.8)";
+    el.style.animation  = "floatUpRed 1.2s ease-out forwards";
   } else if (type === "heal" || type === "buff") {
     const num = parseInt(text.replace("+", "")) || 0;
-    const size = num >= 20 ? "38px" : num >= 10 ? "30px" : "24px";
-    floater.style.fontSize = size;
-    floater.style.color = "#22ff88";
-    floater.style.textShadow =
-      "0 0 10px rgba(34,255,136,0.8), 0 2px 8px rgba(0,0,0,0.8)";
-    floater.style.animation = "floatUpGreen 1.2s ease-out forwards";
+    el.style.fontSize   = num >= 20 ? "38px" : num >= 10 ? "30px" : "24px";
+    el.style.color      = "#22ff88";
+    el.style.textShadow = "0 0 10px rgba(34,255,136,0.8), 0 2px 8px rgba(0,0,0,0.8)";
+    el.style.animation  = "floatUpGreen 1.2s ease-out forwards";
   } else {
-    floater.style.fontSize = "28px";
-    floater.style.color = "#ffd700";
-    floater.style.textShadow =
-      "0 0 10px rgba(255,215,0,0.8), 0 2px 8px rgba(0,0,0,0.8)";
-    floater.style.animation = "floatUp 1.2s ease-out forwards";
+    el.style.fontSize   = "28px";
+    el.style.color      = "#ffd700";
+    el.style.textShadow = "0 0 10px rgba(255,215,0,0.8), 0 2px 8px rgba(0,0,0,0.8)";
+    el.style.animation  = "floatUp 1.2s ease-out forwards";
   }
-  document.body.appendChild(floater);
-  setTimeout(() => floater.remove(), 1200);
 };
 
-export const spawnBuffAnimation = (
-  fromPetId,
-  toPetId,
-  amount = 1,
-  type = "buff",
-  triggerAnim
-) => {
-  const fromElement = document.querySelector(`[data-pet-id="${fromPetId}"]`);
-  const toElement = document.querySelector(`[data-pet-id="${toPetId}"]`);
-  if (!fromElement || !toElement) return;
-  const fromRect = fromElement.getBoundingClientRect();
-  const toRect = toElement.getBoundingClientRect();
-  const startX = fromRect.left + fromRect.width / 2;
-  const startY = fromRect.top + fromRect.height / 2;
-  const endX = toRect.left + toRect.width / 2;
-  const endY = toRect.top + toRect.height / 2;
-  const icons =
-    type === "buff" ? ["⚔️", "❤️"] : type === "heal" ? ["💚", "✨"] : ["💰"];
+// ─── spawnBuffAnimation ───────────────────────────────────────────────────────
+// Bir hayvandan diğerine uçan buff/heal ikonu + floating text
+export const spawnBuffAnimation = (fromPetId, toPetId, amount = 1, type = "buff", triggerAnim) => {
+  const from = getCenter(fromPetId);
+  const to   = getCenter(toPetId);
+  if (!from || !to) return;
+
+  const icons = type === "buff" ? ["⚔️", "❤️"] : type === "heal" ? ["💚", "✨"] : ["💰"];
   icons.forEach((icon, index) => {
     setTimeout(() => {
-      const particle = document.createElement("div");
-      particle.textContent = icon;
-      particle.style.position = "fixed";
-      particle.style.left = `${startX}px`;
-      particle.style.top = `${startY}px`;
-      particle.style.fontSize = "24px";
-      particle.style.pointerEvents = "none";
-      particle.style.zIndex = "1000";
-      particle.style.setProperty("--tx", `${endX - startX}px`);
-      particle.style.setProperty("--ty", `${endY - startY}px`);
-      particle.style.animation = `800ms flyToTarget cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
-      document.body.appendChild(particle);
+      const el = animManager.spawn(
+        `position:fixed;left:${from.x}px;top:${from.y}px;font-size:24px;
+         --tx:${to.x - from.x}px;--ty:${to.y - from.y}px;
+         animation:800ms flyToTarget cubic-bezier(0.25,0.46,0.45,0.94) forwards;`,
+        800
+      ).el;
+      el.textContent = icon;
+
       setTimeout(() => {
-        const rect = toElement.getBoundingClientRect();
-        spawnFloatingText(
-          `+${amount}`,
-          rect.left + rect.width / 2,
-          rect.top,
-          type === "heal" ? "heal" : "buff"
-        );
+        const toNow = getCenter(toPetId);
+        if (toNow) {
+          spawnFloatingText(`+${amount}`, toNow.x, toNow.rect.top, type === "heal" ? "heal" : "buff");
+        }
         if (typeof triggerAnim === "function") triggerAnim(toPetId, "buff");
       }, 700);
-      setTimeout(() => particle.remove(), 800);
     }, index * 150);
   });
 };
 
-export const spawnImpact = (x, y) => {
-  const impact = document.createElement("div");
-  impact.textContent = "💥";
-  impact.className = "impact-effect";
-  impact.style.left = `${x}px`;
-  impact.style.top = `${y}px`;
-  document.body.appendChild(impact);
-  setTimeout(() => impact.remove(), 500);
+// ─── spawnFlyingParticle ──────────────────────────────────────────────────────
+// Genel amaçlı: koordinattan koordinata uçan emoji.
+// useShop içindeki tüm document.createElement blokları bununla değiştirildi.
+export const spawnFlyingParticle = (icon, fromX, fromY, toX, toY, durationMs = 800, onArrive) => {
+  const el = animManager.spawn(
+    `position:fixed;left:${fromX}px;top:${fromY}px;font-size:20px;
+     --tx:${toX - fromX}px;--ty:${toY - fromY}px;
+     animation:flyToTarget ${durationMs}ms cubic-bezier(0.25,0.46,0.45,0.94) forwards;`,
+    durationMs
+  ).el;
+  el.textContent = icon;
+  if (onArrive) setTimeout(onArrive, durationMs - 100);
+  return el;
 };
 
+// ─── spawnImpact ──────────────────────────────────────────────────────────────
+export const spawnImpact = (x, y) => {
+  const el = animManager.spawn(
+    `position:fixed;left:${x}px;top:${y}px;font-size:32px;
+     transform:translate(-50%,-50%);`,
+    500
+  ).el;
+  el.textContent = "💥";
+  el.className = "impact-effect";
+};
+
+// ─── spawnDeathEffect ─────────────────────────────────────────────────────────
 export const spawnDeathEffect = (petId) => {
   playSound("death");
-  const element = document.querySelector(`[data-pet-id="${petId}"]`);
-  if (!element) return;
-  const rect = element.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
+  const center = getCenter(petId);
+  if (!center) return;
+  const { x, y } = center;
 
-  // Karartma efekti
-  const flash = document.createElement("div");
-  flash.style.cssText = `
-    position: fixed;
-    left: ${centerX}px;
-    top: ${centerY}px;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,50,50,0.8) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%) scale(0);
-    animation: deathFlash 0.6s ease-out forwards;
-  `;
-  document.body.appendChild(flash);
-  setTimeout(() => flash.remove(), 600);
+  // Kırmızı flash halkası
+  animManager.spawn(
+    `position:fixed;left:${x}px;top:${y}px;
+     width:120px;height:120px;border-radius:50%;
+     background:radial-gradient(circle,rgba(255,50,50,0.8) 0%,transparent 70%);
+     transform:translate(-50%,-50%) scale(0);
+     animation:deathFlash 0.6s ease-out forwards;`,
+    600
+  );
 
   // Partiküller
-  const particles = ["💀", "💨", "✨", "💫", "🩸"];
+  const emojis = ["💀", "💨", "✨", "💫", "🩸"];
   for (let i = 0; i < 8; i++) {
-    const particle = document.createElement("div");
-    particle.textContent = particles[i % particles.length];
-    const angle = (Math.PI * 2 * i) / 8;
+    const angle    = (Math.PI * 2 * i) / 8;
     const distance = 60 + Math.random() * 40;
-    particle.style.cssText = `
-      position: fixed;
-      left: ${centerX}px;
-      top: ${centerY}px;
-      font-size: ${20 + Math.random() * 16}px;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%, -50%);
-      --tx: ${Math.cos(angle) * distance}px;
-      --ty: ${Math.sin(angle) * distance}px;
-      animation: deathParticle 0.9s ease-out forwards;
-    `;
-    document.body.appendChild(particle);
-    setTimeout(() => particle.remove(), 900);
+    const size     = 20 + Math.random() * 16;
+    animManager.spawn(
+      `position:fixed;left:${x}px;top:${y}px;
+       font-size:${size}px;
+       transform:translate(-50%,-50%);
+       --tx:${Math.cos(angle) * distance}px;
+       --ty:${Math.sin(angle) * distance}px;
+       animation:deathParticle 0.9s ease-out forwards;`,
+      900
+    ).el.textContent = emojis[i % emojis.length];
   }
 
-  // Büyük X efekti
-  const skull = document.createElement("div");
-  skull.textContent = "💀";
-  skull.style.cssText = `
-    position: fixed;
-    left: ${centerX}px;
-    top: ${centerY - 30}px;
-    font-size: 48px;
-    pointer-events: none;
-    z-index: 10000;
-    transform: translate(-50%, -50%) scale(0);
-    animation: deathSkull 1s ease-out forwards;
-  `;
-  document.body.appendChild(skull);
-  setTimeout(() => skull.remove(), 1000);
+  // Büyük kafatası
+  animManager.spawn(
+    `position:fixed;left:${x}px;top:${y - 30}px;font-size:48px;
+     transform:translate(-50%,-50%) scale(0);
+     animation:deathSkull 1s ease-out forwards;`,
+    1000
+  ).el.textContent = "💀";
 };
+
+// ─── spawnProjectile ──────────────────────────────────────────────────────────
 export const ABILITY_PROJECTILES = {
-  start_fire: "🔥",
-  start_poison: "☠️",
-  start_snipe: "🎯",
-  start_multi_snipe: "🎯",
-  faint_wave: "🌊",
+  start_fire:         "🔥",
+  start_poison:       "☠️",
+  start_snipe:        "🎯",
+  start_multi_snipe:  "🎯",
+  faint_wave:         "🌊",
   start_freeze_enemy: "❄️",
-  start_dmg: "💥",
-  faint_dmg: "💀",
-  hurt_dmg: "💢",
- devour: "💚",
-  start_trample: "💨",
-  kill_buff: "🩸",
-  start_fear: "😱",
-  kill_fear_all: "😱",
-  cheetah_faint: "💨",
-  default: "⚔️",
+  start_dmg:          "💥",
+  faint_dmg:          "💀",
+  hurt_dmg:           "💢",
+  devour:             "💚",
+  start_trample:      "💨",
+  kill_buff:          "🩸",
+  start_fear:         "😱",
+  kill_fear_all:      "😱",
+  cheetah_faint:      "💨",
+  default:            "⚔️",
 };
+
+/** Çarpışma efekti (impact + ring) */
+const spawnImpactAt = (endX, endY) => {
+  animManager.spawn(
+    `position:fixed;left:${endX}px;top:${endY}px;font-size:48px;
+     transform:translate(-50%,-50%);
+     filter:drop-shadow(0 0 12px rgba(255,100,0,0.9));
+     animation:impactBurst 0.5s ease-out forwards;`,
+    500
+  ).el.textContent = "💥";
+
+  animManager.spawn(
+    `position:fixed;left:${endX}px;top:${endY}px;
+     width:20px;height:20px;
+     border:3px solid rgba(255,200,50,0.9);border-radius:50%;
+     transform:translate(-50%,-50%);
+     animation:impactRing 0.5s ease-out forwards;`,
+    500
+  );
+};
+
 export const spawnProjectile = (fromPetId, toPetId, ability, onImpact, arc = false) => {
-  const fromEl = document.querySelector(`[data-pet-id="${fromPetId}"]`);
-  const toEl = document.querySelector(`[data-pet-id="${toPetId}"]`);
-  if (!fromEl || !toEl) {
-    if (onImpact) onImpact();
-    return;
-  }
+  const from = getCenter(fromPetId);
+  const to   = getCenter(toPetId);
+  if (!from || !to) { if (onImpact) onImpact(); return; }
 
-  const fromRect = fromEl.getBoundingClientRect();
-  const toRect = toEl.getBoundingClientRect();
-
-  const startX = fromRect.left + fromRect.width / 2;
-  const startY = fromRect.top + fromRect.height / 2;
-  const endX = toRect.left + toRect.width / 2;
-  const endY = toRect.top + toRect.height / 2;
-
-  const emoji = (ability && ABILITY_PROJECTILES[ability]) || ABILITY_PROJECTILES.default;
-  const dx = endX - startX;
-  const dy = endY - startY;
+  const { x: startX, y: startY } = from;
+  const { x: endX,   y: endY   } = to;
+  const dx       = endX - startX;
+  const dy       = endY - startY;
   const distance = Math.sqrt(dx * dx + dy * dy);
   const duration = Math.max(400, Math.min(900, distance * 1.2));
+  const emoji    = (ability && ABILITY_PROJECTILES[ability]) || ABILITY_PROJECTILES.default;
 
-  const projectile = document.createElement("div");
+  const projectile = animManager.spawn(
+    `position:fixed;font-size:32px;
+     transform:translate(-50%,-50%);
+     filter:drop-shadow(0 0 8px white) drop-shadow(0 0 16px rgba(255,200,50,0.9));`,
+    duration + 200
+  ).el;
   projectile.textContent = emoji;
-  document.body.appendChild(projectile);
 
   if (arc) {
-    // Yay atışı - canvas benzeri quadratic bezier ile
-    const steps = 60;
-    const arcHeight = -Math.min(120, distance * 0.5);
-    let currentStep = 0;
+    // Yay (quadratic bezier) hareketi
+    const steps   = 60;
+    const arcH    = -Math.min(120, distance * 0.5);
+    const stepDur = duration / steps;
+    let   s       = 0;
 
-    projectile.style.cssText = `
-      position: fixed;
-      font-size: 32px;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%, -50%);
-      filter: drop-shadow(0 0 8px white) drop-shadow(0 0 16px rgba(255,200,50,0.9));
-      transition: none;
-    `;
-const stepDuration = duration / steps;
     const animate = () => {
-      if (currentStep > steps) {
+      if (s > steps) {
         projectile.remove();
-        // Çarpışma efekti
-        const impact = document.createElement("div");
-        impact.textContent = "💥";
-        impact.style.cssText = `
-          position: fixed;
-          left: ${endX}px;
-          top: ${endY}px;
-          font-size: 48px;
-          pointer-events: none;
-          z-index: 9999;
-          transform: translate(-50%, -50%);
-          filter: drop-shadow(0 0 12px rgba(255,100,0,0.9));
-          animation: impactBurst 0.5s ease-out forwards;
-        `;
-        document.body.appendChild(impact);
-        const ring = document.createElement("div");
-        ring.style.cssText = `
-          position: fixed;
-          left: ${endX}px;
-          top: ${endY}px;
-          width: 20px;
-          height: 20px;
-          border: 3px solid rgba(255,200,50,0.9);
-          border-radius: 50%;
-          pointer-events: none;
-          z-index: 9998;
-          transform: translate(-50%, -50%);
-          animation: impactRing 0.5s ease-out forwards;
-        `;
-        document.body.appendChild(ring);
-        setTimeout(() => { impact.remove(); ring.remove(); }, 500);
+        spawnImpactAt(endX, endY);
         if (onImpact) onImpact();
         return;
       }
-
-      const t = currentStep / steps;
-      // Quadratic bezier
+      const t  = s / steps;
       const mx = startX + dx / 2;
-      const my = startY + dy / 2 + arcHeight;
-      const x = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * mx + t * t * endX;
-      const y = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * my + t * t * endY;
-
+      const my = startY + dy / 2 + arcH;
+      const x  = (1-t)*(1-t)*startX + 2*(1-t)*t*mx + t*t*endX;
+      const y  = (1-t)*(1-t)*startY + 2*(1-t)*t*my + t*t*endY;
       projectile.style.left = `${x}px`;
-      projectile.style.top = `${y}px`;
+      projectile.style.top  = `${y}px`;
 
-      // İz bırak
-      if (currentStep % 4 === 0) {
-        const trail = document.createElement("div");
-        trail.textContent = emoji;
-        trail.style.cssText = `
-          position: fixed;
-          left: ${x}px;
-          top: ${y}px;
-          font-size: ${16}px;
-          pointer-events: none;
-          z-index: 9998;
-          transform: translate(-50%, -50%);
-          opacity: 0.5;
-          filter: drop-shadow(0 0 4px rgba(255,200,50,0.6));
-          animation: trailFade 0.3s ease-out forwards;
-        `;
-        document.body.appendChild(trail);
-        setTimeout(() => trail.remove(), 300);
+      if (s % 4 === 0) {
+        animManager.spawn(
+          `position:fixed;left:${x}px;top:${y}px;font-size:16px;
+           transform:translate(-50%,-50%);opacity:0.5;
+           filter:drop-shadow(0 0 4px rgba(255,200,50,0.6));
+           animation:trailFade 0.3s ease-out forwards;`,
+          300
+        ).el.textContent = emoji;
       }
-
-      currentStep++;
-     setTimeout(animate, stepDuration);
+      s++;
+      setTimeout(animate, stepDur);
     };
-
-   setTimeout(animate, stepDuration);
+    setTimeout(animate, stepDur);
 
   } else {
-    // Düz atış - orijinal sistem
-    projectile.style.cssText = `
-      position: fixed;
-      left: ${startX}px;
-      top: ${startY}px;
-      font-size: 32px;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%, -50%);
-      filter: drop-shadow(0 0 8px white) drop-shadow(0 0 16px rgba(255,200,50,0.9));
-      --tx: ${dx}px;
-      --ty: ${dy}px;
-      animation: projectileFly ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-    `;
+    // Düz atış — CSS animation ile
+    projectile.style.left = `${startX}px`;
+    projectile.style.top  = `${startY}px`;
+    projectile.style.setProperty("--tx", `${dx}px`);
+    projectile.style.setProperty("--ty", `${dy}px`);
+    projectile.style.animation = `projectileFly ${duration}ms cubic-bezier(0.25,0.46,0.45,0.94) forwards`;
 
-    // Parlak iz
     const trailCount = 6;
     for (let i = 0; i < trailCount; i++) {
       setTimeout(() => {
-        const progress = i / trailCount;
-        const trailX = startX + dx * progress;
-        const trailY = startY + dy * progress;
-        const trail = document.createElement("div");
-        trail.textContent = emoji;
-        trail.style.cssText = `
-          position: fixed;
-          left: ${trailX}px;
-          top: ${trailY}px;
-          font-size: ${20 - i * 2}px;
-          pointer-events: none;
-          z-index: 9998;
-          transform: translate(-50%, -50%);
-          opacity: ${0.6 - i * 0.08};
-          filter: drop-shadow(0 0 6px rgba(255,200,50,0.8));
-          animation: trailFade 0.4s ease-out forwards;
-        `;
-        document.body.appendChild(trail);
-        setTimeout(() => trail.remove(), 400);
+        const p = i / trailCount;
+        animManager.spawn(
+          `position:fixed;
+           left:${startX + dx * p}px;top:${startY + dy * p}px;
+           font-size:${20 - i * 2}px;
+           transform:translate(-50%,-50%);
+           opacity:${0.6 - i * 0.08};
+           filter:drop-shadow(0 0 6px rgba(255,200,50,0.8));
+           animation:trailFade 0.4s ease-out forwards;`,
+          400
+        ).el.textContent = emoji;
       }, (duration / trailCount) * i);
     }
 
     setTimeout(() => {
       projectile.remove();
-      const impact = document.createElement("div");
-      impact.textContent = "💥";
-      impact.style.cssText = `
-        position: fixed;
-        left: ${endX}px;
-        top: ${endY}px;
-        font-size: 48px;
-        pointer-events: none;
-        z-index: 9999;
-        transform: translate(-50%, -50%);
-        filter: drop-shadow(0 0 12px rgba(255,100,0,0.9));
-        animation: impactBurst 0.5s ease-out forwards;
-      `;
-      document.body.appendChild(impact);
-      const ring = document.createElement("div");
-      ring.style.cssText = `
-        position: fixed;
-        left: ${endX}px;
-        top: ${endY}px;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255,200,50,0.9);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 9998;
-        transform: translate(-50%, -50%);
-        animation: impactRing 0.5s ease-out forwards;
-      `;
-      document.body.appendChild(ring);
-      setTimeout(() => { impact.remove(); ring.remove(); }, 500);
+      spawnImpactAt(endX, endY);
       if (onImpact) onImpact();
     }, duration);
   }
