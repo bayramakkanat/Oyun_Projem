@@ -1,3 +1,4 @@
+import { useAuthContext } from "./AuthContext";
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 
 import "../styles.css";
@@ -60,6 +61,20 @@ import SettingsModal from "../components/SettingsModal";
 export const GameContext = createContext();
 
 export const GameProvider = ({ children }) => {
+
+  const {
+  user, setUser,
+  showAuthModal, setShowAuthModal,
+  authEmail, setAuthEmail,
+  authPass, setAuthPass,
+  authMode, setAuthMode,
+  authUsername, setAuthUsername,
+  authAvatar, setAuthAvatar,
+  showSettingsModal, setShowSettingsModal,
+  settingsUsername, setSettingsUsername,
+  settingsAvatar, setSettingsAvatar,
+  displayName, setDisplayName,
+} = useAuthContext();
 
   const [gameStarted, setGameStarted] = useState(false);
   const [menuView, setMenuView] = useState("main"); // "main", "play_setup", "achievements", "stats"
@@ -138,20 +153,6 @@ useEffect(() => {
   const [pendingEndTurnAnims, setPendingEndTurnAnims] = useState(false);
   const [shopResetKey, setShopResetKey] = useState(0);
   const [showCollection, setShowCollection] = useState(false);
-
-  // --- MULTIPLAYER STATES ---
-  const [user, setUser] = useState(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authEmail, setAuthEmail] = useState("");
-  const [authPass, setAuthPass] = useState("");
-  const [authMode, setAuthMode] = useState("login");
-  const [authUsername, setAuthUsername] = useState("");
-  const [authAvatar, setAuthAvatar] = useState("🐺");
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [settingsUsername, setSettingsUsername] = useState("");
-  const [settingsAvatar, setSettingsAvatar] = useState("🐺");
-  const [displayName, setDisplayName] = useState("");
-
 
   // Global hata yakalayıcı
   // Resim ön yükleme (düzeltildi - useEffect dışına taşındı)
