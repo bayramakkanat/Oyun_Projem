@@ -1,37 +1,21 @@
 import { useAuthContext } from "./AuthContext";
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 
-import "../styles.css";
 import {
   logError,
   safeNumber,
   saveStats,
 } from "../utils/helpers";
-import Card from "../components/Card";
-import StarField from "../components/StarField";
-import BattleView from "../components/BattleView";
-import GuideScreen from "../components/GuideScreen";
-import NewTierScreen from "../components/NewTierScreen";
-import BossOfferScreen from "../components/BossOfferScreen";
-import BossRewardScreen from "../components/BossRewardScreen";
-import VictoryScreen from "../components/VictoryScreen";
-import GameOverScreen from "../components/GameOverScreen";
-import MenuScreen from "../components/MenuScreen";
-import CollectionScreen from "../components/CollectionScreen";
-import VersusLobby from "../components/VersusLobby";
-import DebugPanel from "../components/DebugPanel";
-import { getDesc } from "../utils/getDesc";
-import { applyEndTurnBuffs } from "../utils/battleUtils";
+
 import { playSound } from "../hooks/useSound";
 import { useBattle } from "../hooks/useBattle";
 import { useShop } from "../hooks/useShop";
 import { useArena } from "../hooks/useArena";
 import { useEndTurn } from "../hooks/useEndTurn";
 import { useMusic } from "../hooks/useMusic";
-import { spawnParticles, spawnBuffAnimation } from "../utils/animations";
+import { spawnBuffAnimation } from "../utils/animations";
 
 import {
-  ABILITY_ICONS,
   DIFFICULTY_CONFIGS,
   ACHIEVEMENTS_DEF,
   BOSSES,
@@ -424,11 +408,6 @@ useEffect(() => {
     anims,
     arenaOpponent,
     arenaResult,
-    authAvatar,
-    authEmail,
-    authMode,
-    authPass,
-    authUsername,
     battle,
     battleGoldRef,
     battleSpeedRef,
@@ -443,7 +422,6 @@ useEffect(() => {
     difficulty,
     difficultyLevel,
     discountNext,
-    displayName,
     eT,
     empty,
     fetchArenaOpponent,
@@ -452,10 +430,6 @@ useEffect(() => {
     gold,
     guide,
     guideLvl,
-    handleEmailAuth,
-    handleGoogleLogin,
-    handleLogout,
-    handleUpdateProfile,
     hasR,
     isBattleOver,
     isBossTurn,
@@ -497,17 +471,11 @@ useEffect(() => {
     setAnims,
     setArenaOpponent,
     setArenaResult,
-    setAuthAvatar,
-    setAuthEmail,
-    setAuthMode,
-    setAuthPass,
-    setAuthUsername,
     setBossChallenge,
     setBossResult,
     setBossRewards,
     setDifficultyLevel,
     setDiscountNext,
-    setDisplayName,
     setET,
     setGameMode,
     setGameStarted,
@@ -534,43 +502,32 @@ useEffect(() => {
     setRewards,
     setSel,
     setSelI,
-    setSettingsAvatar,
-    setSettingsUsername,
     setShop,
     setShopResetKey,
-    setShowAuthModal,
     setShowCollection,
     setShowDebugPanel,
-    setShowSettingsModal,
     setShowSwordClash,
     setSoundEnabled,
-    setStats,
     setStep,
     setTargetBuffHint,
     setTeam,
     setTurn,
     setTurnAndRef,
-    setUser,
     setVersusPhase,
     setVersusReady,
     setVersusRoom,
     setVictory,
     setWins,
-    settingsAvatar,
-    settingsUsername,
     shop,
     shopResetKey,
     shopSlots,
-    showAuthModal,
     showCollection,
     showDebugPanel,
     showNextAchievement,
-    showSettingsModal,
     showSwordClash,
     soundEnabled,
     startBossBattle,
     startVersusBattle,
-    stats,
     step,
     swap,
     targetBuffHint,
@@ -583,7 +540,6 @@ useEffect(() => {
     unlockAchievement,
     updateLeaderboard,
     updateStatsOnEnd,
-    user,
     versusPhase,
     versusReady,
     versusRoom,

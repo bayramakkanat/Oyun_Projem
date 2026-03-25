@@ -1,6 +1,6 @@
 import React from "react";
 import { useGameContext } from "../context/GameContext";
-
+import { useAuthContext } from "../context/AuthContext";
 import Card from "./Card";
 import StarField from "./StarField";
 import BattleView from "./BattleView";
@@ -29,6 +29,7 @@ import {
 
 export default function GameRouter() {
   const context = useGameContext();
+  
   const {
     acceptBoss,
     achievementPopup,
@@ -37,11 +38,6 @@ export default function GameRouter() {
     anims,
     arenaOpponent,
     arenaResult,
-    authAvatar,
-    authEmail,
-    authMode,
-    authPass,
-    authUsername,
     battle,
     battleGoldRef,
     battleSpeedRef,
@@ -56,7 +52,6 @@ export default function GameRouter() {
     difficulty,
     difficultyLevel,
     discountNext,
-    displayName,
     eT,
     empty,
     fetchArenaOpponent,
@@ -65,10 +60,6 @@ export default function GameRouter() {
     gold,
     guide,
     guideLvl,
-    handleEmailAuth,
-    handleGoogleLogin,
-    handleLogout,
-    handleUpdateProfile,
     hasR,
     isBattleOver,
     isBossTurn,
@@ -110,17 +101,11 @@ export default function GameRouter() {
     setAnims,
     setArenaOpponent,
     setArenaResult,
-    setAuthAvatar,
-    setAuthEmail,
-    setAuthMode,
-    setAuthPass,
-    setAuthUsername,
     setBossChallenge,
     setBossResult,
     setBossRewards,
     setDifficultyLevel,
     setDiscountNext,
-    setDisplayName,
     setET,
     setGameMode,
     setGameStarted,
@@ -147,43 +132,32 @@ export default function GameRouter() {
     setRewards,
     setSel,
     setSelI,
-    setSettingsAvatar,
-    setSettingsUsername,
     setShop,
     setShopResetKey,
-    setShowAuthModal,
     setShowCollection,
     setShowDebugPanel,
-    setShowSettingsModal,
     setShowSwordClash,
     setSoundEnabled,
-    setStats,
     setStep,
     setTargetBuffHint,
     setTeam,
     setTurn,
     setTurnAndRef,
-    setUser,
     setVersusPhase,
     setVersusReady,
     setVersusRoom,
     setVictory,
     setWins,
-    settingsAvatar,
-    settingsUsername,
     shop,
     shopResetKey,
     shopSlots,
-    showAuthModal,
     showCollection,
     showDebugPanel,
     showNextAchievement,
-    showSettingsModal,
     showSwordClash,
     soundEnabled,
     startBossBattle,
     startVersusBattle,
-    stats,
     step,
     swap,
     targetBuffHint,
@@ -196,7 +170,6 @@ export default function GameRouter() {
     unlockAchievement,
     updateLeaderboard,
     updateStatsOnEnd,
-    user,
     versusPhase,
     versusReady,
     versusRoom,
@@ -204,6 +177,25 @@ export default function GameRouter() {
     victory,
     wins
   } = context;
+
+  const {
+  user,
+  showAuthModal, setShowAuthModal,
+  authEmail, setAuthEmail,
+  authPass, setAuthPass,
+  authMode, setAuthMode,
+  authUsername, setAuthUsername,
+  authAvatar, setAuthAvatar,
+  showSettingsModal, setShowSettingsModal,
+  settingsUsername, setSettingsUsername,
+  settingsAvatar, setSettingsAvatar,
+  displayName,
+  stats,
+  handleGoogleLogin,
+  handleEmailAuth,
+  handleLogout,
+  handleUpdateProfile,
+} = useAuthContext();
 
   if (gameMode === "versus" && versusPhase === "lobby") {
     return (
