@@ -17,6 +17,7 @@ import { useArena } from "../hooks/useArena";
 import { useEndTurn } from "../hooks/useEndTurn";
 import { useMusic } from "../hooks/useMusic";
 import { spawnBuffAnimation } from "../utils/animations";
+import { applyEndTurnBuffs } from "../utils/battleUtils";
 
 import {
   DIFFICULTY_CONFIGS,
@@ -142,6 +143,17 @@ export const GameProvider = ({ children }) => {
     setTurn(newTurn);
     turnRef.current = newTurn;
   }, []);
+
+  const goToShop = useCallback(() => {
+    setBossChallenge(null);
+    setBossResult(null);
+    setBossRewards([]);
+    setTurnAndRef(turnRef.current + 1);
+    setGold((g) => g + 10);
+    setTeam((currentTeam) => applyEndTurnBuffs(currentTeam));
+    setPendingEndTurnAnims(true);
+    setPhase("shop");
+  }, [setTurnAndRef]);
 
   useEffect(() => { turnRef.current = turn; }, [turn]);
 
@@ -418,7 +430,7 @@ export const GameProvider = ({ children }) => {
   // ─── Context value (useMemo ile sabitlenmiş) ─────────────────────────────
   const value = useMemo(() => ({
     // Boss
-    acceptBoss, declineBoss, offerBoss,
+    acceptBoss, declineBoss, offerBoss, goToShop,
     // Başarımlar
     achievementPopup, achievementQueueRef, achievementShowingRef,
     anims,
@@ -503,7 +515,7 @@ export const GameProvider = ({ children }) => {
     pwr, sellP, clampStat, triggerAnim,
     unlockAchievement, showNextAchievement,
     reset, updateStatsOnEnd,
-    offerBoss, acceptBoss, declineBoss,
+    offerBoss, acceptBoss, declineBoss, goToShop,
     battle, startBossBattle, startVersusBattle, versusSetReady,
     refresh, toggleFreeze, buy, mergeT, sell, swap,
   ]);

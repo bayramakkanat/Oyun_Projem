@@ -3,17 +3,14 @@ import { useGameContext } from "../context/GameContext";
 import Card from "./Card";
 import BossRewardScreen from "./BossRewardScreen";
 import NewTierScreen from "./NewTierScreen";
-import DebugPanel from "./DebugPanel";
 import { getDesc } from "../utils/getDesc";
 import { playSound } from "../hooks/useSound";
 import { ABILITY_ICONS, BOSSES, WIN_TURN } from "../data/gameData";
-import { applyEndTurnBuffs } from "../utils/battleUtils";
 import HUD from "./HUD";
 
 export default function ShopView() {
   const {
     acceptBoss,
-    achievementPopup,
     anims,
     battle,
     bossChallenge,
@@ -23,7 +20,6 @@ export default function ShopView() {
     hasR,
     isBossTurn,
     isPausedRef,
-    lastError,
     lives,
     maxT,
     mergeT,
@@ -38,84 +34,34 @@ export default function ShopView() {
     selI,
     sell,
     setBossChallenge,
-    setBossResult,
-    setBossRewards,
     setGameStarted,
-    setGold,
     setGuide,
-    setLastError,
     setMenuView,
     setNewTier,
     setPhase,
-    setPendingEndTurnAnims,
     setRewards,
     setSel,
     setSelI,
     setShowCollection,
-    setShowDebugPanel,
     setSoundEnabled,
-    setTeam,
-    setTurnAndRef,
     setVersusPhase,
     setVersusReady,
     setVersusRoom,
     shop,
     shopSlots,
-    showDebugPanel,
     soundEnabled,
     team,
     teamSlots,
     toggleFreeze,
     turn,
-    turnRef,
     versusReady,
     wins,
-    gameMode,            // ← gameMode eklendi
+    gameMode,
+    goToShop,
   } = useGameContext();
-
-  const goToShop = () => {
-    setBossChallenge(null);
-    setBossResult(null);
-    setBossRewards([]);
-    const newTurn = turn + 1;
-    setTurnAndRef(newTurn);
-    setGold((g) => g + 10);
-    const updatedTeam = applyEndTurnBuffs(team);
-    setTeam(updatedTeam);
-    setPendingEndTurnAnims(true);
-    setPhase("shop");
-  };
 
   return (
     <>
-      {showDebugPanel && (
-        <DebugPanel
-          onClose={() => setShowDebugPanel(false)}
-          onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
-            setShowDebugPanel(false);
-            // debug savaşı başlatma (kısa)
-          }}
-        />
-      )}
-
-      {lastError && (
-        <div className="fixed top-4 left-4 z-[9999] bg-red-900 border-2 border-red-500 rounded-lg p-3 max-w-md shadow-2xl">
-          <div className="font-bold text-red-300 mb-1">⚠️ Bir Hata Oluştu</div>
-          <div className="text-sm text-white">{lastError.message}</div>
-          <button onClick={() => setLastError(null)} className="mt-2 px-2 py-1 bg-red-700 rounded text-xs hover:bg-red-600">Kapat</button>
-        </div>
-      )}
-
-      {achievementPopup && (
-        <div className="fixed top-6 right-6 z-50 bg-gradient-to-br from-yellow-900 to-orange-900 border-2 border-yellow-400 rounded-xl p-4 shadow-2xl flex items-center gap-3" style={{ animation: "slideIn 0.3s ease-out" }}>
-          <span className="text-3xl">{achievementPopup.icon}</span>
-          <div>
-            <div className="text-yellow-300 font-bold text-sm">Başarım Kazandın!</div>
-            <div className="text-white font-bold">{achievementPopup.name}</div>
-          </div>
-        </div>
-      )}
-
       <div className="max-w-4xl mx-auto">
         <HUD />
 
