@@ -96,20 +96,8 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
       {/* Oyuncu Takımı (SOL YARI) */}
       <div className="flex items-center justify-start flex-nowrap flex-row-reverse min-h-[160px] pb-4 relative z-20 w-[45%] pr-4 gap-1 sm:gap-2">
         {pT.map((a, idx) => {
-           const healthPercent = Math.max(0, (a.curHp / a.hp) * 100);
            return (
              <div key={a.id} className="flex flex-col items-center" style={{ zIndex: 50 - idx }}>
-               {/* HP Bar */}
-               <div className="flex flex-col items-center justify-center mb-2 w-full">
-                  <div className="w-16 h-3 bg-black/50 rounded-full overflow-hidden border border-white/10 shadow-inner">
-                     <div
-                        className={`h-full transition-all duration-500 rounded-full ${
-                          healthPercent > 50 ? "bg-gradient-to-r from-green-600 to-green-400" : healthPercent > 25 ? "bg-gradient-to-r from-yellow-600 to-yellow-400" : "bg-gradient-to-r from-red-600 to-red-400 animate-pulse"
-                        }`}
-                        style={{ width: `${healthPercent}%`, boxShadow: "0 0 10px currentColor" }}
-                     />
-                  </div>
-               </div>
                {/* Asıl Kart (GSAP bağlanıyor) */}
                <div ref={el => playerRefs.current[a.id] = el} className="relative z-10 origin-bottom">
                  <Card
@@ -143,20 +131,8 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
       {/* Düşman Takımı (SAĞ YARI) */}
       <div className="flex items-center justify-start flex-nowrap min-h-[160px] pb-6 relative z-20 w-[45%] pl-4 gap-1 sm:gap-2">
         {eT.map((a, idx) => {
-           const healthPercent = Math.max(0, (a.curHp / a.hp) * 100);
            return (
              <div key={a.id} className="flex flex-col items-center" style={{ zIndex: 50 - idx }}>
-               {/* HP Bar */}
-               <div className="flex flex-col items-center justify-center mb-2 w-full">
-                  <div className="w-16 h-3 bg-black/50 rounded-full overflow-hidden border border-white/10 shadow-inner">
-                     <div
-                        className={`h-full transition-all duration-500 rounded-full ${
-                          healthPercent > 50 ? "bg-gradient-to-r from-red-600 to-red-400" : healthPercent > 25 ? "bg-gradient-to-r from-orange-600 to-orange-400" : "bg-gradient-to-r from-red-800 to-red-600 animate-pulse"
-                        }`}
-                        style={{ width: `${healthPercent}%`, boxShadow: "0 0 10px currentColor" }}
-                     />
-                  </div>
-               </div>
                {/* Asıl Kart veya Boss Modeli */}
                <div ref={el => enemyRefs.current[a.id] = el} className="relative z-10 origin-bottom">
                  {a.isBossUnit && BOSSES[turn]?.image ? (
