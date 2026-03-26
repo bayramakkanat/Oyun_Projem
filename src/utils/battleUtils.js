@@ -1,4 +1,5 @@
 import { TIERS, AB } from "../data/gameData";
+import { spawnFlyingParticle } from "./animations";
 
 const MAX_STAT = 500;
 
@@ -448,21 +449,15 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
         summon.curHp = clampStat(summon.curHp + buff);
         triggerAnim(pet.id, "buff");
         setTimeout(() => {
-          const bearEl = document.querySelector(`[data-pet-id="${pet.id}"]`);
-          if (bearEl) {
-            const rect = bearEl.getBoundingClientRect();
+          const bearCenter = document.querySelector(`[data-pet-id="${pet.id}"]`);
+          if (bearCenter) {
+            const rect = bearCenter.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
             ["🐻", "✨"].forEach((icon, i) => {
-              setTimeout(() => {
-                const p = document.createElement("div");
-                p.textContent = icon;
-                p.style.cssText = `position:fixed;left:${
-                  rect.left + rect.width / 2 + (i * 20 - 10)
-                }px;top:${
-                  rect.top + rect.height / 2
-                }px;font-size:18px;pointer-events:none;z-index:9999;animation:floatUp 0.8s ease-out forwards;`;
-                document.body.appendChild(p);
-                setTimeout(() => p.remove(), 800);
-              }, i * 150);
+              setTimeout(() => spawnFlyingParticle(
+                icon, cx, cy, cx + (i * 20 - 10), cy - 40, 800
+              ), i * 150);
             });
           }
         }, 50);
@@ -484,23 +479,15 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
             summon.curHp = clampStat(summon.curHp + extraBuff);
             triggerAnim(pet.id, "buff");
             setTimeout(() => {
-              const dodoEl = document.querySelector(
-                `[data-pet-id="${pet.id}"]`
-              );
+              const dodoEl = document.querySelector(`[data-pet-id="${pet.id}"]`);
               if (dodoEl) {
                 const rect = dodoEl.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
                 ["🦤", "✨"].forEach((icon, i) => {
-                  setTimeout(() => {
-                    const p = document.createElement("div");
-                    p.textContent = icon;
-                    p.style.cssText = `position:fixed;left:${
-                      rect.left + rect.width / 2 + (i * 20 - 10)
-                    }px;top:${
-                      rect.top + rect.height / 2
-                    }px;font-size:18px;pointer-events:none;z-index:9999;animation:floatUp 0.8s ease-out forwards;`;
-                    document.body.appendChild(p);
-                    setTimeout(() => p.remove(), 800);
-                  }, i * 150);
+                  setTimeout(() => spawnFlyingParticle(
+                    icon, cx, cy, cx + (i * 20 - 10), cy - 40, 800
+                  ), i * 150);
                 });
               }
             }, 50);
