@@ -17,6 +17,146 @@ const getPetCenter = (petId) => {
   return { x: r.left + r.width / 2, y: r.top + r.height / 2, rect: r };
 };
 
+// ─── Satış ability handler'ları ───────────────────────────────────────────
+// Her handler: (pet, index, ctx) => boolean (true = erken return)
+// ctx: { team, nt, setTeam, setGold, setSelI, goldGain, clampStat, pwr,
+//         spawnParticles, spawnFloatingText, spawnFlyingParticle, triggerAnim }
+
+const sellHandlers = {
+  [AB.SELL_BUFF_FRIEND]: (pet, i, ctx) => {
+    const { nt, team, setTeam, setGold, setSelI, goldGain, clampStat, pwr,
+            spawnFloatingText, spawnFlyingParticle, triggerAnim } = ctx;
+    const m      = pwr(pet);
+    const allies = nt.filter((t, idx) => t && idx !== i);
+    if (allies.length === 0) return false;
+
+    const targets    = [...allies].sort(() => Math.random() - 0.5).slice(0, Math.min(m, allies.length));
+    const fromCenter = getPetCenter(pet.id);
+
+    targets.forEach((target, index) => {
+      const targetIdx = nt.findIndex((t) => t && t.id === target.id);
+      if (targetIdx === -1) return;
+
+      setTimeout(() => {
+        const toCenter = getPetCenter(nt[targetIdx].id);
+        if (fromCenter && toCenter) {
+          ["⚔️", "❤️"].forEach((icon, iconIndex) => {
+            setTimeout(() => {
+              spawnFlyingParticle(icon, fromCenter.x, fromCenter.y, toCenter.x, toCenter.y, 800, () => {
+                spawnFloatingText("+1", toCenter.x, toCenter.rect.top, "buff");
+                triggerAnim(nt[targetIdx].id, "buff");
+              });
+            }, iconIndex * 150);
+          });
+        }
+        setTimeout(() => {
+          setTeam((prev) => {
+            const updated = [...prev];
+            const tIdx    = updated.findIndex((t) => t && t.id === target.id);
+            if (tIdx !== -1) {
+              updated[tIdx] = {
+                ...updated[tIdx],
+                atk:   clampStat(updated[tIdx].atk   + m),
+                hp:    clampStat(updated[tIdx].hp     + m),
+                curHp: clampStat(updated[tIdx].curHp  + m),
+              };
+            }
+            return updated;
+          });
+        }, 800);
+      }, index * 200);
+    });
+
+    nt[i] = null;
+    setTeam(nt);
+    setGold((g) => g + goldGain);
+    setSelI(null);
+    return true;
+  },
+
+  [AB.SELL_HEAL_TEAM]: (pet, i, ctx) => {
+    const { team, setTeam, setGold, setSelI, goldGain, clampStat, pwr,
+            spawnParticles, spawnFloatingText, spawnFlyingParticle, triggerAnim } = ctx;
+    const m          = pwr(pet);
+    const healAmount = m * 2;
+    const fromCenter = getPetCenter(pet.id);
+
+    team.forEach((ally, idx) => {
+      if (!ally || idx === i) return;
+      setTimeout(() => {
+        const toCenter = getPetCenter(ally.id);
+        if (fromCenter && toCenter) {
+          for (let k = 0; k < 3; k++) {
+            setTimeout(() => {
+              spawnFlyingParticle("💚", fromCenter.x, fromCenter.y, toCenter.x, toCenter.y, 600);
+            }, k * 100);
+          }
+          setTimeout(() => {
+            spawnFloatingText(`+${healAmount} HP`, toCenter.x, toCenter.rect.top - 10, "heal");
+            triggerAnim(ally.id, "buff");
+          }, 300);
+        }
+      }, idx * 150);
+    });
+
+    const updatedNt = [...team];
+    team.forEach((ally, idx) => {
+      if (!ally || idx === i) return;
+      updatedNt[idx] = {
+        ...ally,
+        hp:    clampStat((ally.hp    || 0) + healAmount),
+        curHp: clampStat((ally.curHp || 0) + healAmount),
+      };
+    });
+    updatedNt[i] = null;
+    setTeam(updatedNt);
+    setGold((g) => g + goldGain);
+    setSelI(null);
+    setTimeout(() => spawnParticles(pet.id, "heal"), 100);
+    return true;
+  },
+
+  [AB.SELL_BUFF_SHOP]: (pet, i, ctx) => {
+    const { nt, setTeam, setShop, setGold, setSelI, goldGain, clampStat, pwr,
+            spawnParticles, spawnFlyingParticle } = ctx;
+    const m          = pwr(pet);
+    const fromCenter = getPetCenter(pet.id);
+
+    setShop((prevShop) => {
+      const updated = prevShop.map((sp) => {
+        if (!sp) return sp;
+        return { ...sp, atk: clampStat(sp.atk + m), hp: clampStat(sp.hp + m), curHp: clampStat(sp.curHp + m) };
+      });
+      if (fromCenter) {
+        updated.forEach((sp, sIdx) => {
+          if (!sp) return;
+          setTimeout(() => {
+            const shopCards  = document.querySelectorAll(".card-3d");
+            const targetCard = shopCards[sIdx];
+            if (!targetCard) return;
+            const r   = targetCard.getBoundingClientRect();
+            const toX = r.left + r.width / 2;
+            const toY = r.top  + r.height / 2;
+            ["⚔️", "❤️"].forEach((icon, iconIndex) => {
+              setTimeout(() => {
+                spawnFlyingParticle(icon, fromCenter.x, fromCenter.y, toX, toY, 700);
+              }, iconIndex * 100);
+            });
+          }, sIdx * 150);
+        });
+      }
+      spawnParticles(pet.id, "buff");
+      return updated;
+    });
+
+    nt[i] = null;
+    setTeam(nt);
+    setGold((g) => g + goldGain);
+    setSelI(null);
+    return true;
+  },
+};
+
 export function useShop({
   team, setTeam,
   shop, setShop,
@@ -35,7 +175,7 @@ export function useShop({
   clampStat,
   triggerAnim,
   unlockAchievement,
-  spawnBuffAnimation: _spawnBuffAnimation, // GameContext'ten gelen — animations.js ile aynı, yedek
+  spawnBuffAnimation: _spawnBuffAnimation,
 }) {
 
   // ─── Ödül havuzu ──────────────────────────────────────────────────────────
@@ -58,8 +198,8 @@ export function useShop({
     setTimeout(() => {
       setTeam((prevTeam) => {
         if (!prevTeam) return prevTeam;
-        const newTeam   = [...prevTeam];
-        let hasChanges  = false;
+        const newTeam  = [...prevTeam];
+        let hasChanges = false;
 
         newTeam.forEach((pet, index) => {
           if (!pet || pet.ability !== AB.FRIEND_LEVELUP_BUFF || pet.id === leveledPetId) return;
@@ -78,7 +218,6 @@ export function useShop({
             const center = getPetCenter(pet.id);
             if (center) {
               spawnFloatingText(`+${m}`, center.x, center.rect.top - 20, "buff");
-              // Kedi emoji uçuşu
               for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
                   spawnFlyingParticle(
@@ -147,13 +286,12 @@ export function useShop({
 
   // ─── Satın alma buff'larını uygula ────────────────────────────────────────
   const applyBuyBuffs = (nt, newPetIndex) => {
-    // buy_buff_random: rastgele bir müttefike buff
     nt.forEach((pet, idx) => {
       if (!pet || pet.ability !== AB.BUY_BUFF_RANDOM || idx === newPetIndex) return;
-      const m       = pwr(pet);
-      const allies  = nt.filter((t, i) => t && i !== idx);
+      const m      = pwr(pet);
+      const allies = nt.filter((t, i) => t && i !== idx);
       if (allies.length === 0) return;
-      const target  = allies[Math.floor(Math.random() * allies.length)];
+      const target = allies[Math.floor(Math.random() * allies.length)];
       spawnBuffAnimation(pet.id, target.id, m, "buff", triggerAnim);
       setTimeout(() => {
         setTeam((prev) => {
@@ -172,7 +310,6 @@ export function useShop({
       }, 800);
     });
 
-    // buy_buff_behind: arkadaki hayvana buff
     nt.forEach((pet, idx) => {
       if (!pet || pet.ability !== AB.BUY_BUFF_BEHIND) return;
       if (idx === 0 || !nt[idx - 1]) return;
@@ -247,7 +384,6 @@ export function useShop({
 
   // ─── Satın al ─────────────────────────────────────────────────────────────
   const buy = (a, slot) => {
-    // Satın alma partikülü
     if (a.ability.includes("fire"))                                    spawnParticles(a.id, "fire");
     else if (a.ability.includes("shield") || a.ability.includes("tank")) spawnParticles(a.id, "shield");
     else if (a.ability.includes("heal"))                               spawnParticles(a.id, "heal");
@@ -256,7 +392,6 @@ export function useShop({
 
     if (!a.isR && gold < a.cost) return;
 
-    // buy_target_buff durumu
     if (a.ability === AB.BUY_TARGET_BUFF && !a.pendingTargetBuff) {
       const nt = [...team];
       const targetPet = nt[slot];
@@ -298,12 +433,11 @@ export function useShop({
       return;
     }
 
-    if (a.tier >= 5)       unlockAchievement("lion_heart");
-    if (a.name === "🐉")   unlockAchievement("dragon");
+    if (a.tier >= 5)      unlockAchievement("lion_heart");
+    if (a.name === "🐉")  unlockAchievement("dragon");
 
     const nt = [...team];
 
-    // Birleştirilebilir
     if (nt[slot] && nt[slot].name === a.name && nt[slot].tier === a.tier && nt[slot].lvl < 3) {
       const { merged, rewards: newRewards } = merge(nt[slot], a);
       nt[slot] = merged;
@@ -376,140 +510,20 @@ export function useShop({
   // ─── Sat ──────────────────────────────────────────────────────────────────
   const sell = (i) => {
     if (!team[i]) return;
-    const pet     = team[i];
-    let goldGain  = sellP(pet);
-    const nt      = [...team];
+    const pet    = team[i];
+    let goldGain = sellP(pet);
+    const nt     = [...team];
 
     if (pet.ability === AB.SELL_GOLD) goldGain += pwr(pet);
 
-    // sell_buff_friend: müttefiklere uçan buff
-    if (pet.ability === AB.SELL_BUFF_FRIEND) {
-      const m       = pwr(pet);
-      const allies  = nt.filter((t, idx) => t && idx !== i);
-      if (allies.length > 0) {
-        const targets    = [...allies].sort(() => Math.random() - 0.5).slice(0, Math.min(m, allies.length));
-        const fromCenter = getPetCenter(pet.id);
+    const ctx = {
+      team, nt, setTeam, setShop, setGold, setSelI, goldGain,
+      clampStat, pwr,
+      spawnParticles, spawnFloatingText, spawnFlyingParticle, triggerAnim,
+    };
 
-        targets.forEach((target, index) => {
-          const targetIdx = nt.findIndex((t) => t && t.id === target.id);
-          if (targetIdx === -1) return;
-
-          setTimeout(() => {
-            const toCenter = getPetCenter(nt[targetIdx].id);
-            if (fromCenter && toCenter) {
-              ["⚔️", "❤️"].forEach((icon, iconIndex) => {
-                setTimeout(() => {
-                  spawnFlyingParticle(icon, fromCenter.x, fromCenter.y, toCenter.x, toCenter.y, 800, () => {
-                    spawnFloatingText("+1", toCenter.x, toCenter.rect.top, "buff");
-                    triggerAnim(nt[targetIdx].id, "buff");
-                  });
-                }, iconIndex * 150);
-              });
-            }
-            // Stat güncelleme
-            setTimeout(() => {
-              setTeam((prev) => {
-                const updated = [...prev];
-                const tIdx    = updated.findIndex((t) => t && t.id === target.id);
-                if (tIdx !== -1) {
-                  updated[tIdx] = {
-                    ...updated[tIdx],
-                    atk:   clampStat(updated[tIdx].atk   + m),
-                    hp:    clampStat(updated[tIdx].hp     + m),
-                    curHp: clampStat(updated[tIdx].curHp  + m),
-                  };
-                }
-                return updated;
-              });
-            }, 800);
-          }, index * 200);
-        });
-
-        nt[i] = null;
-        setTeam(nt);
-        setGold((g) => g + goldGain);
-        setSelI(null);
-        return;
-      }
-    }
-
-    // sell_heal_team: müttefiklere iyileştirme uçuşu
-    if (pet.ability === AB.SELL_HEAL_TEAM) {
-      const m          = pwr(pet);
-      const healAmount = m * 2;
-      const fromCenter = getPetCenter(pet.id);
-
-      team.forEach((ally, idx) => {
-        if (!ally || idx === i) return;
-        setTimeout(() => {
-          const toCenter = getPetCenter(ally.id);
-          if (fromCenter && toCenter) {
-            for (let k = 0; k < 3; k++) {
-              setTimeout(() => {
-                spawnFlyingParticle("💚", fromCenter.x, fromCenter.y, toCenter.x, toCenter.y, 600);
-              }, k * 100);
-            }
-            setTimeout(() => {
-              spawnFloatingText(`+${healAmount} HP`, toCenter.x, toCenter.rect.top - 10, "heal");
-              triggerAnim(ally.id, "buff");
-            }, 300);
-          }
-        }, idx * 150);
-      });
-
-      const updatedNt = [...team];
-      team.forEach((ally, idx) => {
-        if (!ally || idx === i) return;
-        updatedNt[idx] = {
-          ...ally,
-          hp:    clampStat((ally.hp    || 0) + healAmount),
-          curHp: clampStat((ally.curHp || 0) + healAmount),
-        };
-      });
-      updatedNt[i] = null;
-      setTeam(updatedNt);
-      setGold((g) => g + goldGain);
-      setSelI(null);
-      setTimeout(() => spawnParticles(pet.id, "heal"), 100);
-      return;
-    }
-
-    // sell_buff_shop: mağazadaki hayvanlara buff uçuşu
-    if (pet.ability === AB.SELL_BUFF_SHOP) {
-      const m          = pwr(pet);
-      const fromCenter = getPetCenter(pet.id);
-      setShop((prevShop) => {
-        const updated = prevShop.map((sp) => {
-          if (!sp) return sp;
-          return { ...sp, atk: clampStat(sp.atk + m), hp: clampStat(sp.hp + m), curHp: clampStat(sp.curHp + m) };
-        });
-        if (fromCenter) {
-          updated.forEach((sp, sIdx) => {
-            if (!sp) return;
-            setTimeout(() => {
-              const shopCards = document.querySelectorAll(".card-3d");
-              const targetCard = shopCards[sIdx];
-              if (!targetCard) return;
-              const r = targetCard.getBoundingClientRect();
-              const toX = r.left + r.width / 2;
-              const toY = r.top  + r.height / 2;
-              ["⚔️", "❤️"].forEach((icon, iconIndex) => {
-                setTimeout(() => {
-                  spawnFlyingParticle(icon, fromCenter.x, fromCenter.y, toX, toY, 700);
-                }, iconIndex * 100);
-              });
-            }, sIdx * 150);
-          });
-        }
-        spawnParticles(pet.id, "buff");
-        return updated;
-      });
-      nt[i] = null;
-      setTeam(nt);
-      setGold((g) => g + goldGain);
-      setSelI(null);
-      return;
-    }
+    const handler = sellHandlers[pet.ability];
+    if (handler && handler(pet, i, ctx)) return;
 
     // Normal satış
     nt[i] = null;
