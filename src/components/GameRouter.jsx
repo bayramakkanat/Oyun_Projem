@@ -192,7 +192,7 @@ export default function GameRouter() {
         team={team}
         perfectRun={lives === (DIFFICULTY_CONFIGS[difficultyLevel]?.startingLives || 5)}
         onRestart={reset}
-        onMenu={() => { reset(); setGameStarted(false); }}
+       onMenu={() => { reset(); setMenuView("main"); setGameStarted(false); }}
         gameMode={gameMode}
         onRematch={() => {
           reset();
@@ -216,7 +216,7 @@ export default function GameRouter() {
         stats={stats}
         team={team}
         onRestart={reset}
-        onMenu={() => { reset(); setGameStarted(false); }}
+        onMenu={() => { reset(); setMenuView("main"); setGameStarted(false); }}
         gameMode={gameMode}
         onRematch={() => {
           reset();
