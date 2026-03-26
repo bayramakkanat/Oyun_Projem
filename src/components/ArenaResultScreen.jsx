@@ -1,14 +1,10 @@
 import React from "react";
-import { useGameContext } from "../context/GameContext";
+import { useUIContext } from "../context/UIContext";
+import { useBattleContext } from "../context/BattleContext";
 
 export default function ArenaResultScreen() {
-  const {
-    arenaResult,
-    setArenaResult,
-    reset,
-    setMenuView,
-    setGameStarted,
-  } = useGameContext();
+  const { setMenuView, setGameStarted } = useUIContext();
+  const { arenaResult, setArenaResult, reset } = useBattleContext();
 
   if (!arenaResult) return null;
 

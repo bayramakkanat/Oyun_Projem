@@ -65,7 +65,7 @@ export default function ShopView() {
   return (
     <>
       <div className="max-w-4xl mx-auto">
-        <HUD />
+        <HUD reset={reset} />
 
         {/* Shop alanı (kısaltılmış hali) */}
         <div className="bg-black/60 rounded-[2.5rem] p-4 mb-4 border border-white/10 shadow-2xl">

@@ -1,23 +1,22 @@
 import React from "react";
-import { useGameContext } from "../context/GameContext";
+import { useShopContext } from "../context/ShopContext";
+import { useUIContext } from "../context/UIContext";
 import { BOSSES, WIN_TURN } from "../data/gameData";
 
-export default function HUD() {
+// reset prop olarak ShopView'dan geliyor (BattleContext'e gereksiz aboneliği önler)
+export default function HUD({ reset }) {
+  const { turn, maxT, gold } = useShopContext();
   const {
     gameMode,
-    turn,
-    maxT,
     setGuide,
     setShowCollection,
-    gold,
     lives,
     wins,
     soundEnabled,
     setSoundEnabled,
-    reset,
     setMenuView,
     setGameStarted,
-  } = useGameContext();
+  } = useUIContext();
 
   return (
     <div className="flex justify-between items-stretch mb-3 px-1">
