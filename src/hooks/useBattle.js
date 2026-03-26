@@ -211,48 +211,69 @@ export function useBattle({
     }
   }, [versusRoom, versusReady, team, turnRef]);
 
+  // ─── Hata kurtarma: savaş sıkışırsa shop'a zorla dön ──────────────────────
+  const recoverToShop = (errorMsg) => {
+    console.error("useBattle kurtarma:", errorMsg);
+    setIsBattleOver(true);
+    setLog((l) => [...l, `⚠️ Beklenmeyen hata, mağazaya dönülüyor...`]);
+    setTimeout(() => {
+      setIsBattleOver(false);
+      lastProcessedStepRef.current = -1;
+      setPhase("shop");
+    }, 2000);
+  };
+
   const battle = async () => {
     if (gameMode === "versus") {
-      await versusSetReady();
+      try {
+        await versusSetReady();
+      } catch (err) {
+        console.error("Versus hazır hatası:", err);
+      }
       return;
     }
-    setIsBattleOver(false);
-    lastProcessedStepRef.current = -1;
-    battleGoldRef.current = 0;
-    setPGold(0);
-    setRewards([]);
 
-    const pt = applyPermanentBuffs(team)
-      .filter(Boolean)
-      .reverse()
-      .map((x) => ({ ...x, curHp: x.hp, trample: false }));
-    if (pt.length === 0) return;
+    try {
+      setIsBattleOver(false);
+      lastProcessedStepRef.current = -1;
+      battleGoldRef.current = 0;
+      setPGold(0);
+      setRewards([]);
 
-    let et;
-    if (gameMode === "arena") {
-      unlockAchievement("arena_first");
-      const opponentData = await fetchArenaOpponent(difficultyLevel);
-      if (opponentData) {
-        setArenaOpponent(opponentData);
-        const allAnimals = Object.values(TIERS).flat();
-        et = [...opponentData.team].reverse().map((p) => {
-          const animalData = allAnimals.find((a) => a.name === p.name);
-          return { ...p, img: p.img || animalData?.img || null, id: Math.random(), curHp: p.hp };
-        });
+      const pt = applyPermanentBuffs(team)
+        .filter(Boolean)
+        .reverse()
+        .map((x) => ({ ...x, curHp: x.hp, trample: false }));
+      if (pt.length === 0) return;
+
+      let et;
+      if (gameMode === "arena") {
+        unlockAchievement("arena_first");
+        const opponentData = await fetchArenaOpponent(difficultyLevel);
+        if (opponentData) {
+          setArenaOpponent(opponentData);
+          const allAnimals = Object.values(TIERS).flat();
+          et = [...opponentData.team].reverse().map((p) => {
+            const animalData = allAnimals.find((a) => a.name === p.name);
+            return { ...p, img: p.img || animalData?.img || null, id: Math.random(), curHp: p.hp };
+          });
+        } else {
+          et = genE(turn, maxT, teamSlots, difficulty, difficultyLevel);
+          setArenaOpponent({ userName: "AI Komutan" });
+        }
       } else {
         et = genE(turn, maxT, teamSlots, difficulty, difficultyLevel);
-        setArenaOpponent({ userName: "AI Komutan" });
+        setArenaOpponent(null);
       }
-    } else {
-      et = genE(turn, maxT, teamSlots, difficulty, difficultyLevel);
-      setArenaOpponent(null);
-    }
 
-    setET(et);
-    setPT(pt);
-    setLog([]);
-    setStep(0);
-    setPhase("battle");
+      setET(et);
+      setPT(pt);
+      setLog([]);
+      setStep(0);
+      setPhase("battle");
+    } catch (err) {
+      recoverToShop(err?.message || String(err));
+    }
   };
 
   // ─── VERSUS SHOP RESET ──────────────────────────────────────────────────
@@ -278,6 +299,7 @@ export function useBattle({
       });
 
     const unsub = onSnapshot(doc(db, "versus_rooms", code), async (snap) => {
+      try {
       const data = snap.data();
       if (!data) return;
 
@@ -328,6 +350,9 @@ export function useBattle({
           });
         }, 2000);
       }
+      } catch (err) {
+        console.error("Versus snapshot hatası:", err);
+      }
     });
 
     versusUnsubRef.current = unsub;
@@ -344,13 +369,17 @@ export function useBattle({
       setIsBattleOver(true);
       setLog((l) => [...l, "⏱️ Savaş zaman aşımı!"]);
       setTimeout(async () => {
-        const newLives = lives - 1;
-        setLives(newLives);
-        const over = await handleGameOver(newLives, wins, turn);
-        if (over) return;
-        const updatedTeam = buildUpdatedTeam(team, pT);
-        transitionToShop(updatedTeam, turn + 1, 0);
-        setPhase("shop");
+        try {
+          const newLives = lives - 1;
+          setLives(newLives);
+          const over = await handleGameOver(newLives, wins, turn);
+          if (over) return;
+          const updatedTeam = buildUpdatedTeam(team, pT);
+          transitionToShop(updatedTeam, turn + 1, 0);
+          setPhase("shop");
+        } catch (err) {
+          recoverToShop(err?.message || String(err));
+        }
       }, 2000);
       return;
     }
@@ -362,7 +391,8 @@ export function useBattle({
       const won  = eT.length === 0 && pT.length > 0;
       const draw = pT.length === 0 && eT.length === 0;
 
-      (async () => { 
+      (async () => {
+        try {
       // Boss savaşı sonu
       if (bossChallenge === "battle") {
         if (won) {
@@ -450,7 +480,10 @@ export function useBattle({
       }
 
       transitionToShop(updatedTeam, newTurn, 3000);
-      })(); 
+        } catch (err) {
+          recoverToShop(err?.message || String(err));
+        }
+      })();
       return;
     }
 
