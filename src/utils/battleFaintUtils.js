@@ -79,19 +79,19 @@ export const applyDodoTeamRetriggerEffect = ({ ability, sourceNick, power, allyT
   if (ability === AB.FAINT_RAGE || ability === AB.CHEETAH_FAINT) {
     const buff = getTeamBuffAmount(power);
     applyTeamBuff(allyTeam, buff, clampStat);
-    logs.push(`Dodo retrigger -> ${sourceNick} -> team +${buff}/+${buff}`);
+    logs.push(`🦤 Dodo → ${sourceNick} efekti tekrar! Takıma +${buff}/+${buff}`);
     return true;
   }
   if (ability === AB.FAINT_WAVE) {
     const damage = getWaveDamage(power);
     applyTeamDamage(enemyTeam, damage);
-    logs.push(`Dodo retrigger -> ${sourceNick} -> ${enemyLabel} ${damage} damage`);
+    logs.push(`🦤 Dodo → ${sourceNick} efekti tekrar! ${enemyLabel} ${damage} hasar`);
     return true;
   }
   if (ability === AB.FAINT_WEAKEN_ALL) {
     const debuff = getFaintWeakenAllDebuff(power);
     applyTeamDebuff(enemyTeam, debuff);
-    logs.push(`Dodo retrigger -> ${sourceNick} -> ${enemyLabel} -${debuff}/-${debuff}`);
+    logs.push(`🦤 Dodo → ${sourceNick} efekti tekrar! ${enemyLabel} -${debuff}/-${debuff}`);
     return true;
   }
   return false;
@@ -133,8 +133,8 @@ export const applyTeamWideFaintEffect = ({
   enemyTeam,
   clampStat,
   logs,
-  teamBuffLabel = "team",
-  enemyLabel = "enemy team",
+  teamBuffLabel = "takım",
+  enemyLabel = "düşman takımı",
 }) => {
   if (ability === AB.FAINT_RAGE || ability === AB.CHEETAH_FAINT) {
     const buff = getTeamBuffAmount(power);
@@ -145,7 +145,7 @@ export const applyTeamWideFaintEffect = ({
   if (ability === AB.FAINT_WAVE) {
     const damage = getWaveDamage(power);
     applyTeamDamage(enemyTeam, damage);
-    logs.push(`${sourceNick} ${ability} -> ${enemyLabel} ${damage} damage`);
+    logs.push(`💀 ${sourceNick} → ${enemyLabel} ${damage} hasar`);
     return true;
   }
   return false;

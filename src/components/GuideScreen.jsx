@@ -101,7 +101,13 @@ export default function GuideScreen({ onClose, guideLvl, setGuideLvl }) {
             <div className="p-5 flex flex-col gap-4 h-full overflow-y-auto">
               {/* Hayvan başlığı */}
               <div className="flex items-center gap-3">
-                <span className="text-5xl">{selPet.name}</span>
+                <img
+                  src={`/images/animals/${selPet.img}`}
+                  alt={selPet.nick}
+                  className="w-16 h-16 object-contain drop-shadow-2xl"
+                  style={selPet.flip ? {} : { transform: "scaleX(-1)" }}
+                  onError={(e) => { e.target.style.display = "none"; }}
+                />
                 <div>
                   <div className="font-black text-xl text-white">{selPet.nick}</div>
                   <div className={`text-xs font-bold px-2 py-0.5 rounded-full inline-block bg-gradient-to-r ${TBG[activeTier]} border ${TBD[activeTier]}`}>

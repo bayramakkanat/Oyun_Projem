@@ -156,7 +156,7 @@ export async function runBattleTurnPhase({
       enemy.curHp = Math.max(0, enemy.curHp - debuff);
     });
     applyDamageAnimToTeam(e);
-    setLog((l) => [...l, `${a.nick} faint_weaken_all -> enemy team -${debuff}/-${debuff}`]);
+    setLog((l) => [...l, `💀 ${a.nick} → Düşman takımına -${debuff}/-${debuff} (tüm zayıflama)`]);
     await delay(600);
   }
   if (a.ability === AB.HURT_TEAM_BUFF && p[0].curHp > 0 && dD > 0) {
@@ -229,7 +229,7 @@ export async function runBattleTurnPhase({
     e.forEach((enemy) => {
       spawnProjectile(a.id, enemy.id, "kill_fear_all");
     });
-    setLog((l) => [...l, `${a.nick} fear -> enemy team -${debuff}/-${debuff}`]);
+    setLog((l) => [...l, `😱 ${a.nick} → Düşman takımına -${debuff}/-${debuff} (korku)`]);
     await delay(500);
   }
   if (d.ability === AB.DEVOUR && p[0].curHp <= 0 && e[0].curHp > 0) {
@@ -263,7 +263,7 @@ export async function runBattleTurnPhase({
   }
   if (d.ability === AB.KILL_FEAR_ALL && p[0].curHp <= 0) {
     const debuff = applyFearToTeam(p.filter((pet) => pet.curHp > 0), pwr(d), 1);
-    setLog((l) => [...l, `${d.nick} fear -> player team -${debuff}/-${debuff}`]);
+    setLog((l) => [...l, `😱 Düşman ${d.nick} → Oyuncu takımına -${debuff}/-${debuff} (korku)`]);
     await delay(500);
   }
   if (d.ability === AB.ATK_BUFF && e[0].curHp > 0) {
@@ -274,7 +274,7 @@ export async function runBattleTurnPhase({
   }
   if (d.ability === AB.FAINT_WEAKEN_ALL && e[0].curHp <= 0) {
     const debuff = applyFaintWeakenToTeam(p, pwr(d));
-    setLog((l) => [...l, `${d.nick} faint_weaken_all -> player team -${debuff}/-${debuff}`]);
+    setLog((l) => [...l, `💀 Düşman ${d.nick} → Oyuncu takımına -${debuff}/-${debuff} (tüm zayıflama)`]);
     await delay(600);
   }
   if (d.ability === AB.HURT_TEAM_BUFF && e[0].curHp > 0 && aD > 0) {
