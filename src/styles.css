@@ -570,7 +570,7 @@
 
 .card-3d {
   transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-  transform-style: preserve-3d;
+  transform-style: flat;
 }
 
 .card-3d:hover {
