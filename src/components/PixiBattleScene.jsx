@@ -42,6 +42,9 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
         if (pet.curHp <= 0) {
           if (!el.isDeadAnimated) {
              el.isDeadAnimated = true;
+             // data-pet-id'yi temizle: projectile bu hayvana artık ulaşamaz
+             const cardEl = el.querySelector('[data-pet-id]');
+             if (cardEl) cardEl.removeAttribute('data-pet-id');
              gsap.to(el, { y: 150, autoAlpha: 0, duration: 0.5, ease: "power2.in" });
           }
           return;

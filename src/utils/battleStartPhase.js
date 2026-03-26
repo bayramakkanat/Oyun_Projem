@@ -157,6 +157,9 @@ export async function runBattleStartPhase({
     return x.idx - y.idx;
   });
 
+  // Projektil uçuş süresi (ms) - statlar bu süreden sonra güncellenecek
+  const PROJ_FLY_MS = 700;
+
   for (const { pet: a, isPlayer } of attackers) {
     const m = pwr(a);
     const targets = isPlayer ? ee : pp;
@@ -165,44 +168,56 @@ export async function runBattleStartPhase({
 
     if (a.ability === AB.START_FIRE) {
       const dmg = 6 * m;
-      targets.forEach((x) => { x.curHp -= dmg; spawnProjectile(a.id, x.id, "start_fire"); triggerAnim(x.id, "damage"); });
+      // 1. Projektiller fırlatılır
+      targets.forEach((x) => { spawnProjectile(a.id, x.id, "start_fire"); });
       addBattleLog(`🐉 ${isPlayer ? "" : "Düsman "}${a.nick} -> Tüm ${isPlayer ? "düsmanlara" : "takima"} ${dmg} hasar`);
-      await delay(1400);
+      // 2. Projektil uçuş süresi beklenir
+      await delay(PROJ_FLY_MS);
+      // 3. Projektil hedefe ulaştı → stat güncelle + hasar animasyonu
+      targets.forEach((x) => { x.curHp -= dmg; triggerAnim(x.id, "damage"); });
+      syncBattleTeams(pp, ee);
+      await delay(1400 - PROJ_FLY_MS);
     } else if (a.ability === AB.START_FEAR) {
       const aliveTargets = targets.filter((x) => x.curHp > 0);
       if (aliveTargets.length === 0) continue;
-      aliveTargets[0].atk = Math.max(1, aliveTargets[0].atk - 10 * m);
       spawnProjectile(a.id, aliveTargets[0].id, "start_fear");
+      if (aliveTargets.length > 1) spawnProjectile(a.id, aliveTargets[1].id, "start_fear");
+      const fearT = aliveTargets.length > 1 ? `${aliveTargets[0].nick} ve ${aliveTargets[1].nick}` : aliveTargets[0].nick;
+      addBattleLog(`🦁 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${fearT} -${10 * m} ATK`);
+      await delay(PROJ_FLY_MS);
+      aliveTargets[0].atk = Math.max(1, aliveTargets[0].atk - 10 * m);
       triggerAnim(aliveTargets[0].id, "damage");
       if (aliveTargets.length > 1) {
         aliveTargets[1].atk = Math.max(1, aliveTargets[1].atk - 10 * m);
-        spawnProjectile(a.id, aliveTargets[1].id, "start_fear");
         triggerAnim(aliveTargets[1].id, "damage");
       }
-      const fearT = targets.length > 1 ? `${targets[0].nick} ve ${targets[1].nick}` : targets[0].nick;
-      addBattleLog(`🦁 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${fearT} -${10 * m} ATK`);
-      await delay(1200);
+      syncBattleTeams(pp, ee);
+      await delay(1200 - PROJ_FLY_MS);
     } else if (a.ability === AB.START_SNIPE) {
       const currentTargets = isPlayer ? ee : pp;
       const aliveTargets = currentTargets.filter((x) => x.curHp > 0);
       if (aliveTargets.length === 0) continue;
       const snipeTarget = aliveTargets[aliveTargets.length - 1];
-      snipeTarget.curHp -= 3 * m;
-      setTimeout(() => { spawnProjectile(a.id, snipeTarget.id, "start_snipe", null, true); }, 100);
-      triggerAnim(snipeTarget.id, "damage");
+      spawnProjectile(a.id, snipeTarget.id, "start_snipe", null, true);
       addBattleLog(`🎯 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${snipeTarget.nick} e ${3 * m} hasar`);
-      await delay(1200);
+      await delay(PROJ_FLY_MS);
+      snipeTarget.curHp -= 3 * m;
+      triggerAnim(snipeTarget.id, "damage");
+      syncBattleTeams(pp, ee);
+      await delay(1200 - PROJ_FLY_MS);
     } else if (a.ability === AB.START_MULTI_SNIPE) {
       const targetCount = Math.min(m + 1, targets.length);
       for (let j = 0; j < targetCount; j++) {
         const alive = targets.filter((x) => x.curHp > 0);
         if (alive.length > 0) {
           const t = alive[Math.floor(Math.random() * alive.length)];
-          t.curHp -= 8 * m;
           spawnProjectile(a.id, t.id, "start_multi_snipe", null, true);
-          triggerAnim(t.id, "damage");
           addBattleLog(`🦑 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${8 * m} hasar`);
-          await delay(700);
+          await delay(PROJ_FLY_MS);
+          t.curHp -= 8 * m;
+          triggerAnim(t.id, "damage");
+          syncBattleTeams(pp, ee);
+          await delay(700 - PROJ_FLY_MS > 0 ? 700 - PROJ_FLY_MS : 100);
         }
       }
     } else if (a.ability === AB.START_DMG) {
@@ -210,39 +225,47 @@ export async function runBattleStartPhase({
       const alive = currentTargets.filter((x) => x.curHp > 0);
       if (alive.length === 0) continue;
       const t = alive[Math.floor(Math.random() * alive.length)];
-      t.curHp -= 2 * m;
       spawnProjectile(a.id, t.id, "start_dmg", null, true);
-      triggerAnim(t.id, "damage");
       addBattleLog(`💥 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${2 * m} hasar`);
-      await delay(1200);
+      await delay(PROJ_FLY_MS);
+      t.curHp -= 2 * m;
+      triggerAnim(t.id, "damage");
+      syncBattleTeams(pp, ee);
+      await delay(1200 - PROJ_FLY_MS);
     } else if (a.ability === AB.START_POISON) {
-      targets[0].atk = Math.max(1, targets[0].atk - m * 2);
       spawnProjectile(a.id, targets[0].id, "start_poison");
-      triggerAnim(targets[0].id, "damage");
       addBattleLog(`🐍 ${isPlayer ? "" : "Düsman "}${a.nick} -> On düsmana -${m * 2} ATK`);
-      await delay(1200);
+      await delay(PROJ_FLY_MS);
+      targets[0].atk = Math.max(1, targets[0].atk - m * 2);
+      triggerAnim(targets[0].id, "damage");
+      syncBattleTeams(pp, ee);
+      await delay(1200 - PROJ_FLY_MS);
     } else if (a.ability === AB.START_FREEZE_ENEMY) {
       const reduction = (m * 30) / 100;
-      targets[0].atk = Math.max(1, Math.floor(targets[0].atk * (1 - reduction)));
       spawnProjectile(a.id, targets[0].id, "start_freeze_enemy");
+      if (targets.length > 1) spawnProjectile(a.id, targets[targets.length - 1].id, "start_freeze_enemy");
+      addBattleLog(`🦣 ${isPlayer ? "" : "Düsman "}${a.nick} -> On ve arka düsmani %${m * 30} yavaslatti`);
+      await delay(PROJ_FLY_MS);
+      targets[0].atk = Math.max(1, Math.floor(targets[0].atk * (1 - reduction)));
       triggerAnim(targets[0].id, "damage");
       if (targets.length > 1) {
         targets[targets.length - 1].atk = Math.max(1, Math.floor(targets[targets.length - 1].atk * (1 - reduction)));
-        spawnProjectile(a.id, targets[targets.length - 1].id, "start_freeze_enemy");
         triggerAnim(targets[targets.length - 1].id, "damage");
       }
-      addBattleLog(`🦣 ${isPlayer ? "" : "Düsman "}${a.nick} -> On ve arka düsmani %${m * 30} yavaslatti`);
-      await delay(1200);
+      syncBattleTeams(pp, ee);
+      await delay(1200 - PROJ_FLY_MS);
     } else if (a.ability === AB.WEAKEN_STRONG) {
       let mxI = 0, mxP = 0;
       targets.forEach((en, idx) => { if (en.atk + en.curHp > mxP) { mxP = en.atk + en.curHp; mxI = idx; } });
+      spawnProjectile(a.id, targets[mxI].id, "weaken_strong");
+      addBattleLog(`🐧 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${targets[mxI].nick} i %${25 * m} zayiflatti`);
+      await delay(PROJ_FLY_MS);
       const r = (25 * m) / 100;
       targets[mxI].atk = Math.max(1, Math.floor(targets[mxI].atk * (1 - r)));
       targets[mxI].curHp = Math.max(1, Math.floor(targets[mxI].curHp * (1 - r)));
-      spawnProjectile(a.id, targets[mxI].id, "weaken_strong");
       triggerAnim(targets[mxI].id, "damage");
-      addBattleLog(`🐧 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${targets[mxI].nick} i %${25 * m} zayiflatti`);
-      await delay(1200);
+      syncBattleTeams(pp, ee);
+      await delay(1200 - PROJ_FLY_MS);
     }
 
     if (isPlayer) ee = ee.filter((x) => x.curHp > 0);

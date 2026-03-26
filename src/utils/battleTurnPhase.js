@@ -131,6 +131,8 @@ export async function runBattleTurnPhase({
 
   triggerAnim(a.id, "damage");
   triggerAnim(d.id, "damage");
+  // Hasar animasyonu başladı → HP barları şimdi güncellenir
+  syncBattleTeams(p, e);
   await delay(1400);
   if (isCancelled()) return;
 
