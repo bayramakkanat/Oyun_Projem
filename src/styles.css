@@ -1235,3 +1235,33 @@
   70% { transform: translate(-50%, -50%) scale(1.2) rotate(-5deg); opacity: 1; }
   100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg) translateY(-40px); opacity: 0; }
 }
+/* ─── Hayvan idle nefes animasyonu ────────────────────────────────────────── */
+@keyframes petIdle {
+  0%, 100% { transform: scale(1);    filter: brightness(1); }
+  50%       { transform: scale(1.05); filter: brightness(1.08); }
+}
+
+.pet-idle {
+  animation: petIdle 3s ease-in-out infinite;
+}
+
+/* Her hayvan için hafif faz farkı (aynı anda nefes almalarını önler) */
+.pet-idle.phase-1 { animation-delay: -0.5s; }
+.pet-idle.phase-2 { animation-delay: -1s;   }
+.pet-idle.phase-3 { animation-delay: -1.5s; }
+.pet-idle.phase-4 { animation-delay: -2s;   }
+.pet-idle.phase-5 { animation-delay: -2.5s; }
+
+/* ─── Merge ışık patlaması ────────────────────────────────────────────────── */
+@keyframes mergeBurst {
+  0%   { transform: scale(1);    filter: brightness(1) saturate(1); }
+  15%  { transform: scale(1.18); filter: brightness(3)  saturate(2.5) drop-shadow(0 0 16px #fff); }
+  35%  { transform: scale(0.93); filter: brightness(1.6) saturate(1.8); }
+  55%  { transform: scale(1.1);  filter: brightness(2)  saturate(2)  drop-shadow(0 0 8px #fbbf24); }
+  75%  { transform: scale(0.97); filter: brightness(1.2); }
+  100% { transform: scale(1);    filter: brightness(1) saturate(1); }
+}
+
+.card-3d .merge-burst {
+  animation: mergeBurst 0.7s ease-in-out;
+}

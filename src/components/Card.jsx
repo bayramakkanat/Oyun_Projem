@@ -65,10 +65,19 @@ function Card({
     animStyle = { animation: "slideInLeft 0.4s ease-out" };
   if (anim === "slideInRight")
     animStyle = { animation: "slideInRight 0.4s ease-out" };
+  if (anim === "merge")
+    animStyle = { animation: "mergeBurst 0.7s ease-in-out" };
 
   const displayHp = battle
     ? Math.max(0, a.curHp ?? 0)
     : Math.max(0, a.curHp !== undefined ? a.curHp : a.hp);
+
+  // ── HP bar renk geçişi ───────────────────────────────────────────────────
+  const maxHp    = Math.max(1, a.hp ?? 1);
+  const hpRatio  = Math.min(1, Math.max(0, displayHp / maxHp));
+  const hpColor  = hpRatio > 0.5 ? "#4ade80"
+                 : hpRatio > 0.25 ? "#facc15"
+                 : "#ef4444";
 
   const size = compact ? 38 : 44;
 
@@ -136,11 +145,12 @@ function Card({
         style={{
           position: "relative",
           zIndex: 2,
-          color: "#4ade80",
+          color: battle ? hpColor : "#4ade80",
           fontSize: getStatFontSize(value, compact),
           fontWeight: "900",
           textShadow: "0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9)",
           lineHeight: 1,
+          transition: "color 0.4s ease",
         }}
       >
         {value}
@@ -216,7 +226,7 @@ function Card({
     a.img
      ? compact ? "w-16 h-16" : "w-24 h-24"
       : compact ? "w-12 h-12" : "w-16 h-16"
-  }`}
+  } ${!battle && !compact && !anim ? `pet-idle phase-${(a.id ?? 0) % 6}` : ""}`}
 style={
   mirror
     ? (!a.flip ? { transform: "scaleX(-1)" } : {})
@@ -249,6 +259,30 @@ style={
           <SwordStat value={a.atk} />
           <HeartStat value={displayHp} />
         </div>
+        {battle && !compact && (
+          <div className="w-full px-2" style={{ marginTop: "-2px" }}>
+            <div
+              style={{
+                width: "100%",
+                height: "4px",
+                background: "rgba(0,0,0,0.4)",
+                borderRadius: "2px",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${hpRatio * 100}%`,
+                  height: "100%",
+                  background: hpColor,
+                  borderRadius: "2px",
+                  transition: "width 0.3s ease, background 0.4s ease",
+                  boxShadow: `0 0 4px ${hpColor}`,
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
       {!compact && a.ability && a.ability !== "none" && (
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 z-[9999] w-72">

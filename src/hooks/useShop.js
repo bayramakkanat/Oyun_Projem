@@ -273,9 +273,12 @@ export function useShop({
       const newRewards = nL > oL ? addRew() : [];
       if (nL > oL) notifyCatOnLevelup(baseId);
 
-      triggerAnim(baseId, "buff");
+      // Merge ışık patlaması — kademeli 3 dalga
+      triggerAnim(baseId, "merge");
       playSound("buff");
       spawnParticles(baseId, "buff");
+      setTimeout(() => spawnParticles(baseId, "buff"), 120);
+      setTimeout(() => spawnParticles(baseId, "buff"), 260);
 
       return { merged, rewards: newRewards, leveledUp: nL > oL };
     } catch (e) {
