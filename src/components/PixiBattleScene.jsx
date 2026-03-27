@@ -31,7 +31,7 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
       engine.destroy();
       engineRef.current = null;
     };
-  }, []); // Sadece mount/unmount
+  }, []); // Sadece mount/unmount — intentional: engine yalnızca bir kez başlatılır
 
   // ── pT/eT güncellemeleri ─────────────────────────────────────────────────
   useEffect(() => {
@@ -55,11 +55,11 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
       <canvas
         ref={canvasRef}
         style={{
-          width:  "900px",
-          height: "320px",
-          maxWidth: "100%",
-          display: "block",
-          background: "transparent",
+          width:       "900px",
+          height:      "320px",
+          maxWidth:    "100%",
+          display:     "block",
+          background:  "transparent",
         }}
       />
     </div>

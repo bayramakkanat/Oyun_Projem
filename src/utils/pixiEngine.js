@@ -72,7 +72,7 @@ export class PixiEngine {
         view:            canvas,
         width:           SCENE_W,
         height:          SCENE_H,
-        background:      'transparent',   // PixiJS 7 syntax
+        backgroundAlpha: 0,          // PixiJS 7: şeffaf arka plan
         antialias:       true,
         resolution:      window.devicePixelRatio || 1,
         autoDensity:     true,
@@ -83,7 +83,7 @@ export class PixiEngine {
         view:            canvas,
         width:           SCENE_W,
         height:          SCENE_H,
-        background:      'transparent',   // PixiJS 7 syntax
+        backgroundAlpha: 0,          // PixiJS 7: şeffaf arka plan
         forceCanvas:     true,
         resolution:      1,
         autoDensity:     true,
