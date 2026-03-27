@@ -104,6 +104,7 @@ export class PixiEngine {
     this.cameraRoot.position.set(SCENE_W / 2, SCENE_H / 2);
 
     // Hazır — bekleyen takım güncellemesi varsa uygula
+    this.app.renderer.background.alpha = 0;
     this.isReady = true;
     if (this._pendingTeams) {
       const { pT, eT } = this._pendingTeams;
