@@ -550,53 +550,29 @@ export class PixiEngine {
 
   // ── Tween yardımcısı (GSAP olmadan, Pixi ticker tabanlı) ─────────────────
   // props: { x, y, alpha, scale, scaleXY }
-  _tween(target, props, durationMs, ease = "linear", delay = 0) {
-    // Engine veya target henüz hazır değilse sessizce çık
-    if (!target || !this.app) return;
-    const startProps = {};
-
-    for (const key of Object.keys(props)) {
-      if (key === "scaleXY")   startProps[key] = target.scale.x;
-      else if (key === "scale") startProps[key] = target.scale.x;
-      else                      startProps[key] = target[key] ?? 0;
-    }
-
-    const easeFn = (t) => {
-      if (ease === "power1") return t * t;
-      if (ease === "power2") return t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
-      if (ease === "bounce") {
-        if (t < 1/2.75) return 7.5625*t*t;
-        if (t < 2/2.75) return 7.5625*(t-=1.5/2.75)*t+0.75;
-        if (t < 2.5/2.75) return 7.5625*(t-=2.25/2.75)*t+0.9375;
-        return 7.5625*(t-=2.625/2.75)*t+0.984375;
-      }
-      return t; // linear
-    };
-
-    const tick = () => {
-      const now = performance.now();
-      if (now < startTime) return;
-      const elapsed = now - startTime;
-      const t = easeFn(Math.min(1, elapsed / durationMs));
-
-      for (const [key, end] of Object.entries(props)) {
-        const start = startProps[key];
-        const val   = start + (end - start) * t;
-        if (key === "scaleXY") { target.scale.set(val); }
-        else if (key === "scale") { target.scale.set(val); }
-        else { target[key] = val; }
-      }
-
-      if (elapsed >= durationMs) {
-        this.app?.ticker.remove(tick);
-        const idx = this._tickerFns.indexOf(tick);
-        if (idx > -1) this._tickerFns.splice(idx, 1);
-      }
-    };
-
-    this.app?.ticker.add(tick);
-    this._tickerFns.push(tick);
+ _tween(target, props, durationMs, ease = "linear", delay = 0) {
+  if (!target || !this.app) return;
+  const startProps = {};
+  for (const key of Object.keys(props)) {
+    if (key === "scaleXY")   startProps[key] = target.scale.x;
+    else if (key === "scale") startProps[key] = target.scale.x;
+    else                      startProps[key] = target[key] ?? 0;
   }
+
+  const easeFn = (t) => { /* ... */ };
+
+  const startTime = performance.now() + delay;   // 👈 bu satır eklendi
+  const tick = () => {
+    const now = performance.now();
+    if (now < startTime) return;
+    const elapsed = now - startTime;
+    const t = easeFn(Math.min(1, elapsed / durationMs));
+    // ... güncelleme kodları ...
+  };
+
+  this.app?.ticker.add(tick);
+  this._tickerFns.push(tick);
+}
 
   // ── Hayvanın sahne koordinatını döner (projektil hedefleme için) ──────────
   getPetCenter(petId) {

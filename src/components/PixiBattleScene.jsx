@@ -43,11 +43,14 @@ export default function PixiBattleScene({ pT, eT, anims }) {
   return (
     <div
       ref={containerRef}
-      style={{
-        width:      "900px",
-        height:     "320px",
-        maxWidth:   "100%",
-        background: "transparent",
+  style={{
+    width: "900px",
+    height: "320px",
+    maxWidth: "100%",
+    background: "transparent",
+    position: "relative",
+    overflow: "hidden",         // taşan içerik gizlenir
+    margin: "0 auto",           // isteğe bağlı, ortalamak için
       }}
     />
   );
