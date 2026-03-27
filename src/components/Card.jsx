@@ -219,24 +219,25 @@ function Card({
 }}
       >
        <div className="flex flex-col items-center gap-0 -mt-1">
-         <img
-  src={a.img ? `/images/animals/${a.img}` : `https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u${a.name.codePointAt(0).toString(16)}.svg`}
-  alt={a.nick}
-  className={`pet-glow drop-shadow-2xl object-contain ${
-    a.img
-     ? compact ? "w-16 h-16" : "w-24 h-24"
-      : compact ? "w-12 h-12" : "w-16 h-16"
-  } ${!battle && !compact && !anim ? `pet-idle phase-${(a.id ?? 0) % 6}` : ""}`}
-style={
+         <div style={
   mirror
     ? (!a.flip ? { transform: "scaleX(-1)" } : {})
     : (a.flip ? { transform: "scaleX(-1)" } : {})
-}
-  onError={(e) => {
-    e.target.style.display = "none";
-    e.target.nextSibling.style.display = "inline";
-  }}
-/>
+}>
+  <img
+    src={a.img ? `/images/animals/${a.img}` : `https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u${a.name.codePointAt(0).toString(16)}.svg`}
+    alt={a.nick}
+    className={`pet-glow drop-shadow-2xl object-contain ${
+      a.img
+       ? compact ? "w-16 h-16" : "w-24 h-24"
+        : compact ? "w-12 h-12" : "w-16 h-16"
+    } ${!battle && !compact && !anim ? `pet-idle phase-${(a.id ?? 0) % 6}` : ""}`}
+    onError={(e) => {
+      e.target.style.display = "none";
+      e.target.nextSibling.style.display = "inline";
+    }}
+  />
+</div>
 <span
   className={`pet-glow ${
     compact ? "text-2xl" : "text-4xl"

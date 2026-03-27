@@ -82,6 +82,9 @@ export default function GameRouter() {
     // Diğer yardımcılar
     setBossChallenge,
     setPhase,
+    setPT,
+    setET,
+    setIsDebugBattle,
     // Auth modal için gerekenler
     showAuthModal,
     setShowAuthModal,
@@ -179,6 +182,20 @@ export default function GameRouter() {
           loadTasksFromDB={loadTasksFromDB}
           saveTasksToDB={saveTasksToDB}
         />
+        {showDebugPanel && (
+        <DebugPanel
+          onClose={() => setShowDebugPanel(false)}
+          onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
+            setIsDebugBattle(true); 
+            setPT(playerTeam);
+            setET(enemyTeam);
+            if (bossTurn) setBossChallenge("battle");
+            setPhase("battle");
+            setGameStarted(true);
+            setShowDebugPanel(false); 
+          }}
+        />
+      )}
       </>
     );
   }
@@ -292,6 +309,12 @@ export default function GameRouter() {
           onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
             // debug başlatma
             setShowDebugPanel(false);
+            setIsDebugBattle(true);
+            setPT(playerTeam);
+            setET(enemyTeam);
+            if (bossTurn) setBossChallenge("battle");
+            setPhase("battle");
+            setGameStarted(true);
           }}
         />
       )}

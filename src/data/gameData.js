@@ -83,7 +83,7 @@ export const TIERS = {
       ability: AB.FAINT_BUFF,
       tier: 1,
       img: "ant.png",
-      flip: true,
+      flip: false,
     },
     { name: "🐟", 
       nick: "Balık", 
@@ -93,7 +93,7 @@ export const TIERS = {
       ability: AB.BUY_TARGET_BUFF, 
       tier: 1, 
       img: "fish.png", 
-      flip: true 
+      flip: true, 
     },
     {
       name: "🐛",
@@ -104,7 +104,7 @@ export const TIERS = {
       ability: AB.START_BUFF,
       tier: 1,
       img: "tirtil.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🦆",
@@ -126,7 +126,7 @@ export const TIERS = {
       ability: AB.FRIEND_LEVELUP_BUFF,
       tier: 1,
       img: "cat.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🐝",
@@ -137,7 +137,7 @@ export const TIERS = {
       ability: AB.SELL_GOLD,
       tier: 1,
       img: "bee.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🦗",
@@ -183,7 +183,7 @@ export const TIERS = {
       ability: AB.START_TANK,
       tier: 2,
       img: "crab.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🦎",
@@ -194,7 +194,7 @@ export const TIERS = {
       ability: AB.START_DMG,
       tier: 2,
       img: "lizard.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🐀",
@@ -216,7 +216,7 @@ export const TIERS = {
       ability: AB.FAINT_DMG,
       tier: 2,
       img: "hedgehog.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🐍",
@@ -227,7 +227,7 @@ export const TIERS = {
       ability: AB.START_POISON,
       tier: 2,
       img: "snake.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🦘",
@@ -238,7 +238,7 @@ export const TIERS = {
       ability: AB.FRIEND_SUMMON,
       tier: 2,
       img: "kangaroo.png",
-      flip: true,
+     flip: false,
     },
     {
       name: "🦝",
@@ -295,7 +295,7 @@ export const TIERS = {
       ability: AB.START_SNIPE,
       tier: 3,
       img: "owl.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🐺",
@@ -306,7 +306,7 @@ export const TIERS = {
       ability: AB.FRIEND_FAINT,
       tier: 3,
       img: "wolf.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🦩",
@@ -339,7 +339,7 @@ export const TIERS = {
       ability: AB.SELL_HEAL_TEAM,
       tier: 3,
       img: "llama.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🦦",
@@ -350,9 +350,18 @@ export const TIERS = {
       ability: AB.BUY_BUFF_RANDOM,
       tier: 3,
       img: "otter.png",
-      flip: true,
+      flip: false,
     },
-    { name: "🦨", nick: "Kokarca", atk: 3, hp: 4, cost: 4, ability: AB.HURT_REFLECT, tier: 3, img: "skunk.png" },
+    { 
+      name: "🦨", 
+      nick: "Kokarca", 
+      atk: 3, 
+      hp: 4, 
+      cost: 4, 
+      ability: AB.HURT_REFLECT, 
+      tier: 3, 
+      img: "skunk.png" 
+    },
     {
       name: "🦡",
       nick: "Porsuk",
@@ -362,7 +371,7 @@ export const TIERS = {
       ability: AB.FAINT_BUFF_SELF,
       tier: 3,
       img: "badger.png",
-      flip: true,
+      flip: false,
     },
   ],
  4: [
@@ -375,7 +384,7 @@ export const TIERS = {
       ability: AB.KILL_BUFF,
       tier: 4,
       img: "shark.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🐊",
@@ -409,7 +418,7 @@ export const TIERS = {
       ability: AB.END_ALL,
       tier: 4,
       img: "peacock.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🦛",
@@ -442,7 +451,7 @@ export const TIERS = {
       ability: AB.END_BUFF_AHEAD,
       tier: 4,
       img: "giraffe.png",
-      flip: true,
+     flip: false,
     },
     {
       name: "🦓",
@@ -488,7 +497,7 @@ export const TIERS = {
       ability: AB.START_TRAMPLE,
       tier: 5,
       img: "rhino.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🐻",
@@ -532,7 +541,7 @@ export const TIERS = {
       ability: AB.KILL_FEAR_ALL,
       tier: 5,
       img: "tiger.png",
-      flip: true,
+      flip: false,
     },
     {
       name: "🦣",
