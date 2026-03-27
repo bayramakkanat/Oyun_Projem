@@ -65,14 +65,13 @@ export class PixiEngine {
   }
 
   // ── Başlatma ──────────────────────────────────────────────────────────────
-  async init(canvas) {
-    // WebGL başlatma denemesi — GPU desteği yoksa Canvas renderer'a düş
+  async init(container) {
+    // PixiJS kendi canvas'ını oluşturur, biz sadece div'e ekleriz
     try {
       this.app = new PIXI.Application({
-        view:            canvas,
         width:           SCENE_W,
         height:          SCENE_H,
-        backgroundAlpha: 0,          // PixiJS 7: şeffaf arka plan
+        backgroundAlpha: 0,
         antialias:       true,
         resolution:      window.devicePixelRatio || 1,
         autoDensity:     true,
@@ -80,15 +79,19 @@ export class PixiEngine {
     } catch (e) {
       console.warn("[PixiEngine] WebGL başlatılamadı, Canvas renderer'a geçiliyor.", e);
       this.app = new PIXI.Application({
-        view:            canvas,
         width:           SCENE_W,
         height:          SCENE_H,
-        backgroundAlpha: 0,          // PixiJS 7: şeffaf arka plan
+        backgroundAlpha: 0,
         forceCanvas:     true,
         resolution:      1,
         autoDensity:     true,
       });
     }
+
+    // Canvas'ı div'e ekle ve şeffaf yap
+    this.app.view.style.background = "transparent";
+    this.app.view.style.display    = "block";
+    container.appendChild(this.app.view);
 
     this.stage      = this.app.stage;
     this.cameraRoot = new PIXI.Container();
@@ -104,7 +107,6 @@ export class PixiEngine {
     this.cameraRoot.position.set(SCENE_W / 2, SCENE_H / 2);
 
     // Hazır — bekleyen takım güncellemesi varsa uygula
-    this.app.renderer.background.alpha = 0;
     this.isReady = true;
     if (this._pendingTeams) {
       const { pT, eT } = this._pendingTeams;

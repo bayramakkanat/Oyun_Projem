@@ -1,29 +1,22 @@
 /**
  * PixiBattleScene.jsx — Pixi.js tabanlı savaş sahnesi
- *
- * Bu bileşen:
- * - Pixi canvas'ını mount eder ve PixiEngine'i başlatır
- * - pT/eT/anims değişimlerini engine'e iletir
- * - Mevcut BattleView API'siyle tam uyumludur (prop değişikliği gerekmez)
  */
 
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef } from "react";
 import { PixiEngine } from "../utils/pixiEngine";
 
-export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
-  const canvasRef  = useRef(null);
-  const engineRef  = useRef(null);
+export default function PixiBattleScene({ pT, eT, anims }) {
+  const containerRef = useRef(null);
+  const engineRef    = useRef(null);
 
   // ── Engine başlatma ──────────────────────────────────────────────────────
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!containerRef.current) return;
 
     const engine = new PixiEngine();
     engineRef.current = engine;
 
-    // init() tamamlandığında engine kendi pending kuyruğunu uygular
-    // (pT/eT effect mount'ta çağrıldığında engine hazır değilse kuyruğa alır)
-    engine.init(canvasRef.current).catch((err) => {
+    engine.init(containerRef.current).catch((err) => {
       console.error("[PixiBattleScene] Engine başlatılamadı:", err);
     });
 
@@ -31,7 +24,7 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
       engine.destroy();
       engineRef.current = null;
     };
-  }, []); // Sadece mount/unmount — intentional: engine yalnızca bir kez başlatılır
+  }, []);
 
   // ── pT/eT güncellemeleri ─────────────────────────────────────────────────
   useEffect(() => {
@@ -49,19 +42,13 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
 
   return (
     <div
-      className="w-full flex justify-center items-center overflow-hidden"
-      style={{ height: "320px" }}
-    >
-      <canvas
-        ref={canvasRef}
-        style={{
-          width:       "900px",
-          height:      "320px",
-          maxWidth:    "100%",
-          display:     "block",
-          background:  "transparent",
-        }}
-      />
-    </div>
+      ref={containerRef}
+      style={{
+        width:      "900px",
+        height:     "320px",
+        maxWidth:   "100%",
+        background: "transparent",
+      }}
+    />
   );
 }
