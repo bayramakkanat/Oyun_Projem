@@ -65,55 +65,60 @@ export class PixiEngine {
   }
 
   // ── Başlatma ──────────────────────────────────────────────────────────────
-  async init(container) {
-    // PixiJS kendi canvas'ını oluşturur, biz sadece div'e ekleriz
-    try {
-      this.app = new PIXI.Application({
-        width:           SCENE_W,
-        height:          SCENE_H,
-        backgroundAlpha: 0,
-        antialias:       true,
-        resolution:      window.devicePixelRatio || 1,
-        autoDensity:     true,
-      });
-    } catch (e) {
-      console.warn("[PixiEngine] WebGL başlatılamadı, Canvas renderer'a geçiliyor.", e);
-      this.app = new PIXI.Application({
-        width:           SCENE_W,
-        height:          SCENE_H,
-        backgroundAlpha: 0,
-        forceCanvas:     true,
-        resolution:      1,
-        autoDensity:     true,
-      });
-    }
-
-    // Canvas'ı div'e ekle ve şeffaf yap
-    this.app.view.style.background = "transparent";
-    this.app.view.style.display    = "block";
-    container.appendChild(this.app.view);
-
-    this.stage      = this.app.stage;
-    this.cameraRoot = new PIXI.Container();
-    this.petLayer   = new PIXI.Container();
-    this.fxLayer    = new PIXI.Container();
-    this.textLayer  = new PIXI.Container();
-
-    this.cameraRoot.addChild(this.petLayer, this.fxLayer, this.textLayer);
-    this.stage.addChild(this.cameraRoot);
-
-    // Kamera merkezleme
-    this.cameraRoot.pivot.set(SCENE_W / 2, SCENE_H / 2);
-    this.cameraRoot.position.set(SCENE_W / 2, SCENE_H / 2);
-
-    // Hazır — bekleyen takım güncellemesi varsa uygula
-    this.isReady = true;
-    if (this._pendingTeams) {
-      const { pT, eT } = this._pendingTeams;
-      this._pendingTeams = null;
-      await this.updateTeams(pT, eT);
-    }
+async init(container) {
+  try {
+    this.app = new PIXI.Application({
+      width: SCENE_W,
+      height: SCENE_H,
+      transparent: true,          // Şeffaflık aktif
+      antialias: true,
+      resolution: window.devicePixelRatio || 1,
+      autoDensity: true,
+    });
+  } catch (e) {
+    console.warn("[PixiEngine] WebGL başlatılamadı, Canvas renderer'a geçiliyor.", e);
+    this.app = new PIXI.Application({
+      width: SCENE_W,
+      height: SCENE_H,
+      transparent: true,
+      forceCanvas: true,
+      resolution: 1,
+      autoDensity: true,
+    });
   }
+
+  // Canvas’ı ekle ve stil ayarları
+  this.app.view.style.background = "transparent";
+  this.app.view.style.position = "absolute";
+  this.app.view.style.top = "0";
+  this.app.view.style.left = "0";
+  container.appendChild(this.app.view);
+
+  // RENDERER ARKA PLANINI ZORLA ŞEFFAF YAP
+  this.app.renderer.backgroundColor = 0x000000;
+  this.app.renderer.clearColor = [0, 0, 0, 0];
+
+  // Stage oluşturma (devam)
+  this.stage      = this.app.stage;
+  this.cameraRoot = new PIXI.Container();
+  this.petLayer   = new PIXI.Container();
+  this.fxLayer    = new PIXI.Container();
+  this.textLayer  = new PIXI.Container();
+
+  this.cameraRoot.addChild(this.petLayer, this.fxLayer, this.textLayer);
+  this.stage.addChild(this.cameraRoot);
+
+  // Kamera merkezleme
+  this.cameraRoot.pivot.set(SCENE_W / 2, SCENE_H / 2);
+  this.cameraRoot.position.set(SCENE_W / 2, SCENE_H / 2);
+
+  this.isReady = true;
+  if (this._pendingTeams) {
+    const { pT, eT } = this._pendingTeams;
+    this._pendingTeams = null;
+    await this.updateTeams(pT, eT);
+  }
+}
 
   destroy() {
     this._tickerFns.forEach(fn => this.app?.ticker.remove(fn));
@@ -124,50 +129,65 @@ export class PixiEngine {
     this.app = null;
   }
 
-  // ── Texture yükleme (cache'li) ────────────────────────────────────────────
+  // ── Texture yükleme (cache'li, hata durumunda kırmızı placeholder) ────────
   async _getTexture(imgFile) {
     if (!imgFile) return PIXI.Texture.WHITE;
     if (this.textures.has(imgFile)) return this.textures.get(imgFile);
-    return new Promise((resolve) => {
-      try {
-        const tex = PIXI.Texture.from(`/images/animals/${imgFile}`);
-        tex.baseTexture.on("loaded", () => {
-          this.textures.set(imgFile, tex);
-          resolve(tex);
-        });
-        tex.baseTexture.on("error", () => resolve(PIXI.Texture.WHITE));
-        // Zaten yüklüyse
+
+    try {
+      const tex = PIXI.Texture.from(`/images/animals/${imgFile}`);
+      // Yükleme tamamlanana kadar bekle
+      await new Promise((resolve) => {
         if (tex.baseTexture.valid) {
-          this.textures.set(imgFile, tex);
-          resolve(tex);
+          resolve();
+        } else {
+          tex.baseTexture.once('loaded', resolve);
+          tex.baseTexture.once('error', resolve);
         }
-      } catch {
-        resolve(PIXI.Texture.WHITE);
-      }
-    });
+      });
+      this.textures.set(imgFile, tex);
+      return tex;
+    } catch (err) {
+      console.warn(`[PixiEngine] Texture yüklenemedi: ${imgFile}`, err);
+      // Kırmızı placeholder texture oluştur
+      const canvas = document.createElement('canvas');
+      canvas.width = CARD_W;
+      canvas.height = CARD_H;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'red';
+      ctx.fillRect(0, 0, CARD_W, CARD_H);
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText('?', CARD_W/2 - 10, CARD_H/2);
+      const fallbackTex = PIXI.Texture.from(canvas);
+      this.textures.set(imgFile, fallbackTex);
+      return fallbackTex;
+    }
   }
 
-  // ── Pozisyon hesaplama ────────────────────────────────────────────────────
-  // Her takım için hayvan sayısına göre kart boyutu ve X pozisyonları
+  // ── Pozisyon hesaplama (ekran içinde kalır) ────────────────────────────────
   _calcPositions(count, isPlayer) {
     if (count === 0) return [];
 
-    // Kart boyutunu hayvan sayısına göre ölçekle
     const maxW    = MAX_TEAM_W;
     const spacing = Math.min(CARD_W + 8, Math.floor(maxW / count));
     const scale   = Math.min(1, spacing / (CARD_W + 8));
     const cardW   = CARD_W * scale;
     const totalW  = count * spacing;
 
-    // Takım bloğunun başlangıç X'i
-    const baseX = isPlayer
-      ? VS_CENTER_X - TEAM_PADDING - totalW      // Oyuncu: VS'e yakın sağda, uzak solda
-      : VS_CENTER_X + TEAM_PADDING;              // Düşman: VS'e yakın solda, uzak sağda
+    // Takım bloğunun başlangıç X'i, sınırlar içinde
+    let baseX = isPlayer
+      ? VS_CENTER_X - TEAM_PADDING - totalW
+      : VS_CENTER_X + TEAM_PADDING;
+
+    // Ekran dışına taşmayı engelle
+    baseX = Math.max(
+      TEAM_PADDING,
+      Math.min(SCENE_W - totalW - TEAM_PADDING, baseX)
+    );
 
     const positions = [];
     for (let i = 0; i < count; i++) {
-      // Oyuncu: pT[0] = ön = VS'e en yakın (sağ), pT[5] = arka = en sol
-      // Düşman: eT[0] = ön = VS'e en yakın (sol), eT[5] = arka = en sağ
       const x = isPlayer
         ? baseX + (count - 1 - i) * spacing + cardW / 2
         : baseX + i * spacing + cardW / 2;
@@ -268,7 +288,6 @@ export class PixiEngine {
 
   // ── Takım güncelleme (pT/eT değiştiğinde çağrılır) ────────────────────────
   async updateTeams(pT, eT) {
-    // init() henüz tamamlanmadıysa isteği sıraya al
     if (!this.isReady) {
       this._pendingTeams = { pT, eT };
       return;
@@ -276,10 +295,10 @@ export class PixiEngine {
 
     const allPetIds = new Set([...pT, ...eT].map(p => p.id));
 
-    // Yeni hayvanları ekle
     const pPositions = this._calcPositions(pT.length, true);
     const ePositions = this._calcPositions(eT.length, false);
 
+    // Yeni hayvanları ekle / var olanları güncelle
     for (let i = 0; i < pT.length; i++) {
       const pet = pT[i];
       if (!this.sprites.has(pet.id)) {
@@ -297,14 +316,13 @@ export class PixiEngine {
       }
     }
 
-    // Ölü hayvanları temizle (DOM'dan değil, Pixi sahnesinden)
+    // Ölü hayvanları temizle
     for (const [id, entry] of this.sprites) {
       if (!allPetIds.has(id) && !entry.isDead) {
         this._playDeathAnim(id);
       }
     }
 
-    // Kamera zoom
     this._updateZoom(pT.length + eT.length);
   }
 
@@ -314,18 +332,17 @@ export class PixiEngine {
     const { container, hpBar, atkText, hpText } = entry;
     const ch = CARD_H * pos.scale;
 
-    // HP bar
+    // Konumu güncelle
+    container.position.set(pos.x, pos.y);
+    entry.pos = pos;
+
+    // HP bar güncelle
     this._drawHpBar(hpBar, pet.curHp, pet.hp, ch);
-    // Stat text
+    // Stat text güncelle
     atkText.text = `⚔️${pet.atk}`;
     const hpRatio = Math.min(1, Math.max(0, pet.curHp / Math.max(1, pet.hp)));
     hpText.style.fill = hpRatio > 0.5 ? 0x4ade80 : hpRatio > 0.25 ? 0xfacc15 : 0xef4444;
     hpText.text = `❤️${Math.max(0, pet.curHp)}`;
-
-    // Pozisyon (hayvan öldüyse hareket ettirme)
-    if (!entry.isDead) {
-      entry.pos = pos;
-    }
   }
 
   // ── Kamera zoom ───────────────────────────────────────────────────────────
@@ -549,30 +566,53 @@ export class PixiEngine {
   }
 
   // ── Tween yardımcısı (GSAP olmadan, Pixi ticker tabanlı) ─────────────────
-  // props: { x, y, alpha, scale, scaleXY }
- _tween(target, props, durationMs, ease = "linear", delay = 0) {
-  if (!target || !this.app) return;
-  const startProps = {};
-  for (const key of Object.keys(props)) {
-    if (key === "scaleXY")   startProps[key] = target.scale.x;
-    else if (key === "scale") startProps[key] = target.scale.x;
-    else                      startProps[key] = target[key] ?? 0;
+  _tween(target, props, durationMs, ease = "linear", delay = 0) {
+    if (!target || !this.app) return;
+    const startProps = {};
+
+    for (const key of Object.keys(props)) {
+      if (key === "scaleXY")   startProps[key] = target.scale.x;
+      else if (key === "scale") startProps[key] = target.scale.x;
+      else                      startProps[key] = target[key] ?? 0;
+    }
+
+    const easeFn = (t) => {
+      if (ease === "power1") return t * t;
+      if (ease === "power2") return t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+      if (ease === "bounce") {
+        if (t < 1/2.75) return 7.5625*t*t;
+        if (t < 2/2.75) return 7.5625*(t-=1.5/2.75)*t+0.75;
+        if (t < 2.5/2.75) return 7.5625*(t-=2.25/2.75)*t+0.9375;
+        return 7.5625*(t-=2.625/2.75)*t+0.984375;
+      }
+      return t; // linear
+    };
+
+    const startTime = performance.now() + delay;
+    const tick = () => {
+      const now = performance.now();
+      if (now < startTime) return;
+      const elapsed = now - startTime;
+      const t = easeFn(Math.min(1, elapsed / durationMs));
+
+      for (const [key, end] of Object.entries(props)) {
+        const start = startProps[key];
+        const val   = start + (end - start) * t;
+        if (key === "scaleXY") { target.scale.set(val); }
+        else if (key === "scale") { target.scale.set(val); }
+        else { target[key] = val; }
+      }
+
+      if (elapsed >= durationMs) {
+        this.app?.ticker.remove(tick);
+        const idx = this._tickerFns.indexOf(tick);
+        if (idx > -1) this._tickerFns.splice(idx, 1);
+      }
+    };
+
+    this.app?.ticker.add(tick);
+    this._tickerFns.push(tick);
   }
-
-  const easeFn = (t) => { /* ... */ };
-
-  const startTime = performance.now() + delay;   // 👈 bu satır eklendi
-  const tick = () => {
-    const now = performance.now();
-    if (now < startTime) return;
-    const elapsed = now - startTime;
-    const t = easeFn(Math.min(1, elapsed / durationMs));
-    // ... güncelleme kodları ...
-  };
-
-  this.app?.ticker.add(tick);
-  this._tickerFns.push(tick);
-}
 
   // ── Hayvanın sahne koordinatını döner (projektil hedefleme için) ──────────
   getPetCenter(petId) {
