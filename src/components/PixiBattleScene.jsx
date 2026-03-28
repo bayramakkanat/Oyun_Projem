@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import Card from "./Card";
 import { BOSSES } from "../data/gameData";
@@ -8,6 +8,15 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
   const enemyRefs = useRef({});
   const animStateRef = useRef({});
   const cameraRef = useRef(null);
+
+  const [swordVisible, setSwordVisible] = useState(true);
+
+useEffect(() => {
+  if (step === 1) {
+    const t = setTimeout(() => setSwordVisible(false), 600);
+    return () => clearTimeout(t);
+  }
+}, [step]);
 
   // Dinamik Kamera (Zoom) Efekti
   useEffect(() => {
@@ -119,17 +128,28 @@ export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
       </div>
 
       {/* VS Ortası */}
-      <div className="flex flex-col items-center gap-1 flex-shrink-0 z-10 w-[10%]">
-        <div 
-           className="text-5xl drop-shadow-2xl select-none relative" 
-           style={{ transition: "transform 0.2s", transform: step % 2 !== 0 ? "scale(1)" : "scale(1.2)" }}
-        >
-          ⚔️
-        </div>
-        <div className="text-sm text-white font-black tracking-widest bg-white/15 border border-white/20 px-3 py-1 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.2)] backdrop-blur-md">
-          VS
-        </div>
-      </div>
+<div
+  className="flex flex-col items-center gap-1 flex-shrink-0 z-10 overflow-hidden"
+  style={{
+    transition: "width 0.5s ease-in",
+    width: swordVisible ? "10%" : "0%",
+  }}
+>
+  <div
+    className="flex flex-col items-center gap-1 select-none"
+    style={{
+      transition: "opacity 0.4s ease-out, transform 0.5s ease-in",
+      opacity: swordVisible ? 1 : 0,
+      transform: swordVisible ? "scale(1) translateY(0px)" : "scale(0.3) translateY(40px)",
+      pointerEvents: "none",
+    }}
+  >
+    <div className="text-5xl drop-shadow-2xl">⚔️</div>
+    <div className="text-sm text-white font-black tracking-widest bg-white/15 border border-white/20 px-3 py-1 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.2)] backdrop-blur-md">
+      VS
+    </div>
+  </div>
+</div>
 
       {/* Düşman Takımı (SAĞ YARI) */}
       <div className="flex items-center justify-start flex-nowrap min-h-[160px] pb-6 relative z-20 flex-1 min-w-0 overflow-visible pl-4 gap-1 sm:gap-2">

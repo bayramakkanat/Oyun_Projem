@@ -50,7 +50,13 @@ export default function LeaderboardScreen({ onBack, user }) {
       </button>
 
       <h2 className="text-4xl font-black mb-2">LİDERLİK TABLOSU</h2>
-      <p className="text-xs text-gray-500 uppercase tracking-widest mb-6">🏆 {getCurrentMonthLabel()} Sıralaması</p>
+      <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">🏆 {getCurrentMonthLabel()} Sıralaması</p>
+<div className="flex items-center gap-2 mb-6 px-3 py-2 rounded-xl bg-blue-900/20 border border-blue-500/20">
+  <span className="text-blue-400 text-sm">🏅</span>
+  <p className="text-xs text-blue-300">
+    Sıralama <span className="font-black text-white">en yüksek tura</span> göre yapılır. Eşitlik durumunda XP belirler.
+  </p>
+</div>
 
       {loading ? (
         <div className="text-center text-gray-400 py-12">Yükleniyor...</div>
@@ -80,16 +86,18 @@ export default function LeaderboardScreen({ onBack, user }) {
                   <div className={`font-black text-sm ${isMe ? "text-yellow-300" : "text-white"}`}>
                     {p.userName} {isMe && <span className="text-[10px] text-yellow-500">(Sen)</span>}
                   </div>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-widest">
-                    {rank.name} • En Yüksek Tur: {p.bestTurn}
-                  </div>
+                 <div className="text-[10px] text-gray-500 uppercase tracking-widest">
+                {rank.name}
                 </div>
-                <div className="text-right">
-                  <div className="font-black text-lg" style={{ color: rank.color }}>
-                    {p.xp?.toLocaleString()}
-                  </div>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-widest">XP</div>
                 </div>
+               <div className="text-right">
+                <div className="font-black text-base text-white">
+                Tur {p.bestTurn || 0}
+                </div>
+            <div className="font-bold text-sm" style={{ color: rank.color }}>
+              {p.xp?.toLocaleString()} XP
+              </div>
+              </div>
               </div>
             );
           })}

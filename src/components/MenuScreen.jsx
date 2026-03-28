@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import StarField from "./StarField";
 import AuthModal from "./AuthModal";
 import SettingsModal from "./SettingsModal";
@@ -54,6 +54,7 @@ onDebug,
 loadTasksFromDB,
 saveTasksToDB,
 }) {
+  const [achCat, setAchCat] = useState("any");
   const currentDiffConfig =
     DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
 
@@ -437,8 +438,8 @@ saveTasksToDB,
           const catBgs     = { any: "bg-gray-800/30",     standard: "bg-blue-900/20",     arena: "bg-purple-900/20" };
           const catColors  = { any: "text-gray-300",      standard: "text-blue-300",       arena: "text-purple-300" };
           // activeCat state — IIFE içinde useState kullanamayız, o yüzden DOM trick: window._achCat
-          const activeCat = window._achCat || "any";
-          const setActiveCat = (k) => { window._achCat = k; };
+          const activeCat = achCat;
+          const setActiveCat = (k) => setAchCat(k);
           const catAchievements = ACHIEVEMENTS_DEF.filter(a => a.mode === activeCat);
           const catEarned = catAchievements.filter(a => stats.achievements.includes(a.id)).length;
           return (
@@ -456,8 +457,8 @@ saveTasksToDB,
               Geri Dön
             </button>
             <h2 className="text-4xl font-black mb-1">BAŞARIMLAR</h2>
-            <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">
-              {stats.achievements.length} / {ACHIEVEMENTS_DEF.length} açıldı
+           <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">
+            {stats.achievements.length} / {ACHIEVEMENTS_DEF.filter(a => ["any","standard","arena"].includes(a.mode)).length} açıldı
             </p>
 
             {/* Kategori sekmeleri — her zaman üstte sabit */}
@@ -469,7 +470,7 @@ saveTasksToDB,
                 return (
                   <button
                     key={cat.key}
-                    onClick={() => { window._achCat = cat.key; setMenuView("achievements"); }}
+                    onClick={() => setActiveCat(cat.key)}
                     className={`flex-1 flex flex-col items-center py-2.5 px-2 rounded-2xl border-2 transition-all font-bold text-xs ${
                       isActive
                         ? cat.activeColor + " text-white shadow-lg scale-[1.03]"

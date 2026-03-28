@@ -65,87 +65,117 @@ export default function CollectionScreen({ onClose, userId }) {
           })}
         </div>
 
-        {/* Hayvan Kartları */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {animals.map((animal) => {
-            const data = collection[animal.nick] || getDefaultAnimalData();
-            const isUnlocked = data.unlocked;
-            const completedTasks = [data.task1, data.task2, data.task3].filter(Boolean).length;
-            const isComplete = completedTasks === 3;
+       {/* Hayvan Kartları */}
+<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+  {animals.map((animal) => {
+    const data = collection[animal.nick] || getDefaultAnimalData();
+    const isUnlocked = data.unlocked;
+    const completedTasks = [data.task1, data.task2, data.task3].filter(Boolean).length;
+    const isComplete = completedTasks === 3;
 
-            return (
-              <div
-                key={animal.nick}
-                className={`rounded-2xl border-2 p-4 transition-all relative overflow-hidden ${
-                  isComplete
-                    ? "bg-gradient-to-br from-yellow-900/50 to-amber-900/40 border-yellow-400/70 shadow-lg shadow-yellow-500/10"
-                    : isUnlocked
-                    ? "bg-gradient-to-br from-purple-900/60 to-blue-900/60 border-purple-400/60"
-                    : "bg-gray-900/60 border-gray-700/60"
-                }`}
-              >
-                {/* Altın rozet — tam koleksiyon */}
-                {isComplete && (
-                  <div className="absolute top-2 right-2 text-yellow-400 text-lg" style={{ filter: "drop-shadow(0 0 6px rgba(251,191,36,0.8))" }}>👑</div>
-                )}
+    return (
+      <div
+        key={animal.nick}
+        className="rounded-2xl border-2 transition-all relative overflow-hidden flex flex-col"
+        style={
+          isComplete
+            ? { background: "linear-gradient(135deg, #3a2000 0%, #1a0a00 100%)", borderColor: "rgba(251,191,36,0.7)", boxShadow: "0 0 24px rgba(251,191,36,0.15), inset 0 0 30px rgba(251,191,36,0.05)" }
+            : isUnlocked
+            ? { background: "linear-gradient(135deg, #1e0a3c 0%, #0a0a2e 100%)", borderColor: "rgba(167,139,250,0.5)", boxShadow: "0 0 16px rgba(167,139,250,0.1)" }
+            : { background: "rgba(17,17,27,0.8)", borderColor: "rgba(75,85,99,0.4)" }
+        }
+      >
+        {/* Üst görsel alanı — dikdörtgen çerçeve */}
+        <div
+          className="relative w-full overflow-hidden flex items-center justify-center"
+          style={{
+            aspectRatio: "4/3",
+            background: isComplete
+              ? "radial-gradient(ellipse at center, rgba(251,191,36,0.12) 0%, transparent 70%)"
+              : isUnlocked
+              ? "radial-gradient(ellipse at center, rgba(139,92,246,0.15) 0%, transparent 70%)"
+              : "rgba(0,0,0,0.3)",
+          }}
+        >
+          {/* Tam koleksiyon rozeti */}
+          {isComplete && (
+            <div className="absolute top-2 right-2 z-10 text-xl" style={{ filter: "drop-shadow(0 0 8px rgba(251,191,36,0.9))" }}>👑</div>
+          )}
 
-                {/* Hayvan Görseli — büyük ve merkezi */}
-                <div className="flex justify-center mb-3 relative">
-                  <div className={`relative ${isComplete ? "ring-2 ring-yellow-400/60 rounded-full p-1" : ""}`}>
-                    {animal.img ? (
-                      <img
-                        src={`/images/animals/${animal.img}`}
-                        alt={animal.nick}
-                        className={`w-20 h-20 object-contain drop-shadow-xl transition-all ${
-                          !isUnlocked
-                            ? "brightness-0 opacity-30 scale-95"
-                            : isComplete
-                            ? "drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]"
-                            : ""
-                        }`}
-                        style={!animal.flip ? { transform: `scaleX(-1)${!isUnlocked ? " blur(1px)" : ""}` } : (!isUnlocked ? { filter: "blur(1px)" } : {})}
-                      />
-                    ) : (
-                      <span className={`text-5xl block text-center ${!isUnlocked ? "opacity-20 grayscale" : ""}`}>
-                        {animal.name}
-                      </span>
-                    )}
-                    {!isUnlocked && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-2xl">🔒</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+          {animal.img ? (
+            <img
+              src={`/images/animals/${animal.img}`}
+              alt={animal.nick}
+              className="transition-all duration-300"
+              style={{
+                width: "75%",
+                height: "75%",
+                objectFit: "contain",
+                filter: !isUnlocked
+                  ? "brightness(0) opacity(0.2) blur(1px)"
+                  : isComplete
+                  ? "drop-shadow(0 0 16px rgba(251,191,36,0.7))"
+                  : "drop-shadow(0 0 8px rgba(167,139,250,0.4))",
+                transform: !animal.flip ? "scaleX(-1)" : "none",
+              }}
+            />
+          ) : (
+            <span className={`text-6xl ${!isUnlocked ? "opacity-20 grayscale" : ""}`}>
+              {animal.name}
+            </span>
+          )}
 
-                {/* Hayvan Bilgisi */}
-                <div className="text-center mb-3">
-                  <div className={`font-black text-sm ${isUnlocked ? "text-white" : "text-gray-500"}`}>
-                    {isUnlocked ? animal.nick : "???"}
-                  </div>
-                  <div className="text-xs text-gray-400">Kademe {animal.tier}</div>
-                  {isComplete && <div className="text-xs text-yellow-400 font-bold mt-0.5">✨ Tam Koleksiyon!</div>}
-                  {isUnlocked && !isComplete && <div className="text-xs text-green-400/80 mt-0.5">✓ Koleksiyonda</div>}
-                </div>
+          {/* Kilit overlay */}
+          {!isUnlocked && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-3xl">🔒</span>
+                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Kilitli</span>
+              </div>
+            </div>
+          )}
 
-                {/* İstatistikler */}
-                <div className="flex gap-3 mb-3 text-xs">
-                  <div className="flex flex-col items-center bg-black/30 rounded-lg px-2 py-1">
-                    <span className="text-gray-400">Kullanım</span>
+          {/* Unlocked parlama efekti — alt kenar */}
+          {isUnlocked && (
+            <div
+              className="absolute bottom-0 left-0 right-0 h-8"
+              style={{
+                background: isComplete
+                  ? "linear-gradient(to top, rgba(251,191,36,0.15), transparent)"
+                  : "linear-gradient(to top, rgba(139,92,246,0.15), transparent)",
+              }}
+            />
+          )}
+        </div>
+
+        {/* Alt bilgi alanı */}
+        <div className="p-3">
+          <div className={`font-black text-sm text-center ${isUnlocked ? "text-white" : "text-gray-600"}`}>
+            {isUnlocked ? animal.nick : "???"}
+          </div>
+          <div className="text-xs text-gray-500 text-center mb-2">Kademe {animal.tier}</div>
+          {isComplete && <div className="text-xs text-yellow-400 font-bold text-center">✨ Tam Koleksiyon!</div>}
+          {isUnlocked && !isComplete && <div className="text-xs text-green-400/70 text-center">✓ Koleksiyonda</div>}
+        </div>
+
+            {/* İstatistikler */}
+                <div className="flex gap-2 mb-3 text-xs px-1">
+                  <div className="flex-1 flex flex-col items-center bg-black/30 rounded-lg px-1 py-1.5">
+                    <span className="text-gray-500 text-[10px]">Kullanım</span>
                     <span className="text-white font-bold">{data.used}</span>
                   </div>
-                  <div className="flex flex-col items-center bg-black/30 rounded-lg px-2 py-1">
-                    <span className="text-gray-400">Galibiyet</span>
+                  <div className="flex-1 flex flex-col items-center bg-black/30 rounded-lg px-1 py-1.5">
+                    <span className="text-gray-500 text-[10px]">Galibiyet</span>
                     <span className="text-green-400 font-bold">{data.wins}</span>
                   </div>
-                  <div className="flex flex-col items-center bg-black/30 rounded-lg px-2 py-1">
-                    <span className="text-gray-400">Max Seviye</span>
+                  <div className="flex-1 flex flex-col items-center bg-black/30 rounded-lg px-1 py-1.5">
+                    <span className="text-gray-500 text-[10px]">Max Seviye</span>
                     <span className="text-purple-400 font-bold">{data.maxLvl || "-"}</span>
                   </div>
                 </div>
 
                 {/* Görevler */}
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5 px-1 pb-1">
                   {[0, 1, 2].map((idx) => {
                     const progress = getTaskProgress(data, idx);
                     return (
@@ -167,10 +197,13 @@ export default function CollectionScreen({ onClose, userId }) {
                       </div>
                     );
                   })}
-                  <div className="text-right text-[10px] text-gray-500 mt-1">
-                    {completedTasks}/3 görev tamamlandı
+                  <div className="text-right text-[10px] mt-1">
+                    <span className={completedTasks === 3 ? "text-yellow-400 font-bold" : "text-gray-500"}>
+                      {completedTasks}/3 görev tamamlandı
+                    </span>
                   </div>
                 </div>
+                
               </div>
             );
           })}
