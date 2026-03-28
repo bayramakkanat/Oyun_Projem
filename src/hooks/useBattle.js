@@ -97,7 +97,7 @@ export function useBattle({
 
   // ─── faint yardımcısı ───────────────────────────────────────────────────
   const faint = (d, al, en, isP, killer) =>
-    resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAnim, spawnParticles, setTeam });
+    resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAnim, spawnParticles, spawnProjectile, setTeam });
 
   // ─── Takım durumunu savaş sonrası güncelle ──────────────────────────────
   const buildUpdatedTeam = (currentTeam, currentPT) =>

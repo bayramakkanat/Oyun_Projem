@@ -16,7 +16,7 @@ import {
   pushFaintDuplicateEffect,
 } from "./battleFaintUtils";
 
-export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAnim, spawnParticles, setTeam }) {
+export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAnim, spawnParticles, spawnProjectile, setTeam }) {
   if (!d) return { lg: [], sm: [], gG: 0 };
   if (d.isDead) return { lg: [], sm: [], gG: 0 };
 
@@ -27,14 +27,23 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
   if (!isP) {
     if (d.ability === AB.FAINT_BUFF && al.length > 0) {
       applyFaintBuffEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "💀 Düşman ", logSuffix: " -> " });
+      al.forEach((a, i) => setTimeout(() => { triggerAnim && triggerAnim(a.id, "buff"); spawnParticles && spawnParticles(a.id, "buff"); }, i * 80));
     }
     if (d.ability === AB.FAINT_DMG && en.length > 0) {
       applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: "☠️ Düşman ", targetLabel: "Oyuncu takımına", logSuffix: " -> " });
+      if (spawnProjectile) en.forEach((e, i) => setTimeout(() => spawnProjectile(d.id, e.id, AB.FAINT_DMG, null, false), i * 80));
     }
     if (d.ability === AB.FAINT_SHIELD && al.length > 0) {
       applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🛡️ Düşman ", targetLabel: "Düşman takımına", logSuffix: " -> " });
+      al.forEach((a, i) => setTimeout(() => { triggerAnim && triggerAnim(a.id, "buff"); spawnParticles && spawnParticles(a.id, "shield"); }, i * 80));
     }
     applyTeamWideFaintEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, clampStat, logs: lg, teamBuffLabel: "düşman takımı", enemyLabel: "oyuncu takımı" });
+    if ((d.ability === AB.FAINT_WAVE) && en.length > 0 && spawnProjectile) {
+      en.forEach((e, i) => setTimeout(() => spawnProjectile(d.id, e.id, AB.FAINT_WAVE, null, true), i * 120));
+    }
+    if ((d.ability === AB.FAINT_RAGE || d.ability === AB.CHEETAH_FAINT) && al.length > 0) {
+      al.forEach((a, i) => setTimeout(() => { triggerAnim && triggerAnim(a.id, "buff"); spawnParticles && spawnParticles(a.id, "buff"); }, i * 80));
+    }
     if (d.ability === AB.FAINT_GOLD) {
       lg.push(`💰 Düşman ${d.nick} -> +${m} altın (oyuncuya etkisi yok)`);
     }
@@ -88,6 +97,7 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
       killer.atk = clampStat(killer.atk + 3 * km);
       killer.curHp = clampStat(killer.curHp + 3 * km);
       lg.push(`🦈 Düşman ${killer.nick} -> öldürdü, +${3 * km}/+${3 * km}`);
+      setTimeout(() => { triggerAnim && triggerAnim(killer.id, "buff"); spawnParticles && spawnParticles(killer.id, "attack"); }, 100);
     }
     al.forEach((ally) => {
       if (ally && ally.ability === AB.SUMMON_RETRIGGER) {
@@ -121,17 +131,26 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
   // isP === true (oyuncu tarafı)
   if (d.ability === AB.FAINT_BUFF && al.length > 0) {
     applyFaintBuffEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "💀 ", logSuffix: " -> " });
+    al.forEach((a, i) => setTimeout(() => { triggerAnim && triggerAnim(a.id, "buff"); spawnParticles && spawnParticles(a.id, "buff"); }, i * 80));
   }
   if (d.ability === AB.FAINT_COPY && al.length > 0) {
     applyFaintCopyEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🦛 ", temporary: true, logSuffix: " -> " });
   }
   if (d.ability === AB.FAINT_DMG) {
     applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: "☠️ ", targetLabel: "Tüm düşmanlara", logSuffix: " -> " });
+    if (spawnProjectile) en.forEach((e, i) => setTimeout(() => spawnProjectile(d.id, e.id, AB.FAINT_DMG, null, false), i * 80));
   }
   if (d.ability === AB.FAINT_SHIELD) {
     applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: "🛡️ ", targetLabel: "Tüm takıma", logSuffix: " -> " });
+    al.forEach((a, i) => setTimeout(() => { triggerAnim && triggerAnim(a.id, "buff"); spawnParticles && spawnParticles(a.id, "shield"); }, i * 80));
   }
   applyTeamWideFaintEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, clampStat, logs: lg, teamBuffLabel: "oyuncu takımı", enemyLabel: "düşman takımı" });
+  if ((d.ability === AB.FAINT_WAVE) && en.length > 0 && spawnProjectile) {
+    en.forEach((e, i) => setTimeout(() => spawnProjectile(d.id, e.id, AB.FAINT_WAVE, null, true), i * 120));
+  }
+  if ((d.ability === AB.FAINT_RAGE || d.ability === AB.CHEETAH_FAINT) && al.length > 0) {
+    al.forEach((a, i) => setTimeout(() => { triggerAnim && triggerAnim(a.id, "buff"); spawnParticles && spawnParticles(a.id, "buff"); }, i * 80));
+  }
   if (d.ability === AB.FAINT_BUFF_SELF && isP) {
     const m2 = pwr(d);
     applySelfFaintBuffEffect({ deadUnit: d, power: m2, allyTeam: al, clampStat, logs: lg, logPrefix: "🦡 ", logSuffix: " -> " });
