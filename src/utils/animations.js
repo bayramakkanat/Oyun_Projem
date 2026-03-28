@@ -243,6 +243,7 @@ const spawnImpactAt = (endX, endY) => {
 };
 
 export const spawnProjectile = (fromPetId, toPetId, ability, onImpact, arc = false) => {
+  setTimeout(() => {
   const from = getCenter(fromPetId);
   const to   = getCenter(toPetId);
   if (!from || !to) { if (onImpact) onImpact(); return; }
@@ -330,4 +331,5 @@ export const spawnProjectile = (fromPetId, toPetId, ability, onImpact, arc = fal
       if (onImpact) onImpact();
     }, duration);
   }
+  }, 50);
 };

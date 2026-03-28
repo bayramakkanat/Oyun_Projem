@@ -559,6 +559,7 @@ export function useBattle({
           triggerAnim, clampStat, pwr,
           spawnParticles, spawnProjectile,
           setLog, setTeam, syncBattleTeams,
+          faint,
           isDebugBattle, announceDebugWinner,
           scheduleDebugBattleReset, setStep,
         });

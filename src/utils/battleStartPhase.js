@@ -5,7 +5,7 @@ const selfBuffAbilities = [
   AB.START_TRAMPLE, AB.START_CHARGE, AB.START_TANK,
 ];
 
-async function runTempBuffPhase({ playerTeam, delay, triggerAnim, addBattleLog, syncBattleTeams, isCancelled }) {
+async function runTempBuffPhase({ playerTeam, delay, triggerAnim, addBattleLog, syncBattleTeams, isCancelled,faint }) {
   for (let i = 0; i < playerTeam.length; i++) {
     const pet = playerTeam[i];
     if (!pet || (!pet.tempAtk && !pet.tempHp)) continue;
@@ -99,6 +99,7 @@ export async function runBattleStartPhase({
   triggerAnim, clampStat, pwr, spawnParticles, spawnProjectile,
   setLog, setTeam,
   syncBattleTeams,
+  faint,
   isDebugBattle, announceDebugWinner, scheduleDebugBattleReset,
   setStep,
 }) {
@@ -136,6 +137,7 @@ export async function runBattleStartPhase({
 
   // 2. Temp buffs
   if (!(await runTempBuffPhase({ playerTeam: pp, delay, triggerAnim, addBattleLog, syncBattleTeams, isCancelled }))) return;
+  if (!(await runTempBuffPhase({ playerTeam: ee, delay, triggerAnim, addBattleLog, syncBattleTeams, isCancelled }))) return;
 
   // 3. Self buff phases
   const playerPhase = await runPlayerSelfBuffPhase({ playerTeam: pp, delay, triggerAnim, clampStat, pwr, spawnParticles, setLog, setTeam, syncBattleTeams, isCancelled });
@@ -280,8 +282,15 @@ export async function runBattleStartPhase({
       await delay(1200 - PROJ_FLY_MS);
     }
 
-    if (isPlayer) ee = ee.filter((x) => x.curHp > 0);
-    else pp = pp.filter((x) => x.curHp > 0);
+    if (isPlayer) {
+  const dead = ee.filter((x) => x.curHp <= 0);
+  ee = ee.filter((x) => x.curHp > 0);
+  if (faint) dead.forEach((d) => faint(d, ee, pp, false, null));
+} else {
+  const dead = pp.filter((x) => x.curHp <= 0);
+  pp = pp.filter((x) => x.curHp > 0);
+  if (faint) dead.forEach((d) => faint(d, pp, ee, true, null));
+}
     syncBattleTeams(pp, ee);
     if (isCancelled()) return;
   }
