@@ -101,9 +101,9 @@ export default function NewTierScreen({ newTier, onContinue }) {
         )}
       </div>
 
-      {/* Hayvan kartları */}
+     {/* Hayvan kartları */}
       <div
-        className="flex flex-wrap gap-3 justify-center mb-6 max-w-2xl"
+        className="flex flex-wrap gap-3 justify-center mb-10 max-w-2xl mt-6"
         style={{ animation: "slideInFromBottom 0.5s ease-out 0.5s both" }}
       >
         {TIERS[newTier].map((a, i) => (

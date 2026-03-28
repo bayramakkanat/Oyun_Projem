@@ -18,7 +18,16 @@ export default function LeaderboardScreen({ onBack, user }) {
           limit(20)
         );
         const snap = await getDocs(q);
-        setPlayers(snap.docs.map((d) => d.data()));
+        const rawPlayers = snap.docs.map((d) => d.data());
+        // Sıralama: 1) En yüksek tur 2) XP 3) Kendi hesabı önce
+        const sorted = rawPlayers.sort((a, b) => {
+          if ((b.bestTurn || 0) !== (a.bestTurn || 0)) return (b.bestTurn || 0) - (a.bestTurn || 0);
+          if ((b.xp || 0) !== (a.xp || 0)) return (b.xp || 0) - (a.xp || 0);
+          if (user?.uid === a.uid) return -1;
+          if (user?.uid === b.uid) return 1;
+          return 0;
+        });
+        setPlayers(sorted);
       } catch (e) {
         console.error(e);
       } finally {

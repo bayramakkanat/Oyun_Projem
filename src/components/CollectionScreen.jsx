@@ -71,37 +71,61 @@ export default function CollectionScreen({ onClose, userId }) {
             const data = collection[animal.nick] || getDefaultAnimalData();
             const isUnlocked = data.unlocked;
             const completedTasks = [data.task1, data.task2, data.task3].filter(Boolean).length;
+            const isComplete = completedTasks === 3;
 
             return (
               <div
                 key={animal.nick}
-                className={`rounded-2xl border-2 p-4 transition-all ${
-                  isUnlocked
+                className={`rounded-2xl border-2 p-4 transition-all relative overflow-hidden ${
+                  isComplete
+                    ? "bg-gradient-to-br from-yellow-900/50 to-amber-900/40 border-yellow-400/70 shadow-lg shadow-yellow-500/10"
+                    : isUnlocked
                     ? "bg-gradient-to-br from-purple-900/60 to-blue-900/60 border-purple-400/60"
                     : "bg-gray-900/60 border-gray-700/60"
                 }`}
               >
-                {/* Hayvan Başlık */}
-                <div className="flex items-center gap-3 mb-3">
-                  {animal.img ? (
-                    <img
-                      src={`/images/animals/${animal.img}`}
-                      alt={animal.nick}
-                      className={`w-12 h-12 object-contain ${!isUnlocked ? "grayscale opacity-40" : "drop-shadow-lg"}`}
-                      style={!animal.flip ? { transform: "scaleX(-1)" } : {}}
-                    />
-                  ) : (
-                    <span className={`text-4xl ${!isUnlocked ? "grayscale opacity-40" : ""}`}>{animal.name}</span>
-                  )}
-                  <div>
-                    <div className={`font-black text-base ${isUnlocked ? "text-white" : "text-gray-500"}`}>
-                      {animal.nick}
-                    </div>
-                    <div className="text-xs text-gray-400">Kademe {animal.tier}</div>
-                    {isUnlocked && (
-                      <div className="text-xs text-yellow-400 font-bold">✨ Koleksiyonda!</div>
+                {/* Altın rozet — tam koleksiyon */}
+                {isComplete && (
+                  <div className="absolute top-2 right-2 text-yellow-400 text-lg" style={{ filter: "drop-shadow(0 0 6px rgba(251,191,36,0.8))" }}>👑</div>
+                )}
+
+                {/* Hayvan Görseli — büyük ve merkezi */}
+                <div className="flex justify-center mb-3 relative">
+                  <div className={`relative ${isComplete ? "ring-2 ring-yellow-400/60 rounded-full p-1" : ""}`}>
+                    {animal.img ? (
+                      <img
+                        src={`/images/animals/${animal.img}`}
+                        alt={animal.nick}
+                        className={`w-20 h-20 object-contain drop-shadow-xl transition-all ${
+                          !isUnlocked
+                            ? "brightness-0 opacity-30 scale-95"
+                            : isComplete
+                            ? "drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]"
+                            : ""
+                        }`}
+                        style={!animal.flip ? { transform: `scaleX(-1)${!isUnlocked ? " blur(1px)" : ""}` } : (!isUnlocked ? { filter: "blur(1px)" } : {})}
+                      />
+                    ) : (
+                      <span className={`text-5xl block text-center ${!isUnlocked ? "opacity-20 grayscale" : ""}`}>
+                        {animal.name}
+                      </span>
+                    )}
+                    {!isUnlocked && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-2xl">🔒</span>
+                      </div>
                     )}
                   </div>
+                </div>
+
+                {/* Hayvan Bilgisi */}
+                <div className="text-center mb-3">
+                  <div className={`font-black text-sm ${isUnlocked ? "text-white" : "text-gray-500"}`}>
+                    {isUnlocked ? animal.nick : "???"}
+                  </div>
+                  <div className="text-xs text-gray-400">Kademe {animal.tier}</div>
+                  {isComplete && <div className="text-xs text-yellow-400 font-bold mt-0.5">✨ Tam Koleksiyon!</div>}
+                  {isUnlocked && !isComplete && <div className="text-xs text-green-400/80 mt-0.5">✓ Koleksiyonda</div>}
                 </div>
 
                 {/* İstatistikler */}

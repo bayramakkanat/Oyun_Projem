@@ -426,61 +426,74 @@ saveTasksToDB,
           </div>
         )}
 
-        {menuView === "achievements" && (
+        {menuView === "achievements" && (() => {
+          const categories = [
+            { key: "any", label: "🌍 Genel", color: "text-gray-300", border: "border-gray-500/30", bg: "bg-gray-800/30" },
+            { key: "standard", label: "⚔️ Standart", color: "text-blue-300", border: "border-blue-500/30", bg: "bg-blue-900/20" },
+            { key: "arena", label: "🏟️ Arena", color: "text-purple-300", border: "border-purple-500/30", bg: "bg-purple-900/20" },
+          ];
+          return (
           <div
             className="w-full"
             style={{ animation: "slideInRight 0.3s ease-out" }}
           >
             <button
               onClick={() => setMenuView("main")}
-              className="mb-8 flex items-center gap-2 text-gray-400 hover:text-white transition-colors font-bold uppercase text-xs tracking-widest"
+              className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors font-bold uppercase text-xs tracking-widest"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="3"
-                  d="M15 19l-7-7 7-7"
-                />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" />
               </svg>
               Geri Dön
             </button>
-            <h2 className="text-4xl font-black mb-6">BAŞARIMLAR</h2>
-            <div className="grid grid-cols-1 gap-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-              {ACHIEVEMENTS_DEF.map((a) => {
-                const earned = stats.achievements.includes(a.id);
+            <h2 className="text-4xl font-black mb-1">BAŞARIMLAR</h2>
+            <p className="text-xs text-gray-500 uppercase tracking-widest mb-5">
+              {stats.achievements.length} / {ACHIEVEMENTS_DEF.length} açıldı
+            </p>
+            <div className="max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-6">
+              {categories.map(cat => {
+                const catAchievements = ACHIEVEMENTS_DEF.filter(a => a.mode === cat.key);
+                const earnedCount = catAchievements.filter(a => stats.achievements.includes(a.id)).length;
                 return (
-                  <div
-                    key={a.id}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border ${
-                      earned
-                        ? "bg-yellow-500/10 border-yellow-500/20"
-                        : "bg-white/5 border-white/10 opacity-40"
-                    }`}
-                  >
-                    <div className="text-4xl">{earned ? a.icon : "🔒"}</div>
-                    <div className="text-left">
-                      <div
-                        className={`font-black uppercase italic ${
-                          earned ? "text-yellow-300" : "text-gray-400"
-                        }`}
-                      >
-                        {a.name}
+                  <div key={cat.key}>
+                    <div className={`flex items-center gap-3 mb-3 px-3 py-2 rounded-xl border ${cat.border} ${cat.bg}`}>
+                      <span className={`font-black text-sm uppercase tracking-widest ${cat.color}`}>{cat.label}</span>
+                      <span className="ml-auto text-xs text-gray-500">{earnedCount}/{catAchievements.length}</span>
+                      <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-yellow-500 rounded-full transition-all" style={{ width: `${catAchievements.length ? (earnedCount / catAchievements.length) * 100 : 0}%` }} />
                       </div>
-                      <div className="text-xs text-gray-500">{a.desc}</div>
                     </div>
-                    {earned && <div className="ml-auto text-yellow-500">✓</div>}
+                    <div className="grid grid-cols-2 gap-2">
+                      {catAchievements.map((a) => {
+                        const earned = stats.achievements.includes(a.id);
+                        return (
+                          <div
+                            key={a.id}
+                            className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                              earned
+                                ? "bg-yellow-500/10 border-yellow-500/30 shadow-lg shadow-yellow-500/5"
+                                : "bg-white/3 border-white/8 opacity-40"
+                            }`}
+                          >
+                            <div className="text-2xl flex-shrink-0">{earned ? a.icon : "🔒"}</div>
+                            <div className="text-left min-w-0">
+                              <div className={`font-black text-xs uppercase leading-tight ${earned ? "text-yellow-300" : "text-gray-400"}`}>
+                                {a.name}
+                              </div>
+                              <div className="text-[10px] text-gray-500 leading-tight mt-0.5 line-clamp-2">{a.desc}</div>
+                            </div>
+                            {earned && <div className="ml-auto text-yellow-500 flex-shrink-0 text-xs">✓</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}
             </div>
           </div>
-        )}
+          );
+        })()}
         {menuView === "leaderboard" && (
           <LeaderboardScreen
             onBack={() => setMenuView("main")}

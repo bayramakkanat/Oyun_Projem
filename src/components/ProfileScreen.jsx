@@ -80,17 +80,56 @@ if (profileSnap.exists()) {
           </button>
         </div>
 
-        {/* Avatar + İsim */}
-        <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-3xl p-6 mb-4">
-          <div className="w-20 h-20 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center text-5xl">
-            {avatar}
-          </div>
-          <div>
-            <div className="text-2xl font-black text-white">{username}</div>
-            <div className="text-gray-400 text-sm">{user?.email}</div>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xl">{rank.icon}</span>
-              <span className="font-bold text-sm" style={{ color: rank.color }}>{rank.name}</span>
+       {/* Avatar + İsim — Modern Kart */}
+        <div
+          className="relative rounded-3xl p-6 mb-4 overflow-hidden"
+          style={{
+            background: `linear-gradient(135deg, rgba(30,10,60,0.95) 0%, rgba(10,10,30,0.95) 100%)`,
+            border: `2px solid ${rank.color}40`,
+            boxShadow: `0 0 30px ${rank.color}20`,
+          }}
+        >
+          {/* Arka plan parlaması */}
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{ background: `radial-gradient(circle at 30% 50%, ${rank.color} 0%, transparent 60%)` }}
+          />
+          <div className="relative flex items-center gap-5">
+            {/* Büyük Avatar */}
+            <div className="relative flex-shrink-0">
+              <div
+                className="w-28 h-28 rounded-full flex items-center justify-center text-6xl"
+                style={{
+                  background: `radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.3) 100%)`,
+                  border: `3px solid ${rank.color}80`,
+                  boxShadow: `0 0 25px ${rank.color}40, inset 0 0 20px rgba(0,0,0,0.3)`,
+                }}
+              >
+                {avatar}
+              </div>
+              {/* Rank rozeti */}
+              <div
+                className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center text-lg border-2 border-black"
+                style={{ background: `linear-gradient(135deg, ${rank.color}, rgba(0,0,0,0.8))` }}
+              >
+                {rank.icon}
+              </div>
+            </div>
+            {/* İsim & Rank */}
+            <div className="flex-1 min-w-0">
+              <div className="text-2xl font-black text-white truncate">{username}</div>
+              <div className="text-gray-400 text-xs truncate mb-2">{user?.email}</div>
+              <div
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-black"
+                style={{
+                  background: `${rank.color}20`,
+                  border: `1px solid ${rank.color}60`,
+                  color: rank.color,
+                }}
+              >
+                <span>{rank.icon}</span>
+                <span>{rank.name}</span>
+              </div>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useGameContext } from "../context/GameContext";
 import Card from "./Card";
 import BossRewardScreen from "./BossRewardScreen";
@@ -62,6 +62,17 @@ export default function ShopView() {
     goToShop,
   } = useGameContext();
 
+ // Seviye ödülü: merge animasyonu bitmeden gösterilmesin (900ms gecikme)
+  const [showRewards, setShowRewards] = useState(false);
+  useEffect(() => {
+    if (hasR) {
+      const t = setTimeout(() => setShowRewards(true), 900);
+      return () => clearTimeout(t);
+    } else {
+      setShowRewards(false);
+    }
+  }, [hasR]);
+
   return (
     <>
       <div className="max-w-4xl mx-auto">
@@ -77,7 +88,7 @@ export default function ShopView() {
             {shop.map((a) => (
               <div key={a.id} className="flex flex-col items-center flex-shrink-0 gap-1 justify-end">
                 <div
-                  className={`relative transition-all duration-300 ease-spring ${a.frozen ? "ring-2 ring-blue-400 shadow-lg shadow-blue-400/50 animate-pulse" : ""} ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
+                  className={`relative transition-all duration-300 ease-spring ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
                   onClick={() => setSel(sel?.id === a.id ? null : a)}
                   onContextMenu={(e) => { e.preventDefault(); toggleFreeze(a); }}
                 >
@@ -120,8 +131,8 @@ export default function ShopView() {
           </div>
         )}
 
-        {hasR && (
-          <div className="bg-gradient-to-br from-yellow-900/60 to-orange-900/60 border-2 border-yellow-500 rounded-xl p-3 mb-3 shadow-xl">
+        {showRewards && (
+          <div className="bg-gradient-to-br from-yellow-900/60 to-orange-900/60 border-2 border-yellow-500 rounded-xl p-3 mb-3 shadow-xl" style={{ animation: "fadeIn 0.4s ease-out" }}>
             <div className="text-sm text-yellow-300 mb-2 font-bold">🎁 Seviye Ödülü (1 seç!) {team.filter(x => x).length === teamSlots && <span className="text-red-400">- Slot boşalt!</span>}</div>
             <div className="flex gap-3 justify-center flex-wrap">
               {rewards.map((a) => (
