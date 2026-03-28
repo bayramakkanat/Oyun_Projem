@@ -68,31 +68,31 @@ export default function ShopView() {
         <HUD reset={reset} />
 
         {/* Shop alanı (kısaltılmış hali) */}
-        <div className="bg-black/60 rounded-[2.5rem] p-4 mb-4 border border-white/10 shadow-2xl">
+        <div className="glass-panel-strong rounded-[2.5rem] p-4 mb-4 border-2 border-purple-500/20 shadow-2xl hover:border-purple-500/40 transition-all duration-500">
           <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 flex items-center justify-between">
-            <span className="text-yellow-300/90">🛒 HAYVAN MAĞAZASI</span>
-            <span className="text-blue-300/80 font-bold px-2 py-1 bg-blue-500/10 border border-blue-400/20 rounded-lg">SAĞ TIK = ❄️ DONDUR</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-300" style={{ animation: "shimmer 3s ease-in-out infinite" }}>🛒 HAYVAN MAĞAZASI</span>
+            <span className="text-blue-300/90 font-bold px-3 py-1.5 glass-panel border border-blue-400/40 rounded-lg hover:border-blue-400/80 transition-all duration-300 hover:shadow-[0_0_15px_rgba(96,165,250,0.4)]">SAĞ TIK = ❄️ DONDUR</span>
           </div>
           <div className="flex gap-2.5 justify-center items-end">
             {shop.map((a) => (
               <div key={a.id} className="flex flex-col items-center flex-shrink-0 gap-1 justify-end">
                 <div
-                  className={`relative transition-all duration-300 ${a.frozen ? "ring-2 ring-blue-400 shadow-lg shadow-blue-400/50" : ""} ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-105 cursor-pointer"}`}
+                  className={`relative transition-all duration-300 ease-spring ${a.frozen ? "ring-2 ring-blue-400 shadow-lg shadow-blue-400/50 animate-pulse" : ""} ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
                   onClick={() => setSel(sel?.id === a.id ? null : a)}
                   onContextMenu={(e) => { e.preventDefault(); toggleFreeze(a); }}
                 >
                   <Card a={a} anim={anims[a.id]} selected={sel?.id === a.id} showName={false} getDesc={getDesc} shop={shop} team={team} mirror={true} />
-                  {a.frozen && <div className="absolute -top-1 -left-1 text-xl">❄️</div>}
-                  {sel?.id === a.id && <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white z-[60]"><span className="text-white text-xs font-black">✓</span></div>}
+                 {a.frozen && <div className="absolute -top-1 -left-1 text-xl animate-pulse" style={{ filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.8))" }}>❄️</div>}
+                  {sel?.id === a.id && <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/50 border-2 border-white z-[60]" style={{ animation: "pulse 1s ease-in-out infinite" }}><span className="text-white text-xs font-black">✓</span></div>}
                 </div>
-                <span className="text-sm text-yellow-300 font-bold">{a.cost}💰</span>
+               <span className="text-sm text-yellow-300 font-bold px-2 py-0.5 bg-black/40 rounded-full border border-yellow-500/30 backdrop-blur-sm">{a.cost}💰</span>
               </div>
             ))}
             {shopSlots < 4 && <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 h-[180px] justify-end"><div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center"><span className="text-2xl">🔒</span><span className="text-[10px] font-black tracking-tighter mt-1 text-yellow-400 uppercase">Tur 5</span></div><span className="text-sm font-bold opacity-0">0💰</span></div>}
             {shopSlots < 5 && <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 h-[180px] justify-end"><div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center"><span className="text-2xl">🔒</span><span className="text-[10px] font-black tracking-tighter mt-1 text-yellow-400 uppercase">Tur 7</span></div><span className="text-sm font-bold opacity-0">0💰</span></div>}
             <div className="flex flex-col items-center flex-shrink-0 gap-1 h-[180px] justify-end">
-              <button onClick={() => { const unfrozen = shop.filter(s => !s.frozen); if (unfrozen.length === 0 || gold >= 1) { if (unfrozen.length > 0) setGold(g => g - 1); refresh(); playSound("refresh"); } }} disabled={gold < 1 && shop.filter(s => !s.frozen).length > 0} className="w-32 h-40 rounded-2xl bg-transparent disabled:opacity-40 flex flex-col items-center justify-center hover:bg-white/5 transition-all border-2 border-dashed border-white/10 group/roll"><span className="text-3xl group-hover/roll:rotate-180 transition-transform duration-500">🔄</span><span className="text-xs font-black mt-2">{shop.filter(s => !s.frozen).length === 0 ? "BEDAVA" : "1 💰"}</span></button>
-              <span className="text-[10px] text-blue-400 font-black tracking-widest uppercase">YENİLE</span>
+             <button onClick={() => { const unfrozen = shop.filter(s => !s.frozen); if (unfrozen.length === 0 || gold >= 1) { if (unfrozen.length > 0) setGold(g => g - 1); refresh(); playSound("refresh"); } }} disabled={gold < 1 && shop.filter(s => !s.frozen).length > 0} className="w-32 h-40 rounded-2xl bg-transparent disabled:opacity-40 flex flex-col items-center justify-center hover:bg-purple-500/10 transition-all duration-300 border-2 border-dashed border-purple-400/30 hover:border-purple-400/60 group/roll hover:shadow-[0_0_20px_rgba(168,85,247,0.3)]"><span className="text-3xl group-hover/roll:rotate-180 transition-transform duration-500 group-hover/roll:scale-125">🔄</span><span className="text-xs font-black mt-2 text-purple-300">{shop.filter(s => !s.frozen).length === 0 ? "BEDAVA" : "1 💰"}</span></button>
+             <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase">YENİLE</span>
             </div>
           </div>
         </div>
@@ -135,8 +135,8 @@ export default function ShopView() {
           </div>
         )}
 
-        <div className="bg-black/60 rounded-[2.5rem] p-4 mb-3 border border-white/10 shadow-2xl">
-          <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-4"><span className="text-yellow-300/90">⚔️ SAVAŞ TAKIMI</span>{sel?.pendingTargetBuff ? <span className="text-cyan-300 animate-pulse"> 🎯 Buff vermek için hedef seç!</span> : sel ? <span className="text-yellow-300"> - Slot seç</span> : null}</div>
+       <div className="glass-panel-strong rounded-[2.5rem] p-4 mb-3 border-2 border-green-500/20 shadow-2xl hover:border-green-500/40 transition-all duration-500">
+          <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-4"><span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-green-400 to-emerald-300" style={{ animation: "shimmer 3s ease-in-out infinite", animationDelay: "0.5s" }}>⚔️ SAVAŞ TAKIMI</span>{sel?.pendingTargetBuff ? <span className="text-cyan-300 animate-pulse"> 🎯 Buff vermek için hedef seç!</span> : sel ? <span className="text-yellow-300"> - Slot seç</span> : null}</div>
           {sel?.pendingTargetBuff && <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center">🎯 Buff vermek istediğin hayvana tıkla!</div>}
           <div className="flex gap-2.5 justify-center px-1 py-3">
             {team.map((a, i) => {
