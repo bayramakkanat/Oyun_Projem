@@ -22,7 +22,7 @@ export default function HUD({ reset }) {
     <div className="flex justify-between items-stretch mb-3 px-1">
       {/* SOL: Tur / Kademe / Rehber / Koleksiyon / Boss uyarısı */}
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex flex-col items-center bg-gray-900/80 border border-white/20 px-3 rounded-2xl shadow-inner min-w-[52px] h-[52px] justify-center">
+       <div className="flex flex-col items-center bg-gray-900/80 border border-white/20 px-3 rounded-2xl shadow-inner min-w-[52px] h-[52px] justify-center" style={{ animation: "hudItemGlow 3s ease-in-out infinite" }}>
           <span className="text-[9px] text-gray-400 uppercase tracking-widest font-black">TUR</span>
           <span className="text-white font-black text-base leading-none">
             {turn}
