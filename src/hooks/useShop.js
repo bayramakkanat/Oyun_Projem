@@ -176,6 +176,7 @@ export function useShop({
   triggerAnim,
   unlockAchievement,
   spawnBuffAnimation: _spawnBuffAnimation,
+  onGoldSpent,
 }) {
 
   // ─── Ödül havuzu ──────────────────────────────────────────────────────────
@@ -408,6 +409,7 @@ export function useShop({
         setTeam(nt);
         if (!a.isR) {
           setGold((g) => g - a.cost);
+          if (onGoldSpent) onGoldSpent(a.cost);
           setShop(shop.filter((x) => x.id !== a.id));
           if (newRewards.length > 0) setRewards((prev) => [...prev, ...newRewards]);
         } else {
@@ -425,6 +427,7 @@ export function useShop({
       nt[slot] = { ...a, lvl: a.lvl || 1, exp: a.exp || 0, curHp: a.curHp || a.hp, isR: undefined, rT: undefined, grp: undefined };
       if (!a.isR) {
         setGold((g) => g - a.cost);
+        if (onGoldSpent) onGoldSpent(a.cost);
         setShop(shop.filter((x) => x.id !== a.id));
       } else {
         setRewards(rewards.filter((x) => x.grp !== a.grp));
@@ -447,6 +450,7 @@ export function useShop({
       setTeam(nt);
       if (!a.isR) {
         setGold((g) => g - a.cost);
+        if (onGoldSpent) onGoldSpent(a.cost);
         setShop(shop.filter((x) => x.id !== a.id));
         if (merged.ability === AB.SHOP_DISCOUNT) setDiscountNext(true);
         if (newRewards.length > 0) setRewards((prev) => [...prev, ...newRewards]);
@@ -462,8 +466,9 @@ export function useShop({
     if (nt[slot] !== null) return;
 
     nt[slot] = { ...a, lvl: a.lvl || 1, exp: a.exp || 0, curHp: a.curHp || a.hp, isR: undefined, rT: undefined, grp: undefined };
-    if (!a.isR) {
+   if (!a.isR) {
       setGold((g) => g - a.cost);
+      if (onGoldSpent) onGoldSpent(a.cost);
       setShop(shop.filter((x) => x.id !== a.id));
     } else {
       setRewards(rewards.filter((x) => x.grp !== a.grp));

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import StarField from "./StarField";
 import AuthModal from "./AuthModal";
 import SettingsModal from "./SettingsModal";
@@ -428,10 +429,18 @@ saveTasksToDB,
 
         {menuView === "achievements" && (() => {
           const categories = [
-            { key: "any", label: "🌍 Genel", color: "text-gray-300", border: "border-gray-500/30", bg: "bg-gray-800/30" },
-            { key: "standard", label: "⚔️ Standart", color: "text-blue-300", border: "border-blue-500/30", bg: "bg-blue-900/20" },
-            { key: "arena", label: "🏟️ Arena", color: "text-purple-300", border: "border-purple-500/30", bg: "bg-purple-900/20" },
+            { key: "any",      label: "🌍 Genel",    activeColor: "bg-gray-600  border-gray-400",  inactiveColor: "bg-gray-900/60 border-gray-700/60 text-gray-400", textColor: "text-white" },
+            { key: "standard", label: "⚔️ Standart", activeColor: "bg-blue-700  border-blue-400",  inactiveColor: "bg-gray-900/60 border-gray-700/60 text-gray-400", textColor: "text-white" },
+            { key: "arena",    label: "🏟️ Arena",    activeColor: "bg-purple-700 border-purple-400", inactiveColor: "bg-gray-900/60 border-gray-700/60 text-gray-400", textColor: "text-white" },
           ];
+          const catBorders = { any: "border-gray-500/30", standard: "border-blue-500/30", arena: "border-purple-500/30" };
+          const catBgs     = { any: "bg-gray-800/30",     standard: "bg-blue-900/20",     arena: "bg-purple-900/20" };
+          const catColors  = { any: "text-gray-300",      standard: "text-blue-300",       arena: "text-purple-300" };
+          // activeCat state — IIFE içinde useState kullanamayız, o yüzden DOM trick: window._achCat
+          const activeCat = window._achCat || "any";
+          const setActiveCat = (k) => { window._achCat = k; };
+          const catAchievements = ACHIEVEMENTS_DEF.filter(a => a.mode === activeCat);
+          const catEarned = catAchievements.filter(a => stats.achievements.includes(a.id)).length;
           return (
           <div
             className="w-full"
@@ -439,7 +448,7 @@ saveTasksToDB,
           >
             <button
               onClick={() => setMenuView("main")}
-              className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors font-bold uppercase text-xs tracking-widest"
+              className="mb-4 flex items-center gap-2 text-gray-400 hover:text-white transition-colors font-bold uppercase text-xs tracking-widest"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" />
@@ -447,49 +456,72 @@ saveTasksToDB,
               Geri Dön
             </button>
             <h2 className="text-4xl font-black mb-1">BAŞARIMLAR</h2>
-            <p className="text-xs text-gray-500 uppercase tracking-widest mb-5">
+            <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">
               {stats.achievements.length} / {ACHIEVEMENTS_DEF.length} açıldı
             </p>
-            <div className="max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-6">
+
+            {/* Kategori sekmeleri — her zaman üstte sabit */}
+            <div className="flex gap-2 mb-4">
               {categories.map(cat => {
-                const catAchievements = ACHIEVEMENTS_DEF.filter(a => a.mode === cat.key);
-                const earnedCount = catAchievements.filter(a => stats.achievements.includes(a.id)).length;
+                const isActive = activeCat === cat.key;
+                const allInCat = ACHIEVEMENTS_DEF.filter(a => a.mode === cat.key);
+                const earnedInCat = allInCat.filter(a => stats.achievements.includes(a.id)).length;
                 return (
-                  <div key={cat.key}>
-                    <div className={`flex items-center gap-3 mb-3 px-3 py-2 rounded-xl border ${cat.border} ${cat.bg}`}>
-                      <span className={`font-black text-sm uppercase tracking-widest ${cat.color}`}>{cat.label}</span>
-                      <span className="ml-auto text-xs text-gray-500">{earnedCount}/{catAchievements.length}</span>
-                      <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                        <div className="h-full bg-yellow-500 rounded-full transition-all" style={{ width: `${catAchievements.length ? (earnedCount / catAchievements.length) * 100 : 0}%` }} />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {catAchievements.map((a) => {
-                        const earned = stats.achievements.includes(a.id);
-                        return (
-                          <div
-                            key={a.id}
-                            className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                              earned
-                                ? "bg-yellow-500/10 border-yellow-500/30 shadow-lg shadow-yellow-500/5"
-                                : "bg-white/3 border-white/8 opacity-40"
-                            }`}
-                          >
-                            <div className="text-2xl flex-shrink-0">{earned ? a.icon : "🔒"}</div>
-                            <div className="text-left min-w-0">
-                              <div className={`font-black text-xs uppercase leading-tight ${earned ? "text-yellow-300" : "text-gray-400"}`}>
-                                {a.name}
-                              </div>
-                              <div className="text-[10px] text-gray-500 leading-tight mt-0.5 line-clamp-2">{a.desc}</div>
-                            </div>
-                            {earned && <div className="ml-auto text-yellow-500 flex-shrink-0 text-xs">✓</div>}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  <button
+                    key={cat.key}
+                    onClick={() => { window._achCat = cat.key; setMenuView("achievements"); }}
+                    className={`flex-1 flex flex-col items-center py-2.5 px-2 rounded-2xl border-2 transition-all font-bold text-xs ${
+                      isActive
+                        ? cat.activeColor + " text-white shadow-lg scale-[1.03]"
+                        : cat.inactiveColor + " hover:border-white/20"
+                    }`}
+                  >
+                    <span>{cat.label}</span>
+                    <span className={`text-[10px] mt-0.5 ${isActive ? "text-white/70" : "text-gray-600"}`}>
+                      {earnedInCat}/{allInCat.length}
+                    </span>
+                  </button>
                 );
               })}
+            </div>
+
+            {/* İlerleme çubuğu */}
+            <div className={`flex items-center gap-3 mb-4 px-3 py-2 rounded-xl border ${catBorders[activeCat]} ${catBgs[activeCat]}`}>
+              <span className={`font-black text-xs uppercase tracking-widest ${catColors[activeCat]}`}>
+                {catEarned}/{catAchievements.length} tamamlandı
+              </span>
+              <div className="flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-full bg-yellow-500 rounded-full transition-all"
+                  style={{ width: `${catAchievements.length ? (catEarned / catAchievements.length) * 100 : 0}%` }} />
+              </div>
+            </div>
+
+            {/* Başarım listesi */}
+            <div className="max-h-[52vh] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="grid grid-cols-2 gap-2">
+                {catAchievements.map((a) => {
+                  const earned = stats.achievements.includes(a.id);
+                  return (
+                    <div
+                      key={a.id}
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                        earned
+                          ? "bg-yellow-500/10 border-yellow-500/30 shadow-lg shadow-yellow-500/5"
+                          : "bg-white/3 border-white/8 opacity-40"
+                      }`}
+                    >
+                      <div className="text-2xl flex-shrink-0">{earned ? a.icon : "🔒"}</div>
+                      <div className="text-left min-w-0">
+                        <div className={`font-black text-xs uppercase leading-tight ${earned ? "text-yellow-300" : "text-gray-400"}`}>
+                          {a.name}
+                        </div>
+                        <div className="text-[10px] text-gray-500 leading-tight mt-0.5 line-clamp-2">{a.desc}</div>
+                      </div>
+                      {earned && <div className="ml-auto text-yellow-500 flex-shrink-0 text-xs">✓</div>}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
           );

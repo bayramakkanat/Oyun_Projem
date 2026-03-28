@@ -10,6 +10,7 @@ import React, {
 import { useShop } from "../hooks/useShop";
 import { spawnBuffAnimation } from "../utils/animations";
 import { useUIContext } from "./UIContext";
+import { loadTasks, saveTasks } from "../utils/helpers";
 
 export const ShopContext = createContext();
 
@@ -18,7 +19,20 @@ export const ShopProvider = ({ children }) => {
     pwr, sellP, clampStat, triggerAnim,
     unlockAchievement,
     difficultyLevel,
+    user,
   } = useUIContext();
+
+  // Altın harcama görev takibi
+  const onGoldSpent = useCallback((amount) => {
+    const taskData = loadTasks(user?.uid);
+    if (!taskData) return;
+    taskData.daily.tasks = taskData.daily.tasks.map((t) => {
+      if (t.done || t.type !== "gold_spent") return t;
+      const progress = Math.min(t.progress + amount, t.target);
+      return { ...t, progress, done: progress >= t.target };
+    });
+    saveTasks(taskData, user?.uid);
+  }, [user]);
 
   // ─── Mağaza / Takım state ─────────────────────────────────────────────────
   const [gold,          setGold]          = useState(10);
@@ -68,6 +82,7 @@ export const ShopProvider = ({ children }) => {
     triggerAnim,
     unlockAchievement,
     spawnBuffAnimation,
+    onGoldSpent,
   });
 
   // ─── Context value ────────────────────────────────────────────────────────

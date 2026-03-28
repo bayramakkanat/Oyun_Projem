@@ -176,13 +176,13 @@ function Card({
           </div>
         )}
 
-      {/* "Takımında!" rozeti — takımda mergelanabilir hayvan mağazada belirince */}
+     {/* "Takımında!" rozeti — takımda mergelanabilir hayvan mağazada belirince */}
       {!compact &&
         shop &&
         team &&
         team.some((t) => t && t.name === a.name && t.tier === a.tier && t.lvl < 3) && (
           <div
-            className="absolute -bottom-4 left-1/2 z-30 pointer-events-none"
+            className="absolute -top-5 left-1/2 z-30 pointer-events-none"
             style={{ animation: "teamBadgeBounce 2.5s ease-in-out infinite" }}
           >
             <span
