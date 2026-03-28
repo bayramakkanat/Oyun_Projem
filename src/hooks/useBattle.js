@@ -79,8 +79,12 @@ export function useBattle({
   const versusUnsubRef    = useRef(null);
   const lastBattleIdRef   = useRef(null);
   const phaseRef          = useRef(phase);
+  const pTRef             = useRef(pT);
+  const eTRef             = useRef(eT);
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
+  useEffect(() => { pTRef.current = pT; }, [pT]);
+  useEffect(() => { eTRef.current = eT; }, [eT]);
 
   // ─── useBattleResults: koleksiyon / görev / leaderboard ─────────────────
   const { updateCollectionStats, updateTaskProgress, handleArenaGameOver, handleGameOver } =
@@ -549,7 +553,8 @@ export function useBattle({
       // Step 0: Savaş başı yetenekleri
       if (step === 0) {
         await runBattleStartPhase({
-          pp: [...pT], ee: [...eT],
+          pp: [...pTRef.current].filter(x => x.curHp > 0),
+          ee: [...eTRef.current].filter(x => x.curHp > 0),
           delay, isCancelled: () => isCancelled,
           triggerAnim, clampStat, pwr,
           spawnParticles, spawnProjectile,
@@ -562,7 +567,7 @@ export function useBattle({
 
       // Step > 0: Normal savaş turu
       await runBattleTurnPhase({
-        pT, eT,
+        pT: pTRef.current, eT: eTRef.current,
         delay, isCancelled: () => isCancelled,
         triggerAnim, clampStat, pwr,
         battleSpeedRef,

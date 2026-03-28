@@ -87,6 +87,11 @@ export async function runBattleTurnPhase({
     return;
   }
 
+  // Hayalet savaş koruması: ön hayvanlar gerçekten var mı?
+  // React state gecikmesi yüzünden curHp <= 0 olan bir hayvan p[0] olabilir
+  if (!p[0] || p[0].curHp <= 0) { setIsBattleOver(true); return; }
+  if (!e[0] || e[0].curHp <= 0) { setIsBattleOver(true); return; }
+
   let lg = [];
   const a = p[0];
   const d = e[0];

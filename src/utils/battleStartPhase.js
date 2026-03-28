@@ -206,19 +206,31 @@ export async function runBattleStartPhase({
       syncBattleTeams(pp, ee);
       await delay(1200 - PROJ_FLY_MS);
     } else if (a.ability === AB.START_MULTI_SNIPE) {
-      const targetCount = Math.min(m + 1, targets.length);
-      for (let j = 0; j < targetCount; j++) {
-        const alive = targets.filter((x) => x.curHp > 0);
-        if (alive.length > 0) {
-          const t = alive[Math.floor(Math.random() * alive.length)];
-          spawnProjectile(a.id, t.id, "start_multi_snipe", null, true);
-          addBattleLog(`🦑 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${8 * m} hasar`);
-          await delay(PROJ_FLY_MS);
-          t.curHp -= 8 * m;
-          triggerAnim(t.id, "damage");
+      // Tüm hedefleri BAŞTA seç (snapshot) — sonra sırayla fırlat
+      const alive = targets.filter((x) => x.curHp > 0);
+      const targetCount = Math.min(m + 1, alive.length);
+      // Rastgele karıştır ve ilk N tanesini al
+      const selectedTargets = [...alive]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, targetCount);
+
+      for (let j = 0; j < selectedTargets.length; j++) {
+        const t = selectedTargets[j];
+        // Hedef hala hayatta mı kontrol et (önceki atıştan öldüyse atla)
+        const stillAlive = targets.find((x) => x.id === t.id && x.curHp > 0);
+        if (!stillAlive) continue;
+
+        spawnProjectile(a.id, t.id, "start_multi_snipe", null, true);
+        addBattleLog(`🦑 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${8 * m} hasar`);
+        await delay(PROJ_FLY_MS);
+        // ID ile bul — referans stale olabilir
+        const currentT = targets.find((x) => x.id === t.id);
+        if (currentT && currentT.curHp > 0) {
+          currentT.curHp -= 8 * m;
+          triggerAnim(currentT.id, "damage");
           syncBattleTeams(pp, ee);
-          await delay(700 - PROJ_FLY_MS > 0 ? 700 - PROJ_FLY_MS : 100);
         }
+        await delay(300);
       }
     } else if (a.ability === AB.START_DMG) {
       const currentTargets = isPlayer ? ee : pp;
