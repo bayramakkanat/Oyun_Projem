@@ -118,27 +118,43 @@ useEffect(() => {
 
       {/* Ana savaş alanı */}
       <div className="flex-1 flex flex-col justify-center items-center relative overflow-hidden min-h-0">
-        <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-purple-900/10 to-transparent pointer-events-none"></div>
+        <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-purple-900/20 via-purple-800/10 to-transparent pointer-events-none"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(60,20,100,0.15)_0%,transparent_70%)] pointer-events-none"></div>
-        <div
-          className="absolute bottom-0 w-[150%] h-[40%] bg-white/5 border-t border-white/10"
+        {/* Dinamik ışık efektleri */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-3xl animate-pulse pointer-events-none"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-red-500/5 rounded-full blur-3xl animate-pulse pointer-events-none" style={{ animationDelay: '1s' }}></div>
+       <div
+          className="absolute bottom-0 w-[150%] h-[40%] border-t border-white/10"
           style={{
             transform: "perspective(1000px) rotateX(60deg)",
             transformOrigin: "bottom center",
             background:
-              "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 80%)",
+              "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08) 0%, rgba(139,92,246,0.03) 40%, transparent 80%)",
+            animation: "groundReflection 4s ease-in-out infinite",
+          }}
+        ></div>
+        {/* Zemin grid çizgileri */}
+        <div
+          className="absolute bottom-0 w-[150%] h-[40%] opacity-20 pointer-events-none"
+          style={{
+            transform: "perspective(1000px) rotateX(60deg)",
+            transformOrigin: "bottom center",
+            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(139,92,246,0.1) 50px, rgba(139,92,246,0.1) 51px)",
           }}
         ></div>
         <div className="relative z-10 flex flex-col items-center gap-2 w-full px-4 mt-24">
           {/* Takım İsimleri */}
           <div className="w-full max-w-2xl flex justify-between px-16 mb-2">
             <div className="flex flex-col items-center">
-              <span className="text-[11px] text-green-400 font-black uppercase tracking-widest bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">
+              <span className="text-[11px] text-green-400 font-black uppercase tracking-widest glass-panel px-3 py-1 rounded-md">
   Takımın
 </span>
               <span
-               className="text-base font-black text-green-300 bg-black/80 px-4 py-1.5 rounded-full border-2 border-green-400/80 backdrop-blur-sm shadow-lg shadow-green-500/30 uppercase tracking-wide"
-style={{ textShadow: "0 0 10px rgba(74,222,128,0.8)" }}
+               className="text-base font-black text-green-300 glass-panel-strong px-4 py-1.5 rounded-full border-2 border-green-400/80 shadow-lg shadow-green-500/30 uppercase tracking-wide hover-glow"
+style={{ 
+  textShadow: "0 0 10px rgba(74,222,128,0.8), 0 0 20px rgba(74,222,128,0.5)",
+  animation: "neonPulse 2s ease-in-out infinite"
+}}
               >
               
                  {user
@@ -147,12 +163,16 @@ style={{ textShadow: "0 0 10px rgba(74,222,128,0.8)" }}
               </span>
             </div>
             <div className="flex flex-col items-center">
-             <span className="text-[11px] text-red-400 font-black uppercase tracking-widest bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">
+             <span className="text-[11px] text-red-400 font-black uppercase tracking-widest glass-panel px-3 py-1 rounded-md">
   Rakip
 </span>
               <span
-                className="text-base font-black text-red-300 bg-black/70 px-4 py-1.5 rounded-full border-2 border-red-400/80 backdrop-blur-sm shadow-lg shadow-red-500/30"
-                style={{ textShadow: "0 0 10px rgba(248,113,113,0.8)" }}
+                className="text-base font-black text-red-300 glass-panel-strong px-4 py-1.5 rounded-full border-2 border-red-400/80 shadow-lg shadow-red-500/30 hover-glow"
+                style={{ 
+                  textShadow: "0 0 10px rgba(248,113,113,0.8), 0 0 20px rgba(248,113,113,0.5)",
+                  animation: "neonPulse 2s ease-in-out infinite",
+                  animationDelay: "1s"
+                }}
               >
                 {arenaOpponent
                   ? arenaOpponent.userName || "Rakip"
@@ -172,8 +192,11 @@ style={{ textShadow: "0 0 10px rgba(74,222,128,0.8)" }}
 
       {/* Alt log paneli */}
       <div
-        className="flex-shrink-0 bg-gradient-to-r from-black/70 via-purple-950/40 to-black/70 backdrop-blur-md border-t border-purple-500/30 z-10"
-        style={{ height: "22vh" }}
+        className="flex-shrink-0 glass-panel-strong border-t-2 border-purple-500/40 z-10"
+        style={{ 
+          height: "22vh",
+          boxShadow: "0 -4px 30px rgba(139, 92, 246, 0.15)"
+        }}
       >
         <div className="flex justify-between items-center px-4 pt-1.5 pb-1">
           <span className="text-xs text-purple-400 font-bold">
