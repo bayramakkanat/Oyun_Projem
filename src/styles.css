@@ -1265,3 +1265,366 @@
 .card-3d .merge-burst {
   animation: mergeBurst 0.7s ease-in-out;
 }
+/* ═══════════════════════════════════════════════════════════
+   🎨 GELİŞMİŞ GÖRSEL SİSTEMİ - TIER BAZLI EFEKTLER
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────── 
+   TIER BAZLI GLOW ANİMASYONLARI (Mevcut renk paletine uygun)
+   ─────────────────────────────────────────────────────────── */
+
+@keyframes tier1Glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(148, 163, 184, 0.3),
+                0 0 20px rgba(148, 163, 184, 0.2),
+                inset 0 0 10px rgba(148, 163, 184, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(148, 163, 184, 0.5),
+                0 0 40px rgba(148, 163, 184, 0.3),
+                inset 0 0 15px rgba(148, 163, 184, 0.2);
+  }
+}
+
+@keyframes tier2Glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(52, 211, 153, 0.4),
+                0 0 20px rgba(52, 211, 153, 0.2),
+                inset 0 0 10px rgba(52, 211, 153, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.6),
+                0 0 40px rgba(52, 211, 153, 0.4),
+                inset 0 0 15px rgba(52, 211, 153, 0.2);
+  }
+}
+
+@keyframes tier3Glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.4),
+                0 0 20px rgba(34, 211, 238, 0.2),
+                inset 0 0 10px rgba(34, 211, 238, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.6),
+                0 0 40px rgba(34, 211, 238, 0.4),
+                inset 0 0 15px rgba(34, 211, 238, 0.2);
+  }
+}
+
+@keyframes tier4Glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(232, 121, 249, 0.4),
+                0 0 30px rgba(232, 121, 249, 0.3),
+                inset 0 0 15px rgba(232, 121, 249, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(232, 121, 249, 0.7),
+                0 0 50px rgba(232, 121, 249, 0.5),
+                inset 0 0 20px rgba(232, 121, 249, 0.2);
+  }
+}
+
+@keyframes tier5Glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(251, 113, 133, 0.5),
+                0 0 30px rgba(251, 113, 133, 0.3),
+                inset 0 0 15px rgba(251, 113, 133, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(251, 113, 133, 0.8),
+                0 0 50px rgba(251, 113, 133, 0.5),
+                inset 0 0 20px rgba(251, 113, 133, 0.2);
+  }
+}
+
+@keyframes tier6Glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.6),
+                0 0 40px rgba(251, 191, 36, 0.4),
+                0 0 60px rgba(255, 165, 0, 0.3),
+                inset 0 0 20px rgba(251, 191, 36, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.9),
+                0 0 60px rgba(251, 191, 36, 0.6),
+                0 0 90px rgba(255, 165, 0, 0.4),
+                inset 0 0 25px rgba(251, 191, 36, 0.3);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   3D KART EFEKTİ (Parallax & Depth)
+   ─────────────────────────────────────────────────────────── */
+
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes holographicShine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   GELİŞMİŞ PARTİKÜL ANİMASYONLARI
+   ─────────────────────────────────────────────────────────── */
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) translateX(20px) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   GLASSMORPHISM & BACKDROP EFEKTLERİ
+   ─────────────────────────────────────────────────────────── */
+
+.glass-panel {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-panel-strong {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   NEON BORDER ANİMASYONLARI
+   ─────────────────────────────────────────────────────────── */
+
+@keyframes neonPulse {
+  0%, 100% {
+    box-shadow: 0 0 5px currentColor,
+                0 0 10px currentColor,
+                0 0 15px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 10px currentColor,
+                0 0 20px currentColor,
+                0 0 30px currentColor,
+                0 0 40px currentColor;
+  }
+}
+
+@keyframes borderGlow {
+  0% {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+  100% {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   GELİŞMİŞ HOVER EFEKTLERİ
+   ─────────────────────────────────────────────────────────── */
+
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px) scale(1.02);
+  filter: brightness(1.1);
+}
+
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  filter: brightness(1.2) drop-shadow(0 0 20px currentColor);
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   BATTLE SCENE EFEKTLERİ
+   ─────────────────────────────────────────────────────────── */
+
+@keyframes groundReflection {
+  0%, 100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes energyWave {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes impactShockwave {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   SMOOTH EASING FUNCTIONS
+   ─────────────────────────────────────────────────────────── */
+
+.ease-spring {
+  transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.ease-smooth {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ease-bounce {
+  transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   KART 3D PARALLAX EFEKTİ
+   ─────────────────────────────────────────────────────────── */
+
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card-3d:hover {
+  transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateZ(10px);
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   TIER BAZLI PARTIKÜLLER (Her tier'a özel renk)
+   ─────────────────────────────────────────────────────────── */
+
+.tier-particles-1::before,
+.tier-particles-1::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(148, 163, 184, 0.6);
+  border-radius: 50%;
+  animation: particleFloat 3s infinite;
+}
+
+.tier-particles-2::before,
+.tier-particles-2::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(52, 211, 153, 0.6);
+  border-radius: 50%;
+  animation: particleFloat 3s infinite;
+}
+
+.tier-particles-3::before,
+.tier-particles-3::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(34, 211, 238, 0.6);
+  border-radius: 50%;
+  animation: particleFloat 3s infinite;
+}
+
+.tier-particles-4::before,
+.tier-particles-4::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(232, 121, 249, 0.6);
+  border-radius: 50%;
+  animation: particleFloat 3s infinite;
+}
+
+.tier-particles-5::before,
+.tier-particles-5::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(251, 113, 133, 0.6);
+  border-radius: 50%;
+  animation: particleFloat 3s infinite;
+}
+
+.tier-particles-6::before,
+.tier-particles-6::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(251, 191, 36, 0.8);
+  border-radius: 50%;
+  animation: particleFloat 3s infinite;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+}
+
+.tier-particles-1::after { animation-delay: 1s; }
+.tier-particles-2::after { animation-delay: 1s; }
+.tier-particles-3::after { animation-delay: 1s; }
+.tier-particles-4::after { animation-delay: 1s; }
+.tier-particles-5::after { animation-delay: 1s; }
+.tier-particles-6::after { animation-delay: 1s; }
