@@ -166,24 +166,28 @@ saveTasksToDB,
               <div
                 className="text-[160px] leading-none drop-shadow-[0_0_40px_rgba(255,255,255,0.3)] select-none"
                 style={{
-                  animation: "pulse 2.5s ease-in-out infinite",
-                  filter: "drop-shadow(0 0 20px rgba(255,255,255,0.2))",
+                  animation: "menuLogoFloat 4s ease-in-out infinite",
+                  filter: "drop-shadow(0 0 30px rgba(255,255,255,0.25)) drop-shadow(0 0 60px rgba(139,92,246,0.2))",
                 }}
               >
                 🐾
               </div>
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-6 bg-black/50 blur-2xl rounded-full"></div>
             </div>
-            <h1 className="text-6xl font-black mb-2 text-center bg-gradient-to-b from-white via-gray-200 to-gray-500 bg-clip-text text-transparent drop-shadow-2xl italic tracking-tighter">
+           <h1
+              className="text-6xl font-black mb-2 text-center bg-gradient-to-b from-white via-gray-200 to-gray-500 bg-clip-text text-transparent drop-shadow-2xl italic tracking-tighter"
+              style={{ animation: "menuTitleGlow 3s ease-in-out infinite" }}
+            >
               HAYVAN SAVAŞÇILARI
             </h1>
             <p className="text-gray-400 mb-12 text-center font-medium tracking-wide uppercase text-xs opacity-60">
               Takımını Kur • Stratejini Belirle • Arenaya Hükmet
             </p>
             <div className="grid grid-cols-1 gap-4 w-full">
-              <button
+             <button
                 onClick={() => setMenuView("play_setup")}
                 className="group relative w-full py-6 bg-white text-black rounded-3xl font-black text-3xl shadow-[0_20px_40px_rgba(255,255,255,0.15)] hover:scale-[1.03] transition-all active:scale-95 overflow-hidden"
+                style={{ boxShadow: "0 0 30px rgba(255,255,255,0.1), 0 20px 60px rgba(255,255,255,0.15)" }}
               >
                 <div className="relative z-10 flex items-center justify-center gap-3">
                   ⚔️ OYNA

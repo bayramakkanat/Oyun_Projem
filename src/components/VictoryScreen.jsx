@@ -22,8 +22,8 @@ export default function VictoryScreen({
         style={{ animation: "fadeIn 0.5s ease-out" }}
       >
         <div
-         className="text-8xl mb-2"
-          style={{ animation: "victoryBounce 1s ease-in-out infinite", filter: "drop-shadow(0 0 30px rgba(251,191,36,0.8)) drop-shadow(0 0 60px rgba(251,191,36,0.4))" }}
+         className="text-8xl mb-4"
+          style={{ animation: "trophyFloat 3s ease-in-out infinite" }}
         >
           🏆
         </div>
@@ -32,14 +32,20 @@ export default function VictoryScreen({
             ✨ MÜKEMMEL OYUN ✨
           </div>
         )}
-        <div className="text-4xl font-black mb-1 text-yellow-300">
-          TEBRİKLER!
+        <div
+          className="text-4xl font-black mb-1 text-yellow-300"
+          style={{ animation: "victoryGlow 2s ease-in-out infinite" }}
+        >
+          TEBRİKLER! 🎊
         </div>
         <div className="text-gray-400 mb-6 text-sm uppercase tracking-widest">
           Arenaya hükmettin
         </div>
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4">
+       <div className="grid grid-cols-3 gap-3 mb-6">
+          <div
+            className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 backdrop-blur-sm"
+            style={{ animation: "statCardPop 0.5s ease-out 0.1s both" }}
+          >
             <div className="text-2xl font-black text-yellow-300">
               {WIN_TURN}
             </div>
@@ -47,13 +53,19 @@ export default function VictoryScreen({
               Tur Tamamlandı
             </div>
           </div>
-          <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-4">
+          <div
+            className="bg-green-500/10 border border-green-500/30 rounded-2xl p-4 backdrop-blur-sm"
+            style={{ animation: "statCardPop 0.5s ease-out 0.25s both" }}
+          >
             <div className="text-2xl font-black text-green-400">{wins}</div>
             <div className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">
               Galibiyet
             </div>
           </div>
-          <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4">
+          <div
+            className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 backdrop-blur-sm"
+            style={{ animation: "statCardPop 0.5s ease-out 0.4s both" }}
+          >
             <div className="text-2xl font-black text-red-400">{lives} ❤️</div>
             <div className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">
               Kalan Can

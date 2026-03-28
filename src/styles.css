@@ -1628,3 +1628,82 @@
 .tier-particles-4::after { animation-delay: 1s; }
 .tier-particles-5::after { animation-delay: 1s; }
 .tier-particles-6::after { animation-delay: 1s; }
+/* ─────────────────────────────────────────────────────────── 
+   TAKIM BADGE & SHOP İNDİKATÖRLERİ
+   ─────────────────────────────────────────────────────────── */
+
+@keyframes teamBadgePulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.08);
+    box-shadow: 0 0 18px rgba(74, 222, 128, 0.9), 0 0 30px rgba(74, 222, 128, 0.4);
+  }
+}
+
+@keyframes teamBadgeBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0px); }
+  50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   ZAFER & GAME OVER EKRAN EFEKTLERİ
+   ─────────────────────────────────────────────────────────── */
+
+@keyframes trophyFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(-3deg);
+    filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 60px rgba(251, 191, 36, 0.4));
+  }
+  50% {
+    transform: translateY(-12px) rotate(3deg);
+    filter: drop-shadow(0 0 50px rgba(251, 191, 36, 1)) drop-shadow(0 0 80px rgba(251, 191, 36, 0.6));
+  }
+}
+
+@keyframes skullFloat {
+  0%, 100% { transform: translateY(0px) rotate(-5deg); filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.6)); }
+  50% { transform: translateY(-10px) rotate(5deg); filter: drop-shadow(0 0 40px rgba(239, 68, 68, 0.9)); }
+}
+
+@keyframes victoryGlow {
+  0%, 100% { text-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 40px rgba(251, 191, 36, 0.3); }
+  50% { text-shadow: 0 0 40px rgba(251, 191, 36, 1), 0 0 80px rgba(251, 191, 36, 0.6), 0 0 120px rgba(251, 191, 36, 0.3); }
+}
+
+@keyframes statCardPop {
+  0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+  70% { transform: scale(1.05); }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes menuLogoFloat {
+  0%, 100% { transform: scale(1) rotate(-2deg); }
+  50% { transform: scale(1.05) rotate(2deg); }
+}
+
+@keyframes menuTitleGlow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.2) drop-shadow(0 0 20px rgba(255, 255, 255, 0.3)); }
+}
+
+@keyframes hudItemGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(139, 92, 246, 0); }
+  50% { box-shadow: 0 0 12px rgba(139, 92, 246, 0.3); }
+}
+
+/* ─────────────────────────────────────────────────────────── 
+   BATTLE VIEW — İSİM ETİKETLERİ
+   ─────────────────────────────────────────────────────────── */
+
+@keyframes labelSlideDown {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

@@ -23,28 +23,42 @@ export default function GameOverScreen({
       >
         <div
           className="text-8xl mb-4"
-          style={{ animation: "shake 0.5s ease-out" }}
+          style={{ animation: "skullFloat 4s ease-in-out infinite" }}
         >
           💀
         </div>
-        <div className="text-4xl font-black mb-1 text-red-400">OYUN BİTTİ</div>
+       <div
+          className="text-4xl font-black mb-1 text-red-400"
+          style={{ textShadow: "0 0 20px rgba(239, 68, 68, 0.6), 0 0 40px rgba(239, 68, 68, 0.3)" }}
+        >
+          OYUN BİTTİ
+        </div>
         <div className="text-gray-400 mb-6 text-sm uppercase tracking-widest">
           Savaşçı düştü ama efsane yaşıyor
         </div>
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+       <div className="grid grid-cols-3 gap-3 mb-6">
+          <div
+            className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm"
+            style={{ animation: "statCardPop 0.5s ease-out 0.1s both" }}
+          >
             <div className="text-2xl font-black text-white">{survived}</div>
             <div className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">
               Tur Hayatta
             </div>
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+          <div
+            className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm"
+            style={{ animation: "statCardPop 0.5s ease-out 0.25s both" }}
+          >
             <div className="text-2xl font-black text-green-400">{wins}</div>
             <div className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">
               Galibiyet
             </div>
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+          <div
+            className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm"
+            style={{ animation: "statCardPop 0.5s ease-out 0.4s both" }}
+          >
             <div className="text-2xl font-black text-blue-400">
               {Math.max(stats.bestTurn, turn)}
             </div>

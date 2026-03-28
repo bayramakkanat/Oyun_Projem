@@ -160,6 +160,7 @@ function Card({
 
  return (
     <div className="relative group overflow-visible">
+      {/* Merge uyarısı — mevcut yıldız */}
       {!compact &&
         shop &&
         team &&
@@ -172,6 +173,30 @@ function Card({
             style={{ animation: "starTwinkle 1.5s ease-in-out infinite" }}
           >
             ⭐
+          </div>
+        )}
+
+      {/* "Takımında!" rozeti — takımda olan hayvan mağazada belirince */}
+      {!compact &&
+        shop &&
+        team &&
+        team.some((t) => t && t.name === a.name && t.tier === a.tier) && (
+          <div
+            className="absolute -bottom-4 left-1/2 z-30 pointer-events-none"
+            style={{ animation: "teamBadgeBounce 2.5s ease-in-out infinite" }}
+          >
+            <span
+              className="text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full whitespace-nowrap"
+              style={{
+                background: "linear-gradient(135deg, #059669, #10b981)",
+                color: "white",
+                border: "1px solid rgba(52, 211, 153, 0.6)",
+                boxShadow: "0 0 10px rgba(52, 211, 153, 0.5), 0 2px 8px rgba(0,0,0,0.4)",
+                display: "block",
+              }}
+            >
+              👥 Takımında!
+            </span>
           </div>
         )}
       {!compact && (

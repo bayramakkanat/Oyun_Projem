@@ -145,8 +145,8 @@ useEffect(() => {
         <div className="relative z-10 flex flex-col items-center gap-2 w-full px-4 mt-24">
           {/* Takım İsimleri */}
           <div className="w-full max-w-2xl flex justify-between px-16 mb-2">
-            <div className="flex flex-col items-center">
-              <span className="text-[11px] text-green-400 font-black uppercase tracking-widest glass-panel px-3 py-1 rounded-md">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[11px] text-green-400 font-black uppercase tracking-widest glass-panel px-3 py-1 rounded-md" style={{ animation: "labelSlideDown 0.4s ease-out" }}>
   Takımın
 </span>
               <span
@@ -162,8 +162,8 @@ style={{
   : "TAKIMIN"}
               </span>
             </div>
-            <div className="flex flex-col items-center">
-             <span className="text-[11px] text-red-400 font-black uppercase tracking-widest glass-panel px-3 py-1 rounded-md">
+           <div className="flex flex-col items-center gap-2">
+             <span className="text-[11px] text-red-400 font-black uppercase tracking-widest glass-panel px-3 py-1 rounded-md" style={{ animation: "labelSlideDown 0.4s ease-out" }}>
   Rakip
 </span>
               <span
