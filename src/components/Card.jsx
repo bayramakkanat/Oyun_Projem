@@ -158,8 +158,8 @@ function Card({
     </div>
   );
 
-  return (
-    <div className="relative group">
+ return (
+    <div className="relative group overflow-visible">
       {!compact &&
         shop &&
         team &&
@@ -183,9 +183,9 @@ function Card({
           )}
         </>
       )}
-      <div
+     <div
         data-pet-id={a.id}
-       className={`card-3d tier-${a.tier} level-${a.lvl} ${battle ? "battle-card" : ""} ${
+       className={`card-3d tier-${a.tier} level-${a.lvl} ${!battle && !compact ? `tier-particles-${a.tier}` : ""} ${battle ? "battle-card" : ""} ${
           compact
             ? "w-20 h-28 pt-2 pb-1"
             : tall
@@ -194,11 +194,11 @@ function Card({
       } rounded-xl flex flex-col items-center justify-around ${(battle || a.img) ? "bg-transparent border-0 shadow-none" : `bg-gradient-to-br ${TBG[a.tier]} border-2 ${TBD[a.tier]} backdrop-blur-md shadow-xl`} ${
           battle
             ? ""
-            : `${
+           : `${
                 selected
-  ? ""
+  ? `ring-4 ring-white/50 shadow-2xl`
   : close && !compact
-  ? ""
+  ? "ring-2 ring-yellow-400/60 animate-pulse"
   : ""
               }`
       } ${
@@ -207,13 +207,15 @@ function Card({
     : "cursor-pointer transition-all duration-300"
 } relative`}
         onClick={onClick}
-        style={{
+       style={{
   ...(battle
     ? {}
     : !compact && !isFlipped
     ? { opacity: 0, transform: "rotateY(90deg)" }
     : isFlipped
-    ? {}
+    ? { 
+        animation: !anim && !compact ? `tier${a.tier}Glow 3s ease-in-out infinite` : undefined,
+      }
     : {}),
   ...animStyle
 }}
@@ -224,14 +226,14 @@ function Card({
     ? (!a.flip ? { transform: "scaleX(-1)" } : {})
     : (a.flip ? { transform: "scaleX(-1)" } : {})
 }>
-  <img
+ <img
     src={a.img ? `/images/animals/${a.img}` : `https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u${a.name.codePointAt(0).toString(16)}.svg`}
     alt={a.nick}
-    className={`pet-glow drop-shadow-2xl object-contain ${
+    className={`pet-glow drop-shadow-2xl object-contain transition-all duration-300 ${
       a.img
        ? compact ? "w-16 h-16" : "w-24 h-24"
         : compact ? "w-12 h-12" : "w-16 h-16"
-    } ${!battle && !compact && !anim ? `pet-idle phase-${(a.id ?? 0) % 6}` : ""}`}
+    } ${!battle && !compact && !anim ? `pet-idle phase-${(a.id ?? 0) % 6} group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_currentColor]` : ""}`}
     onError={(e) => {
       e.target.style.display = "none";
       e.target.nextSibling.style.display = "inline";
