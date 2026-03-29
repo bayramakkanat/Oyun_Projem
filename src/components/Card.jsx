@@ -256,8 +256,8 @@ function Card({
     alt={a.nick}
     className={`pet-glow drop-shadow-2xl object-contain transition-all duration-300 ${
       a.img
-       ? compact ? "w-16 h-16" : "w-24 h-24"
-        : compact ? "w-12 h-12" : "w-16 h-16"
+      ? compact ? "w-16 h-16" : "w-12 h-12 sm:w-24 sm:h-24"
+  : compact ? "w-12 h-12" : "w-10 h-10 sm:w-16 sm:h-16"
     } ${!battle && !compact && !anim ? `pet-idle phase-${(a.id ?? 0) % 6} group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_currentColor]` : ""}`}
     onError={(e) => {
       e.target.style.display = "none";
