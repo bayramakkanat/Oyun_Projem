@@ -82,7 +82,7 @@ export default function ShopView() {
         <div className="glass-panel-strong rounded-[2.5rem] p-4 mb-4 border-2 border-purple-500/20 shadow-2xl hover:border-purple-500/40 transition-all duration-500">
           <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 flex items-center justify-between">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-300" style={{ animation: "shimmer 3s ease-in-out infinite" }}>🛒 HAYVAN MAĞAZASI</span>
-            <span className="text-blue-300/90 font-bold px-3 py-1.5 glass-panel border border-blue-400/40 rounded-lg hover:border-blue-400/80 transition-all duration-300 hover:shadow-[0_0_15px_rgba(96,165,250,0.4)]">SAĞ TIK = ❄️ DONDUR</span>
+            <span className="hidden sm:inline text-blue-300/90 font-bold px-3 py-1.5 glass-panel border border-blue-400/40 rounded-lg hover:border-blue-400/80 transition-all duration-300 hover:shadow-[0_0_15px_rgba(96,165,250,0.4)]">SAĞ TIK = ❄️ DONDUR</span>
           </div>
          <div className="flex gap-1 sm:gap-2.5 justify-center items-end">
             {shop.map((a) => (
@@ -186,7 +186,7 @@ export default function ShopView() {
             <button onClick={battle} disabled={team.filter(x => x).length === 0 || phase === "battle"} className="flex-1 group relative py-4 bg-gradient-to-br from-green-600 to-emerald-800 disabled:opacity-40 rounded-2xl font-black text-lg tracking-tight hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_40px_rgba(22,163,74,0.3)] overflow-hidden"><div className="relative z-10 flex items-center justify-center gap-2">⚔️ NORMAL SAVAŞ</div><div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div></button>
           </div>
         ) : (
-          <button onClick={battle} disabled={team.filter(x => x).length === 0 || phase === "battle" || (versusReady)} className="w-full group relative py-5 mt-2 bg-gray-800/60 disabled:cursor-not-allowed rounded-2xl font-black text-2xl tracking-tighter hover:scale-[1.01] hover:bg-gray-700/70 hover:border-gray-500/60 active:scale-95 transition-all duration-200 border-2 border-gray-600/40 text-gray-300 overflow-hidden"><div className="relative z-10 flex items-center justify-center gap-3">{team.filter(x => x).length === 0 ? <><span className="text-4xl">🐾</span><span>ÖNCE TAKIMINA HAYVAN EKLE!</span></> : versusReady ? `⏳ Rakip Bekleniyor...` : "⚔️ SAVAŞI BAŞLAT"}</div><div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div></button>
+         <button onClick={battle} disabled={team.filter(x => x).length === 0 || phase === "battle" || (versusReady)} className="w-full group relative py-3 sm:py-5 mt-2 bg-gray-800/60 disabled:cursor-not-allowed rounded-2xl font-black text-lg sm:text-2xl tracking-tighter hover:scale-[1.01] hover:bg-gray-700/70 hover:border-gray-500/60 active:scale-95 transition-all duration-200 border-2 border-gray-600/40 text-gray-300 overflow-hidden"><div className="relative z-10 flex items-center justify-center gap-3">{team.filter(x => x).length === 0 ? <><span className="text-4xl">🐾</span><span>ÖNCE TAKIMINA HAYVAN EKLE!</span></> : versusReady ? `⏳ Rakip Bekleniyor...` : "⚔️ SAVAŞI BAŞLAT"}</div><div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div></button>
         )}
       </div>
 
