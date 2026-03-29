@@ -254,10 +254,10 @@ function Card({
  <img
     src={a.img ? `/images/animals/${a.img}` : `https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u${a.name.codePointAt(0).toString(16)}.svg`}
     alt={a.nick}
-    className={`pet-glow drop-shadow-2xl object-contain transition-all duration-300 ${
-      a.img
-      ? compact ? "w-16 h-16" : "w-12 h-12 sm:w-24 sm:h-24"
-  : compact ? "w-12 h-12" : "w-10 h-10 sm:w-16 sm:h-16"
+   className={`pet-glow drop-shadow-2xl object-contain transition-all duration-300 ${
+  a.img
+    ? compact ? "w-16 h-16" : "w-12 h-12 sm:w-24 sm:h-24"
+    : compact ? "w-12 h-12" : "w-10 h-10 sm:w-16 sm:h-16"
     } ${!battle && !compact && !anim ? `pet-idle phase-${(a.id ?? 0) % 6} group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_currentColor]` : ""}`}
     onError={(e) => {
       e.target.style.display = "none";

@@ -293,7 +293,7 @@ export default function GameRouter() {
   // ana oyun ekranı (shop veya battle)
   return (
     <div
-      className="min-h-screen text-white p-2 flex flex-col justify-center"
+     className="min-h-screen text-white p-2 flex flex-col justify-center overflow-x-hidden"
       style={{
         backgroundImage: `url(/images/themes/battle_bg.jpg)`,
         backgroundSize: "cover",
