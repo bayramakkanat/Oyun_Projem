@@ -61,22 +61,24 @@ export default function HUD({ reset }) {
       </div>
 
       {/* ALT SATIR: ALTIN + CAN + ZAFER + SES + MENÜ */}
-      <div className="flex items-center gap-1.5">
-        <div className="flex flex-col items-center bg-yellow-900/60 border border-yellow-500/40 px-2 py-1 rounded-xl flex-1">
-          <span className="text-[8px] text-yellow-400 uppercase tracking-widest font-black">ALTIN</span>
-          <span className="text-yellow-200 font-black text-sm leading-none">💰{gold}</span>
-        </div>
-        <div className="flex flex-col items-center bg-red-900/60 border border-red-500/40 px-2 py-1 rounded-xl flex-1">
-          <span className="text-[8px] text-red-400 uppercase tracking-widest font-black">CAN</span>
-          <span className="text-red-200 font-black text-sm leading-none">❤️{lives}</span>
-        </div>
-        <div className="flex flex-col items-center bg-green-900/60 border border-green-500/40 px-2 py-1 rounded-xl flex-1">
-          <span className="text-[8px] text-green-400 uppercase tracking-widest font-black">ZAFER</span>
-          <span className="text-green-200 font-black text-sm leading-none">✓{wins}</span>
-        </div>
-        <button onClick={() => setSoundEnabled(s => !s)} className="p-2 bg-gray-900/70 rounded-xl text-sm hover:bg-gray-700/80 transition-all border border-white/10 h-[36px] w-[36px] flex items-center justify-center">{soundEnabled ? "🔊" : "🔇"}</button>
-        <button onClick={() => { reset(); setMenuView("main"); setGameStarted(false); }} className="p-2 bg-gray-900/70 rounded-xl text-sm hover:bg-gray-700/80 transition-all border border-white/10 h-[36px] w-[36px] flex items-center justify-center">🏠</button>
-      </div>
+<div className="flex items-center gap-1.5">
+  <div className="flex flex-col items-center bg-yellow-900/60 border border-yellow-500/40 px-2 py-1 rounded-xl min-w-[56px]">
+    <span className="text-[8px] text-yellow-400 uppercase tracking-widest font-black">ALTIN</span>
+    <span className="text-yellow-200 font-black text-sm leading-none">💰{gold}</span>
+  </div>
+  <div className="flex flex-col items-center bg-red-900/60 border border-red-500/40 px-2 py-1 rounded-xl min-w-[56px]">
+    <span className="text-[8px] text-red-400 uppercase tracking-widest font-black">CAN</span>
+    <span className="text-red-200 font-black text-sm leading-none">❤️{lives}</span>
+  </div>
+  <div className="flex flex-col items-center bg-green-900/60 border border-green-500/40 px-2 py-1 rounded-xl min-w-[56px]">
+    <span className="text-[8px] text-green-400 uppercase tracking-widest font-black">ZAFER</span>
+    <span className="text-green-200 font-black text-sm leading-none">✓{wins}</span>
+  </div>
+  <div className="flex gap-1.5 ml-auto">
+    <button onClick={() => setSoundEnabled(s => !s)} className="p-2 bg-gray-900/70 rounded-xl text-sm hover:bg-gray-700/80 transition-all border border-white/10 h-[36px] w-[36px] flex items-center justify-center">{soundEnabled ? "🔊" : "🔇"}</button>
+    <button onClick={() => { reset(); setMenuView("main"); setGameStarted(false); }} className="p-2 bg-gray-900/70 rounded-xl text-sm hover:bg-gray-700/80 transition-all border border-white/10 h-[36px] w-[36px] flex items-center justify-center">🏠</button>
+  </div>
+</div>
     </div>
   );
 }
