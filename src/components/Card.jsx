@@ -215,7 +215,7 @@ function Card({
             ? "w-20 h-28 pt-2 pb-1"
             : tall
             ? "w-28 h-40 pt-3 pb-4"
-          : "w-32 h-40 pt-1 pb-1"
+          : "w-[68px] h-[90px] pt-0.5 pb-0.5 sm:w-32 sm:h-40"
       } rounded-xl flex flex-col items-center justify-around ${(battle || a.img) ? "bg-transparent border-0 shadow-none" : `bg-gradient-to-br ${TBG[a.tier]} border-2 ${TBD[a.tier]} backdrop-blur-md shadow-xl`} ${
           battle
             ? ""
