@@ -31,14 +31,14 @@ export default function HUD({ reset }) {
             )}
           </span>
         </div>
-        <div className="flex flex-col items-center bg-purple-900/60 border border-purple-400/30 px-3 rounded-2xl shadow-inner h-[52px] justify-center">
-          <span className="text-[9px] text-purple-300 uppercase tracking-widest font-black mb-0.5">KADEME</span>
-          <div className="flex gap-1">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-sm transition-all ${i <= maxT ? "bg-purple-600 border-2 border-purple-300 text-white shadow-lg shadow-purple-500/40" : "bg-gray-800 border-2 border-gray-600 text-gray-500"} ${i === maxT ? "ring-2 ring-yellow-400 ring-offset-1 ring-offset-black" : ""}`}>{i}</div>
-            ))}
-          </div>
-        </div>
+        <div className="flex flex-col items-center bg-purple-900/60 border border-purple-400/30 px-2 rounded-2xl shadow-inner h-[52px] justify-center">
+  <span className="text-[9px] text-purple-300 uppercase tracking-widest font-black mb-0.5">KADEME</span>
+  <div className="flex gap-0.5">
+    {[1, 2, 3, 4, 5, 6].map(i => (
+      <div key={i} className={`w-5 h-5 sm:w-7 sm:h-7 rounded-md sm:rounded-lg flex items-center justify-center font-black text-xs sm:text-sm transition-all ${i <= maxT ? "bg-purple-600 border border-purple-300 sm:border-2 text-white shadow-lg shadow-purple-500/40" : "bg-gray-800 border border-gray-600 sm:border-2 text-gray-500"} ${i === maxT ? "ring-1 sm:ring-2 ring-yellow-400 ring-offset-1 ring-offset-black" : ""}`}>{i}</div>
+    ))}
+  </div>
+</div>
         <button onClick={() => setGuide(true)} className="bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 w-[48px] h-[52px] flex items-center justify-center">🗺️</button>
         <button onClick={() => setShowCollection(true)} className="bg-gray-900/70 rounded-xl text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 w-[48px] h-[52px] flex items-center justify-center">📖</button>
         {gameMode === "standard" && BOSSES[turn + 1] && (

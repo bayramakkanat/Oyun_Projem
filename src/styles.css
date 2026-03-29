@@ -980,35 +980,6 @@
 
 /* Responsive — Mobil */
 @media (max-width: 640px) {
-  /* Kartlar daha küçük */
-  .w-32 {
-    width: 5.5rem !important;
-  }
-
-  .h-40 {
-    height: 7rem !important;
-  }
-
-  .text-3xl {
-    font-size: 1.4rem !important;
-  }
-
-  /* Mağaza ve takım yatay kaydırma */
-  .flex.gap-2\.5.justify-center {
-    overflow-x: auto;
-    justify-content: flex-start !important;
-    padding-bottom: 8px;
-  }
-
-  /* Header küçültme */
-  .text-lg {
-    font-size: 0.95rem !important;
-  }
-
-  .font-bold.text-lg {
-    font-size: 0.9rem !important;
-  }
-
   /* Savaş ekranı */
   .gap-8 {
     gap: 1rem !important;
