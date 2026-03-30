@@ -70,9 +70,33 @@ export function useFriends({ user, onChallengeAccepted }) {
     setSearchError("");
     setSearchResult(null);
     try {
-      const snap = await getDocs(
-        query(collection(db, "usernames"), where("username", "==", username.toLowerCase().trim()))
-      );
+      const searchTerm = username.toLowerCase().trim();
+const snap = await getDocs(
+  query(collection(db, "usernames"), where("username", "==", searchTerm))
+);
+if (snap.empty) {
+  // displayName ile de dene
+  const snap2 = await getDocs(
+    query(collection(db, "usernames"), where("displayName", "==", username.trim()))
+  );
+  if (snap2.empty) {
+    setSearchError("Kullanıcı bulunamadı.");
+    setSearchLoading(false);
+    return;
+  }
+  // snap2 ile devam et
+  const data = snap2.docs[0].data();
+  if (data.uid === user.uid) {
+    setSearchError("Kendinize istek gönderemezsiniz.");
+    setSearchLoading(false);
+    return;
+  }
+  const alreadyFriend = friends.some(f => f.uid === data.uid);
+  const reqSnap = await getDoc(doc(db, "friend_requests", data.uid, "incoming", user.uid));
+  setSearchResult({ ...data, alreadyFriend, requestSent: reqSnap.exists() });
+  setSearchLoading(false);
+  return;
+}
       if (snap.empty) {
         setSearchError("Kullanıcı bulunamadı.");
       } else {

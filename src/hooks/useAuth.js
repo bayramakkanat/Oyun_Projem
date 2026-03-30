@@ -67,14 +67,26 @@ export function useAuth({
   }, []);
 
   const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      logError(err, "Google Login");
-      alert("Giriş yapılamadı: " + err.message);
+  const provider = new GoogleAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const u = result.user;
+    const username = (u.displayName || u.email.split("@")[0]).toLowerCase().replace(/\s+/g, "_");
+    const existing = await getDocs(
+      query(collection(db, "usernames"), where("uid", "==", u.uid))
+    );
+    if (existing.empty) {
+      await setDoc(doc(db, "usernames", username), {
+        username,
+        uid: u.uid,
+        displayName: u.displayName || username,
+      });
     }
-  };
+  } catch (err) {
+    logError(err, "Google Login");
+    alert("Giriş yapılamadı: " + err.message);
+  }
+};
 
   const handleEmailAuth = async (e) => {
     e.preventDefault();
