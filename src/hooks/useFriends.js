@@ -76,9 +76,9 @@ const snap = await getDocs(
 );
 if (snap.empty) {
   // displayName ile de dene
-  const snap2 = await getDocs(
-    query(collection(db, "usernames"), where("displayName", "==", username.trim()))
-  );
+ const snap2 = await getDocs(
+  query(collection(db, "usernames"), where("username", ">=", searchTerm), where("username", "<=", searchTerm + "\uf8ff"))
+);
   if (snap2.empty) {
     setSearchError("Kullanıcı bulunamadı.");
     setSearchLoading(false);
