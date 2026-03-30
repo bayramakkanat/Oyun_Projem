@@ -45,11 +45,11 @@ export default function ShopView() {
           <div className="flex gap-1 sm:gap-2 w-full items-end justify-center">
             {[0,1,2,3,4].map((idx) => {
   const a = shop[idx];
-  if (!a) return <div key={idx} className="flex-shrink-0" style={{width:"128px"}}></div>;
+  if (!a) return <div key={idx} className="flex-shrink-0 w-32 h-40"></div>;
   return (
-    <div key={a.id} className="flex flex-col items-center flex-shrink-0 gap-1 justify-end" style={{width:"128px"}}>
+    <div key={a.id} className="flex flex-col items-center flex-shrink-0 w-32 gap-1 justify-end">
       <div
-        className={`relative w-full transition-all duration-300 ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
+        className={`relative transition-all duration-300 ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
         onClick={() => setSel(sel?.id === a.id ? null : a)}
         onContextMenu={(e) => { e.preventDefault(); toggleFreeze(a); }}
       >
@@ -63,8 +63,8 @@ export default function ShopView() {
 })}
 
             {shopSlots < 4 && (
-             <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end" style={{width:"128px"}}>
-                <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
+             <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end" style={{width:"128px", height:"160px"}}>
+                <div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
                   <span className="text-xl">🔒</span>
                   <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur 5</span>
                 </div>
@@ -73,8 +73,8 @@ export default function ShopView() {
             )}
 
             {shopSlots < 5 && (
-              <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end" style={{width:"128px"}}>
-                <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end" style={{width:"128px", height:"160px"}}>
+                <div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
                   <span className="text-xl">🔒</span>
                   <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur 7</span>
                 </div>
@@ -83,11 +83,11 @@ export default function ShopView() {
             )}
 
             {/* Yenile */}
-            <div className="flex flex-col items-center flex-shrink-0 gap-1 justify-end" style={{width:"128px"}}>
+            <div className="flex flex-col items-center flex-shrink-0 gap-1 justify-end" style={{width:"128px", height:"160px"}}>
               <button
                 onClick={() => { const unfrozen = shop.filter(s => !s.frozen); if (unfrozen.length === 0 || gold >= 1) { if (unfrozen.length > 0) setGold(g => g - 1); refresh(); playSound("refresh"); } }}
                 disabled={gold < 1 && shop.filter(s => !s.frozen).length > 0}
-                className="w-full aspect-[3/4] rounded-2xl bg-transparent disabled:opacity-40 flex flex-col items-center justify-center hover:bg-purple-500/10 transition-all duration-300 border-2 border-dashed border-purple-400/30 hover:border-purple-400/60 group/roll"
+                className="w-32 h-40 rounded-2xl bg-transparent disabled:opacity-40 flex flex-col items-center justify-center hover:bg-purple-500/10 transition-all duration-300 border-2 border-dashed border-purple-400/30 hover:border-purple-400/60 group/roll"
               >
                 <span className="text-2xl sm:text-3xl group-hover/roll:rotate-180 transition-transform duration-500">🔄</span>
                 <span className="text-[10px] sm:text-xs font-black mt-1 text-purple-300">{shop.filter(s => !s.frozen).length === 0 ? "BEDAVA" : "1 💰"}</span>
@@ -153,7 +153,7 @@ export default function ShopView() {
                 <div key={i} className="flex-shrink-0">
                   <button
                     onClick={() => { if (sel) buy(sel, i); else if (selI !== null) mergeT(selI, i); }}
-                    className="w-full aspect-[3/4] rounded-2xl border-2 border-green-500/50 text-green-400 transition-all bg-green-500/10 flex flex-col items-center justify-center"
+                    className="w-32 h-40 rounded-2xl border-2 border-green-500/50 text-green-400 transition-all bg-green-500/10 flex flex-col items-center justify-center"
                     style={{ animation: "slotUnlock 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards" }}
                   >
                     <span style={{ animation: "lockBreak 0.8s ease-out forwards" }}>🔓</span>
@@ -164,7 +164,7 @@ export default function ShopView() {
 
               if (isLocked) return (
                 <div key={i} className="flex-shrink-0 opacity-40">
-                  <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
+                  <div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
                     <span className="text-xl">🔒</span>
                     <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur {lockedTurn}</span>
                   </div>
@@ -193,7 +193,7 @@ export default function ShopView() {
                 <div key={i} className="flex-shrink-0">
                   <button
                     onClick={() => { if (sel) buy(sel, i); else if (selI !== null) { const newTeam = [...team]; [newTeam[selI], newTeam[i]] = [newTeam[i], newTeam[selI]]; setTeam(newTeam); setSelI(null); } }}
-                    className={`w-full aspect-[3/4] rounded-2xl transition-all flex items-center justify-center group/slot ${sel || selI !== null ? "border-2 border-dashed border-green-400/70 bg-green-500/5 text-green-400/50 hover:border-green-400 hover:bg-green-500/10 hover:scale-105 active:scale-95" : "border-0 bg-transparent"}`}
+                    className={`w-32 h-40 rounded-2xl transition-all flex items-center justify-center group/slot ${sel || selI !== null ? "border-2 border-dashed border-green-400/70 bg-green-500/5 text-green-400/50 hover:border-green-400 hover:bg-green-500/10 hover:scale-105 active:scale-95" : "border-0 bg-transparent"}`}
                   >
                     <span className={`transition-transform duration-300 ${sel || selI !== null ? "group-hover/slot:rotate-90 text-green-400/50" : "text-white/20 text-xs"}`}>+</span>
                   </button>
