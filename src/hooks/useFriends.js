@@ -115,11 +115,11 @@ if (snap.empty) {
           });
         }
       }
-    } catch (e) {
-      setSearchError("Arama sırasında hata oluştu.");
-    } finally {
-      setSearchLoading(false);
-    }
+   } catch (e) {
+  setSearchError("Hata: " + e.message);
+} finally {
+  setSearchLoading(false);
+}
   };
 
   // ── Arkadaşlık isteği gönder ─────────────────────────────────────────────
