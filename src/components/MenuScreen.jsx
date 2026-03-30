@@ -49,10 +49,11 @@ export default function MenuScreen({
   handleGoogleLogin,
   handleLogout,
   handleUpdateProfile,
- onStart,
-onDebug,
-loadTasksFromDB,
-saveTasksToDB,
+  onStart,
+  onStartVersus,
+  onDebug,
+  loadTasksFromDB,
+  saveTasksToDB,
 }) {
   const [achCat, setAchCat] = useState("any");
   const currentDiffConfig =
@@ -553,14 +554,15 @@ saveTasksToDB,
           </div>
         )}
         {menuView === "profile" && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
-            <ProfileScreen
-              onClose={() => setMenuView("main")}
-              user={user}
-              stats={stats}
-            />
-          </div>
-        )}
+  <div className="fixed inset-0 z-50 overflow-y-auto">
+    <ProfileScreen
+      onClose={() => setMenuView("main")}
+      user={user}
+      stats={stats}
+      onStartVersus={onStartVersus}
+    />
+  </div>
+)}
         {menuView === "feedback" && (
   <div className="fixed inset-0 z-50 overflow-y-auto">
     <FeedbackScreen

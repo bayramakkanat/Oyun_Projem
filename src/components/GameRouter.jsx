@@ -79,6 +79,8 @@ export default function GameRouter() {
     versusPhase,
     setVersusPhase,
     setVersusRoom,
+    versusAutoJoin,
+    setVersusAutoJoin,
     // Diğer yardımcılar
     setBossChallenge,
     setPhase,
@@ -114,8 +116,10 @@ export default function GameRouter() {
   if (gameMode === "versus" && versusPhase === "lobby") {
     return (
       <VersusLobby
-        user={user}
-        onRoomReady={(roomInfo) => {
+  user={user}
+  autoJoin={versusAutoJoin}
+  onRoomReady={(roomInfo) => {
+    setVersusAutoJoin(null);
           setVersusRoom(roomInfo);
           setVersusPhase("playing");
           reset();
@@ -177,6 +181,11 @@ export default function GameRouter() {
               unlockAchievement("first_game");
               playSound("shop_open");
             }
+          }}
+          onStartVersus={(roomCode, role) => {
+          setGameMode("versus");
+          setVersusAutoJoin({ roomCode, role });
+          setVersusPhase("lobby");
           }}
           onDebug={() => setShowDebugPanel(true)}
           loadTasksFromDB={loadTasksFromDB}

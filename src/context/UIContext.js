@@ -55,6 +55,7 @@ export const UIProvider = ({ children }) => {
   const [gameMode,          setGameMode]           = useState("standard");
   const [versusPhase,       setVersusPhase]        = useState(null);
   const [versusRoom,        setVersusRoom]         = useState(null);
+  const [versusAutoJoin,    setVersusAutoJoin]     = useState(null);
   const [difficultyLevel,   setDifficultyLevel]    = useState(
     () => localStorage.getItem("petgame_difficulty") || "normal"
   );
@@ -210,6 +211,7 @@ export const UIProvider = ({ children }) => {
     gameMode, setGameMode,
     versusPhase, setVersusPhase,
     versusRoom, setVersusRoom,
+    versusAutoJoin, setVersusAutoJoin,
     difficultyLevel, setDifficultyLevel,
     anims, setAnims,
     isPaused, setIsPaused,
@@ -239,7 +241,7 @@ export const UIProvider = ({ children }) => {
     over, victory, lives, wins,
     guide, guideLvl, openTiers, lastError,
     showCollection, showDebugPanel, isDebugBattle,
-    gameMode, versusPhase, versusRoom, difficultyLevel,
+    gameMode, versusPhase, versusRoom, versusAutoJoin, difficultyLevel,
     anims, isPaused, newTier, lastT, newlyOpenedSlot,
     // Auth
     user, displayName, stats,

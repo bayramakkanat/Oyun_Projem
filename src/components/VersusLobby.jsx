@@ -10,8 +10,18 @@ import {
 } from "firebase/firestore";
 import StarField from "./StarField";
 
-export default function VersusLobby({ user, onRoomReady, onCancel }) {
+export default function VersusLobby({ user, onRoomReady, onCancel, autoJoin }) {
   const [mode, setMode] = useState(null); // "create" | "join"
+  useEffect(() => {
+  if (!autoJoin || !user) return;
+  if (autoJoin.role === "host") {
+    setMode("create");
+    createRoomWithCode(autoJoin.roomCode);
+  } else {
+    setMode("join");
+    joinRoomWithCode(autoJoin.roomCode);
+  }
+}, [autoJoin, user]);
   const [roomCode, setRoomCode] = useState("");
   const [inputCode, setInputCode] = useState("");
   const [status, setStatus] = useState("");
@@ -28,7 +38,53 @@ export default function VersusLobby({ user, onRoomReady, onCancel }) {
       code += chars[Math.floor(Math.random() * chars.length)];
     return code;
   };
+  const createRoomWithCode = async (code) => {
+  setRoomCode(code);
+  setStatus("Oda oluşturuluyor...");
+  try {
+    await setDoc(doc(db, "versus_rooms", code), {
+      code,
+      host: { uid: user.uid, name: userName },
+      guest: null,
+      status: "waiting",
+      disconnected: null,
+      createdAt: serverTimestamp(),
+    });
+    setStatus("Oda hazır! Arkadaşın kabul etmesi bekleniyor...");
+    const unsub = onSnapshot(doc(db, "versus_rooms", code), (snap) => {
+      const data = snap.data();
+      if (!data) return;
+      if (data.status === "ready") {
+        unsub();
+        onRoomReady({ code, role: "host", roomData: data });
+      }
+    });
+    setUnsubscribe(() => unsub);
+  } catch (err) {
+    setError("Oda oluşturulamadı: " + err.message);
+  }
+};
 
+const joinRoomWithCode = async (code) => {
+  setStatus("Odaya bağlanılıyor...");
+  try {
+    const roomRef = doc(db, "versus_rooms", code);
+    const snap = await getDoc(roomRef);
+    if (!snap.exists()) { setError("Oda bulunamadı."); setStatus(""); return; }
+    const data = snap.data();
+    if (data.status !== "waiting") { setError("Bu oda artık müsait değil."); setStatus(""); return; }
+    await setDoc(roomRef, {
+      ...data,
+      guest: { uid: user.uid, name: userName },
+      status: "ready",
+      disconnected: null,
+    });
+    setStatus("Odaya katıldın! Oyun başlıyor...");
+    onRoomReady({ code, role: "guest", roomData: { ...data, guest: { uid: user.uid, name: userName }, status: "ready" } });
+  } catch (err) {
+    setError("Odaya katılınamadı: " + err.message);
+  }
+};
   const createRoom = async () => {
     const code = generateCode();
     setRoomCode(code);
