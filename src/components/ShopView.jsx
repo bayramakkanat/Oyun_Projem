@@ -35,7 +35,7 @@ export default function ShopView() {
         <HUD reset={reset} />
 
         {/* MAĞAZA */}
-<div className="glass-panel-strong rounded-[2.5rem] p-3 sm:p-4 mb-4 border-2 border-purple-500/20 shadow-2xl hover:border-purple-500/40 transition-all duration-500 overflow-hidden">
+<div className="glass-panel-strong rounded-[2.5rem] p-3 sm:p-4 mb-4 border-2 border-purple-500/20 shadow-2xl hover:border-purple-500/40 transition-all duration-500">
   <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 flex items-center justify-between">
     <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-300">🛒 HAYVAN MAĞAZASI</span>
     <span className="hidden sm:inline text-blue-300/90 font-bold px-3 py-1.5 glass-panel border border-blue-400/40 rounded-lg">SAĞ TIK = ❄️ DONDUR</span>
