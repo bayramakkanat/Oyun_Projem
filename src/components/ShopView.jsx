@@ -42,9 +42,9 @@ export default function ShopView() {
           </div>
 
           {/* flex-1: her item mevcut genişliği eşit paylaşır, taşmaz */}
-          <div className="flex gap-1 sm:gap-2 w-full items-end justify-center">
+          <div className="grid grid-cols-6 gap-1 sm:gap-2 w-full items-end">
             {shop.map((a) => (
-              <div key={a.id} className="flex flex-col items-center w-32 flex-shrink-0 gap-1 justify-end">
+              <div key={a.id} className="flex flex-col items-center flex-shrink-0 gap-1 justify-end">
                 <div
                   className={`relative w-full transition-all duration-300 ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
                   onClick={() => setSel(sel?.id === a.id ? null : a)}
@@ -59,7 +59,7 @@ export default function ShopView() {
             ))}
 
             {shopSlots < 4 && (
-              <div className="flex flex-col items-center w-32 flex-shrink-0 gap-1 opacity-40 justify-end">
+              <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end">
                 <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
                   <span className="text-xl">🔒</span>
                   <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur 5</span>
@@ -69,7 +69,7 @@ export default function ShopView() {
             )}
 
             {shopSlots < 5 && (
-              <div className="flex flex-col items-center w-32 flex-shrink-0 gap-1 opacity-40 justify-end">
+              <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end">
                 <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
                   <span className="text-xl">🔒</span>
                   <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur 7</span>
@@ -79,7 +79,7 @@ export default function ShopView() {
             )}
 
             {/* Yenile */}
-            <div className="flex flex-col items-center w-32 flex-shrink-0 gap-1 justify-end">
+            <div className="flex flex-col items-center flex-shrink-0 gap-1 justify-end">
               <button
                 onClick={() => { const unfrozen = shop.filter(s => !s.frozen); if (unfrozen.length === 0 || gold >= 1) { if (unfrozen.length > 0) setGold(g => g - 1); refresh(); playSound("refresh"); } }}
                 disabled={gold < 1 && shop.filter(s => !s.frozen).length > 0}
@@ -139,14 +139,14 @@ export default function ShopView() {
           </div>
           {sel?.pendingTargetBuff && <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center">🎯 Buff vermek istediğin hayvana tıkla!</div>}
 
-          <div className="flex gap-1 sm:gap-2 w-full py-3 justify-center">
+          <div className="grid grid-cols-6 gap-1 sm:gap-2 w-full py-3">
             {team.map((a, i) => {
               const isLocked = (i === 4 && turn < 5) || (i === 5 && turn < 7);
               const lockedTurn = i === 4 ? 5 : 7;
               const isJustOpened = (i === 4 && newlyOpenedSlot === "shop_4_team_4") || (i === 5 && newlyOpenedSlot === "shop_5_team_5");
 
               if (isJustOpened) return (
-                <div key={i} className="w-32 flex-shrink-0">
+                <div key={i} className="flex-shrink-0">
                   <button
                     onClick={() => { if (sel) buy(sel, i); else if (selI !== null) mergeT(selI, i); }}
                     className="w-full aspect-[3/4] rounded-2xl border-2 border-green-500/50 text-green-400 transition-all bg-green-500/10 flex flex-col items-center justify-center"
@@ -159,7 +159,7 @@ export default function ShopView() {
               );
 
               if (isLocked) return (
-                <div key={i} className="w-32 flex-shrink-0 opacity-40">
+                <div key={i} className="flex-shrink-0 opacity-40">
                   <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
                     <span className="text-xl">🔒</span>
                     <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur {lockedTurn}</span>
@@ -168,7 +168,7 @@ export default function ShopView() {
               );
 
               return a ? (
-                <div key={a.id} className="w-32 flex-shrink-0 flex flex-col items-center" onClick={() => {
+                <div key={a.id} className="flex-shrink-0 flex flex-col items-center" onClick={() => {
                   if (sel?.pendingTargetBuff) {
                     if (team[i] && i !== sel.sourceSlot) {
                       const buffAmount = sel.buffAmount;
@@ -186,7 +186,7 @@ export default function ShopView() {
                   </div>
                 </div>
               ) : (
-                <div key={i} className="w-32 flex-shrink-0">
+                <div key={i} className="flex-shrink-0">
                   <button
                     onClick={() => { if (sel) buy(sel, i); else if (selI !== null) { const newTeam = [...team]; [newTeam[selI], newTeam[i]] = [newTeam[i], newTeam[selI]]; setTeam(newTeam); setSelI(null); } }}
                     className={`w-full aspect-[3/4] rounded-2xl transition-all flex items-center justify-center group/slot ${sel || selI !== null ? "border-2 border-dashed border-green-400/70 bg-green-500/5 text-green-400/50 hover:border-green-400 hover:bg-green-500/10 hover:scale-105 active:scale-95" : "border-0 bg-transparent"}`}
