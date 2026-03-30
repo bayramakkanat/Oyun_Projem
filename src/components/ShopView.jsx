@@ -42,7 +42,7 @@ export default function ShopView() {
           </div>
 
           {/* flex-1: her item mevcut genişliği eşit paylaşır, taşmaz */}
-          <div className="flex gap-1 sm:gap-2 w-full items-end">
+          <div className="flex gap-1 sm:gap-2 w-full items-end justify-center">
             {shop.map((a) => (
               <div key={a.id} className="flex flex-col items-center w-32 flex-shrink-0 gap-1 justify-end">
                 <div
