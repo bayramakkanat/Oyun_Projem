@@ -63,7 +63,7 @@ export default function ShopView() {
 })}
 
             {shopSlots < 4 && (
-              <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end">
+             <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end" style={{width:"128px"}}>
                 <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
                   <span className="text-xl">🔒</span>
                   <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur 5</span>
@@ -73,7 +73,7 @@ export default function ShopView() {
             )}
 
             {shopSlots < 5 && (
-              <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end">
+              <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end" style={{width:"128px"}}>
                 <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
                   <span className="text-xl">🔒</span>
                   <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur 7</span>
@@ -83,7 +83,7 @@ export default function ShopView() {
             )}
 
             {/* Yenile */}
-            <div className="flex flex-col items-center flex-shrink-0 gap-1 justify-end">
+            <div className="flex flex-col items-center flex-shrink-0 gap-1 justify-end" style={{width:"128px"}}>
               <button
                 onClick={() => { const unfrozen = shop.filter(s => !s.frozen); if (unfrozen.length === 0 || gold >= 1) { if (unfrozen.length > 0) setGold(g => g - 1); refresh(); playSound("refresh"); } }}
                 disabled={gold < 1 && shop.filter(s => !s.frozen).length > 0}
@@ -143,7 +143,7 @@ export default function ShopView() {
           </div>
           {sel?.pendingTargetBuff && <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center">🎯 Buff vermek istediğin hayvana tıkla!</div>}
 
-          <div className="grid grid-cols-6 gap-1 sm:gap-2 w-full py-3">
+          <div className="flex gap-1 sm:gap-2 w-full py-3 justify-center">
             {team.map((a, i) => {
               const isLocked = (i === 4 && turn < 5) || (i === 5 && turn < 7);
               const lockedTurn = i === 4 ? 5 : 7;
