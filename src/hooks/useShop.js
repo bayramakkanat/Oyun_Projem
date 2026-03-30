@@ -340,7 +340,7 @@ export function useShop({
 
   // ─── Mağaza yenile ────────────────────────────────────────────────────────
   const refresh = () => {
-    const currentFrozen = shop.filter((s) => s.frozen);
+    const currentFrozen = shop.filter((s) => s && s.frozen);
     setDiscountNext(false);
     const slotsNeeded = shopSlots - currentFrozen.length;
     const pool = [];
@@ -381,10 +381,10 @@ export function useShop({
 
   // ─── Dondur ───────────────────────────────────────────────────────────────
   const toggleFreeze = (a) => {
-    const willFreeze = !shop.find((s) => s.id === a.id)?.frozen;
-    if (willFreeze) playSound("freeze");
-    setShop(shop.map((s) => (s.id === a.id ? { ...s, frozen: !s.frozen } : s)));
-  };
+  const willFreeze = !shop.find((s) => s && s.id === a.id)?.frozen;
+  if (willFreeze) playSound("freeze");
+  setShop(shop.map((s) => (s && s.id === a.id ? { ...s, frozen: !s.frozen } : s)));
+};
 
   // ─── Satın al ─────────────────────────────────────────────────────────────
   const buy = (a, slot) => {
@@ -410,7 +410,16 @@ export function useShop({
         if (!a.isR) {
           setGold((g) => g - a.cost);
           if (onGoldSpent) onGoldSpent(a.cost);
-          setShop(shop.filter((x) => x.id !== a.id));
+          // ✨ Sabit slot: hayvanı null yap, filter yapma
+          setShop(prev => {
+            const idx = prev.findIndex(p => p?.id === a.id);
+            if (idx !== -1) {
+              const newShop = [...prev];
+              newShop[idx] = null;
+              return newShop;
+            }
+            return prev;
+          });
           if (newRewards.length > 0) setRewards((prev) => [...prev, ...newRewards]);
         } else {
           setRewards((prev) => [...prev.filter((x) => x.grp !== a.grp), ...newRewards]);
@@ -428,7 +437,16 @@ export function useShop({
       if (!a.isR) {
         setGold((g) => g - a.cost);
         if (onGoldSpent) onGoldSpent(a.cost);
-        setShop(shop.filter((x) => x.id !== a.id));
+        // ✨ Sabit slot
+        setShop(prev => {
+          const idx = prev.findIndex(p => p?.id === a.id);
+          if (idx !== -1) {
+            const newShop = [...prev];
+            newShop[idx] = null;
+            return newShop;
+          }
+          return prev;
+        });
       } else {
         setRewards(rewards.filter((x) => x.grp !== a.grp));
       }
@@ -451,7 +469,16 @@ export function useShop({
       if (!a.isR) {
         setGold((g) => g - a.cost);
         if (onGoldSpent) onGoldSpent(a.cost);
-        setShop(shop.filter((x) => x.id !== a.id));
+        // ✨ Sabit slot
+        setShop(prev => {
+          const idx = prev.findIndex(p => p?.id === a.id);
+          if (idx !== -1) {
+            const newShop = [...prev];
+            newShop[idx] = null;
+            return newShop;
+          }
+          return prev;
+        });
         if (merged.ability === AB.SHOP_DISCOUNT) setDiscountNext(true);
         if (newRewards.length > 0) setRewards((prev) => [...prev, ...newRewards]);
       } else {
@@ -466,10 +493,19 @@ export function useShop({
     if (nt[slot] !== null) return;
 
     nt[slot] = { ...a, lvl: a.lvl || 1, exp: a.exp || 0, curHp: a.curHp || a.hp, isR: undefined, rT: undefined, grp: undefined };
-   if (!a.isR) {
+    if (!a.isR) {
       setGold((g) => g - a.cost);
       if (onGoldSpent) onGoldSpent(a.cost);
-      setShop(shop.filter((x) => x.id !== a.id));
+      // ✨ Sabit slot
+      setShop(prev => {
+        const idx = prev.findIndex(p => p?.id === a.id);
+        if (idx !== -1) {
+          const newShop = [...prev];
+          newShop[idx] = null;
+          return newShop;
+        }
+        return prev;
+      });
     } else {
       setRewards(rewards.filter((x) => x.grp !== a.grp));
     }
@@ -477,11 +513,8 @@ export function useShop({
     applyBuyBuffs(nt, slot);
     setTeam(nt);
 
-    const remainingShop  = shop.filter((x) => x.id !== a.id);
-    const stillMergeable = remainingShop.some((sp) =>
-      nt.some((t) => t && t.name === sp.name && t.tier === sp.tier && t.lvl < 3)
-    );
-    if (stillMergeable) setTimeout(() => playSound("levelup"), 400);
+    const stillMergeable = shop.some(sp => sp && sp.id !== a.id && nt.some(t => t && t.name === sp.name && t.tier === sp.tier && t.lvl < 3));
+if (stillMergeable) setTimeout(() => playSound("levelup"), 400);
     setSel(null);
   };
 

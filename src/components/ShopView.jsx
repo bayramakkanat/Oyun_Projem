@@ -35,67 +35,81 @@ export default function ShopView() {
         <HUD reset={reset} />
 
         {/* MAĞAZA */}
-        <div className="glass-panel-strong rounded-[2.5rem] p-3 sm:p-4 mb-4 border-2 border-purple-500/20 shadow-2xl hover:border-purple-500/40 transition-all duration-500">
-          <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 flex items-center justify-between">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-300" style={{ animation: "shimmer 3s ease-in-out infinite" }}>🛒 HAYVAN MAĞAZASI</span>
-            <span className="hidden sm:inline text-blue-300/90 font-bold px-3 py-1.5 glass-panel border border-blue-400/40 rounded-lg hover:border-blue-400/80 transition-all duration-300 hover:shadow-[0_0_15px_rgba(96,165,250,0.4)]">SAĞ TIK = ❄️ DONDUR</span>
-          </div>
+<div className="glass-panel-strong rounded-[2.5rem] p-3 sm:p-4 mb-4 border-2 border-purple-500/20 shadow-2xl hover:border-purple-500/40 transition-all duration-500 overflow-hidden">
+  <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 flex items-center justify-between">
+    <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-300">🛒 HAYVAN MAĞAZASI</span>
+    <span className="hidden sm:inline text-blue-300/90 font-bold px-3 py-1.5 glass-panel border border-blue-400/40 rounded-lg">SAĞ TIK = ❄️ DONDUR</span>
+  </div>
 
-          {/* flex-1: her item mevcut genişliği eşit paylaşır, taşmaz */}
-          <div className="flex gap-1 sm:gap-2 w-full items-end justify-center">
-            {[0,1,2,3,4].map((idx) => {
-  const a = shop[idx];
-  if (!a) return <div key={idx} className="flex-shrink-0 w-32 h-40"></div>;
+  {/* 6 sütunlu grid: 5 hayvan slotu + 1 yenile butonu */}
+  <div className="grid grid-cols-6 gap-2 items-end">
+    {[0, 1, 2, 3, 4].map((idx) => {
+      const a = shop[idx];
+      const isLocked = (idx === 3 && turn < 5) || (idx === 4 && turn < 7);
+
+      if (isLocked) {
   return (
-    <div key={a.id} className="flex flex-col items-center flex-shrink-0 w-32 gap-1 justify-end">
-      <div
-        className={`relative transition-all duration-300 ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
-        onClick={() => setSel(sel?.id === a.id ? null : a)}
-        onContextMenu={(e) => { e.preventDefault(); toggleFreeze(a); }}
-      >
-        <Card a={a} anim={anims[a.id]} selected={sel?.id === a.id} showName={false} getDesc={getDesc} shop={shop} team={team} mirror={true} />
-        {a.frozen && <div className="absolute -top-1 -left-1 text-xl animate-pulse" style={{ filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.8))" }}>❄️</div>}
-        {sel?.id === a.id && <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/50 border-2 border-white z-[60]" style={{ animation: "pulse 1s ease-in-out infinite" }}><span className="text-white text-xs font-black">✓</span></div>}
+    <div key={`lock-${idx}`} className="flex flex-col items-center gap-1 opacity-40">
+      <div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
+        <span className="text-xl">🔒</span>
+        <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">
+          {idx === 3 ? "Tur 5" : "Tur 7"}
+        </span>
       </div>
-      <span className="text-xs sm:text-sm text-yellow-300 font-bold px-1 py-0.5 bg-black/40 rounded-full border border-yellow-500/30 backdrop-blur-sm">{a.cost}💰</span>
+      <span className="text-xs opacity-0 font-bold px-1 py-0.5 bg-black/40 rounded-full border border-yellow-500/30 backdrop-blur-sm">
+        0💰
+      </span>
     </div>
   );
-})}
+}
 
-            {shopSlots < 4 && (
-             <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end" style={{width:"128px", height:"160px"}}>
-                <div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
-                  <span className="text-xl">🔒</span>
-                  <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur 5</span>
-                </div>
-                <span className="text-xs opacity-0">0💰</span>
-              </div>
-            )}
-
-            {shopSlots < 5 && (
-              <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end" style={{width:"128px", height:"160px"}}>
-                <div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
-                  <span className="text-xl">🔒</span>
-                  <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur 7</span>
-                </div>
-                <span className="text-xs opacity-0">0💰</span>
-              </div>
-            )}
-
-            {/* Yenile */}
-            <div className="flex flex-col items-center flex-shrink-0 gap-1 justify-end" style={{width:"128px", height:"160px"}}>
-              <button
-                onClick={() => { const unfrozen = shop.filter(s => !s.frozen); if (unfrozen.length === 0 || gold >= 1) { if (unfrozen.length > 0) setGold(g => g - 1); refresh(); playSound("refresh"); } }}
-                disabled={gold < 1 && shop.filter(s => !s.frozen).length > 0}
-                className="w-32 h-40 rounded-2xl bg-transparent disabled:opacity-40 flex flex-col items-center justify-center hover:bg-purple-500/10 transition-all duration-300 border-2 border-dashed border-purple-400/30 hover:border-purple-400/60 group/roll"
-              >
-                <span className="text-2xl sm:text-3xl group-hover/roll:rotate-180 transition-transform duration-500">🔄</span>
-                <span className="text-[10px] sm:text-xs font-black mt-1 text-purple-300">{shop.filter(s => !s.frozen).length === 0 ? "BEDAVA" : "1 💰"}</span>
-              </button>
-              <span className="text-[9px] sm:text-[10px] text-purple-400 font-black tracking-widest uppercase">YENİLE</span>
-            </div>
+      // Açık slot: hayvan varsa göster, yoksa boş placeholder
+      if (!a) {
+        return (
+          <div key={`empty-${idx}`} className="flex flex-col items-center gap-1">
+            <div className="w-32 h-40" />
+            <span className="text-xs opacity-0 font-bold px-1 py-0.5 bg-black/40 rounded-full border border-yellow-500/30 backdrop-blur-sm">
+              0💰
+            </span>
           </div>
+        );
+      }
+
+      return (
+        <div key={a.id} className="flex flex-col items-center gap-1">
+          <div
+            className={`relative transition-all duration-300 ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
+            onClick={() => setSel(sel?.id === a.id ? null : a)}
+            onContextMenu={(e) => { e.preventDefault(); toggleFreeze(a); }}
+          >
+            <Card a={a} anim={anims[a.id]} selected={sel?.id === a.id} showName={false} getDesc={getDesc} shop={shop} team={team} mirror={true} />
+            {a.frozen && <div className="absolute -top-1 -left-1 text-xl animate-pulse">❄️</div>}
+            {sel?.id === a.id && <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white z-[60]">✓</div>}
+          </div>
+          <span className="text-xs sm:text-sm text-yellow-300 font-bold px-1 py-0.5 bg-black/40 rounded-full border border-yellow-500/30 backdrop-blur-sm">
+            {a.cost}💰
+          </span>
         </div>
+      );
+    })}
+
+    {/* Yenile butonu (6. sütun) */}
+    <div className="flex flex-col items-center gap-1">
+      <button
+  onClick={() => { const unfrozen = shop.filter(s => s && !s.frozen); if (unfrozen.length === 0 || gold >= 1) { if (unfrozen.length > 0) setGold(g => g - 1); refresh(); playSound("refresh"); } }}
+  disabled={gold < 1 && shop.filter(s => s && !s.frozen).length > 0}
+  className="w-32 h-40 rounded-2xl bg-transparent disabled:opacity-40 flex flex-col items-center justify-center hover:bg-purple-500/10 transition-all duration-300 border-2 border-dashed border-purple-400/30 hover:border-purple-400/60 group/roll"
+>
+  <span className="text-2xl sm:text-3xl group-hover/roll:rotate-180 transition-transform duration-500">🔄</span>
+  <span className="text-[10px] sm:text-xs font-black mt-1 text-purple-300">{shop.filter(s => s && !s.frozen).length === 0 ? "BEDAVA" : "1 💰"}</span>
+</button>
+      {/* Yenile butonunun altındaki yazıyı da aynı stil ve yükseklikte yapıyoruz */}
+      <span className="text-xs font-bold px-1 py-0.5 bg-black/40 rounded-full border border-purple-400/30 backdrop-blur-sm text-purple-300">
+        YENİLE
+      </span>
+    </div>
+  </div>
+</div>
 
         {sel && (
           <div className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:top-1/2 sm:right-4 sm:left-auto sm:-translate-y-1/2 sm:w-72 z-50 w-full bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-purple-500 rounded-2xl p-4 shadow-2xl backdrop-blur-sm">
