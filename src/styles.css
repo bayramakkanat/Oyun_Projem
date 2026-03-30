@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @keyframes pulse {
   0% {
     transform: scale(1);
