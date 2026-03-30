@@ -215,7 +215,7 @@ function Card({
             ? "w-20 h-28 pt-2 pb-1"
             : tall
             ? "w-28 h-40 pt-3 pb-4"
-         : "w-[68px] h-[90px] pt-0.5 pb-0.5 sm:w-32 sm:h-40 sm:pt-1 sm:pb-1"
+         : "w-32 h-40 pt-1 pb-1"
       } rounded-xl flex flex-col items-center justify-around ${(battle || a.img) ? "bg-transparent border-0 shadow-none" : `bg-gradient-to-br ${TBG[a.tier]} border-2 ${TBD[a.tier]} backdrop-blur-md shadow-xl`} ${
           battle
             ? ""
@@ -256,8 +256,8 @@ function Card({
     alt={a.nick}
    className={`pet-glow drop-shadow-2xl object-contain transition-all duration-300 ${
   a.img
-    ? compact ? "w-16 h-16" : window.innerWidth < 640 ? "w-12 h-12" : "w-24 h-24"
-  : compact ? "w-12 h-12" : window.innerWidth < 640 ? "w-10 h-10" : "w-16 h-16"
+    ? compact ? "w-16 h-16" : "w-24 h-24"
+  : compact ? "w-12 h-12" : "w-16 h-16"
     } ${!battle && !compact && !anim ? `pet-idle phase-${(a.id ?? 0) % 6} group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_currentColor]` : ""}`}
     onError={(e) => {
       e.target.style.display = "none";
