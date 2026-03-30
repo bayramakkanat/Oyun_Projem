@@ -42,21 +42,25 @@ export default function ShopView() {
           </div>
 
           {/* flex-1: her item mevcut genişliği eşit paylaşır, taşmaz */}
-          <div className="grid grid-cols-6 gap-1 sm:gap-2 w-full items-end">
-            {shop.map((a) => (
-              <div key={a.id} className="flex flex-col items-center flex-shrink-0 gap-1 justify-end">
-                <div
-                  className={`relative w-full transition-all duration-300 ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
-                  onClick={() => setSel(sel?.id === a.id ? null : a)}
-                  onContextMenu={(e) => { e.preventDefault(); toggleFreeze(a); }}
-                >
-                  <Card a={a} anim={anims[a.id]} selected={sel?.id === a.id} showName={false} getDesc={getDesc} shop={shop} team={team} mirror={true} />
-                  {a.frozen && <div className="absolute -top-1 -left-1 text-xl animate-pulse" style={{ filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.8))" }}>❄️</div>}
-                  {sel?.id === a.id && <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/50 border-2 border-white z-[60]" style={{ animation: "pulse 1s ease-in-out infinite" }}><span className="text-white text-xs font-black">✓</span></div>}
-                </div>
-                <span className="text-xs sm:text-sm text-yellow-300 font-bold px-1 py-0.5 bg-black/40 rounded-full border border-yellow-500/30 backdrop-blur-sm">{a.cost}💰</span>
-              </div>
-            ))}
+          <div className="flex gap-1 sm:gap-2 w-full items-end justify-center">
+            {[0,1,2,3,4].map((idx) => {
+  const a = shop[idx];
+  if (!a) return <div key={idx} className="flex-shrink-0" style={{width:"128px"}}></div>;
+  return (
+    <div key={a.id} className="flex flex-col items-center flex-shrink-0 gap-1 justify-end" style={{width:"128px"}}>
+      <div
+        className={`relative w-full transition-all duration-300 ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
+        onClick={() => setSel(sel?.id === a.id ? null : a)}
+        onContextMenu={(e) => { e.preventDefault(); toggleFreeze(a); }}
+      >
+        <Card a={a} anim={anims[a.id]} selected={sel?.id === a.id} showName={false} getDesc={getDesc} shop={shop} team={team} mirror={true} />
+        {a.frozen && <div className="absolute -top-1 -left-1 text-xl animate-pulse" style={{ filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.8))" }}>❄️</div>}
+        {sel?.id === a.id && <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/50 border-2 border-white z-[60]" style={{ animation: "pulse 1s ease-in-out infinite" }}><span className="text-white text-xs font-black">✓</span></div>}
+      </div>
+      <span className="text-xs sm:text-sm text-yellow-300 font-bold px-1 py-0.5 bg-black/40 rounded-full border border-yellow-500/30 backdrop-blur-sm">{a.cost}💰</span>
+    </div>
+  );
+})}
 
             {shopSlots < 4 && (
               <div className="flex flex-col items-center flex-shrink-0 gap-1 opacity-40 justify-end">
