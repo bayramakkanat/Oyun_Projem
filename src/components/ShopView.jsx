@@ -139,7 +139,7 @@ export default function ShopView() {
           </div>
           {sel?.pendingTargetBuff && <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center">🎯 Buff vermek istediğin hayvana tıkla!</div>}
 
-          <div className="flex gap-1 sm:gap-2 w-full py-3">
+          <div className="flex gap-1 sm:gap-2 w-full py-3 justify-center">
             {team.map((a, i) => {
               const isLocked = (i === 4 && turn < 5) || (i === 5 && turn < 7);
               const lockedTurn = i === 4 ? 5 : 7;
