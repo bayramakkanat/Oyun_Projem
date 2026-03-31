@@ -12,6 +12,7 @@ import { clearGameState } from "../utils/localSave";
 import { logError, safeNumber, saveStats } from "../utils/helpers";
 import { playSound } from "../hooks/useSound";
 import { ACHIEVEMENTS_DEF, MAX_STAT, WIN_TURN } from "../data/gameData";
+import { useFriends } from "../hooks/useFriends";
 
 export const UIContext = createContext();
 
@@ -64,6 +65,15 @@ export const UIProvider = ({ children }) => {
   const [newTier,           setNewTier]            = useState(null);
   const [lastT,             setLastT]              = useState(1);
   const [newlyOpenedSlot,   setNewlyOpenedSlot]    = useState(null);
+
+  const friendsData = useFriends({
+    user,
+    onChallengeAccepted: (roomCode) => {
+      setGameMode("versus");
+      setVersusPhase("lobby");
+      setVersusAutoJoin({ roomCode, role: "guest" });
+    },
+  });
 
   // ─── Ref'ler ──────────────────────────────────────────────────────────────
   const battleSpeedRef       = useRef(
@@ -237,6 +247,7 @@ export const UIProvider = ({ children }) => {
     settingsUsername, setSettingsUsername,
     settingsAvatar, setSettingsAvatar,
     handleGoogleLogin, handleEmailAuth, handleLogout, handleUpdateProfile,
+    friendsData,
   }), [
     gameStarted, menuView, soundEnabled, achievementPopup,
     over, victory, lives, wins,

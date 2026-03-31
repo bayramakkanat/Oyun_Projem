@@ -3,9 +3,8 @@ import { getRank, RANKS, loadStats, loadTasks } from "../utils/helpers";
 import { getCurrentMonthLabel } from "../hooks/useArena";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { useFriends } from "../hooks/useFriends";
 
-export default function ProfileScreen({ onClose, user, stats, onStartVersus }) {
+export default function ProfileScreen({ onClose, user, stats, onStartVersus, friendsData }) {
   const [xp, setXp] = useState(0);
   const [arenaWins, setArenaWins] = useState(0);
   const [bestTurn, setBestTurn] = useState(0);
@@ -19,7 +18,7 @@ export default function ProfileScreen({ onClose, user, stats, onStartVersus }) {
 
   const taskData = loadTasks(user?.uid);
 
-  const {
+ const {
     friends,
     incomingRequests,
     incomingChallenges,
@@ -36,13 +35,7 @@ export default function ProfileScreen({ onClose, user, stats, onStartVersus }) {
     rejectChallenge,
     setSearchResult,
     setSearchError,
-  } = useFriends({
-    user,
-    onChallengeAccepted: (roomCode) => {
-      onClose();
-      if (onStartVersus) onStartVersus(roomCode);
-    },
-  });
+  } = friendsData;
 
   useEffect(() => {
     const fetchXP = async () => {
