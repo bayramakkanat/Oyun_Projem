@@ -24,6 +24,7 @@ export default function GameRouter() {
     gameStarted,
     setGameStarted,
     reset,
+    restoreGame,
     menuView,
     setMenuView,
     victory,
@@ -186,6 +187,12 @@ export default function GameRouter() {
           setGameMode("versus");
           setVersusAutoJoin({ roomCode, role });
           setVersusPhase("lobby");
+          }}
+          onContinue={(saved) => {
+            setGameMode(saved.gameMode ?? "standard");
+            setDifficultyLevel(saved.difficultyLevel ?? "normal");
+            restoreGame(saved);
+            setGameStarted(true);
           }}
           onDebug={() => setShowDebugPanel(true)}
           loadTasksFromDB={loadTasksFromDB}

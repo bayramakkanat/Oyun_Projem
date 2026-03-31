@@ -8,7 +8,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-
+import { clearGameState } from "../utils/localSave";
 import { logError, safeNumber, saveStats } from "../utils/helpers";
 import { playSound } from "../hooks/useSound";
 import { ACHIEVEMENTS_DEF, MAX_STAT, WIN_TURN } from "../data/gameData";
@@ -167,6 +167,7 @@ export const UIProvider = ({ children }) => {
 
   // ─── Oyun sonu istatistik güncellemesi ───────────────────────────────────
   const updateStatsOnEnd = useCallback((won, currentTurn, currentWins, currentLives) => {
+    clearGameState();
     setStats((prev) => {
       const next = {
         ...prev,

@@ -219,7 +219,37 @@ export const BattleProvider = ({ children }) => {
     setGuideLvl, setAnims,
     setOver, setVictory, setNewTier, setLastT,
   ]);
-
+  const restoreGame = useCallback((saved) => {
+  const cfg = DIFFICULTY_CONFIGS[saved.difficultyLevel] || DIFFICULTY_CONFIGS.normal;
+  // ShopContext
+  setGold(saved.gold ?? cfg.startingGold);
+  setTurnAndRef(saved.turn ?? 1);
+  setTeam(saved.team ?? [null, null, null, null, null, null]);
+  setShop([]);
+  setShopResetKey((k) => k + 1);
+  setRewards([]);
+  // UIContext
+  setWins(saved.wins ?? 0);
+  setLives(saved.lives ?? cfg.startingLives);
+  setAnims({});
+  setGuideLvl({});
+  // BattleContext
+  setPhase(saved.phase ?? "shop");
+  setOver(false);
+  setVictory(false);
+  setNewTier(null);
+  setLastT(Math.min(Math.ceil((saved.turn ?? 1) / 2), 6));
+  setPGold(0);
+  setBossChallenge(null);
+  setBossResult(null);
+  setBossRewards([]);
+  lastProcessedStepRef.current = -1;
+  setIsBattleOver(false);
+}, [
+  setGold, setTurnAndRef, setTeam, setShop, setShopResetKey, setRewards,
+  setWins, setLives, setAnims, setGuideLvl,
+  setOver, setVictory, setNewTier, setLastT,
+]);
   // ─── Context value ────────────────────────────────────────────────────────
   const value = useMemo(() => ({
     // Battle state
@@ -247,6 +277,7 @@ export const BattleProvider = ({ children }) => {
     battle, startBossBattle, startVersusBattle, versusSetReady,
     offerBoss, acceptBoss, declineBoss, goToShop,
     reset,
+    restoreGame,
     // Arena
     saveArenaTeam, fetchArenaOpponent, updateLeaderboard,
     loadTasksFromDB, saveTasksToDB,
@@ -257,7 +288,7 @@ export const BattleProvider = ({ children }) => {
     pendingEndTurnAnims, versusReady, opponentReady,
     isBossTurn, currentDiffConfig, diffMult, difficulty,
     battle, startBossBattle, startVersusBattle, versusSetReady,
-    offerBoss, acceptBoss, declineBoss, goToShop, reset,
+    offerBoss, acceptBoss, declineBoss, goToShop, reset, restoreGame,
     saveArenaTeam, fetchArenaOpponent, updateLeaderboard,
     loadTasksFromDB, saveTasksToDB,
   ]);

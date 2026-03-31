@@ -5,8 +5,9 @@ import React, {
   useRef,
   useCallback,
   useMemo,
+  useEffect,
 } from "react";
-
+import { saveGameState } from "../utils/localSave";
 import { useShop } from "../hooks/useShop";
 import { spawnBuffAnimation } from "../utils/animations";
 import { useUIContext } from "./UIContext";
@@ -20,6 +21,11 @@ export const ShopProvider = ({ children }) => {
     unlockAchievement,
     difficultyLevel,
     user,
+    gameStarted,
+  gameMode,      
+  lives,         
+  wins,          
+  phase,         // ← BattleContext'te ama GameEffects üzerinden
   } = useUIContext();
 
   // Altın harcama görev takibi
@@ -61,7 +67,19 @@ export const ShopProvider = ({ children }) => {
     setTurn(newTurn);
     turnRef.current = newTurn;
   }, []);
-
+  useEffect(() => {
+  if (!gameStarted) return;
+  saveGameState({
+    turn,
+    gold,
+    lives,
+    wins,
+    team,
+    phase: "shop",
+    gameMode,
+    difficultyLevel,
+  });
+}, [turn, gold, team]);
   // ─── Shop hook ────────────────────────────────────────────────────────────
   const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
     team, setTeam,

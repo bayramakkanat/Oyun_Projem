@@ -13,7 +13,7 @@ import CollectionScreen from "./CollectionScreen";
 import TasksScreen from "./TasksScreen";
 import ProfileScreen from "./ProfileScreen";
 import FeedbackScreen from "./FeedbackScreen";
-
+import { hasSavedGame, loadGameState } from "../utils/localSave";
 export default function MenuScreen({
   menuView,
   setMenuView,
@@ -54,6 +54,7 @@ export default function MenuScreen({
   onDebug,
   loadTasksFromDB,
   saveTasksToDB,
+  onContinue,
 }) {
   const [achCat, setAchCat] = useState("any");
   const currentDiffConfig =
@@ -187,6 +188,22 @@ export default function MenuScreen({
               Takımını Kur • Stratejini Belirle • Arenaya Hükmet
             </p>
             <div className="grid grid-cols-1 gap-4 w-full">
+              {hasSavedGame() && (
+  <button
+    onClick={() => onContinue(loadGameState())}
+    className="group relative w-full py-5 bg-gradient-to-br from-teal-600 to-green-700 rounded-3xl font-black text-xl shadow-xl hover:scale-[1.03] transition-all active:scale-95 border border-teal-500/50 flex items-center justify-center gap-3"
+  >
+    ▶️ Kaldığın Yerden Devam Et
+    {(() => {
+      const s = loadGameState();
+      return s ? (
+        <span className="text-sm font-bold opacity-70">
+          (Tur {s.turn} • {s.gameMode === "arena" ? "🏟️" : "⚔️"})
+        </span>
+      ) : null;
+    })()}
+  </button>
+)}
              <button
                 onClick={() => setMenuView("play_setup")}
                 className="group relative w-full py-6 bg-white text-black rounded-3xl font-black text-3xl shadow-[0_20px_40px_rgba(255,255,255,0.15)] hover:scale-[1.03] transition-all active:scale-95 overflow-hidden"
