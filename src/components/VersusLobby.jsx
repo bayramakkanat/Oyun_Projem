@@ -63,7 +63,7 @@ const joinRoomWithCode = async (code) => {
   for (let i = 0; i < 8; i++) {
     const roomRef = doc(db, "versus_rooms", code);
     snap = await getDoc(roomRef);
-    if (snap.exists() && snap.data().status === "waiting") break;
+    if (snap.exists() && (snap.data().status === "waiting" || snap.data().status === "ready")) break;
     snap = null;
     await new Promise(r => setTimeout(r, 1500));
     setStatus(`Oda bekleniyor... (${i + 1}/8)`);
@@ -75,8 +75,8 @@ const joinRoomWithCode = async (code) => {
       setStatus("");
       return;
     }
-    const data = snap.data();
-    if (data.status !== "waiting") {
+   const data = snap.data();
+    if (data.status === "ready" && data.guest?.uid && data.guest.uid !== user.uid) {
       setError("Bu oda artık müsait değil.");
       setStatus("");
       return;
