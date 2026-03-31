@@ -15,6 +15,7 @@
 
 import React, { createContext, useContext, useEffect } from "react";
 import { playSound } from "../hooks/useSound";
+import { clearGameState } from "../utils/localSave";
 
 import { UIProvider, useUIContext } from "./UIContext";
 import { ShopProvider, useShopContext } from "./ShopContext";
@@ -35,7 +36,7 @@ const GameEffects = () => {
 
   const { gold, turn, phase } = useShopContext();
 
-  const { updateLeaderboard } = useBattleContext();
+  const { updateLeaderboard, arenaResult } = useBattleContext();
 
   // ─── Altın başarımı ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -70,6 +71,11 @@ const GameEffects = () => {
       updateLeaderboard({ won: false, isNewBestTurn: turn > (stats.bestTurn || 0) });
     }
   }, [over]);
+  // ─── Arena sonucu gelince kaydı sil ──────────────────────────────────────
+  useEffect(() => {
+    if (!arenaResult) return;
+    clearGameState();
+  }, [arenaResult]);
 
   return null;
 };
