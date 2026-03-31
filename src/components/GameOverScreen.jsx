@@ -25,7 +25,7 @@ export default function GameOverScreen({
           className="text-8xl mb-4"
           style={{ animation: "skullFloat 4s ease-in-out infinite" }}
         >
-          💀
+          {gameMode === "versus" ? "🏳️" : "💀"}
         </div>
        <div
           className="text-4xl font-black mb-1 text-red-400"
@@ -34,7 +34,7 @@ export default function GameOverScreen({
           OYUN BİTTİ
         </div>
         <div className="text-gray-400 mb-6 text-sm uppercase tracking-widest">
-          Savaşçı düştü ama efsane yaşıyor
+          {gameMode === "versus" ? "Rakibin bu sefer daha güçlüydü" : "Savaşçı düştü ama efsane yaşıyor"}
         </div>
        <div className="grid grid-cols-3 gap-3 mb-6">
           <div

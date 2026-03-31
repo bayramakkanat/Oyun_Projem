@@ -22,10 +22,10 @@ export default function VictoryScreen({
         style={{ animation: "fadeIn 0.5s ease-out" }}
       >
         <div
-         className="text-8xl mb-4"
+          className="text-8xl mb-4"
           style={{ animation: "trophyFloat 3s ease-in-out infinite" }}
         >
-          🏆
+          {gameMode === "versus" ? "⚔️" : "🏆"}
         </div>
         {perfectRun && (
           <div className="text-yellow-400 font-black text-sm uppercase tracking-widest mb-2 animate-pulse">
@@ -39,7 +39,7 @@ export default function VictoryScreen({
           TEBRİKLER! 🎊
         </div>
         <div className="text-gray-400 mb-6 text-sm uppercase tracking-widest">
-          Arenaya hükmettin
+          {gameMode === "versus" ? "Rakibini yendin" : "Arenaya hükmettin"}
         </div>
        <div className="grid grid-cols-3 gap-3 mb-6">
           <div
