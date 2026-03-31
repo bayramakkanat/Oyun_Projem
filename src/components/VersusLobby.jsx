@@ -12,16 +12,7 @@ import StarField from "./StarField";
 
 export default function VersusLobby({ user, onRoomReady, onCancel, autoJoin }) {
   const [mode, setMode] = useState(null); // "create" | "join"
-  useEffect(() => {
-  if (!autoJoin || !user) return;
-  if (autoJoin.role === "host") {
-    setMode("create");
-    createRoomWithCode(autoJoin.roomCode);
-  } else {
-    setMode("join");
-    joinRoomWithCode(autoJoin.roomCode);
-  }
-}, [autoJoin, user]);
+
   const [roomCode, setRoomCode] = useState("");
   const [inputCode, setInputCode] = useState("");
   const [status, setStatus] = useState("");
@@ -193,6 +184,17 @@ const joinRoomWithCode = async (code) => {
       setError("Odaya katılınamadı: " + err.message);
     }
   };
+
+  useEffect(() => {
+    if (!autoJoin || !user) return;
+    if (autoJoin.role === "host") {
+      setMode("create");
+      createRoomWithCode(autoJoin.roomCode);
+    } else {
+      setMode("join");
+      joinRoomWithCode(autoJoin.roomCode);
+    }
+  }, [autoJoin, user]);
 
  useEffect(() => {
     return () => {

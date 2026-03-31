@@ -69,6 +69,7 @@ export const ShopProvider = ({ children }) => {
   }, []);
   useEffect(() => {
   if (!gameStarted) return;
+  if (gameMode === "versus") return;
   saveGameState({
     turn,
     gold,
