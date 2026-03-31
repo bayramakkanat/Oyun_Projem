@@ -51,6 +51,7 @@ export default function MenuScreen({
   handleUpdateProfile,
   onStart,
   onStartVersus,
+  friendsData,
   onDebug,
   loadTasksFromDB,
   saveTasksToDB,
@@ -577,6 +578,7 @@ export default function MenuScreen({
       user={user}
       stats={stats}
       onStartVersus={onStartVersus}
+      friendsData={friendsData}
     />
   </div>
 )}

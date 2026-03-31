@@ -12,6 +12,7 @@ import NewTierScreen from "./NewTierScreen";
 import ShopView from "./ShopView";
 import ArenaResultScreen from "./ArenaResultScreen";
 import StarField from "./StarField";
+import GlobalNotifications from "./GlobalNotifications";
 import DebugPanel from "./DebugPanel";
 import { playSound } from "../hooks/useSound";
 import { BOSSES, DIFFICULTY_CONFIGS, WIN_TURN } from "../data/gameData";
@@ -25,6 +26,9 @@ export default function GameRouter() {
     setGameStarted,
     reset,
     restoreGame,
+    friendsData,
+    versusAutoJoin,
+    setVersusAutoJoin,
     menuView,
     setMenuView,
     victory,
@@ -80,8 +84,6 @@ export default function GameRouter() {
     versusPhase,
     setVersusPhase,
     setVersusRoom,
-    versusAutoJoin,
-    setVersusAutoJoin,
     // Diğer yardımcılar
     setBossChallenge,
     setPhase,
@@ -112,10 +114,21 @@ export default function GameRouter() {
     handleLogout,
     handleUpdateProfile,
   } = useGameContext();
-
+  const notifications = (
+    <GlobalNotifications
+      friendsData={friendsData}
+      onChallengeAccept={(roomCode) => {
+        setGameMode("versus");
+        setVersusPhase("lobby");
+        setVersusAutoJoin({ roomCode, role: "guest" });
+      }}
+    />
+  );
   // versus lobby
   if (gameMode === "versus" && versusPhase === "lobby") {
     return (
+       <>
+        {notifications}
       <VersusLobby
   user={user}
   autoJoin={versusAutoJoin}
@@ -131,6 +144,7 @@ export default function GameRouter() {
           setVersusRoom(null);
         }}
       />
+      </>
     );
   }
 
@@ -138,6 +152,7 @@ export default function GameRouter() {
   if (!gameStarted) {
     return (
       <>
+        {notifications}
         <MenuScreen
           menuView={menuView}
           setMenuView={setMenuView}
@@ -188,6 +203,7 @@ export default function GameRouter() {
           setVersusAutoJoin({ roomCode, role });
           setVersusPhase("lobby");
           }}
+          friendsData={friendsData}
           onContinue={(saved) => {
             setGameMode(saved.gameMode ?? "standard");
             setDifficultyLevel(saved.difficultyLevel ?? "normal");
@@ -305,7 +321,7 @@ export default function GameRouter() {
       />
     );
   }
-
+  
   // ana oyun ekranı (shop veya battle)
   return (
     <div
@@ -318,6 +334,7 @@ export default function GameRouter() {
         backgroundAttachment: "fixed",
       }}
     >
+      {notifications}
       <StarField />
       {showDebugPanel && (
         <DebugPanel
