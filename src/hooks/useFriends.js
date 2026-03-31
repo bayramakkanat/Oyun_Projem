@@ -52,17 +52,6 @@ export function useFriends({ user, onChallengeAccepted }) {
     return () => unsub();
   }, [user]);
 
-  // ── Challenge kabul edilince versus'a geç ────────────────────────────────
-  useEffect(() => {
-    if (!user || incomingChallenges.length === 0) return;
-    // Kabul edilen challenge var mı kontrol et
-    const accepted = incomingChallenges.find(c => c.status === "accepted");
-    if (accepted && onChallengeAccepted) {
-      deleteDoc(doc(db, "challenge_invites", user.uid, "invites", accepted.uid));
-      onChallengeAccepted(accepted.roomCode);
-    }
-  }, [incomingChallenges, user]);
-
   // ── Kullanıcı adıyla ara ─────────────────────────────────────────────────
   const searchUser = async (username) => {
     if (!username.trim()) return;
@@ -188,20 +177,14 @@ if (snap.empty) {
     }
   };
 
-  // ── Meydan okumayı kabul et ──────────────────────────────────────────────
+ // ── Meydan okumayı kabul et ──────────────────────────────────────────────
   const acceptChallenge = async (challenge, onAccepted) => {
     if (!user) return;
     try {
-      // Karşı tarafı bilgilendir
-      await setDoc(doc(db, "challenge_invites", challenge.uid, "invites", user.uid), {
-        uid: user.uid,
-        displayName: user.displayName || user.email,
-        roomCode: challenge.roomCode,
-        status: "accepted",
-        sentAt: serverTimestamp(),
-      });
-      // Kendi invite'ını sil
+      // Sadece kendi invite'ını sil, karşıya yazma — döngüyü önler
       await deleteDoc(doc(db, "challenge_invites", user.uid, "invites", challenge.uid));
+      // Karşı taraftaki orijinal invite'ı da sil
+      await deleteDoc(doc(db, "challenge_invites", challenge.uid, "invites", user.uid));
       onAccepted(challenge.roomCode);
     } catch (e) {
       alert("Kabul edilemedi: " + e.message);
