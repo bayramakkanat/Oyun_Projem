@@ -67,12 +67,27 @@ export default function VersusLobby({ user, onRoomReady, onCancel, autoJoin }) {
 
 const joinRoomWithCode = async (code) => {
   setStatus("Odaya bağlanılıyor...");
+  // Oda henüz oluşturulmamış olabilir, 3 kez dene
+  let snap = null;
+  for (let i = 0; i < 5; i++) {
+    const roomRef = doc(db, "versus_rooms", code);
+    snap = await getDoc(roomRef);
+    if (snap.exists()) break;
+    await new Promise(r => setTimeout(r, 800));
+  }
   try {
     const roomRef = doc(db, "versus_rooms", code);
-    const snap = await getDoc(roomRef);
-    if (!snap.exists()) { setError("Oda bulunamadı."); setStatus(""); return; }
+    if (!snap || !snap.exists()) { setError("Oda bulunamadı."); setStatus(""); return; }
     const data = snap.data();
-    if (data.status !== "waiting") { setError("Bu oda artık müsait değil."); setStatus(""); return; }
+    // waiting veya host henüz oluşturuyorsa bekle
+    if (data.status !== "waiting") {
+      // Eğer zaten ready ise ve guest yoksa, biz katılıyoruz demektir
+      if (data.status === "ready" && !data.guest) {
+        // devam et
+      } else {
+        setError("Bu oda artık müsait değil."); setStatus(""); return;
+      }
+    }
     await setDoc(roomRef, {
       ...data,
       guest: { uid: user.uid, name: userName },
