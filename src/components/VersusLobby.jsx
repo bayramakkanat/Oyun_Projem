@@ -67,26 +67,28 @@ export default function VersusLobby({ user, onRoomReady, onCancel, autoJoin }) {
 
 const joinRoomWithCode = async (code) => {
   setStatus("Odaya bağlanılıyor...");
-  // Oda henüz oluşturulmamış olabilir, 3 kez dene
   let snap = null;
-  for (let i = 0; i < 5; i++) {
+  // Host odayı oluşturana kadar 8 kez dene (her biri 1.5sn = max 12sn)
+  for (let i = 0; i < 8; i++) {
     const roomRef = doc(db, "versus_rooms", code);
     snap = await getDoc(roomRef);
-    if (snap.exists()) break;
-    await new Promise(r => setTimeout(r, 800));
+    if (snap.exists() && snap.data().status === "waiting") break;
+    snap = null;
+    await new Promise(r => setTimeout(r, 1500));
+    setStatus(`Oda bekleniyor... (${i + 1}/8)`);
   }
   try {
     const roomRef = doc(db, "versus_rooms", code);
-    if (!snap || !snap.exists()) { setError("Oda bulunamadı."); setStatus(""); return; }
+    if (!snap || !snap.exists()) {
+      setError("Oda bulunamadı. Host henüz oluşturmamış olabilir.");
+      setStatus("");
+      return;
+    }
     const data = snap.data();
-    // waiting veya host henüz oluşturuyorsa bekle
     if (data.status !== "waiting") {
-      // Eğer zaten ready ise ve guest yoksa, biz katılıyoruz demektir
-      if (data.status === "ready" && !data.guest) {
-        // devam et
-      } else {
-        setError("Bu oda artık müsait değil."); setStatus(""); return;
-      }
+      setError("Bu oda artık müsait değil.");
+      setStatus("");
+      return;
     }
     await setDoc(roomRef, {
       ...data,
@@ -95,7 +97,11 @@ const joinRoomWithCode = async (code) => {
       disconnected: null,
     });
     setStatus("Odaya katıldın! Oyun başlıyor...");
-    onRoomReady({ code, role: "guest", roomData: { ...data, guest: { uid: user.uid, name: userName }, status: "ready" } });
+    onRoomReady({
+      code,
+      role: "guest",
+      roomData: { ...data, guest: { uid: user.uid, name: userName }, status: "ready" },
+    });
   } catch (err) {
     setError("Odaya katılınamadı: " + err.message);
   }
