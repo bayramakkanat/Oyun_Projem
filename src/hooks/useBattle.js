@@ -288,11 +288,17 @@ export function useBattle({
   useEffect(() => {
     if (phase !== "shop" || !versusRoom || versusPhase !== "playing") return;
     const { code, role } = versusRoom;
-    updateDoc(doc(db, "versus_rooms", code), {
+    const payload = {
       [role === "host" ? "hostReadyTurn" : "guestReadyTurn"]: null,
       [role === "host" ? "hostTeam"      : "guestTeam"     ]: null,
-    }).catch(console.error);
-  }, [phase]);
+    };
+    // Tur sayacini host tarafi ortak bir zaman damgasi ile baslatir.
+    if (role === "host") {
+      payload.shopStartedAt = Date.now();
+      payload.shopStartedTurn = turnRef.current;
+    }
+    updateDoc(doc(db, "versus_rooms", code), payload).catch(console.error);
+  }, [phase, versusRoom, versusPhase, turnRef]);
 
   // ─── VERSUS SNAPSHOT LISTENER ───────────────────────────────────────────
   useEffect(() => {
@@ -334,7 +340,6 @@ export function useBattle({
 
       if (!hostReady || !guestReady) return;
       if (!data.hostTeam || !data.guestTeam) return;
-      if (data.hostTeam.length === 0 || data.guestTeam.length === 0) return;
 
       if (role === "host" && !data.battleId) {
         const newId = `${code}_${turnRef.current}_${Date.now()}`;
@@ -345,8 +350,6 @@ export function useBattle({
       if (!data.battleId) return;
       if (lastBattleIdRef.current === data.battleId) return;
       lastBattleIdRef.current = data.battleId;
-
-      unsub();
 
       const myTeam    = processTeam(role === "host" ? data.hostTeam : data.guestTeam);
       const theirTeam = processTeam(role === "host" ? data.guestTeam : data.hostTeam);

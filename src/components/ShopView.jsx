@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase";
 import { useGameContext } from "../context/GameContext";
 import Card from "./Card";
 import BossRewardScreen from "./BossRewardScreen";
@@ -16,7 +18,7 @@ export default function ShopView() {
     setGameStarted, setGuide, setMenuView, setNewTier, setPhase, setRewards,
     setSel, setSelI, setTeam, setGold, setShowCollection, setSoundEnabled,
     setVersusPhase, setVersusReady, setVersusRoom, shop, shopSlots, soundEnabled,
-    team, teamSlots, toggleFreeze, turn, versusReady, wins, gameMode, goToShop,
+    team, teamSlots, toggleFreeze, turn, versusReady, wins, gameMode, goToShop, versusRoom,
   } = useGameContext();
 
   const [showRewards, setShowRewards] = useState(false);
@@ -35,23 +37,38 @@ export default function ShopView() {
       setTimeLeft(null);
       return;
     }
-    // Kısa bir gecikme — guest geçişinde yanlış tetiklenmeyi önler
-    const startDelay = setTimeout(() => {
-      const duration = getTimerDuration(turn);
-      setTimeLeft(duration);
-      const interval = setInterval(() => {
-        setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          battle();
-          return 0;
+    if (!versusRoom?.code) return;
+
+    const duration = getTimerDuration(turn);
+    let intervalId = null;
+    let hasTriggered = false;
+
+    const unsub = onSnapshot(doc(db, "versus_rooms", versusRoom.code), (snap) => {
+      const data = snap.data();
+      if (!data) return;
+      if (data.shopStartedTurn !== turn || typeof data.shopStartedAt !== "number") return;
+
+      const syncTick = () => {
+        const elapsedSec = Math.max(0, Math.floor((Date.now() - data.shopStartedAt) / 1000));
+        const remaining = Math.max(0, duration - elapsedSec);
+        setTimeLeft(remaining);
+
+        if (remaining <= 0 && !hasTriggered) {
+          hasTriggered = true;
+          if (!versusReady) battle();
         }
-        return prev - 1;
-      });
-      }, 1000);
-    }, 1500);
-    return () => clearTimeout(startDelay);
-  }, [turn, gameMode]);
+      };
+
+      syncTick();
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(syncTick, 250);
+    });
+
+    return () => {
+      unsub();
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [turn, gameMode, phase, battle, versusRoom?.code, versusReady]);
 
   useEffect(() => {
     if (hasR) {
