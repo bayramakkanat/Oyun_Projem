@@ -88,6 +88,16 @@ export const BattleProvider = ({ children }) => {
     () => [5, 10, 15].includes(turn) && gameMode === "standard",
     [turn, gameMode]
   );
+  const { currentDiffConfig, diffMult, difficulty } = useMemo(() => {
+    const cfg = gameMode === "versus"
+      ? DIFFICULTY_CONFIGS.normal
+      : (DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal);
+    return {
+      currentDiffConfig: cfg,
+      diffMult:          cfg.enemyStatMultiplier,
+      difficulty:        (1 + Math.floor(turn / 3) * 0.2) * cfg.enemyStatMultiplier,
+    };
+  }, [difficultyLevel, turn, gameMode]);
   // ─── Log otomatik kaydırma ────────────────────────────────────────────────
   useEffect(() => {
     if (logR.current) logR.current.scrollTop = logR.current.scrollHeight;
