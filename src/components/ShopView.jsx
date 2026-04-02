@@ -20,6 +20,35 @@ export default function ShopView() {
   } = useGameContext();
 
   const [showRewards, setShowRewards] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(null);
+
+  // ── Versus timer ──────────────────────────────────────────────────────────
+  const getTimerDuration = (currentTurn) => {
+    if (currentTurn <= 3) return 60;
+    if (currentTurn <= 6) return 90;
+    if (currentTurn <= 10) return 120;
+    return 180;
+  };
+
+  useEffect(() => {
+    if (gameMode !== "versus" || phase !== "shop") {
+      setTimeLeft(null);
+      return;
+    }
+    const duration = getTimerDuration(turn);
+    setTimeLeft(duration);
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          battle();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [turn, phase, gameMode]);
   useEffect(() => {
     if (hasR) {
       const t = setTimeout(() => setShowRewards(true), 900);
@@ -34,6 +63,23 @@ export default function ShopView() {
       <div className="max-w-4xl mx-auto w-full min-w-0">
         <HUD reset={reset} />
 
+        {gameMode === "versus" && timeLeft !== null && (
+          <div className={`flex items-center justify-center gap-3 mb-3 py-2.5 rounded-2xl border-2 font-black text-lg transition-all ${
+            timeLeft <= 10
+              ? "bg-red-900/60 border-red-500/60 text-red-300 animate-pulse"
+              : timeLeft <= 30
+              ? "bg-orange-900/40 border-orange-500/40 text-orange-300"
+              : "bg-white/5 border-white/10 text-gray-300"
+          }`}>
+            <span className="text-2xl">⏱️</span>
+            <span>
+              {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
+            </span>
+            <span className="text-xs font-bold opacity-60 uppercase tracking-widest">
+              {versusReady ? "Rakip Bekleniyor..." : "Tur Süresi"}
+            </span>
+          </div>
+        )}
         {/* MAĞAZA */}
 <div className="glass-panel-strong rounded-[2.5rem] p-3 sm:p-4 mb-4 border-2 border-purple-500/20 shadow-2xl hover:border-purple-500/40 transition-all duration-500">
   <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 flex items-center justify-between">
