@@ -41,15 +41,13 @@ export default function ShopView() {
       setTimeLeft(duration);
       const interval = setInterval(() => {
         setTimeLeft(prev => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            if (team.filter(x => x).length > 0) {
-              battle();
-            }
-            return 0;
-          }
-          return prev - 1;
-        });
+        if (prev <= 1) {
+          clearInterval(interval);
+          battle();
+          return 0;
+        }
+        return prev - 1;
+      });
       }, 1000);
     }, 1500);
     return () => clearTimeout(startDelay);
