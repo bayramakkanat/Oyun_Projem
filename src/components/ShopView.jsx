@@ -35,20 +35,24 @@ export default function ShopView() {
       setTimeLeft(null);
       return;
     }
-    const duration = getTimerDuration(turn);
-    setTimeLeft(duration);
-    const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          battle();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
+    // Kısa bir gecikme — guest geçişinde yanlış tetiklenmeyi önler
+    const startDelay = setTimeout(() => {
+      const duration = getTimerDuration(turn);
+      setTimeLeft(duration);
+      const interval = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            battle();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }, 1500);
+    return () => clearTimeout(startDelay);
   }, [turn, phase, gameMode]);
+  
   useEffect(() => {
     if (hasR) {
       const t = setTimeout(() => setShowRewards(true), 900);
