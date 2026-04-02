@@ -82,6 +82,7 @@ export function useBattle({
   const pTRef             = useRef(pT);
   const eTRef             = useRef(eT);
   const disconnectReportedRef = useRef(false);
+  const disconnectNoticeShownRef = useRef(false);
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { pTRef.current = pT; }, [pT]);
@@ -224,6 +225,8 @@ export function useBattle({
     setPT(pt);
     setLog(pt.length === 0 ? ["💀 Takımın boştu! Rakip otomatik kazandı."] : []);
     setStep(0);
+    playSound("versus_match");
+    disconnectNoticeShownRef.current = false;
     setPhase("battle");
   };
 
@@ -256,6 +259,7 @@ export function useBattle({
         [teamKey]: currentTeam,
       });
       setVersusReady(true);
+      playSound("versus_ready");
     } catch (err) {
       console.error("Versus hazır hatası:", err);
     }
@@ -370,7 +374,11 @@ export function useBattle({
         return;
       }
       if (data.disconnected && data.disconnected !== role) {
-        setLog((l) => [...l, "⚠️ Rakip bağlantısı koptu! Zafer sayılıyor..."]);
+        if (!disconnectNoticeShownRef.current) {
+          disconnectNoticeShownRef.current = true;
+          playSound("versus_disconnect");
+          setLog((l) => [...l, "⚠️ Rakip bağlantısı koptu! Zafer sayılıyor..."]);
+        }
         setTimeout(() => setVictory(true), 2000);
         return;
       }

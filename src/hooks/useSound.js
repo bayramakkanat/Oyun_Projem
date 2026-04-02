@@ -150,6 +150,47 @@ export const playSound = (type) => {
         o2.stop(now + t + 0.12);
       });
       return;
+    } else if (type === "versus_ready") {
+      [0, 0.07].forEach((t, i) => {
+        const o2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        o2.connect(g2);
+        g2.connect(ctx.destination);
+        o2.type = "triangle";
+        o2.frequency.setValueAtTime([520, 680][i], now + t);
+        g2.gain.setValueAtTime(0.14, now + t);
+        g2.gain.exponentialRampToValueAtTime(0.01, now + t + 0.12);
+        o2.start(now + t);
+        o2.stop(now + t + 0.13);
+      });
+      return;
+    } else if (type === "versus_match") {
+      [0, 0.08, 0.16].forEach((t, i) => {
+        const o2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        o2.connect(g2);
+        g2.connect(ctx.destination);
+        o2.type = "sawtooth";
+        o2.frequency.setValueAtTime([220, 300, 420][i], now + t);
+        g2.gain.setValueAtTime(0.12, now + t);
+        g2.gain.exponentialRampToValueAtTime(0.01, now + t + 0.12);
+        o2.start(now + t);
+        o2.stop(now + t + 0.14);
+      });
+      return;
+    } else if (type === "versus_disconnect") {
+      const o2 = ctx.createOscillator();
+      const g2 = ctx.createGain();
+      o2.connect(g2);
+      g2.connect(ctx.destination);
+      o2.type = "square";
+      o2.frequency.setValueAtTime(260, now);
+      o2.frequency.linearRampToValueAtTime(180, now + 0.22);
+      g2.gain.setValueAtTime(0.16, now);
+      g2.gain.exponentialRampToValueAtTime(0.01, now + 0.24);
+      o2.start(now);
+      o2.stop(now + 0.25);
+      return;
     }
     
   } catch (e) {}
