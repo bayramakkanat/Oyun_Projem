@@ -262,7 +262,8 @@ export const UIProvider = ({ children }) => {
     settingsUsername, settingsAvatar,
     // Stable callbacks
     pwr, sellP, clampStat, triggerAnim,
-    unlockAchievement, showNextAchievement, updateStatsOnEnd,
+   unlockAchievement, showNextAchievement, updateStatsOnEnd,
+    friendsData,
   ]);
 
   return (
