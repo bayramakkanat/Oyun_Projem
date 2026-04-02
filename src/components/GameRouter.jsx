@@ -133,10 +133,10 @@ export default function GameRouter() {
   user={user}
   autoJoin={versusAutoJoin}
   onRoomReady={(roomInfo) => {
-    setVersusAutoJoin(null);
+          setVersusAutoJoin(null);
           setVersusRoom(roomInfo);
           setVersusPhase("playing");
-          reset();
+          reset("versus");
           setGameStarted(true);
         }}
         onCancel={() => {

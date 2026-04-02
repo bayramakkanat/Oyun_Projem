@@ -88,18 +88,6 @@ export const BattleProvider = ({ children }) => {
     () => [5, 10, 15].includes(turn) && gameMode === "standard",
     [turn, gameMode]
   );
-
-  const { currentDiffConfig, diffMult, difficulty } = useMemo(() => {
-    const cfg = gameMode === "versus"
-  ? DIFFICULTY_CONFIGS.normal
-  : (DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal);
-    return {
-      currentDiffConfig: cfg,
-      diffMult:          cfg.enemyStatMultiplier,
-      difficulty:        (1 + Math.floor(turn / 3) * 0.2) * cfg.enemyStatMultiplier,
-    };
-  }, [difficultyLevel, turn]);
-
   // ─── Log otomatik kaydırma ────────────────────────────────────────────────
   useEffect(() => {
     if (logR.current) logR.current.scrollTop = logR.current.scrollHeight;
@@ -185,8 +173,11 @@ export const BattleProvider = ({ children }) => {
   }, [setTurnAndRef, setGold, setTeam]);
 
   // ─── Oyunu sıfırla ────────────────────────────────────────────────────────
-  const reset = useCallback(() => {
-    const cfg = DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
+  const reset = useCallback((forceMode) => {
+    const effectiveMode = forceMode || gameMode;
+    const cfg = effectiveMode === "versus"
+      ? DIFFICULTY_CONFIGS.normal
+      : (DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal);
 
     // ShopContext state
     setGold(cfg.startingGold);
