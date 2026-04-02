@@ -181,14 +181,15 @@ export function useBattleResults({
         return true;
       }
 
-      setOver(true);
-
       if (gameMode === "versus" && versusRoom) {
         const { code, role } = versusRoom;
         const { updateDoc, doc } = await import("firebase/firestore");
         const { db }             = await import("../firebase");
         updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
+        return true;
       }
+
+      setOver(true);
 
       return true;
     },

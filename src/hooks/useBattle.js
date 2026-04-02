@@ -186,7 +186,7 @@ export function useBattle({
   };
 
   const versusSetReady = useCallback(async () => {
-    if (versusReady || !versusRoom) return;
+    if (!versusRoom) return;
     const { code, role } = versusRoom;
     const readyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
     const teamKey        = role === "host" ? "hostTeam"      : "guestTeam";
@@ -451,8 +451,15 @@ export function useBattle({
       if (gameMode === "arena") saveArenaTeam(updatedTeam, difficultyLevel);
 
       // Koleksiyon & görev güncellemeleri
-      if (gameMode === "versus") {
-        transitionToShop(updatedTeam, newTurn, 3000);
+     if (gameMode === "versus") {
+        // Yenilgi / can kaybı
+        if (!won && !draw) {
+          const newLives = lives - 1;
+          setLives(newLives);
+          const over = await handleGameOver(newLives, wins, turn);
+          if (over) return;
+        }
+        transitionToShop(updatedTeam, turn + 1, 3000);
         return;
       }
       updateCollectionStats(updatedTeam, won);
