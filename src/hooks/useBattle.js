@@ -178,10 +178,9 @@ export function useBattle({
     setOpponentReady(false);
     const pt = myTeam.filter(Boolean).reverse().map((x) => ({ ...x, curHp: x.hp }));
     const et = theirTeam.filter(Boolean).reverse().map((x) => ({ ...x, curHp: x.hp }));
-    if (pt.length === 0) return;
     setET(et);
     setPT(pt);
-    setLog([]);
+    setLog(pt.length === 0 ? ["💀 Takımın boştu! Rakip otomatik kazandı."] : []);
     setStep(0);
     setPhase("battle");
   };
