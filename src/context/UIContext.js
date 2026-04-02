@@ -68,11 +68,7 @@ export const UIProvider = ({ children }) => {
 
   const friendsData = useFriends({
     user,
-    onChallengeAccepted: (roomCode) => {
-      setGameMode("versus");
-      setVersusPhase("lobby");
-      setVersusAutoJoin({ roomCode, role: "guest" });
-    },
+    onChallengeAccepted: null,
   });
 
   // ─── Ref'ler ──────────────────────────────────────────────────────────────

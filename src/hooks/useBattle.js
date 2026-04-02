@@ -186,7 +186,12 @@ export function useBattle({
   };
 
   const versusSetReady = useCallback(async () => {
-    if (!versusRoom) return;
+    console.log("versusSetReady çağrıldı", { versusRoom, versusReady, turn: turnRef.current });
+    if (!versusRoom) {
+      console.log("versusRoom yok, çıkılıyor");
+      return;
+    }
+    console.log("Firebase'e yazılıyor...", { code: versusRoom.code, role: versusRoom.role });
     const { code, role } = versusRoom;
     const readyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
     const teamKey        = role === "host" ? "hostTeam"      : "guestTeam";
@@ -307,7 +312,11 @@ export function useBattle({
       if (!data) return;
 
       if (data.loser) {
-        if (data.loser !== role) setVictory(true);
+        if (data.loser === role) {
+          setOver(true);
+        } else {
+          setVictory(true);
+        }
         return;
       }
       if (data.disconnected && data.disconnected !== role) {
@@ -361,13 +370,6 @@ export function useBattle({
     versusUnsubRef.current = unsub;
     return () => {
       unsub();
-      // Oyuncu sayfadan ayrılırken disconnect yaz
-      if (versusRoom?.code) {
-        const { code, role } = versusRoom;
-        updateDoc(doc(db, "versus_rooms", code), {
-          disconnected: role,
-        }).catch(() => {});
-      }
     };
   }, [versusRoom?.code, versusPhase, turn]);
 

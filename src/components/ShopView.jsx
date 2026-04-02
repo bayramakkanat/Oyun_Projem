@@ -24,7 +24,7 @@ export default function ShopView() {
 
   // ── Versus timer ──────────────────────────────────────────────────────────
   const getTimerDuration = (currentTurn) => {
-    if (currentTurn <= 3) return 60;
+    if (currentTurn <= 3) return 30;
     if (currentTurn <= 6) return 90;
     if (currentTurn <= 10) return 120;
     return 180;
@@ -51,7 +51,7 @@ export default function ShopView() {
       }, 1000);
     }, 1500);
     return () => clearTimeout(startDelay);
-  }, [turn, phase, gameMode]);
+  }, [turn, gameMode]);
 
   useEffect(() => {
     if (hasR) {
