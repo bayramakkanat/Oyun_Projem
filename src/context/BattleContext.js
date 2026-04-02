@@ -90,7 +90,9 @@ export const BattleProvider = ({ children }) => {
   );
 
   const { currentDiffConfig, diffMult, difficulty } = useMemo(() => {
-    const cfg = DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;
+    const cfg = gameMode === "versus"
+  ? DIFFICULTY_CONFIGS.normal
+  : (DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal);
     return {
       currentDiffConfig: cfg,
       diffMult:          cfg.enemyStatMultiplier,

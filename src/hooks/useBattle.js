@@ -360,7 +360,16 @@ export function useBattle({
     });
 
     versusUnsubRef.current = unsub;
-    return () => { unsub(); };
+    return () => {
+      unsub();
+      // Oyuncu sayfadan ayrılırken disconnect yaz
+      if (versusRoom?.code) {
+        const { code, role } = versusRoom;
+        updateDoc(doc(db, "versus_rooms", code), {
+          disconnected: role,
+        }).catch(() => {});
+      }
+    };
   }, [versusRoom?.code, versusPhase, turn]);
 
   // ─── ANA SAVAŞ ADIM DÖNGÜSÜ ─────────────────────────────────────────────
@@ -443,6 +452,10 @@ export function useBattle({
       if (gameMode === "arena") saveArenaTeam(updatedTeam, difficultyLevel);
 
       // Koleksiyon & görev güncellemeleri
+      if (gameMode === "versus") {
+        transitionToShop(updatedTeam, newTurn, 3000);
+        return;
+      }
       updateCollectionStats(updatedTeam, won);
       updateTaskProgress(updatedTeam, won);
 

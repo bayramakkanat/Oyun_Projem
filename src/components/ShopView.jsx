@@ -43,7 +43,9 @@ export default function ShopView() {
         setTimeLeft(prev => {
           if (prev <= 1) {
             clearInterval(interval);
-            battle();
+            if (team.filter(x => x).length > 0) {
+              battle();
+            }
             return 0;
           }
           return prev - 1;
@@ -52,7 +54,7 @@ export default function ShopView() {
     }, 1500);
     return () => clearTimeout(startDelay);
   }, [turn, phase, gameMode]);
-  
+
   useEffect(() => {
     if (hasR) {
       const t = setTimeout(() => setShowRewards(true), 900);

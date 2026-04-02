@@ -196,7 +196,7 @@ const joinRoomWithCode = async (code) => {
     }
   }, [autoJoin, user]);
 
- useEffect(() => {
+useEffect(() => {
     return () => {
       if (unsubscribe) unsubscribe();
       clearTimeout(timeoutRef.current);
