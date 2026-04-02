@@ -81,10 +81,52 @@ export function useBattle({
   const phaseRef          = useRef(phase);
   const pTRef             = useRef(pT);
   const eTRef             = useRef(eT);
+  const disconnectReportedRef = useRef(false);
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { pTRef.current = pT; }, [pT]);
   useEffect(() => { eTRef.current = eT; }, [eT]);
+
+  // ─── VERSUS PRESENCE / DISCONNECT ────────────────────────────────────────
+  useEffect(() => {
+    if (!versusRoom || versusPhase !== "playing") return;
+    const { code, role } = versusRoom;
+    const myLastSeenField = role === "host" ? "hostLastSeen" : "guestLastSeen";
+
+    let heartbeatTimer = null;
+    disconnectReportedRef.current = false;
+
+    const writeHeartbeat = () => {
+      updateDoc(doc(db, "versus_rooms", code), {
+        [myLastSeenField]: Date.now(),
+      }).catch(() => {});
+    };
+
+    const reportDisconnect = () => {
+      if (disconnectReportedRef.current) return;
+      disconnectReportedRef.current = true;
+      updateDoc(doc(db, "versus_rooms", code), {
+        disconnected: role,
+        [myLastSeenField]: Date.now(),
+      }).catch(() => {});
+    };
+
+    // Odaya girince anlık heartbeat at
+    writeHeartbeat();
+    heartbeatTimer = setInterval(writeHeartbeat, 5000);
+
+    const onPageHide = () => reportDisconnect();
+    const onBeforeUnload = () => reportDisconnect();
+
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("beforeunload", onBeforeUnload);
+
+    return () => {
+      if (heartbeatTimer) clearInterval(heartbeatTimer);
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [versusRoom?.code, versusRoom?.role, versusPhase]);
 
   // ─── useBattleResults: koleksiyon / görev / leaderboard ─────────────────
   const { updateCollectionStats, updateTaskProgress, handleArenaGameOver, handleGameOver } =
@@ -329,6 +371,17 @@ export function useBattle({
         setLog((l) => [...l, "⚠️ Rakip bağlantısı koptu! Zafer sayılıyor..."]);
         setTimeout(() => setVictory(true), 2000);
         return;
+      }
+
+      // Heartbeat düşerse (ör. ani kapanma) rakibi disconnected işaretle
+      const now = Date.now();
+      const staleMs = 30000;
+      const opponentRole = role === "host" ? "guest" : "host";
+      const opponentLastSeen = role === "host" ? data.guestLastSeen : data.hostLastSeen;
+      if (!data.disconnected && !data.loser) {
+        if (typeof opponentLastSeen === "number" && now - opponentLastSeen > staleMs) {
+          updateDoc(doc(db, "versus_rooms", code), { disconnected: opponentRole }).catch(() => {});
+        }
       }
 
       if (phaseRef.current !== "shop") return;

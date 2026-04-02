@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { logError, calcArenaXP } from "../utils/helpers";
+import { TTL_DURATIONS, getExpiryDate } from "../utils/ttl";
 
 const AYLAR = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran",
                "Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
@@ -62,6 +63,7 @@ export function useArena({ user, turnRef }) {
         difficulty: difficulty,
         turn: turn,
         timestamp: serverTimestamp(),
+        expiresAt: getExpiryDate(TTL_DURATIONS.arenaTeam),
       });
       console.log(`✅ Arena takımı kaydedildi! Tur: ${turn}`);
     } catch (err) {

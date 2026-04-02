@@ -16,6 +16,8 @@ import { spawnBuffAnimation } from "../utils/animations";
 import { applyEndTurnBuffs } from "../utils/battleUtils";
 import { playSound } from "../hooks/useSound";
 import { DIFFICULTY_CONFIGS } from "../data/gameData";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 import { useUIContext } from "./UIContext";
 import { useShopContext } from "./ShopContext";
@@ -189,6 +191,13 @@ export const BattleProvider = ({ children }) => {
       ? DIFFICULTY_CONFIGS.normal
       : (DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal);
 
+    // Versus maçından menüye/yeniden başlatmaya çıkışta rakibi beklemede bırakma.
+    if (!forceMode && gameMode === "versus" && versusPhase === "playing" && versusRoom?.code && versusRoom?.role) {
+      updateDoc(doc(db, "versus_rooms", versusRoom.code), {
+        disconnected: versusRoom.role,
+      }).catch(() => {});
+    }
+
     // ShopContext state
     setGold(cfg.startingGold);
     setTurnAndRef(1);
@@ -221,6 +230,7 @@ export const BattleProvider = ({ children }) => {
     setGold, setWins, setLives, setTeam, setShop, setShopResetKey, setRewards,
     setGuideLvl, setAnims,
     setOver, setVictory, setNewTier, setLastT,
+    gameMode, versusPhase, versusRoom?.code, versusRoom?.role,
   ]);
   const restoreGame = useCallback((saved) => {
   const cfg = DIFFICULTY_CONFIGS[saved.difficultyLevel] || DIFFICULTY_CONFIGS.normal;

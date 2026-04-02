@@ -5,6 +5,7 @@ import {
   serverTimestamp, orderBy
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { TTL_DURATIONS, getExpiryDate } from "../utils/ttl";
 
 /**
  * useFriends — Arkadaş sistemi
@@ -119,6 +120,7 @@ if (snap.empty) {
         uid: user.uid,
         displayName: user.displayName || user.email,
         sentAt: serverTimestamp(),
+        expiresAt: getExpiryDate(TTL_DURATIONS.friendRequest),
       });
       setSearchResult(prev => ({ ...prev, requestSent: true }));
     } catch (e) {
@@ -171,6 +173,7 @@ if (snap.empty) {
         roomCode,
         status: "pending",
         sentAt: serverTimestamp(),
+        expiresAt: getExpiryDate(TTL_DURATIONS.challengeInvite),
       });
     } catch (e) {
       alert("Meydan okuma gönderilemedi: " + e.message);

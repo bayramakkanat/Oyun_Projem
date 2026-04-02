@@ -1,4 +1,6 @@
 import { useAuthContext } from "./AuthContext";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../firebase";
 import React, {
   createContext,
   useContext,
@@ -70,6 +72,20 @@ export const UIProvider = ({ children }) => {
     user,
     onChallengeAccepted: null,
   });
+
+  const handleLogoutWithCleanup = useCallback(async () => {
+    try {
+      if (gameMode === "versus" && versusPhase === "playing" && versusRoom?.code && versusRoom?.role && user?.uid) {
+        await updateDoc(doc(db, "versus_rooms", versusRoom.code), {
+          disconnected: versusRoom.role,
+        });
+      }
+    } catch (e) {
+      console.error("Logout disconnect işaretleme hatası:", e);
+    } finally {
+      await handleLogout();
+    }
+  }, [gameMode, versusPhase, versusRoom?.code, versusRoom?.role, user?.uid, handleLogout]);
 
   // ─── Ref'ler ──────────────────────────────────────────────────────────────
   const battleSpeedRef       = useRef(
@@ -242,7 +258,7 @@ export const UIProvider = ({ children }) => {
     showSettingsModal, setShowSettingsModal,
     settingsUsername, setSettingsUsername,
     settingsAvatar, setSettingsAvatar,
-    handleGoogleLogin, handleEmailAuth, handleLogout, handleUpdateProfile,
+    handleGoogleLogin, handleEmailAuth, handleLogout: handleLogoutWithCleanup, handleUpdateProfile,
     friendsData,
   }), [
     gameStarted, menuView, soundEnabled, achievementPopup,
@@ -258,7 +274,7 @@ export const UIProvider = ({ children }) => {
     settingsUsername, settingsAvatar,
     // Stable callbacks
     pwr, sellP, clampStat, triggerAnim,
-   unlockAchievement, showNextAchievement, updateStatsOnEnd,
+   unlockAchievement, showNextAchievement, updateStatsOnEnd, handleLogoutWithCleanup,
     friendsData,
   ]);
 
