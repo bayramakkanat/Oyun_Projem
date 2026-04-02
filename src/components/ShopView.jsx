@@ -23,6 +23,7 @@ export default function ShopView() {
 
   const [showRewards, setShowRewards] = useState(false);
   const [timeLeft, setTimeLeft] = useState(null);
+  const [showVersusLockOverlay, setShowVersusLockOverlay] = useState(false);
 
   // ── Versus timer ──────────────────────────────────────────────────────────
   const getTimerDuration = (currentTurn) => {
@@ -79,26 +80,42 @@ export default function ShopView() {
     }
   }, [hasR]);
 
+  useEffect(() => {
+    if (gameMode !== "versus" || phase !== "shop" || !versusReady) {
+      setShowVersusLockOverlay(false);
+      return;
+    }
+    setShowVersusLockOverlay(true);
+  }, [gameMode, phase, versusReady]);
+
   return (
     <>
       <div className="max-w-4xl mx-auto w-full min-w-0">
         <HUD reset={reset} />
 
         {gameMode === "versus" && timeLeft !== null && (
-          <div className={`flex items-center justify-center gap-3 mb-3 py-2.5 rounded-2xl border-2 font-black text-lg transition-all ${
+          <div className={`relative overflow-hidden flex items-center justify-center gap-3 mb-3 py-2.5 rounded-2xl border-2 font-black text-lg transition-all ${
             timeLeft <= 10
               ? "bg-red-900/60 border-red-500/60 text-red-300 animate-pulse"
               : timeLeft <= 30
               ? "bg-orange-900/40 border-orange-500/40 text-orange-300"
               : "bg-white/5 border-white/10 text-gray-300"
           }`}>
+            {versusReady && <div className="versus-waiting-sheen" />}
             <span className="text-2xl">⏱️</span>
             <span>
               {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
             </span>
-            <span className="text-xs font-bold opacity-60 uppercase tracking-widest">
+            <span className={`text-xs font-bold uppercase tracking-widest ${versusReady ? "text-cyan-200" : "opacity-60"}`}>
               {versusReady ? "Rakip Bekleniyor..." : "Tur Süresi"}
             </span>
+            {versusReady && (
+              <span className="inline-flex items-center gap-1 ml-1">
+                <span className="versus-dot" />
+                <span className="versus-dot" />
+                <span className="versus-dot" />
+              </span>
+            )}
           </div>
         )}
         {/* MAĞAZA */}
@@ -290,9 +307,18 @@ export default function ShopView() {
             <button onClick={battle} disabled={team.filter(x => x).length === 0 || phase === "battle"} className="flex-1 group relative py-4 bg-gradient-to-br from-green-600 to-emerald-800 disabled:opacity-40 rounded-2xl font-black text-lg tracking-tight hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_40px_rgba(22,163,74,0.3)] overflow-hidden"><div className="relative z-10 flex items-center justify-center gap-2">⚔️ NORMAL SAVAŞ</div><div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div></button>
           </div>
         ) : (
-          <button onClick={battle} disabled={team.filter(x => x).length === 0 || phase === "battle" || versusReady} className="w-full group relative py-5 mt-2 bg-gray-800/60 disabled:cursor-not-allowed rounded-2xl font-black text-2xl tracking-tighter hover:scale-[1.01] hover:bg-gray-700/70 hover:border-gray-500/60 active:scale-95 transition-all duration-200 border-2 border-gray-600/40 text-gray-300 overflow-hidden"><div className="relative z-10 flex items-center justify-center gap-3">{team.filter(x => x).length === 0 ? <><span className="text-4xl">🐾</span><span>ÖNCE TAKIMINA HAYVAN EKLE!</span></> : versusReady ? `⏳ Rakip Bekleniyor...` : "⚔️ SAVAŞI BAŞLAT"}</div><div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div></button>
+          <button onClick={battle} disabled={team.filter(x => x).length === 0 || phase === "battle" || versusReady} className={`w-full group relative py-5 mt-2 bg-gray-800/60 disabled:cursor-not-allowed rounded-2xl font-black text-2xl tracking-tighter hover:scale-[1.01] hover:bg-gray-700/70 hover:border-gray-500/60 active:scale-95 transition-all duration-200 border-2 border-gray-600/40 text-gray-300 overflow-hidden ${versusReady ? "versus-ready-button" : ""}`}><div className="relative z-10 flex items-center justify-center gap-3">{team.filter(x => x).length === 0 ? <><span className="text-4xl">🐾</span><span>ÖNCE TAKIMINA HAYVAN EKLE!</span></> : versusReady ? `⏳ Rakip Bekleniyor...` : "⚔️ SAVAŞI BAŞLAT"}</div><div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div></button>
         )}
       </div>
+
+      {showVersusLockOverlay && (
+        <div className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center">
+          <div className="versus-lock-overlay" />
+          <div className="relative z-10 px-6 py-4 rounded-2xl border border-cyan-400/40 bg-black/55 backdrop-blur-md text-cyan-200 font-black tracking-wide text-sm sm:text-base text-center shadow-[0_0_40px_rgba(34,211,238,0.25)]">
+            Rakip eslestiriliyor...
+          </div>
+        </div>
+      )}
 
       {bossChallenge === "reward" && (
         <BossRewardScreen

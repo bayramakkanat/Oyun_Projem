@@ -276,6 +276,8 @@ export function useBattle({
   const battle = async () => {
     if (gameMode === "versus") {
       try {
+        // Standard/arena ile aynı kural: savaşa geçerken seçilmemiş ödüller silinir.
+        setRewards([]);
         await versusSetReady();
       } catch (err) {
         console.error("Versus hazır hatası:", err);
