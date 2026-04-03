@@ -24,6 +24,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "lint": "eslint -c .eslintrc.ci.json \"src/**/*.{js,jsx}\" --ignore-pattern \"src/**/__tests__/**\" --max-warnings=0",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },

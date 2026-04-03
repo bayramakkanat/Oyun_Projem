@@ -120,12 +120,18 @@ const sellHandlers = {
     const { nt, setTeam, setShop, setGold, setSelI, goldGain, clampStat, pwr,
             spawnParticles, spawnFlyingParticle } = ctx;
     const m          = pwr(pet);
+    const shopBuff   = 2 * m; // L1:+2, L2:+4, L3:+6
     const fromCenter = getPetCenter(pet.id);
 
     setShop((prevShop) => {
       const updated = prevShop.map((sp) => {
         if (!sp) return sp;
-        return { ...sp, atk: clampStat(sp.atk + m), hp: clampStat(sp.hp + m), curHp: clampStat(sp.curHp + m) };
+        return {
+          ...sp,
+          atk: clampStat(sp.atk + shopBuff),
+          hp: clampStat(sp.hp + shopBuff),
+          curHp: clampStat(sp.curHp + shopBuff),
+        };
       });
       if (fromCenter) {
         updated.forEach((sp, sIdx) => {
@@ -396,14 +402,22 @@ export function useShop({
 
     if (!a.isR && gold < a.cost) return;
 
-    if (a.ability === AB.BUY_TARGET_BUFF && !a.pendingTargetBuff) {
+    if ((a.ability === AB.BUY_TARGET_BUFF || a.ability === AB.BUY_TARGET_HP) && !a.pendingTargetBuff) {
       const nt = [...team];
       const targetPet = nt[slot];
+      const getTargetBuff = (petLike) => {
+        if (petLike.ability === AB.BUY_TARGET_HP) {
+          const m = pwr({ ...petLike, lvl: petLike.lvl || 1 });
+          return { atk: 0, hp: 3 * m };
+        }
+        const m = pwr({ ...petLike, lvl: petLike.lvl || 1 });
+        const amount = m === 1 ? 1 : m === 2 ? 2 : 4;
+        return { atk: amount, hp: amount };
+      };
 
       if (targetPet && targetPet.name === a.name && targetPet.tier === a.tier && targetPet.lvl < 3) {
         const { merged, rewards: newRewards } = merge(targetPet, a);
-        const mergedPower = pwr(merged);
-        const buffAmount  = mergedPower === 1 ? 1 : mergedPower === 2 ? 2 : 4;
+        const targetBuff = getTargetBuff(merged);
         nt[slot] = merged;
         applyBuyBuffs(nt, slot);
         setTeam(nt);
@@ -424,15 +438,14 @@ export function useShop({
         } else {
           setRewards((prev) => [...prev.filter((x) => x.grp !== a.grp), ...newRewards]);
         }
-        setSel({ ...merged, pendingTargetBuff: true, buffAmount, sourceSlot: slot });
+        setSel({ ...merged, pendingTargetBuff: true, targetBuff, sourceSlot: slot });
         setSelI(null);
         return;
       }
 
       if (targetPet !== null) return;
 
-      const m          = pwr({ ...a, lvl: a.lvl || 1 });
-      const buffAmount = m === 1 ? 1 : m === 2 ? 2 : 4;
+      const targetBuff = getTargetBuff(a);
       nt[slot] = { ...a, lvl: a.lvl || 1, exp: a.exp || 0, curHp: a.curHp || a.hp, isR: undefined, rT: undefined, grp: undefined };
       if (!a.isR) {
         setGold((g) => g - a.cost);
@@ -452,7 +465,7 @@ export function useShop({
       }
       applyBuyBuffs(nt, slot);
       setTeam(nt);
-      setSel({ ...a, pendingTargetBuff: true, buffAmount, sourceSlot: slot });
+      setSel({ ...a, pendingTargetBuff: true, targetBuff, sourceSlot: slot });
       setSelI(null);
       return;
     }
@@ -537,10 +550,15 @@ if (stillMergeable) setTimeout(() => playSound("levelup"), 400);
       nt[fi] = null;
       setTeam(nt);
       if (newRewards.length > 0) setRewards((prev) => [...prev, ...newRewards]);
-      if (leveledUp && merged.ability === AB.BUY_TARGET_BUFF) {
-        const mergedPower = pwr(merged);
-        const buffAmount  = mergedPower === 1 ? 1 : mergedPower === 2 ? 2 : 4;
-        setSel({ ...merged, pendingTargetBuff: true, buffAmount, sourceSlot: ti });
+      if (leveledUp && (merged.ability === AB.BUY_TARGET_BUFF || merged.ability === AB.BUY_TARGET_HP)) {
+        const targetBuff = merged.ability === AB.BUY_TARGET_HP
+          ? { atk: 0, hp: 3 * pwr(merged) }
+          : (() => {
+              const mergedPower = pwr(merged);
+              const amount = mergedPower === 1 ? 1 : mergedPower === 2 ? 2 : 4;
+              return { atk: amount, hp: amount };
+            })();
+        setSel({ ...merged, pendingTargetBuff: true, targetBuff, sourceSlot: ti });
       }
       setSelI(null);
       return true;

@@ -164,7 +164,6 @@ export const BattleProvider = ({ children }) => {
     saveArenaTeam, fetchArenaOpponent, updateLeaderboard, setArenaResult, saveTasksToDB,
     user,
     difficultyLevel, maxT, teamSlots, difficulty,
-    setPGold,
   });
 
   // ─── Boss fonksiyonları ───────────────────────────────────────────────────
