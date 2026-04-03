@@ -151,9 +151,9 @@ export async function runBattleTurnPhase({
     await delay(500);
   }
   if (a.ability === AB.START_CHARGE && p[0].curHp > 0) {
-    p[0].atk = clampStat(p[0].atk + 2 * pwr(a));
+    p[0].atk = clampStat(p[0].atk + AM.START_CHARGE_AMT * pwr(a));
     triggerAnim(a.id, "buff");
-    setLog((l) => [...l, `🐗 ${a.nick} -> +${2 * pwr(a)} ATK`]);
+    setLog((l) => [...l, `🐗 ${a.nick} -> +${AM.START_CHARGE_AMT * pwr(a)} ATK`]);
     await delay(500);
   }
   if (a.ability === AB.FAINT_WEAKEN_ALL && p[0].curHp <= 0) {
@@ -299,9 +299,9 @@ export async function runBattleTurnPhase({
     await delay(500);
   }
   if (d.ability === AB.START_CHARGE && e[0].curHp > 0) {
-    e[0].atk = clampStat(e[0].atk + 2 * pwr(d));
+    e[0].atk = clampStat(e[0].atk + AM.START_CHARGE_AMT * pwr(d));
     triggerAnim(d.id, "buff");
-    setLog((l) => [...l, `🐗 Düşman ${d.nick} -> +${2 * pwr(d)} ATK`]);
+    setLog((l) => [...l, `🐗 Düşman ${d.nick} -> +${AM.START_CHARGE_AMT * pwr(d)} ATK`]);
     await delay(500);
   }
   if (a.ability === AB.DEVOUR && e[0].curHp <= 0 && p[0].curHp > 0) {

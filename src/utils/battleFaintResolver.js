@@ -1,5 +1,5 @@
 // src/utils/battleFaintResolver.js
-import { AB } from "../data/gameData";
+import { AB, ABILITY_MULTIPLIERS as AM } from "../data/gameData";
 import { applySummonBuffs } from "./battleUtils";
 import {
   applyDodoTeamRetriggerEffect,
@@ -117,7 +117,7 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
             const extraSummon = createFaintSummonUnit({ name: "🥚", nick: "Düş.Yavru", power: m, img: "baby_crocodile.png", flip: false });
             applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
             sm.push(extraSummon);
-            lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Ekstra yavru ${4 * m}/${4 * m}`);
+            lg.push(`🦤 Düşman Dodo -> ${d.nick} efekti tekrar! Ekstra yavru ${AM.FAINT_SUMMON_AMT * m}/${AM.FAINT_SUMMON_AMT * m}`);
           }
           if (d.ability === AB.FAINT_DUPLICATE) {
             pushFaintDuplicateEffect({ deadUnit: d, allyTeam: al, summons: sm, logs: lg, logPrefix: "🦤 Düşman Dodo -> " });
@@ -167,7 +167,7 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
   }
   if (d.ability === AB.FAINT_SUMMON) {
     const newSummon = createFaintSummonUnit({ name: "🥚", nick: "Yavru", power: m, img: "baby_crocodile.png" });
-    lg.push(`🥚 ${d.nick} -> ${4 * m}/${4 * m} yavru çağırdı`);
+    lg.push(`🥚 ${d.nick} -> ${AM.FAINT_SUMMON_AMT * m}/${AM.FAINT_SUMMON_AMT * m} yavru çağırdı`);
     sm.push(newSummon);
     setTimeout(() => {
       const buffedSummon = { ...newSummon };
@@ -230,7 +230,7 @@ export function resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAn
             const extraSummon = createFaintSummonUnit({ name: "🥚", nick: "Yavru", power: m, img: "baby_crocodile.png", flip: false });
             applySummonBuffs([extraSummon], al, lg, { triggerAnim, spawnParticles });
             sm.push(extraSummon);
-            lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Ekstra yavru ${4 * m}/${4 * m}`);
+            lg.push(`🦤 Dodo -> ${d.nick} efekti tekrar! Ekstra yavru ${AM.FAINT_SUMMON_AMT * m}/${AM.FAINT_SUMMON_AMT * m}`);
           }
           if (d.ability === AB.FAINT_DUPLICATE) {
             pushFaintDuplicateEffect({ deadUnit: d, allyTeam: al, summons: sm, logs: lg, logPrefix: "🦤 Dodo -> " });

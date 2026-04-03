@@ -31,9 +31,9 @@ export const applyFaintBuffEffect = ({ deadUnit, power, allyTeam, clampStat, log
 export const createFaintSummonUnit = ({ name, nick, power, img, flip = false }) => ({
   name,
   nick,
-  atk: 4 * power,
-  hp: 4 * power,
-  curHp: 4 * power,
+  atk: AM.FAINT_SUMMON_AMT * power,
+  hp: AM.FAINT_SUMMON_AMT * power,
+  curHp: AM.FAINT_SUMMON_AMT * power,
   ability: AB.NONE,
   tier: 1,
   lvl: 1,
