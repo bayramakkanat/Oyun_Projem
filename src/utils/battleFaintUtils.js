@@ -1,4 +1,4 @@
-import { AB } from "../data/gameData";
+import { AB, ABILITY_MULTIPLIERS as AM } from "../data/gameData";
 import { applyTeamBuff, applyTeamDamage, applyTeamDebuff, getFaintWeakenAllDebuff, getTeamBuffAmount, getWaveDamage } from "./battleEffectUtils";
 
 export const applyFaintDamageEffect = ({ deadUnit, power, enemyTeam, logs, logPrefix = "", targetLabel = "", logSuffix = "" }) => {
@@ -202,6 +202,6 @@ export const applyStagComboEffect = ({ deadUnit, power, allyTeam, clampStat, log
 export const pushFaintSummonEffect = ({ deadUnit, power, summons, logs, name, nick, img, flip = false, logPrefix = "" }) => {
   const summon = createFaintSummonUnit({ name, nick, power, img, flip });
   summons.push(summon);
-  logs.push(`${logPrefix}${deadUnit.nick} -> ${4 * power}/${4 * power} yavru çağırdı`);
+  logs.push(`${logPrefix}${deadUnit.nick} -> ${AM.FAINT_SUMMON_AMT * power}/${AM.FAINT_SUMMON_AMT * power} yavru çağırdı`);
   return summon;
 };
