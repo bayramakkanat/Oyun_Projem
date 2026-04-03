@@ -1,24 +1,35 @@
 import { useRef, useEffect } from "react";
 import PixiBattleScene from "./PixiBattleScene";
 import { BOSSES } from "../data/gameData";
+import { useGameContext } from "../context/GameContext";
 
-export default function BattleView({
-  turn,
-  gold,
-  lives,
-  wins,
-  pT,
-  eT,
-  log,
-  step,
-  anims,
-  bossChallenge,
-  arenaOpponent,
- battleSpeedRef,
-  isPaused,
-  onPauseToggle,
-  user,
-}) {
+export default function BattleView() {
+  const {
+    turn, gold, lives, wins, pT, eT, log, step, anims,
+    bossChallenge, arenaOpponent, battleSpeedRef, isPaused, setIsPaused, isPausedRef, user,
+  } = useGameContext();
+
+  const onPauseToggle = () => {
+    if (isPausedRef) isPausedRef.current = !isPausedRef.current;
+    if (setIsPaused) setIsPaused((p) => !p);
+  };
+  // remove trailing lines...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const logR = useRef(null);
 useEffect(() => {
     if (logR.current) {

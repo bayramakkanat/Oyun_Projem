@@ -1,4 +1,4 @@
-import { AB } from "../data/gameData";
+import { AB, ABILITY_MULTIPLIERS as AM } from "../data/gameData";
 import { getFearAllDebuff, getFaintWeakenAllDebuff } from "./battleEffectUtils";
 import { spawnFloatingText, spawnDeathEffect, spawnProjectile } from "./animations";
 

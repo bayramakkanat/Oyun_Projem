@@ -152,67 +152,7 @@ export default function GameRouter() {
     return (
       <>
         {notifications}
-        <MenuScreen
-          menuView={menuView}
-          setMenuView={setMenuView}
-          soundEnabled={soundEnabled}
-          setSoundEnabled={setSoundEnabled}
-          stats={stats}
-          difficultyLevel={difficultyLevel}
-          setDifficultyLevel={setDifficultyLevel}
-          gameMode={gameMode}
-          setGameMode={setGameMode}
-          user={user}
-          displayName={displayName}
-          achievementPopup={achievementPopup}
-          showAuthModal={showAuthModal}
-          setShowAuthModal={setShowAuthModal}
-          showSettingsModal={showSettingsModal}
-          setShowSettingsModal={setShowSettingsModal}
-          authMode={authMode}
-          setAuthMode={setAuthMode}
-          authEmail={authEmail}
-          setAuthEmail={setAuthEmail}
-          authPass={authPass}
-          setAuthPass={setAuthPass}
-          authUsername={authUsername}
-          setAuthUsername={setAuthUsername}
-          authAvatar={authAvatar}
-          setAuthAvatar={setAuthAvatar}
-          settingsUsername={settingsUsername}
-          setSettingsUsername={setSettingsUsername}
-          settingsAvatar={settingsAvatar}
-          setSettingsAvatar={setSettingsAvatar}
-          handleEmailAuth={handleEmailAuth}
-          handleGoogleLogin={handleGoogleLogin}
-          handleLogout={handleLogout}
-          handleUpdateProfile={() => handleUpdateProfile(user)}
-          onStart={() => {
-            if (gameMode === "versus") {
-              setVersusPhase("lobby");
-            } else {
-              reset();
-              setGameStarted(true);
-              unlockAchievement("first_game");
-              playSound("shop_open");
-            }
-          }}
-          onStartVersus={(roomCode, role) => {
-          setGameMode("versus");
-          setVersusAutoJoin({ roomCode, role });
-          setVersusPhase("lobby");
-          }}
-          friendsData={friendsData}
-          onContinue={(saved) => {
-            setGameMode(saved.gameMode ?? "standard");
-            setDifficultyLevel(saved.difficultyLevel ?? "normal");
-            restoreGame(saved);
-            setGameStarted(true);
-          }}
-          onDebug={() => setShowDebugPanel(true)}
-          loadTasksFromDB={loadTasksFromDB}
-          saveTasksToDB={saveTasksToDB}
-        />
+        <MenuScreen />
         {showDebugPanel && (
         <DebugPanel
           onClose={() => setShowDebugPanel(false)}
@@ -367,26 +307,7 @@ export default function GameRouter() {
       {phase === "shop" ? (
         <ShopView />
       ) : (
-        <BattleView
-          turn={turn}
-          gold={gold}
-          lives={lives}
-          wins={wins}
-          pT={pT}
-          eT={eT}
-          log={log}
-          step={step}
-          anims={anims}
-          bossChallenge={bossChallenge}
-          arenaOpponent={arenaOpponent}
-          battleSpeedRef={battleSpeedRef}
-          isPaused={isPaused}
-          onPauseToggle={() => {
-            isPausedRef.current = !isPausedRef.current;
-            setIsPaused((p) => !p);
-          }}
-          user={user}
-        />
+        <BattleView />
       )}
     </div>
   );
