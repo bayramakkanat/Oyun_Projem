@@ -100,7 +100,14 @@ return chosen;
     }
   };
 
-const updateLeaderboard = async ({ won, totalWins = 0, totalTurns = 0, taskXP = 0 }) => {
+const updateLeaderboard = async ({
+  won,
+  totalWins = 0,
+  totalLosses = 0,
+  totalDraws = 0,
+  totalTurns = 0,
+  taskXP = 0,
+}) => {
   console.log("🎯 updateLeaderboard çağrıldı!", { won, turn: turnRef?.current });
   if (!user) return;
   try {
@@ -110,13 +117,15 @@ const updateLeaderboard = async ({ won, totalWins = 0, totalTurns = 0, taskXP = 
     const prev = snap.exists() ? snap.data() : { xp: 0, bestTurn: 0, totalWins: 0, totalGames: 0 };
     console.log("📦 Firebase'den okunan veri:", prev);
     const isNewBestTurn = turn > (prev.bestTurn || 0);
-   const earnedXP = Math.max(0, totalTurns * 2 + totalWins * 5 - (totalTurns - totalWins) * 2) + (isNewBestTurn ? 50 : 0) + taskXP;
+   const earnedXP = Math.max(0, totalTurns * 2 + totalWins * 5 - totalLosses * 2) + (isNewBestTurn ? 50 : 0) + taskXP;
 const newXP = (prev.xp || 0) + earnedXP;
     const newBestTurn = Math.max(prev.bestTurn || 0, turn);
     const newTotalWins = (prev.totalWins || 0) + totalWins;
     const newTotalGames = (prev.totalGames || 0) + 1;
     const newTotalTurns = (prev.totalTurns || 0) + totalTurns;
     const newMonthlyWins = (prev.monthlyWins || 0) + (won ? 1 : 0);
+    const newTotalLosses = (prev.totalLosses || 0) + totalLosses;
+    const newTotalDraws = (prev.totalDraws || 0) + totalDraws;
     console.log("🏆 won değeri:", won, "newTotalWins:", newTotalWins);
 
  await setDoc(ref, {
@@ -126,8 +135,10 @@ const newXP = (prev.xp || 0) + earnedXP;
   bestTurn: newBestTurn,
   totalWins: newTotalWins,
   totalGames: newTotalGames,
-totalTurns: newTotalTurns,
-monthlyWins: newMonthlyWins,
+ totalTurns: newTotalTurns,
+ totalLosses: newTotalLosses,
+ totalDraws: newTotalDraws,
+ monthlyWins: newMonthlyWins,
   lastPlayed: serverTimestamp(),
   month: getMonthKey(),
 });

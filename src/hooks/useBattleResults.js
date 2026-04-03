@@ -1,14 +1,3 @@
-/**
- * useBattleResults
- *
- * useBattle içinden ayrıştırılan üç sorumluluk:
- *  1. Koleksiyon istatistiklerini güncelleme (loadCollection / saveCollection)
- *  2. Görev ilerlemesini güncelleme (loadTasks / saveTasks)
- *  3. Arena sonu leaderboard çağrısı (handleArenaGameOver)
- *
- * useBattle bu hook'u çağırır; ayrı test edilebilir ve değiştirilebilir hale gelir.
- */
-
 import { useCallback } from "react";
 import {
   loadCollection,
@@ -32,7 +21,6 @@ export function useBattleResults({
   setOver,
   versusRoom,
 }) {
-  // ─── Koleksiyon istatistiklerini güncelle ──────────────────────────────────
   const updateCollectionStats = useCallback(
     (updatedTeam, won) => {
       if (gameMode !== "arena") return;
@@ -40,21 +28,19 @@ export function useBattleResults({
       const col = loadCollection(user?.uid);
       updatedTeam.forEach((pet) => {
         if (!pet) return;
-        const key  = pet.nick;
+        const key = pet.nick;
         const data = col[key] || getDefaultAnimalData();
         data.used += 1;
         if (won) data.wins += 1;
         if (pet.lvl > data.maxLvl) data.maxLvl = pet.lvl;
         if (pet.lvl === 3) data.unlocked = true;
-        // Hayvan başarım kontrolleri
-        if (data.used >= 3)    data.task1 = true;
-        if (data.wins >= 5)    data.task2 = true;
-        if (data.unlocked)     data.task3 = true;
+        if (data.used >= 3) data.task1 = true;
+        if (data.wins >= 5) data.task2 = true;
+        if (data.unlocked) data.task3 = true;
         col[key] = data;
       });
       saveCollection(col, user?.uid);
 
-      // Firebase global istatistik (fire-and-forget)
       if (user?.uid) {
         import("../firebase").then(({ db }) => {
           import("firebase/firestore").then(({ doc, setDoc, increment }) => {
@@ -67,28 +53,26 @@ export function useBattleResults({
         });
       }
 
-      // Koleksiyon başarımları
       const toId = (nick) =>
         nick
           .toLowerCase()
-          .replace(/ş/g, "s").replace(/ğ/g, "g").replace(/ü/g, "u")
-          .replace(/ö/g, "o").replace(/ı/g, "i").replace(/ç/g, "c")
+          .replace(/\u015F/g, "s").replace(/\u011F/g, "g").replace(/\u00FC/g, "u")
+          .replace(/\u00F6/g, "o").replace(/\u0131/g, "i").replace(/\u00E7/g, "c")
           .replace(/\s+/g, "_");
 
       updatedTeam.forEach((pet) => {
         if (!pet) return;
-        const c  = col[pet.nick];
-        if (!c)  return;
+        const c = col[pet.nick];
+        if (!c) return;
         const id = toId(pet.nick);
-        if (c.wins >= 1)                  unlockAchievement(`use_${id}`);
+        if (c.wins >= 1) unlockAchievement(`use_${id}`);
         if (c.maxLvl >= 2 && c.wins >= 1) unlockAchievement(`lvl2_${id}`);
-        if (c.maxLvl >= 3)                unlockAchievement(`lvl3_${id}`);
+        if (c.maxLvl >= 3) unlockAchievement(`lvl3_${id}`);
       });
     },
     [gameMode, user, unlockAchievement]
   );
 
-  // ─── Görev ilerlemesini güncelle ───────────────────────────────────────────
   const updateTaskProgress = useCallback(
     (updatedTeam, won) => {
       const taskData = loadTasks(user?.uid);
@@ -98,12 +82,12 @@ export function useBattleResults({
         tasks.map((t) => {
           if (t.done) return t;
           let progress = t.progress;
-          if (t.type === "battles")                                            progress += 1;
-          if (t.type === "wins"      && won)                                   progress += 1;
-          if (t.type === "arena_wins"&& won && gameMode === "arena")           progress += 1;
-          if (t.type === "tier1_wins"&& won && updatedTeam.some((p) => p?.tier === 1)) progress += 1;
-          if (t.type === "lvl2"      && updatedTeam.some((p) => p?.lvl >= 2)) progress = Math.max(progress, 1);
-          if (t.type === "comeback"  && won && lives === 1)                    progress += 1;
+          if (t.type === "battles") progress += 1;
+          if (t.type === "wins" && won) progress += 1;
+          if (t.type === "arena_wins" && won && gameMode === "arena") progress += 1;
+          if (t.type === "tier1_wins" && won && updatedTeam.some((p) => p?.tier === 1)) progress += 1;
+          if (t.type === "lvl2" && updatedTeam.some((p) => p?.lvl >= 2)) progress = Math.max(progress, 1);
+          if (t.type === "comeback" && won && lives === 1) progress += 1;
           if (t.type === "unique_animals") {
             const used = new Set(updatedTeam.filter(Boolean).map((p) => p.nick));
             progress = Math.max(progress, used.size);
@@ -113,21 +97,20 @@ export function useBattleResults({
           return { ...t, progress: Math.min(progress, t.target), done };
         });
 
-      taskData.daily.tasks   = updateTask(taskData.daily.tasks);
-      taskData.weekly.tasks  = updateTask(taskData.weekly.tasks);
+      taskData.daily.tasks = updateTask(taskData.daily.tasks);
+      taskData.weekly.tasks = updateTask(taskData.weekly.tasks);
       saveTasks(taskData, user?.uid);
       if (saveTasksToDB) saveTasksToDB(taskData);
     },
     [user, gameMode, turn, lives, saveTasksToDB]
   );
 
-  // ─── Arena oyun sonu leaderboard ──────────────────────────────────────────
   const handleArenaGameOver = useCallback(
-    (finalWins, finalTurn) => {
+    (finalWins, finalTurn, arenaStats = {}) => {
       const freshTaskData = loadTasks(user?.uid);
       const pendingTaskXP = freshTaskData
         ? [
-            ...(freshTaskData.daily?.tasks  || []),
+            ...(freshTaskData.daily?.tasks || []),
             ...(freshTaskData.weekly?.tasks || []),
           ]
             .filter((t) => t.done && !t.xpClaimed)
@@ -135,31 +118,46 @@ export function useBattleResults({
         : 0;
 
       if (freshTaskData) {
-        freshTaskData.daily.tasks  = freshTaskData.daily.tasks.map((t)  => (t.done ? { ...t, xpClaimed: true } : t));
-        freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map((t) => (t.done ? { ...t, xpClaimed: true } : t));
+        freshTaskData.daily.tasks = freshTaskData.daily.tasks.map((t) =>
+          t.done ? { ...t, xpClaimed: true } : t
+        );
+        freshTaskData.weekly.tasks = freshTaskData.weekly.tasks.map((t) =>
+          t.done ? { ...t, xpClaimed: true } : t
+        );
         saveTasks(freshTaskData, user?.uid);
         if (saveTasksToDB) saveTasksToDB(freshTaskData);
       }
 
+      const totalWins = Number.isFinite(arenaStats.wins) ? arenaStats.wins : finalWins;
+      const totalLosses = Number.isFinite(arenaStats.losses)
+        ? arenaStats.losses
+        : Math.max(0, finalTurn - finalWins);
+      const totalDraws = Number.isFinite(arenaStats.draws)
+        ? arenaStats.draws
+        : Math.max(0, finalTurn - totalWins - totalLosses);
+
       updateLeaderboard({
-        won: finalWins > 0,
-        totalWins: finalWins,
+        won: totalWins > 0,
+        totalWins,
+        totalLosses,
+        totalDraws,
         totalTurns: finalTurn,
         taskXP: pendingTaskXP,
       }).then((result) => {
-        const isNewRecord  = result?.isNewRecord || false;
-        const losses       = finalTurn - finalWins;
-        const xpBreakdown  = [
-          { label: `${finalTurn} Tur × 2 XP`,           xp: finalTurn * 2 },
-          { label: `${finalWins} Zafer × 5 XP`,         xp: finalWins * 5 },
-          { label: `${losses} Yenilgi × -2 XP`,         xp: -(losses * 2) },
-          ...(isNewRecord ? [{ label: "🏆 Yeni Rekor Bonusu", xp: 50 }] : []),
+        const isNewRecord = result?.isNewRecord || false;
+        const xpBreakdown = [
+          { label: `${finalTurn} Tur x 2 XP`, xp: finalTurn * 2 },
+          { label: `${totalWins} Zafer x 5 XP`, xp: totalWins * 5 },
+          { label: `${totalLosses} Yenilgi x -2 XP`, xp: -(totalLosses * 2) },
+          { label: `${totalDraws} Beraberlik x 0 XP`, xp: 0 },
+          ...(isNewRecord ? [{ label: "Yeni Rekor Bonusu", xp: 50 }] : []),
         ];
         const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
         setArenaResult({
           reachedTurn: finalTurn,
-          totalWins: finalWins,
-          totalLosses: losses,
+          totalWins,
+          totalLosses,
+          totalDraws,
           earnedXP,
           isNewRecord,
           xpBreakdown,
@@ -169,27 +167,24 @@ export function useBattleResults({
     [user, updateLeaderboard, saveTasksToDB, setArenaResult]
   );
 
-  // ─── setOver yardımcısı (versus + arena ortak) ────────────────────────────
-  // useBattle içindeki tekrar eden "newLives <= 0" bloklarını birleştirir
   const handleGameOver = useCallback(
-    async (newLives, currentWins, currentTurn) => {
-      if (newLives > 0) return false; // oyun bitmedi
+    async (newLives, currentWins, currentTurn, arenaStats) => {
+      if (newLives > 0) return false;
 
       if (gameMode === "arena") {
-        handleArenaGameOver(currentWins, currentTurn);
+        handleArenaGameOver(currentWins, currentTurn, arenaStats);
         return true;
       }
 
       if (gameMode === "versus" && versusRoom) {
         const { code, role } = versusRoom;
         const { updateDoc, doc } = await import("firebase/firestore");
-        const { db }             = await import("../firebase");
+        const { db } = await import("../firebase");
         updateDoc(doc(db, "versus_rooms", code), { loser: role }).catch(console.error);
         return true;
       }
 
       setOver(true);
-
       return true;
     },
     [gameMode, versusRoom, handleArenaGameOver, setOver]

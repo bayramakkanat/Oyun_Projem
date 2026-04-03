@@ -8,7 +8,7 @@ export default function ArenaResultScreen() {
 
   if (!arenaResult) return null;
 
-  const { reachedTurn, totalWins, totalLosses, earnedXP, isNewRecord, xpBreakdown } = arenaResult;
+  const { reachedTurn, totalWins, totalLosses, totalDraws, earnedXP, isNewRecord, xpBreakdown } = arenaResult;
 
   return (
     <div
@@ -42,6 +42,11 @@ export default function ArenaResultScreen() {
             <div className="flex flex-col items-center">
               <span className="text-green-400 font-black text-2xl">{totalWins}</span>
               <span className="text-gray-500 text-xs uppercase tracking-wide">Zafer</span>
+            </div>
+            <div className="w-px bg-white/10"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-gray-300 font-black text-2xl">{totalDraws ?? 0}</span>
+              <span className="text-gray-500 text-xs uppercase tracking-wide">Beraberlik</span>
             </div>
             <div className="w-px bg-white/10"></div>
             <div className="flex flex-col items-center">

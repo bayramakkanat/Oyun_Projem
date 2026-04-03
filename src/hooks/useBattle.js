@@ -81,6 +81,7 @@ export function useBattle({
   const eTRef             = useRef(eT);
   const disconnectReportedRef = useRef(false);
   const disconnectNoticeShownRef = useRef(false);
+  const arenaRoundStatsRef = useRef({ wins: 0, losses: 0, draws: 0 });
   const toFiniteNumber = (value, fallback = 0) =>
     Number.isFinite(Number(value)) ? Number(value) : fallback;
   const normalizeBattlePet = (pet, animalData) => {
@@ -99,6 +100,15 @@ export function useBattle({
       exp: toFiniteNumber(pet?.exp, 0),
     };
   };
+  const sanitizeBattleTeam = (teamArr, allAnimals) =>
+    (teamArr || [])
+      .filter(Boolean)
+      .map((pet) =>
+        normalizeBattlePet(
+          pet,
+          allAnimals?.find((a) => a.name === pet?.name)
+        )
+      );
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { pTRef.current = pT; }, [pT]);
@@ -214,12 +224,19 @@ export function useBattle({
     lastProcessedStepRef.current = -1;
     battleGoldRef.current = 0;
     const boss = BOSSES[turn];
-    const pt = applyPermanentBuffs(team)
-      .filter(Boolean)
-      .reverse()
-      .map((x) => ({ ...x, curHp: x.hp, trample: false }));
+    const allAnimals = Object.values(TIERS).flat();
+    const pt = sanitizeBattleTeam(
+      applyPermanentBuffs(team)
+        .filter(Boolean)
+        .reverse()
+        .map((x) => ({ ...x, curHp: x.hp, trample: false })),
+      allAnimals
+    );
     if (pt.length === 0) return;
-    const et = boss.team.map((b) => ({ ...b, id: Math.random() }));
+    const et = sanitizeBattleTeam(
+      boss.team.map((b) => ({ ...b, id: Math.random() })),
+      allAnimals
+    );
     setET(et);
     setPT(pt);
     playSound("boss_start");
@@ -238,11 +255,9 @@ export function useBattle({
     setOpponentReady(false);
     const allAnimals = Object.values(TIERS).flat();
     const pt = myTeam
-      .filter(Boolean)
       .reverse()
       .map((x) => normalizeBattlePet(x, allAnimals.find((a) => a.name === x.name)));
     const et = theirTeam
-      .filter(Boolean)
       .reverse()
       .map((x) => normalizeBattlePet(x, allAnimals.find((a) => a.name === x.name)));
     setET(et);
@@ -319,16 +334,23 @@ export function useBattle({
     }
 
     try {
+      if (gameMode === "arena" && turnRef.current === 1 && wins === 0) {
+        arenaRoundStatsRef.current = { wins: 0, losses: 0, draws: 0 };
+      }
       setIsBattleOver(false);
       lastProcessedStepRef.current = -1;
       battleGoldRef.current = 0;
       setPGold(0);
       setRewards([]);
 
-      const pt = applyPermanentBuffs(team)
-        .filter(Boolean)
-        .reverse()
-        .map((x) => ({ ...x, curHp: x.hp, trample: false }));
+      const allAnimals = Object.values(TIERS).flat();
+      const pt = sanitizeBattleTeam(
+        applyPermanentBuffs(team)
+          .filter(Boolean)
+          .reverse()
+          .map((x) => ({ ...x, curHp: x.hp, trample: false })),
+        allAnimals
+      );
       if (pt.length === 0) return;
 
       let et;
@@ -338,16 +360,22 @@ export function useBattle({
         if (opponentData) {
           setArenaOpponent(opponentData);
           const allAnimals = Object.values(TIERS).flat();
-          et = [...opponentData.team].reverse().map((p) => {
-            const animalData = allAnimals.find((a) => a.name === p.name);
-            return { ...p, img: p.img || animalData?.img || null, id: Math.random(), curHp: p.hp };
-          });
+          et = sanitizeBattleTeam(
+            [...opponentData.team].reverse().map((p) => {
+              const animalData = allAnimals.find((a) => a.name === p.name);
+              return { ...p, img: p.img || animalData?.img || null, id: Math.random(), curHp: p.hp };
+            }),
+            allAnimals
+          );
         } else {
           et = genE(turn, maxT, teamSlots, difficulty, difficultyLevel);
           setArenaOpponent({ userName: "AI Komutan" });
         }
       } else {
-        et = genE(turn, maxT, teamSlots, difficulty, difficultyLevel);
+        et = sanitizeBattleTeam(
+          genE(turn, maxT, teamSlots, difficulty, difficultyLevel),
+          allAnimals
+        );
         setArenaOpponent(null);
       }
 
@@ -488,7 +516,7 @@ export function useBattle({
         try {
           const newLives = lives - 1;
           setLives(newLives);
-          const over = await handleGameOver(newLives, wins, turn);
+          const over = await handleGameOver(newLives, wins, turn, arenaRoundStatsRef.current);
           if (over) return;
           const updatedTeam = buildUpdatedTeam(team, pT);
           transitionToShop(updatedTeam, turn + 1, 0);
@@ -530,7 +558,7 @@ export function useBattle({
           setBossChallenge(null);
           const newLives = lives - 2;
           setLives(newLives);
-          const over = await handleGameOver(newLives, wins, turn);
+          const over = await handleGameOver(newLives, wins, turn, arenaRoundStatsRef.current);
           if (over) return;
           const updatedTeam = buildUpdatedTeam(team, pT);
           transitionToShop(updatedTeam, turn + 1, 3000);
@@ -544,11 +572,14 @@ export function useBattle({
 
       if (won) {
         setWins((w) => w + 1);
+        if (gameMode === "arena") arenaRoundStatsRef.current.wins += 1;
         setLog((l) => [...l, "🎉 ZAFER!"]);
       } else if (draw) {
         setLog((l) => [...l, "🤝 Berabere"]);
+        if (gameMode === "arena") arenaRoundStatsRef.current.draws += 1;
       } else {
         setLog((l) => [...l, "💀 Yenilgi"]);
+        if (gameMode === "arena") arenaRoundStatsRef.current.losses += 1;
       }
 
       // Arena: takımı kaydet
@@ -560,7 +591,7 @@ export function useBattle({
         if (!won && !draw) {
           const newLives = lives - 1;
           setLives(newLives);
-          const over = await handleGameOver(newLives, wins, turn);
+          const over = await handleGameOver(newLives, wins, turn, arenaRoundStatsRef.current);
           if (over) return;
         }
         transitionToShop(updatedTeam, turn + 1, 3000);
@@ -581,7 +612,7 @@ export function useBattle({
       if (!won && !draw) {
         const newLives = lives - 1;
         setLives(newLives);
-        const over = await handleGameOver(newLives, wins, turn);
+        const over = await handleGameOver(newLives, wins, turn, arenaRoundStatsRef.current);
         if (over) return;
       }
 
@@ -648,8 +679,9 @@ export function useBattle({
       if (isCancelled) return;
 
       const syncBattleTeams = (playerTeam, enemyTeam) => {
-        if (playerTeam) setPT([...playerTeam]);
-        if (enemyTeam)  setET([...enemyTeam]);
+        const allAnimals = Object.values(TIERS).flat();
+        if (playerTeam) setPT(sanitizeBattleTeam(playerTeam, allAnimals));
+        if (enemyTeam)  setET(sanitizeBattleTeam(enemyTeam, allAnimals));
       };
 
       const scheduleDebugBattleReset = () => {
@@ -710,3 +742,4 @@ export function useBattle({
 
   return { battle, startBossBattle, startVersusBattle, versusSetReady };
 }
+

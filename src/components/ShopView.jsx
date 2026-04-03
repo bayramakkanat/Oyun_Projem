@@ -272,8 +272,21 @@ export default function ShopView() {
                 <div key={a.id} className="flex-shrink-0 flex flex-col items-center" onClick={() => {
                   if (sel?.pendingTargetBuff) {
                     if (team[i] && i !== sel.sourceSlot) {
-                      const buffAmount = sel.buffAmount;
-                      setTeam(prev => prev.map((pet, idx) => idx === i ? { ...pet, atk: Math.min(pet.atk + buffAmount, 500), hp: Math.min(pet.hp + buffAmount, 500), curHp: Math.min(pet.curHp + buffAmount, 500) } : pet));
+                      const atkBuff = Number.isFinite(Number(sel?.targetBuff?.atk)) ? Number(sel.targetBuff.atk) : 0;
+                      const hpBuff = Number.isFinite(Number(sel?.targetBuff?.hp)) ? Number(sel.targetBuff.hp) : 0;
+                      const clamp = (v) => Math.max(0, Math.min(500, Number.isFinite(Number(v)) ? Number(v) : 0));
+                      setTeam((prev) =>
+                        prev.map((pet, idx) => {
+                          if (idx !== i || !pet) return pet;
+                          const nextHp = clamp((pet.hp ?? 0) + hpBuff);
+                          return {
+                            ...pet,
+                            atk: clamp((pet.atk ?? 0) + atkBuff),
+                            hp: nextHp,
+                            curHp: clamp((pet.curHp ?? pet.hp ?? 0) + hpBuff),
+                          };
+                        })
+                      );
                       setSel(null);
                       playSound("buff");
                     }
