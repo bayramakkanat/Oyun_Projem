@@ -1,5 +1,5 @@
 import { TIERS, AB, ABILITY_MULTIPLIERS as AM } from "../data/gameData";
-import { spawnFlyingParticle } from "./animations";
+import { spawnFlyingParticle, spawnFloatingText } from "./animations";
 
 const MAX_STAT = 500;
 
@@ -210,10 +210,18 @@ const applyStartAbilitiesForTeam = (team, enemies, isPlayer, lg, callbacks) => {
       lg.push(`🦏 ${pfx}${a.nick} → +${AM.START_TRAMPLE_ATK * m} ATK (çiğneme${isPlayer ? " aktif" : ""})`);
     }
     if (a.ability === AB.START_CHARGE) {
-      team[i].atk = clampStat(team[i].atk + AM.START_CHARGE_AMT * m);
-      team[i].curHp = clampStat(team[i].curHp + AM.START_CHARGE_AMT * m);
-      if (isPlayer) triggerAnim(a.id, "buff");
-      lg.push(`🐗 ${pfx}${a.nick} → +${AM.START_CHARGE_AMT * m}/+${AM.START_CHARGE_AMT * m}`);
+      const buffVal = AM.START_CHARGE_AMT * m;
+      team[i].atk = clampStat(team[i].atk + buffVal);
+      team[i].curHp = clampStat(team[i].curHp + buffVal);
+      if (isPlayer) {
+        triggerAnim(a.id, "buff");
+        const el = document.querySelector(`[data-pet-id="${a.id}"]`);
+        if (el) {
+          const r = el.getBoundingClientRect();
+          spawnFloatingText(`+${buffVal}/+${buffVal}`, r.left + r.width / 2, r.top, "buff");
+        }
+      }
+      lg.push(`🐗 ${pfx}${a.nick} → +${buffVal}/+${buffVal}`);
     }
     if (a.ability === AB.START_TANK) {
       team[i].curHp += 3 * m;
@@ -350,6 +358,7 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
         triggerAnim(pet.id, "buff");
         setTimeout(() => {
           const bearCenter = document.querySelector(`[data-pet-id="${pet.id}"]`);
+          const targetCenter = document.querySelector(`[data-pet-id="${summon.id}"]`);
           if (bearCenter) {
             const rect = bearCenter.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;
@@ -359,6 +368,10 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
                 icon, cx, cy, cx + (i * 20 - 10), cy - 40, 800
               ), i * 150);
             });
+          }
+          if (targetCenter) {
+            const rect = targetCenter.getBoundingClientRect();
+            spawnFloatingText(`+${buff}/+${buff}`, rect.left + rect.width / 2, rect.top, "buff");
           }
         }, 50);
         logArr.push(
@@ -380,6 +393,7 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
             triggerAnim(pet.id, "buff");
             setTimeout(() => {
               const dodoEl = document.querySelector(`[data-pet-id="${pet.id}"]`);
+              const targetEl = document.querySelector(`[data-pet-id="${summon.id}"]`);
               if (dodoEl) {
                 const rect = dodoEl.getBoundingClientRect();
                 const cx = rect.left + rect.width / 2;
@@ -389,6 +403,10 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
                     icon, cx, cy, cx + (i * 20 - 10), cy - 40, 800
                   ), i * 150);
                 });
+              }
+              if (targetEl) {
+                const rect = targetEl.getBoundingClientRect();
+                spawnFloatingText(`+${extraBuff}/+${extraBuff}`, rect.left + rect.width / 2, rect.top, "buff");
               }
             }, 50);
             logArr.push(

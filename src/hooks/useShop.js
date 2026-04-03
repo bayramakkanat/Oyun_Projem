@@ -43,7 +43,7 @@ const sellHandlers = {
           ["⚔️", "❤️"].forEach((icon, iconIndex) => {
             setTimeout(() => {
               spawnFlyingParticle(icon, fromCenter.x, fromCenter.y, toCenter.x, toCenter.y, 800, () => {
-                spawnFloatingText("+1", toCenter.x, toCenter.rect.top, "buff");
+                spawnFloatingText(`+${AM.SELL_BUFF_AMT * m}`, toCenter.x, toCenter.rect.top, "buff");
                 triggerAnim(nt[targetIdx].id, "buff");
               });
             }, iconIndex * 150);
