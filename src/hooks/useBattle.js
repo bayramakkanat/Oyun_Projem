@@ -90,6 +90,7 @@ export function useBattle({
 
   // ─── VERSUS PRESENCE / DISCONNECT ────────────────────────────────────────
   useEffect(() => {
+    if (gameMode !== "versus") return;
     if (!versusRoom || versusPhase !== "playing") return;
     const { code, role } = versusRoom;
     const myLastSeenField = role === "host" ? "hostLastSeen" : "guestLastSeen";
@@ -127,7 +128,7 @@ export function useBattle({
       window.removeEventListener("pagehide", onPageHide);
       window.removeEventListener("beforeunload", onBeforeUnload);
     };
-  }, [versusRoom?.code, versusRoom?.role, versusPhase]);
+  }, [gameMode, versusRoom?.code, versusRoom?.role, versusPhase]);
 
   // ─── useBattleResults: koleksiyon / görev / leaderboard ─────────────────
   const { updateCollectionStats, updateTaskProgress, handleArenaGameOver, handleGameOver } =
@@ -334,6 +335,7 @@ export function useBattle({
 
   // ─── VERSUS SHOP RESET ──────────────────────────────────────────────────
   useEffect(() => {
+    if (gameMode !== "versus") return;
     if (phase !== "shop" || !versusRoom || versusPhase !== "playing") return;
     const { code, role } = versusRoom;
     const payload = {
@@ -346,10 +348,11 @@ export function useBattle({
       payload.shopStartedTurn = turnRef.current;
     }
     updateDoc(doc(db, "versus_rooms", code), payload).catch(console.error);
-  }, [phase, versusRoom, versusPhase, turnRef]);
+  }, [gameMode, phase, versusRoom, versusPhase, turnRef]);
 
   // ─── VERSUS SNAPSHOT LISTENER ───────────────────────────────────────────
   useEffect(() => {
+    if (gameMode !== "versus") return;
     if (!versusRoom || versusPhase !== "playing") return;
     const { code, role } = versusRoom;
     const allAnimals = Object.values(TIERS).flat();
@@ -437,7 +440,7 @@ export function useBattle({
     return () => {
       unsub();
     };
-  }, [versusRoom?.code, versusPhase, turn]);
+  }, [gameMode, versusRoom?.code, versusPhase, turn]);
 
   // ─── ANA SAVAŞ ADIM DÖNGÜSÜ ─────────────────────────────────────────────
   useEffect(() => {

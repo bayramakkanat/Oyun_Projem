@@ -38,7 +38,7 @@ export const BattleProvider = ({ children }) => {
     isDebugBattle, setIsDebugBattle,
     showDebugPanel, setShowDebugPanel,
     versusPhase, setVersusPhase,
-    versusRoom,
+    versusRoom, setVersusRoom,
     newTier, setNewTier,
     lastT, setLastT,
     newlyOpenedSlot, setNewlyOpenedSlot,
@@ -211,6 +211,10 @@ export const BattleProvider = ({ children }) => {
     // UIContext state
     setGuideLvl({});
     setAnims({});
+    if (effectiveMode !== "versus") {
+      setVersusPhase(null);
+      setVersusRoom(null);
+    }
 
     // BattleContext state
     setPhase("shop");
@@ -230,10 +234,11 @@ export const BattleProvider = ({ children }) => {
     setGold, setWins, setLives, setTeam, setShop, setShopResetKey, setRewards,
     setGuideLvl, setAnims,
     setOver, setVictory, setNewTier, setLastT,
-    gameMode, versusPhase, versusRoom?.code, versusRoom?.role,
+    gameMode, versusPhase, versusRoom?.code, versusRoom?.role, setVersusPhase, setVersusRoom,
   ]);
   const restoreGame = useCallback((saved) => {
   const cfg = DIFFICULTY_CONFIGS[saved.difficultyLevel] || DIFFICULTY_CONFIGS.normal;
+  const savedMode = saved.gameMode ?? "standard";
   // ShopContext
   setGold(saved.gold ?? cfg.startingGold);
   setTurnAndRef(saved.turn ?? 1);
@@ -246,6 +251,10 @@ export const BattleProvider = ({ children }) => {
   setLives(saved.lives ?? cfg.startingLives);
   setAnims({});
   setGuideLvl({});
+  if (savedMode !== "versus") {
+    setVersusPhase(null);
+    setVersusRoom(null);
+  }
   // BattleContext
   setPhase(saved.phase ?? "shop");
   setOver(false);
@@ -258,11 +267,12 @@ export const BattleProvider = ({ children }) => {
   setBossRewards([]);
   lastProcessedStepRef.current = -1;
   setIsBattleOver(false);
-}, [
+ }, [
   setGold, setTurnAndRef, setTeam, setShop, setShopResetKey, setRewards,
   setWins, setLives, setAnims, setGuideLvl,
   setOver, setVictory, setNewTier, setLastT,
-]);
+  setVersusPhase, setVersusRoom,
+ ]);
   // ─── Context value ────────────────────────────────────────────────────────
   const value = useMemo(() => ({
     // Battle state
