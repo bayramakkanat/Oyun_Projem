@@ -117,7 +117,7 @@ const updateLeaderboard = async ({
     const prev = snap.exists() ? snap.data() : { xp: 0, bestTurn: 0, totalWins: 0, totalGames: 0 };
     console.log("📦 Firebase'den okunan veri:", prev);
     const isNewBestTurn = turn > (prev.bestTurn || 0);
-   const earnedXP = Math.max(0, totalTurns * 2 + totalWins * 5 - totalLosses * 2) + (isNewBestTurn ? 50 : 0) + taskXP;
+  const earnedXP = Math.max(0, totalTurns * 2 + totalWins * 5 - totalLosses * 2 + totalDraws * 1) + (isNewBestTurn ? 50 : 0) + taskXP;
 const newXP = (prev.xp || 0) + earnedXP;
     const newBestTurn = Math.max(prev.bestTurn || 0, turn);
     const newTotalWins = (prev.totalWins || 0) + totalWins;

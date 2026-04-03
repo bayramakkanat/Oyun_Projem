@@ -149,7 +149,7 @@ export function useBattleResults({
           { label: `${finalTurn} Tur x 2 XP`, xp: finalTurn * 2 },
           { label: `${totalWins} Zafer x 5 XP`, xp: totalWins * 5 },
           { label: `${totalLosses} Yenilgi x -2 XP`, xp: -(totalLosses * 2) },
-          { label: `${totalDraws} Beraberlik x 0 XP`, xp: 0 },
+          { label: `${totalDraws} Beraberlik x 1 XP`, xp: totalDraws * 1 },
           ...(isNewRecord ? [{ label: "Yeni Rekor Bonusu", xp: 50 }] : []),
         ];
         const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
