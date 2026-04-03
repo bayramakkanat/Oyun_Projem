@@ -8,11 +8,9 @@ import { resolveFaint } from "../utils/battleFaintResolver";
 import {
   applyPermanentBuffs,
   genE,
-  applyEndTurnBuffs,
 } from "../utils/battleUtils";
 import {
   spawnParticles,
-  spawnFloatingText,
   spawnDeathEffect,
   spawnProjectile,
 } from "../utils/animations";

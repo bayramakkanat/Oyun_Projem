@@ -11,7 +11,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import { logError, calcArenaXP } from "../utils/helpers";
+import { logError } from "../utils/helpers";
 import { TTL_DURATIONS, getExpiryDate } from "../utils/ttl";
 
 const AYLAR = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran",

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getRank, RANKS, loadStats, loadTasks } from "../utils/helpers";
+import { getRank, RANKS, loadTasks } from "../utils/helpers";
 import { getCurrentMonthLabel } from "../hooks/useArena";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
@@ -10,8 +10,6 @@ export default function ProfileScreen({ onClose, user, stats, onStartVersus, fri
   const [bestTurn, setBestTurn] = useState(0);
   const [totalGames, setTotalGames] = useState(0);
   const [totalTurns, setTotalTurns] = useState(0);
-  const [firebaseAchievements, setFirebaseAchievements] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("profile"); // "profile" | "friends"
   const [searchInput, setSearchInput] = useState("");
   const [challengingUid, setChallengingUid] = useState(null);
@@ -39,7 +37,7 @@ export default function ProfileScreen({ onClose, user, stats, onStartVersus, fri
 
   useEffect(() => {
     const fetchXP = async () => {
-      if (!user) { setLoading(false); return; }
+      if (!user) return;
       try {
         const monthKey = `${new Date().getFullYear()}_${String(new Date().getMonth() + 1).padStart(2, "0")}`;
         const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
@@ -54,14 +52,9 @@ export default function ProfileScreen({ onClose, user, stats, onStartVersus, fri
         const profileSnap = await getDoc(profileRef);
         if (profileSnap.exists()) {
           setBestTurn(profileSnap.data().allTimeBestTurn || 0);
-          if (profileSnap.data().achievements) {
-            setFirebaseAchievements(profileSnap.data().achievements);
-          }
         }
       } catch (e) {
         console.error(e);
-      } finally {
-        setLoading(false);
       }
     };
     fetchXP();

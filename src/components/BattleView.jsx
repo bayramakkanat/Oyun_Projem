@@ -1,6 +1,4 @@
 import { useRef, useEffect } from "react";
-import Card from "./Card";
-import StarField from "./StarField";
 import PixiBattleScene from "./PixiBattleScene";
 import { BOSSES } from "../data/gameData";
 

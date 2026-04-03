@@ -140,22 +140,6 @@ const SCENARIOS = [
     ],
   },
 ];
-const getAnimal = (nick, tier, lvl = 1) => {
-  const base = Object.values(TIERS).flat().find(
-    (a) => a.nick === nick && a.tier === tier
-  );
-  if (!base) return null;
-  const bonus = lvl - 1;
-  return {
-    ...base,
-    id: Math.random(),
-    lvl,
-    exp: 0,
-    atk: base.atk + bonus,
-    hp: base.hp + bonus,
-    curHp: base.hp + bonus,
-  };
-};
 // Hayvan kartı bileşeni (mini)
 function MiniCard({ animal, onRemove, onLvlChange, onMoveUp, onMoveDown, isFirst, isLast, flip }) {
   return (

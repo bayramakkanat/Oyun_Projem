@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   collection, doc, setDoc, getDoc, getDocs,
   deleteDoc, onSnapshot, query, where,
-  serverTimestamp, orderBy
+  serverTimestamp
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { TTL_DURATIONS, getExpiryDate } from "../utils/ttl";

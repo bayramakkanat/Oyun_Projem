@@ -15,7 +15,7 @@ import StarField from "./StarField";
 import GlobalNotifications from "./GlobalNotifications";
 import DebugPanel from "./DebugPanel";
 import { playSound } from "../hooks/useSound";
-import { BOSSES, DIFFICULTY_CONFIGS, WIN_TURN } from "../data/gameData";
+import { BOSSES, DIFFICULTY_CONFIGS } from "../data/gameData";
 
 export default function GameRouter() {
   const {
@@ -56,7 +56,6 @@ export default function GameRouter() {
     lastError,
     setLastError,
     achievementPopup,
-    setAchievementPopup,
     soundEnabled,
     setSoundEnabled,
     user,

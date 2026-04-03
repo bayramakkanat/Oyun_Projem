@@ -1,4 +1,4 @@
-﻿import { AB } from "../data/gameData";
+import { AB } from "../data/gameData";
 const pwr = (a) => {
   if (!a) return 1;
   if (a.lvl === 3) return 3;

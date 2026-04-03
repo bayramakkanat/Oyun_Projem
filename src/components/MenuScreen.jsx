@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import StarField from "./StarField";
 import AuthModal from "./AuthModal";
 import SettingsModal from "./SettingsModal";

@@ -7,18 +7,17 @@ import BossRewardScreen from "./BossRewardScreen";
 import NewTierScreen from "./NewTierScreen";
 import { getDesc } from "../utils/getDesc";
 import { playSound } from "../hooks/useSound";
-import { ABILITY_ICONS, BOSSES, WIN_TURN } from "../data/gameData";
+import { ABILITY_ICONS, BOSSES } from "../data/gameData";
 import HUD from "./HUD";
 
 export default function ShopView() {
   const {
-    acceptBoss, anims, battle, bossChallenge, bossRewards, buy, gold, hasR,
-    isBossTurn, isPausedRef, lives, maxT, mergeT, newTier, newlyOpenedSlot,
-    offerBoss, phase, refresh, reset, rewards, sel, selI, sell, setBossChallenge,
-    setGameStarted, setGuide, setMenuView, setNewTier, setPhase, setRewards,
-    setSel, setSelI, setTeam, setGold, setShowCollection, setSoundEnabled,
-    setVersusPhase, setVersusReady, setVersusRoom, shop, shopSlots, soundEnabled,
-    team, teamSlots, toggleFreeze, turn, versusReady, wins, gameMode, goToShop, versusRoom,
+    anims, battle, bossChallenge, bossRewards, buy, gold, hasR,
+    isBossTurn, mergeT, newTier, newlyOpenedSlot,
+    offerBoss, phase, refresh, reset, rewards, sel, selI, sell,
+    setNewTier, setPhase, setRewards,
+    setSel, setSelI, setTeam, setGold,
+    shop, team, teamSlots, toggleFreeze, turn, versusReady, gameMode, goToShop, versusRoom,
   } = useGameContext();
 
   const [showRewards, setShowRewards] = useState(false);

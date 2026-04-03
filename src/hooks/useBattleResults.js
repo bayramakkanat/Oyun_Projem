@@ -17,7 +17,6 @@ import {
   loadTasks,
   saveTasks,
 } from "../utils/helpers";
-import { WIN_TURN } from "../data/gameData";
 
 export function useBattleResults({
   user,
