@@ -165,274 +165,173 @@ export const applyEndTurnBuffs = (currentTeam) => {
   });
   return nt;
 };
-export const appStart = (p, e, callbacks) => {
+// ─── Shared helper: tek fonksiyon, iki tarafa da çalışır ─────────────────────
+// isPlayer=true → pp (oyuncu); isPlayer=false → ee (düşman)
+const applyStartAbilitiesForTeam = (team, enemies, isPlayer, lg, callbacks) => {
   const { triggerAnim, spawnParticles } = callbacks;
+  const pfx = isPlayer ? "" : "Düşman ";
+
+  team.forEach((a, i) => {
+    if (!a) return;
+    const m = pwr(a);
+
+    if (a.ability === AB.START_BUFF) {
+      team[i].atk += m;
+      if (isPlayer) { triggerAnim(a.id, "buff"); spawnParticles(a.id, "buff"); }
+      lg.push(`⚡ ${pfx}${a.nick} → +${m} ATK (savaş başı)`);
+    }
+    if (a.ability === AB.START_TEAM_SHIELD) {
+      team.forEach((x, j) => {
+        team[j].curHp = clampStat(team[j].curHp + m);
+        if (isPlayer) { team[j].hp = clampStat(team[j].hp + m); triggerAnim(x.id, "buff"); }
+      });
+      if (isPlayer) spawnParticles(a.id, "shield");
+      const allyLabel = isPlayer ? "takıma" : "düşman takımına";
+      lg.push(`🛡️ ${pfx}${a.nick} → Tüm ${allyLabel} +${m} HP`);
+    }
+    if (a.ability === AB.START_TRIPLE && isPlayer) {
+      team[i].tripleAttackCount = m;
+      triggerAnim(a.id, "buff");
+      lg.push(`⚔️⚔️⚔️ ${a.nick} → İlk ${m} saldırı 3x hasar!`);
+    }
+    if (a.ability === AB.START_ALL_PERM) {
+      team.forEach((x, j) => {
+        team[j].atk = clampStat(team[j].atk + 2 * m);
+        if (isPlayer) triggerAnim(x.id, "buff");
+      });
+      if (isPlayer) spawnParticles(a.id, "buff");
+      const allyLabel = isPlayer ? "takıma" : "düşman takımına";
+      lg.push(`🦅 ${pfx}${a.nick} → Tüm ${allyLabel} +${2 * m} ATK KALICI`);
+    }
+    if (a.ability === AB.START_TRAMPLE) {
+      team[i].atk += 5 * m;
+      team[i].trample = true;
+      if (isPlayer) triggerAnim(a.id, "buff");
+      lg.push(`🦏 ${pfx}${a.nick} → +${5 * m} ATK (çiğneme${isPlayer ? " aktif" : ""})`);
+    }
+    if (a.ability === AB.START_CHARGE) {
+      team[i].curHp += 2 * m;
+      if (isPlayer) triggerAnim(a.id, "buff");
+      lg.push(`🐗 ${pfx}${a.nick} → +${2 * m} HP`);
+    }
+    if (a.ability === AB.START_TANK) {
+      team[i].curHp += 3 * m;
+      if (isPlayer) triggerAnim(a.id, "buff");
+      lg.push(`🦀 ${pfx}${a.nick} → +${3 * m} HP (tank)`);
+    }
+
+    // Düşmana hasar veren yetenekler
+    if (enemies.length > 0) {
+      const enLabel = isPlayer ? "düşmana" : "oyuncu birimine";
+      if (a.ability === AB.START_SNIPE) {
+        const t = enemies.length > 1 ? enemies.length - 1 : 0;
+        enemies[t].curHp -= 3 * m;
+        triggerAnim(enemies[t].id, "damage");
+        if (isPlayer) spawnParticles(a.id, "attack");
+        lg.push(`🎯 ${pfx}${a.nick} → Arka ${enLabel} ${3 * m} hasar`);
+        if (isPlayer) { const dead = enemies.filter(x => x.curHp <= 0); dead.forEach((_, di) => enemies.splice(enemies.indexOf(dead[di]), 1)); }
+        else { enemies.forEach((x, xi) => { enemies[xi] = { ...x, curHp: Math.max(1, x.curHp) }; }); }
+      }
+      if (a.ability === AB.START_MULTI_SNIPE) {
+        const targetCount = Math.min(m + 1, enemies.length);
+        if (isPlayer) spawnParticles(a.id, "attack");
+        for (let j = 0; j < targetCount; j++) {
+          if (enemies.length === 0) break;
+          const targetIdx = Math.floor(Math.random() * enemies.length);
+          enemies[targetIdx].curHp -= 8 * m;
+          triggerAnim(enemies[targetIdx].id, "damage");
+          lg.push(`🦑 ${pfx}${a.nick} → ${enemies[targetIdx].nick}'e ${8 * m} hasar`);
+          if (isPlayer) { const dead = enemies.filter(x => x.curHp <= 0); dead.forEach(d => enemies.splice(enemies.indexOf(d), 1)); }
+          else { enemies.forEach((x, xi) => { enemies[xi] = { ...x, curHp: Math.max(1, x.curHp) }; }); }
+        }
+      }
+      if (a.ability === AB.START_FEAR) {
+        enemies[0].atk = Math.max(1, enemies[0].atk - 10 * m);
+        triggerAnim(enemies[0].id, "damage");
+        if (enemies.length > 1) {
+          enemies[1].atk = Math.max(1, enemies[1].atk - 10 * m);
+          triggerAnim(enemies[1].id, "damage");
+        }
+        if (isPlayer) spawnParticles(a.id, "attack");
+        lg.push(`🦁 ${pfx}${a.nick} → Ön 2 ${enLabel.replace("na","ya")} -${10 * m} ATK${isPlayer ? "!" : ""}`);
+      }
+      if (a.ability === AB.START_FIRE) {
+        enemies.forEach(x => { x.curHp -= 6 * m; triggerAnim(x.id, "damage"); });
+        if (!isPlayer) team[i].atk = clampStat(team[i].atk + 4 * m); // Düşman ejderi kendine buff alır
+        if (isPlayer) { triggerAnim(a.id, "buff"); spawnParticles(a.id, "fire"); }
+        const targetLabel = isPlayer ? "düşmanlara" : "oyuncu takımına";
+        lg.push(`🐉 ${pfx}${a.nick} → Tüm ${targetLabel} ${6 * m} hasar${isPlayer ? ` + Kendine +${4 * m} ATK KALICI` : ""}`);
+        if (isPlayer) { const dead = enemies.filter(x => x.curHp <= 0); dead.forEach(d => enemies.splice(enemies.indexOf(d), 1)); }
+        else { enemies.forEach((x, xi) => { enemies[xi] = { ...x, curHp: Math.max(1, x.curHp) }; }); }
+      }
+      if (a.ability === AB.START_DMG) {
+        const t = Math.floor(Math.random() * enemies.length);
+        enemies[t].curHp -= 2 * m;
+        triggerAnim(enemies[t].id, "damage");
+        if (isPlayer) spawnParticles(a.id, "attack");
+        lg.push(`💥 ${pfx}${a.nick} → ${enemies[t].nick}'e ${2 * m} hasar`);
+        if (isPlayer) { const dead = enemies.filter(x => x.curHp <= 0); dead.forEach(d => enemies.splice(enemies.indexOf(d), 1)); }
+        else { enemies.forEach((x, xi) => { enemies[xi] = { ...x, curHp: Math.max(1, x.curHp) }; }); }
+      }
+      if (a.ability === AB.START_POISON) {
+        enemies[0].atk = Math.max(1, enemies[0].atk - m * 2);
+        lg.push(`🐍 ${pfx}${a.nick} → Ön ${enLabel} -${m * 2} ATK`);
+      }
+      if (a.ability === AB.START_FREEZE_ENEMY) {
+        const reduction = (m * 30) / 100;
+        enemies[0].atk = Math.max(1, Math.floor(enemies[0].atk * (1 - reduction)));
+        triggerAnim(enemies[0].id, "damage");
+        if (enemies.length > 1) {
+          enemies[enemies.length - 1].atk = Math.max(1, Math.floor(enemies[enemies.length - 1].atk * (1 - reduction)));
+          triggerAnim(enemies[enemies.length - 1].id, "damage");
+        }
+        lg.push(`🦣 ${pfx}${a.nick} → Ön ve arka ${isPlayer ? "düşmanı" : "oyuncu birimini"} %${m * 30} yavaşlattı`);
+      }
+      if (a.ability === AB.WEAKEN_STRONG) {
+        let mxI = 0, mxP = 0;
+        enemies.forEach((en, idx) => { if (en.atk + en.curHp > mxP) { mxP = en.atk + en.curHp; mxI = idx; } });
+        const r = (25 * m) / 100;
+        enemies[mxI].atk = Math.max(1, Math.floor(enemies[mxI].atk * (1 - r)));
+        enemies[mxI].curHp = Math.max(1, Math.floor(enemies[mxI].curHp * (1 - r)));
+        triggerAnim(enemies[mxI].id, "damage");
+        lg.push(`🐧 ${pfx}${a.nick} → ${isPlayer ? "" : "En güçlü "}${enemies[mxI].nick}'${isPlayer ? "i" : "i"} %${25 * m} zayıflattı`);
+      }
+    }
+  });
+};
+
+// appStart: legacy synchronous battle-start calculator (kullanılmıyor ama dışa aktarılıyor)
+export const appStart = (p, e, callbacks) => {
   let pp = p.map((x) => ({ ...x }));
   let ee = e.map((x) => ({ ...x }));
   let lg = [];
 
+  // Stag combo (savaş başı takım-çapı kalıcı buff)
   pp.forEach((pet) => {
-   if (pet && pet.ability === AB.STAG_COMBO) {
+    if (pet && pet.ability === AB.STAG_COMBO) {
       const m = pwr(pet);
       pp = pp.map((ally) =>
         ally && ally.id !== pet.id
-          ? {
-              ...ally,
-              atk: clampStat(ally.atk + 2 * m),
-              hp: clampStat(ally.hp + 2 * m),
-              curHp: clampStat(ally.curHp + 2 * m),
-            }
+          ? { ...ally, atk: clampStat(ally.atk + 2 * m), hp: clampStat(ally.hp + 2 * m), curHp: clampStat(ally.curHp + 2 * m) }
           : ally
       );
       lg.push(`🦌 ${pet.nick} → Takıma +${2 * m}/+${2 * m} KALICI`);
     }
   });
 
+  // Geçici bufflar
   pp.forEach((a, i) => {
-    if (a.tempAtk) {
-      pp[i].atk += a.tempAtk;
-      lg.push(`✨ ${a.nick} +${a.tempAtk} atk (geçici)`);
-    }
-    if (a.tempHp) {
-      pp[i].curHp += a.tempHp;
-      lg.push(`✨ ${a.nick} +${a.tempHp} hp (geçici)`);
-    }
+    if (a.tempAtk) { pp[i].atk += a.tempAtk; lg.push(`✨ ${a.nick} +${a.tempAtk} atk (geçici)`); }
+    if (a.tempHp)  { pp[i].curHp += a.tempHp;  lg.push(`✨ ${a.nick} +${a.tempHp} hp (geçici)`);  }
   });
 
-  pp.forEach((a, i) => {
-    const m = pwr(a);
-    if (a.ability === AB.START_BUFF) {
-      pp[i].atk += m;
-      triggerAnim(a.id, "buff");
-      spawnParticles(a.id, "buff");
-      lg.push(`⚡ ${a.nick} → +${m} ATK (savaş başı)`);
-    }
-    if (a.ability === AB.START_TEAM_SHIELD) {
-      pp.forEach((x, j) => {
-        pp[j].curHp = clampStat(pp[j].curHp + m);
-        pp[j].hp = clampStat(pp[j].hp + m);
-        triggerAnim(x.id, "buff");
-      });
-      spawnParticles(a.id, "shield");
-      lg.push(`🛡️ ${a.nick} → Tüm takıma +${m} HP`);
-    }
-    if (a.ability === AB.START_TRIPLE) {
-      pp[i].tripleAttackCount = m;
-      triggerAnim(a.id, "buff");
-      lg.push(`⚔️⚔️⚔️ ${a.nick} → İlk ${m} saldırı 3x hasar!`);
-    }
-    if (a.ability === AB.START_ALL_PERM) {
-      pp.forEach((x) => {
-        triggerAnim(x.id, "buff");
-      });
-      spawnParticles(a.id, "buff");
-      lg.push(`🦅 ${a.nick} → Tüm takıma +${2 * m} ATK KALICI`);
-    }
-    if (a.ability === AB.START_SNIPE && ee.length > 0) {
-      const t = ee.length > 1 ? ee.length - 1 : 0;
-      ee[t].curHp -= 3 * m;
-      triggerAnim(ee[t].id, "damage");
-      spawnParticles(a.id, "attack");
-      lg.push(`🎯 ${a.nick} → Arka düşmana ${3 * m} hasar`);
-      ee = ee.filter((x) => x.curHp > 0);
-    }
-    if (a.ability === AB.START_MULTI_SNIPE && ee.length > 0) {
-      const targetCount = Math.min(m + 1, ee.length);
-      spawnParticles(a.id, "attack");
-      for (let j = 0; j < targetCount; j++) {
-        if (ee.length > 0) {
-          const targetIdx = Math.floor(Math.random() * ee.length);
-          ee[targetIdx].curHp -= 8 * m;
-          triggerAnim(ee[targetIdx].id, "damage");
-          lg.push(`🦑 ${a.nick} → ${ee[targetIdx].nick}'e ${8 * m} hasar`);
-          ee = ee.filter((x) => x.curHp > 0);
-        }
-      }
-    }
-    if (a.ability === AB.START_FEAR && ee.length > 0) {
-      ee[0].atk = Math.max(1, ee[0].atk - 10 * m);
-      triggerAnim(ee[0].id, "damage");
-      if (ee.length > 1) {
-        ee[1].atk = Math.max(1, ee[1].atk - 10 * m);
-        triggerAnim(ee[1].id, "damage");
-      }
-      spawnParticles(a.id, "attack");
-      lg.push(`🦁 ${a.nick} → Ön 2 düşmana -${10 * m} ATK!`);
-    }
-    if (a.ability === AB.START_FIRE) {
-      ee.forEach((x) => {
-        x.curHp -= 6 * m;
-        triggerAnim(x.id, "damage");
-      });
-      triggerAnim(a.id, "buff");
-      spawnParticles(a.id, "fire");
-      lg.push(
-        `🐉 ${a.nick} → Tüm düşmanlara ${6 * m} hasar + Kendine +${
-          4 * m
-        } ATK KALICI`
-      );
-      ee = ee.filter((x) => x.curHp > 0);
-    }
-    if (a.ability === AB.START_TRAMPLE) {
-      pp[i].atk += 5 * m;
-      pp[i].trample = true;
-      triggerAnim(a.id, "buff");
-      lg.push(`🦏 ${a.nick} → +${5 * m} ATK (çiğneme aktif)`);
-    }
-    if (a.ability === AB.START_CHARGE) {
-      pp[i].curHp += 2 * m;
-      triggerAnim(a.id, "buff");
-      lg.push(`🐗 ${a.nick} → +${2 * m} HP`);
-    }
-    if (a.ability === AB.START_TANK) {
-      pp[i].curHp += 3 * m;
-      triggerAnim(a.id, "buff");
-      lg.push(`🦀 ${a.nick} → +${3 * m} HP (tank)`);
-    }
-    if (a.ability === AB.START_DMG && ee.length > 0) {
-      const t = Math.floor(Math.random() * ee.length);
-      ee[t].curHp -= 2 * m;
-      triggerAnim(ee[t].id, "damage");
-      spawnParticles(a.id, "attack");
-      lg.push(`💥 ${a.nick} → ${ee[t].nick}'e ${2 * m} hasar`);
-      ee = ee.filter((x) => x.curHp > 0);
-    }
-    if (a.ability === AB.START_POISON && ee.length > 0) {
-      ee[0].atk = Math.max(1, ee[0].atk - m * 2);
-      lg.push(`🐍 ${a.nick} → Ön düşmana -${m * 2} ATK`);
-    }
-    if (a.ability === AB.WEAKEN_STRONG && ee.length > 0) {
-      let mxI = 0,
-        mxP = 0;
-      ee.forEach((en, idx) => {
-        if (en.atk + en.curHp > mxP) {
-          mxP = en.atk + en.curHp;
-          mxI = idx;
-        }
-      });
-      const r = (25 * m) / 100;
-      ee[mxI].atk = Math.max(1, Math.floor(ee[mxI].atk * (1 - r)));
-      ee[mxI].curHp = Math.max(1, Math.floor(ee[mxI].curHp * (1 - r)));
-      triggerAnim(ee[mxI].id, "damage");
-      lg.push(`🐧 ${a.nick} → ${ee[mxI].nick}'i %${25 * m} zayıflattı`);
-    }
-    if (a.ability === AB.START_FREEZE_ENEMY && ee.length > 0) {
-      const reduction = (m * 30) / 100;
-      ee[0].atk = Math.max(1, Math.floor(ee[0].atk * (1 - reduction)));
-      triggerAnim(ee[0].id, "damage");
-      if (ee.length > 1) {
-        ee[ee.length - 1].atk = Math.max(
-          1,
-          Math.floor(ee[ee.length - 1].atk * (1 - reduction))
-        );
-        triggerAnim(ee[ee.length - 1].id, "damage");
-      }
-      lg.push(`🦣 ${a.nick} → Ön ve arka düşmanı %${m * 30} yavaşlattı`);
-    }
-  });
+  // Savaş başı yetenekler — paylaşılan helper ile
+  applyStartAbilitiesForTeam(pp, ee, true,  lg, callbacks);
+  applyStartAbilitiesForTeam(ee, pp, false, lg, callbacks);
 
-  ee.forEach((a, i) => {
-    const m = pwr(a);
-    if (a.ability === AB.START_BUFF) {
-      ee[i].atk += m;
-      lg.push(`⚡ Düşman ${a.nick} → +${m} ATK (savaş başı)`);
-    }
-    if (a.ability === AB.START_TEAM_SHIELD) {
-      ee.forEach((x, j) => {
-        ee[j].curHp = clampStat(ee[j].curHp + m);
-      });
-      lg.push(`🛡️ Düşman ${a.nick} → Tüm düşman takımına +${m} HP`);
-    }
-    if (a.ability === AB.START_TANK) {
-      ee[i].curHp += 3 * m;
-      lg.push(`🦀 Düşman ${a.nick} → +${3 * m} HP (tank)`);
-    }
-    if (a.ability === AB.START_DMG && pp.length > 0) {
-      const t = Math.floor(Math.random() * pp.length);
-      pp[t].curHp -= 2 * m;
-      lg.push(`💥 Düşman ${a.nick} → ${pp[t].nick}'e ${2 * m} hasar`);
-      pp = pp.map((x) => ({ ...x, curHp: Math.max(1, x.curHp) }));
-    }
-    if (a.ability === AB.START_SNIPE && pp.length > 0) {
-      const t = pp.length > 1 ? pp.length - 1 : 0;
-      pp[t].curHp -= 3 * m;
-      lg.push(`🎯 Düşman ${a.nick} → Arka oyuncu birimine ${3 * m} hasar`);
-      pp = pp.map((x) => ({ ...x, curHp: Math.max(1, x.curHp) }));
-    }
-    if (a.ability === AB.START_MULTI_SNIPE && pp.length > 0) {
-      const targetCount = Math.min(m + 1, pp.length);
-      for (let j = 0; j < targetCount; j++) {
-        if (pp.length > 0) {
-          const targetIdx = Math.floor(Math.random() * pp.length);
-          pp[targetIdx].curHp -= 8 * m;
-          lg.push(
-            `🦑 Düşman ${a.nick} → ${pp[targetIdx].nick}'e ${8 * m} hasar`
-          );
-          pp = pp.map((x) => ({ ...x, curHp: Math.max(1, x.curHp) }));
-        }
-      }
-    }
-    if (a.ability === AB.START_FEAR && pp.length > 0) {
-      pp[0].atk = Math.max(1, pp[0].atk - 10 * m);
-      if (pp.length > 1) pp[1].atk = Math.max(1, pp[1].atk - 10 * m);
-      lg.push(`😱 Düşman ${a.nick} → Ön 2 oyuncu birimine -${10 * m} ATK`);
-    }
-    if (a.ability === AB.START_FIRE) {
-      pp.forEach((x) => {
-        x.curHp -= 6 * m;
-      });
-      ee[i].atk = clampStat(ee[i].atk + 4 * m);
-      lg.push(`🐉 Düşman ${a.nick} → Tüm oyuncu takımına ${6 * m} hasar`);
-      pp = pp.map((x) => ({ ...x, curHp: Math.max(1, x.curHp) }));
-    }
-    if (a.ability === AB.START_POISON && pp.length > 0) {
-      pp[0].atk = Math.max(1, pp[0].atk - m * 2);
-      lg.push(`🐍 Düşman ${a.nick} → Ön oyuncu birimine -${m * 2} ATK`);
-    }
-    if (a.ability === AB.START_CHARGE) {
-      ee[i].curHp += 2 * m;
-      lg.push(`🐗 Düşman ${a.nick} → +${2 * m} HP`);
-    }
-    if (a.ability === AB.START_TRAMPLE) {
-      ee[i].atk += 5 * m;
-      ee[i].trample = true;
-      lg.push(`🦏 Düşman ${a.nick} → +${5 * m} ATK (çiğneme)`);
-    }
-    if (a.ability === AB.START_ALL_PERM) {
-      ee.forEach((x, j) => {
-        ee[j].atk = clampStat(ee[j].atk + 2 * m);
-      });
-      lg.push(`🦅 Düşman ${a.nick} → Tüm düşman takımına +${2 * m} ATK`);
-    }
-    if (a.ability === AB.START_FREEZE_ENEMY && pp.length > 0) {
-      const reduction = (m * 30) / 100;
-      pp[0].atk = Math.max(1, Math.floor(pp[0].atk * (1 - reduction)));
-      if (pp.length > 1)
-        pp[pp.length - 1].atk = Math.max(
-          1,
-          Math.floor(pp[pp.length - 1].atk * (1 - reduction))
-        );
-      lg.push(
-        `🦣 Düşman ${a.nick} → Ön ve arka oyuncu birimini %${m * 30} yavaşlattı`
-      );
-    }
-    if (a.ability === AB.WEAKEN_STRONG && pp.length > 0) {
-      let mxI = 0,
-        mxP = 0;
-      pp.forEach((en, idx) => {
-        if (en.atk + en.curHp > mxP) {
-          mxP = en.atk + en.curHp;
-          mxI = idx;
-        }
-      });
-      const r = (25 * m) / 100;
-      pp[mxI].atk = Math.max(1, Math.floor(pp[mxI].atk * (1 - r)));
-      pp[mxI].curHp = Math.max(1, Math.floor(pp[mxI].curHp * (1 - r)));
-      lg.push(
-        `🐧 Düşman ${a.nick} → En güçlü oyuncu birimini %${25 * m} zayıflattı`
-      );
-    }
-  });
+  // filter → ee/pp mutate edildi, sil/tut sync yap
+  pp = pp.filter(x => x.curHp > 0);
+  ee = ee.filter(x => x.curHp > 0);
 
   return { pp, ee, lg };
 };
