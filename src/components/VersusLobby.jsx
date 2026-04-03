@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { db } from "../firebase";
 import {
   collection,
@@ -34,7 +34,7 @@ export default function VersusLobby({ user, onRoomReady, onCancel, autoJoin }) {
     return code;
   };
 
-  const createRoomWithCode = async (code, nameOverride = "") => {
+  const createRoomWithCode = useCallback(async (code, nameOverride = "") => {
     setRoomCode(code);
     setStatus("Oda oluşturuluyor...");
     try {
@@ -63,9 +63,9 @@ export default function VersusLobby({ user, onRoomReady, onCancel, autoJoin }) {
     } catch (err) {
       setError("Oda oluşturulamadı: " + err.message);
     }
-  };
+  }, [onRoomReady, user?.uid, userName]);
 
-  const joinRoomWithCode = async (code) => {
+  const joinRoomWithCode = useCallback(async (code) => {
     setStatus("Odaya bağlanılıyor...");
     setError("");
     let snap = null;
@@ -111,7 +111,7 @@ export default function VersusLobby({ user, onRoomReady, onCancel, autoJoin }) {
     } catch (err) {
       setError("Odaya katılınamadı: " + err.message);
     }
-  };
+  }, [onRoomReady, user?.uid, userName]);
 
   const createRoom = async () => {
     const code = generateCode();
@@ -175,7 +175,7 @@ export default function VersusLobby({ user, onRoomReady, onCancel, autoJoin }) {
       setOpenRooms(rooms);
     });
     return () => unsub();
-  }, [user?.uid]);
+  }, [user]);
 
   useEffect(() => {
     if (!autoJoin || !user) return;
@@ -186,7 +186,7 @@ export default function VersusLobby({ user, onRoomReady, onCancel, autoJoin }) {
       setMode("join");
       joinRoomWithCode(autoJoin.roomCode);
     }
-  }, [autoJoin, user]);
+  }, [autoJoin, createRoomWithCode, joinRoomWithCode, user]);
 
   useEffect(() => {
     return () => {

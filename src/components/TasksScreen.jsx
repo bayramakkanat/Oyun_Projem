@@ -33,7 +33,7 @@ export default function TasksScreen({ onClose, userId, user, loadTasksFromDB, sa
     setLoading(false);
   };
   load();
-}, [userId]);
+}, [loadTasksFromDB, saveTasksToDB, user, userId]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-white">Yükleniyor...</div>;
 if (!taskData) return null;

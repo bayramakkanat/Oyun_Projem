@@ -35,7 +35,7 @@ export default function LeaderboardScreen({ onBack, user }) {
       }
     };
     fetch();
-  }, []);
+  }, [user?.uid]);
 
   return (
     <div className="w-full" style={{ animation: "slideInRight 0.3s ease-out" }}>
