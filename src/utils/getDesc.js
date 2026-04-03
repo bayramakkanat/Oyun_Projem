@@ -46,7 +46,7 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.END_TEAM_BUFF)
     return `Tur sonu: Arkadaki 2 dosta +${m * 2} Atak, +${m * 2} Can verir (kalıcı).`;
   if (a.ability === AB.START_CHARGE)
-    return `Savaş başı: Kendine +${AM.START_CHARGE_AMT * m} Atak ve +${AM.START_CHARGE_AMT * m} Can verir. Her saldırıda +${AM.START_CHARGE_AMT * m} Atak kazanır.`;
+    return `Savaş başı: Kendine +${AM.START_CHARGE_AMT * m} Can verir. Her saldırıda +${AM.START_CHARGE_AMT * m} Atak kazanır.`;
   if (a.ability === AB.SELL_HEAL_TEAM)
     return `Satınca: Tüm takıma +${m * 2} Can verir (kalıcı)`;
   if (a.ability === AB.BUY_BUFF_BEHIND)

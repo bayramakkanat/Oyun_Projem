@@ -356,7 +356,7 @@ export const TIERS = {
       hp: 5,
       cost: 4,
       ability: AB.START_CHARGE,
-      desc: "Savaş başlayınca kendine +4 Atak ve +4 HP verir. Her saldırıda +4 Atak kazanır.",
+      desc: "Savaş başlayınca kendine +4 HP verir. Her saldırıda +4 Atak kazanır.",
       tier: 3,
       img: "boar.png",
       flip: true,

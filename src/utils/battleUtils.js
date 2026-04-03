@@ -211,17 +211,16 @@ const applyStartAbilitiesForTeam = (team, enemies, isPlayer, lg, callbacks) => {
     }
     if (a.ability === AB.START_CHARGE) {
       const buffVal = AM.START_CHARGE_AMT * m;
-      team[i].atk = clampStat(team[i].atk + buffVal);
       team[i].curHp = clampStat(team[i].curHp + buffVal);
       if (isPlayer) {
         triggerAnim(a.id, "buff");
         const el = document.querySelector(`[data-pet-id="${a.id}"]`);
         if (el) {
           const r = el.getBoundingClientRect();
-          spawnFloatingText(`+${buffVal}/+${buffVal}`, r.left + r.width / 2, r.top, "buff");
+          spawnFloatingText(`+${buffVal} HP`, r.left + r.width / 2, r.top, "buff");
         }
       }
-      lg.push(`🐗 ${pfx}${a.nick} → +${buffVal}/+${buffVal}`);
+      lg.push(`🐗 ${pfx}${a.nick} → +${buffVal} HP`);
     }
     if (a.ability === AB.START_TANK) {
       team[i].curHp += 3 * m;
