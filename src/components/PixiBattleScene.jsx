@@ -158,18 +158,27 @@ useEffect(() => {
              <div key={a.id} className="flex flex-col items-center" style={{ zIndex: 50 - idx }}>
                {/* Asıl Kart veya Boss Modeli */}
                <div ref={el => enemyRefs.current[a.id] = el} className="relative z-10 origin-bottom">
-                 {a.isBossUnit && BOSSES[turn]?.image ? (
+                 {a.isBossUnit ? (
                     <div className="relative flex flex-col items-center justify-center">
                        <div className="relative flex items-center justify-center w-36 h-36">
-                          <div
-                             className="absolute w-28 h-28 rounded-full"
-                             style={{ background: `radial-gradient(circle, ${BOSSES[turn].glow} 0%, transparent 70%)` }}
-                          />
-                          <img
-                             src={BOSSES[turn].image}
-                             alt={a.nick}
-                             className="relative z-10 w-28 h-28 object-contain drop-shadow-[0_0_15px_currentColor]"
-                          />
+                          {(() => {
+                             const bossConfig = Object.values(BOSSES).find(b => b.name === a.nick || b.team.some(bt => bt.id === a.id));
+                             const bossImg = bossConfig?.image;
+                             const bossGlow = bossConfig?.glow || "rgba(255,255,255,0.4)";
+                             return (
+                                <>
+                                  <div
+                                     className="absolute w-28 h-28 rounded-full"
+                                     style={{ background: `radial-gradient(circle, ${bossGlow} 0%, transparent 70%)` }}
+                                  />
+                                  <img
+                                     src={bossImg}
+                                     alt={a.nick}
+                                     className="relative z-10 w-28 h-28 object-contain drop-shadow-[0_0_15px_currentColor]"
+                                  />
+                                </>
+                             );
+                          })()}
                        </div>
                        <div className="flex gap-1 items-center mt-1 z-20 bg-black/60 rounded-xl px-2 py-1 backdrop-blur-md border border-white/10">
                           <span className="text-red-400 font-black text-lg">⚔️{a.atk}</span>
