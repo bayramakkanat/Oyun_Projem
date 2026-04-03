@@ -50,12 +50,12 @@ async function runSelfBuffPhase({
       nextTeam.forEach((x) => { if (x) triggerAnim(x.id, "buff"); });
       setLog((l) => [...l, `🦅 ${pfx}${a.nick} -> Tüm takima +${buffAmount} ATK KALICI`]);
     } else if (a.ability === AB.START_TRAMPLE) {
-      nextTeam[i].atk += 5 * m;
+      nextTeam[i].atk += AM.START_TRAMPLE_ATK * m;
       nextTeam[i].trample = true;
-      setLog((l) => [...l, `🦏 ${pfx}${a.nick} -> +${AM.START_TRAMPLE_ATK * m} ATK (ciğneme)`]);
+      setLog((l) => [...l, `🦏 ${pfx}${a.nick} -> +${AM.START_TRAMPLE_ATK * m} ATK (çiğneme)`]);
     } else if (a.ability === AB.START_CHARGE) {
-      nextTeam[i].curHp += 2 * m;
-      setLog((l) => [...l, `🐗 ${pfx}${a.nick} -> +${AM.START_CHARGE_HP * m} HP`]);
+      nextTeam[i].atk += AM.START_CHARGE_AMT * m;
+      setLog((l) => [...l, `🐗 ${pfx}${a.nick} -> +${AM.START_CHARGE_AMT * m} ATK`]);
     } else if (a.ability === AB.START_TANK) {
       nextTeam[i].curHp += 3 * m;
       setLog((l) => [...l, `🦀 ${pfx}${a.nick} -> +${AM.START_TANK_HP * m} HP`]);
