@@ -210,9 +210,10 @@ const applyStartAbilitiesForTeam = (team, enemies, isPlayer, lg, callbacks) => {
       lg.push(`🦏 ${pfx}${a.nick} → +${AM.START_TRAMPLE_ATK * m} ATK (çiğneme${isPlayer ? " aktif" : ""})`);
     }
     if (a.ability === AB.START_CHARGE) {
-      team[i].curHp += AM.START_CHARGE_HP * m;
+      team[i].atk = clampStat(team[i].atk + AM.START_CHARGE_AMT * m);
+      team[i].curHp = clampStat(team[i].curHp + AM.START_CHARGE_AMT * m);
       if (isPlayer) triggerAnim(a.id, "buff");
-      lg.push(`🐗 ${pfx}${a.nick} → +${AM.START_CHARGE_HP * m} HP`);
+      lg.push(`🐗 ${pfx}${a.nick} → +${AM.START_CHARGE_AMT * m}/+${AM.START_CHARGE_AMT * m}`);
     }
     if (a.ability === AB.START_TANK) {
       team[i].curHp += 3 * m;

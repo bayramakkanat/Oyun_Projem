@@ -1,4 +1,4 @@
-import { AB } from "../data/gameData";
+import { AB, ABILITY_MULTIPLIERS as AM } from "../data/gameData";
 const pwr = (a) => {
   if (!a) return 1;
   if (a.lvl === 3) return 3;
@@ -35,7 +35,7 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.FRIEND_SUMMON)
     return `Dost ölünce: ${m * 2} Atak, ${m * 3} Can değerinde yavru çağırır (en fazla 3).`;
   if (a.ability === AB.SELL_BUFF_FRIEND)
-    return `Satınca: Rastgele ${m} dosta +${m} Atak, +${m} Can verir (kalıcı).`;
+    return `Satınca: Rastgele ${m} dosta +${AM.SELL_BUFF_AMT * m} Atak, +${AM.SELL_BUFF_AMT * m} Can verir (kalıcı).`;
   if (a.ability === AB.SHOP_DISCOUNT)
     return `Alınca: Sonraki yenilemede tüm hayvanlara ${m} altın indirim`;
   if (a.ability === AB.FAINT_SHIELD) return `Ölünce: Tüm dostlara +${2 * m} Can verir`;
@@ -46,7 +46,7 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.END_TEAM_BUFF)
     return `Tur sonu: Arkadaki 2 dosta +${m * 2} Atak, +${m * 2} Can verir (kalıcı).`;
   if (a.ability === AB.START_CHARGE)
-    return `Savaş başı: Kendine +${2 * m} Can verir. Her saldırıda +${2 * m} Atak kazanır.`;
+    return `Savaş başı: Kendine +${AM.START_CHARGE_AMT * m} Atak ve +${AM.START_CHARGE_AMT * m} Can verir. Her saldırıda +${2 * m} Atak kazanır.`;
   if (a.ability === AB.SELL_HEAL_TEAM)
     return `Satınca: Tüm takıma +${m * 2} Can verir (kalıcı)`;
   if (a.ability === AB.BUY_BUFF_BEHIND)
@@ -89,7 +89,7 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.START_FIRE)
     return `Savaş başı: Tüm düşmanlara ${6 * m} hasar verir. Kendine +${4 * m} Atak kazanır (kalıcı).`;
   if (a.ability === AB.STAG_COMBO)
-    return `Savaş başı: Takıma +${2 * m} Atak, +${2 * m} Can verir (kalıcı). Ölünce aynı etki tekrar eder (Dodo tetiklemez).`;
+    return `Savaş başı: Takıma +${AM.STAG_COMBO_AMT * m} Atak, +${AM.STAG_COMBO_AMT * m} Can verir (kalıcı). Ölünce aynı etki tekrar eder.`;
   if (a.ability === AB.DEVOUR)
     return `Öldürünce: Düşmanın statlarının %${30 + 10 * m}'unu alır.`;
   if (a.ability === AB.FAINT_WAVE)
@@ -102,7 +102,7 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.START_MULTI_SNIPE)
     return `Savaş başı: ${m + 1} düşmana ${8 * m} hasar verir. Hayatta kalırsa kendine +${m * 5} Atak, +${m * 5} Can verir (kalıcı).`;
   if (a.ability === AB.FAINT_DUPLICATE)
-    return `Ölünce: Rastgele bir dostu kopyalar (Dodo tetiklemez).`;
+    return `Ölünce: Rastgele bir dostu kopyalar.`;
   if (a.ability === AB.FAINT_BUFF_SELF)
     return `Ölünce (tur sonu): Kendine +${2 * m} Atak, +${2 * m} Can verir (kalıcı)`;
   if (a.ability === AB.SELL_BUFF_SHOP)
@@ -110,7 +110,7 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.BUY_TARGET_HP)
     return `Satın alınınca: Seçilen dosta +${3 * m} Can verir (kalıcı)`;
   if (a.ability === AB.SUMMON_BUFF)
-    return `Savaşta çıkan yavruya +${5 * m} Atak, +${5 * m} Can verir`;
+    return `Savaşta çıkan yavruya +${AM.SUMMON_BUFF_AMT * m} Atak, +${AM.SUMMON_BUFF_AMT * m} Can verir`;
   if (a.ability === AB.SUMMON_RETRIGGER)
     return `Dost ölünce: Ölüm etkisini ve yavru güçlendirmesini ${m} kez tekrarlar.`;
   if (a.ability === AB.CHEETAH_FAINT)
