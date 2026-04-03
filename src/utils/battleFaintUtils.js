@@ -94,6 +94,20 @@ export const applyDodoTeamRetriggerEffect = ({ ability, sourceNick, power, allyT
     logs.push(`🦤 Dodo → ${sourceNick} efekti tekrar! ${enemyLabel} -${debuff}/-${debuff}`);
     return true;
   }
+  if (ability === AB.STAG_COMBO) {
+    const buff = 2 * power; // AM.STAG_COMBO_AMT
+    allyTeam.forEach((pet, idx) => {
+      if (!pet) return;
+      allyTeam[idx] = {
+        ...pet,
+        atk: clampStat(pet.atk + buff),
+        hp: typeof pet.hp === "number" ? clampStat(pet.hp + buff) : pet.hp,
+        curHp: clampStat(pet.curHp + buff),
+      };
+    });
+    logs.push(`🦤 Dodo → ${sourceNick} efekti tekrar! Takıma +${buff}/+${buff} KALICI`);
+    return true;
+  }
   return false;
 };
 export const applyFriendFaintEffect = ({ allyUnit, power, clampStat, logs, logPrefix = "", logSuffix = "" }) => {

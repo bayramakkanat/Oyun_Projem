@@ -210,7 +210,7 @@ const applyStartAbilitiesForTeam = (team, enemies, isPlayer, lg, callbacks) => {
       lg.push(`🦏 ${pfx}${a.nick} → +${AM.START_TRAMPLE_ATK * m} ATK (çiğneme${isPlayer ? " aktif" : ""})`);
     }
     if (a.ability === AB.START_CHARGE) {
-      team[i].curHp += 2 * m;
+      team[i].curHp += AM.START_CHARGE_HP * m;
       if (isPlayer) triggerAnim(a.id, "buff");
       lg.push(`🐗 ${pfx}${a.nick} → +${AM.START_CHARGE_HP * m} HP`);
     }
@@ -342,7 +342,7 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
     alliedTeam.forEach((pet) => {
       if (pet && pet.ability === AB.SUMMON_BUFF) {
         const m = pwr(pet);
-        const buff = 5 * m;
+        const buff = AM.SUMMON_BUFF_AMT * m;
         summon.atk = clampStat(summon.atk + buff);
         summon.hp = clampStat(summon.hp + buff);
         summon.curHp = clampStat(summon.curHp + buff);
@@ -372,7 +372,7 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
         alliedTeam.forEach((buffPet) => {
           if (buffPet && buffPet.ability === AB.SUMMON_BUFF) {
             const bearM = pwr(buffPet);
-            const extraBuff = 5 * bearM * dodoM;
+            const extraBuff = AM.SUMMON_BUFF_AMT * bearM * dodoM;
             summon.atk = clampStat(summon.atk + extraBuff);
             summon.hp = clampStat(summon.hp + extraBuff);
             summon.curHp = clampStat(summon.curHp + extraBuff);

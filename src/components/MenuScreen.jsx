@@ -14,49 +14,49 @@ import TasksScreen from "./TasksScreen";
 import ProfileScreen from "./ProfileScreen";
 import FeedbackScreen from "./FeedbackScreen";
 import { hasSavedGame, loadGameState } from "../utils/localSave";
-export default function MenuScreen({
-  menuView,
-  setMenuView,
-  soundEnabled,
-  setSoundEnabled,
-  stats,
-  difficultyLevel,
-  setDifficultyLevel,
-  gameMode,
-  setGameMode,
-  user,
-  displayName,
-  achievementPopup,
-  showAuthModal,
-  setShowAuthModal,
-  showSettingsModal,
-  setShowSettingsModal,
-  authMode,
-  setAuthMode,
-  authEmail,
-  setAuthEmail,
-  authPass,
-  setAuthPass,
-  authUsername,
-  setAuthUsername,
-  authAvatar,
-  setAuthAvatar,
-  settingsUsername,
-  setSettingsUsername,
-  settingsAvatar,
-  setSettingsAvatar,
-  handleEmailAuth,
-  handleGoogleLogin,
-  handleLogout,
-  handleUpdateProfile,
-  onStart,
-  onStartVersus,
-  friendsData,
-  onDebug,
-  loadTasksFromDB,
-  saveTasksToDB,
-  onContinue,
-}) {
+import { useGameContext } from "../context/GameContext";
+import { playSound } from "../hooks/useSound";
+export default function MenuScreen() {
+  const { 
+    menuView, setMenuView, soundEnabled, setSoundEnabled, stats, 
+    difficultyLevel, setDifficultyLevel, gameMode, setGameMode, 
+    user, displayName, achievementPopup, showAuthModal, setShowAuthModal, 
+    showSettingsModal, setShowSettingsModal, authMode, setAuthMode, 
+    authEmail, setAuthEmail, authPass, setAuthPass, authUsername, 
+    setAuthUsername, authAvatar, setAuthAvatar, settingsUsername, 
+    setSettingsUsername, settingsAvatar, setSettingsAvatar, 
+    handleEmailAuth, handleGoogleLogin, handleLogout, handleUpdateProfile, 
+    friendsData, loadTasksFromDB, saveTasksToDB, 
+    setVersusPhase, reset, setGameStarted, unlockAchievement, 
+    setVersusAutoJoin, restoreGame, setShowDebugPanel 
+  } = useGameContext();
+
+  const onStart = () => {
+    if (gameMode === "versus") {
+      setVersusPhase("lobby");
+    } else {
+      reset();
+      setGameStarted(true);
+      unlockAchievement("first_game");
+      playSound("shop_open");
+    }
+  };
+
+  const onStartVersus = (roomCode, role) => {
+    setGameMode("versus");
+    setVersusAutoJoin({ roomCode, role });
+    setVersusPhase("lobby");
+  };
+
+  const onContinue = (saved) => {
+    setGameMode(saved.gameMode ?? "standard");
+    setDifficultyLevel(saved.difficultyLevel ?? "normal");
+    restoreGame(saved);
+    setGameStarted(true);
+  };
+
+  const onDebug = () => setShowDebugPanel(true);
+
   const [achCat, setAchCat] = useState("any");
   const currentDiffConfig =
     DIFFICULTY_CONFIGS[difficultyLevel] || DIFFICULTY_CONFIGS.normal;

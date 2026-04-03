@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { TIERS, AB } from "../data/gameData";
+import { TIERS, AB, ABILITY_MULTIPLIERS as AM } from "../data/gameData";
 import { logError, safeNumber } from "../utils/helpers";
 import {
   spawnParticles,
@@ -56,9 +56,9 @@ const sellHandlers = {
             if (tIdx !== -1) {
               updated[tIdx] = {
                 ...updated[tIdx],
-                atk:   clampStat(updated[tIdx].atk   + m),
-                hp:    clampStat(updated[tIdx].hp     + m),
-                curHp: clampStat(updated[tIdx].curHp  + m),
+                atk:   clampStat(updated[tIdx].atk   + AM.SELL_BUFF_AMT * m),
+                hp:    clampStat(updated[tIdx].hp     + AM.SELL_BUFF_AMT * m),
+                curHp: clampStat(updated[tIdx].curHp  + AM.SELL_BUFF_AMT * m),
               };
             }
             return updated;
