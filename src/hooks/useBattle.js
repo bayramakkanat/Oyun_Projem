@@ -81,6 +81,24 @@ export function useBattle({
   const eTRef             = useRef(eT);
   const disconnectReportedRef = useRef(false);
   const disconnectNoticeShownRef = useRef(false);
+  const toFiniteNumber = (value, fallback = 0) =>
+    Number.isFinite(Number(value)) ? Number(value) : fallback;
+  const normalizeBattlePet = (pet, animalData) => {
+    const baseAtk = toFiniteNumber(pet?.atk, toFiniteNumber(animalData?.atk, 0));
+    const baseHp = toFiniteNumber(pet?.hp, toFiniteNumber(animalData?.hp, 1));
+    const safeHp = clampStat(Math.max(1, baseHp));
+    const safeCurHp = clampStat(
+      Math.max(0, toFiniteNumber(pet?.curHp, safeHp))
+    );
+    return {
+      ...pet,
+      atk: clampStat(baseAtk),
+      hp: safeHp,
+      curHp: safeCurHp,
+      lvl: toFiniteNumber(pet?.lvl, 1),
+      exp: toFiniteNumber(pet?.exp, 0),
+    };
+  };
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { pTRef.current = pT; }, [pT]);
@@ -218,8 +236,15 @@ export function useBattle({
     setPGold(0);
     setVersusReady(false);
     setOpponentReady(false);
-    const pt = myTeam.filter(Boolean).reverse().map((x) => ({ ...x, curHp: x.hp }));
-    const et = theirTeam.filter(Boolean).reverse().map((x) => ({ ...x, curHp: x.hp }));
+    const allAnimals = Object.values(TIERS).flat();
+    const pt = myTeam
+      .filter(Boolean)
+      .reverse()
+      .map((x) => normalizeBattlePet(x, allAnimals.find((a) => a.name === x.name)));
+    const et = theirTeam
+      .filter(Boolean)
+      .reverse()
+      .map((x) => normalizeBattlePet(x, allAnimals.find((a) => a.name === x.name)));
     setET(et);
     setPT(pt);
     setLog(pt.length === 0 ? ["💀 Takımın boştu! Rakip otomatik kazandı."] : []);
@@ -242,11 +267,16 @@ export function useBattle({
     const allAnimals     = Object.values(TIERS).flat();
     const currentTeam = team.filter(Boolean).map((p) => {
       const animalData = allAnimals.find((a) => a.name === p.name);
+      const normalized = normalizeBattlePet(p, animalData);
       return {
         name: p.name, nick: p.nick,
-        atk: p.atk, hp: p.hp, curHp: p.hp,
+        atk: normalized.atk,
+        hp: normalized.hp,
+        curHp: normalized.hp,
         ability: p.ability || AB.NONE,
-        tier: p.tier, lvl: p.lvl || 1, exp: p.exp || 0,
+        tier: p.tier,
+        lvl: normalized.lvl,
+        exp: normalized.exp,
         img: p.img || animalData?.img || null,
         flip: p.flip || animalData?.flip || false,
         id: Math.random(), isBossUnit: false,
@@ -262,7 +292,7 @@ export function useBattle({
     } catch (err) {
       console.error("Versus hazır hatası:", err);
     }
-  }, [versusRoom, versusReady, team, turnRef]);
+  }, [versusRoom, versusReady, team, turnRef, clampStat]);
 
   // ─── Hata kurtarma: savaş sıkışırsa shop'a zorla dön ──────────────────────
   const recoverToShop = (errorMsg) => {
@@ -358,7 +388,12 @@ export function useBattle({
     const processTeam = (arr) =>
       arr.map((p) => {
         const a = allAnimals.find((a) => a.name === p.name);
-        return { ...p, img: p.img || a?.img || null, flip: p.flip !== undefined ? p.flip : (a?.flip || false) };
+        const normalized = normalizeBattlePet(p, a);
+        return {
+          ...normalized,
+          img: p.img || a?.img || null,
+          flip: p.flip !== undefined ? p.flip : (a?.flip || false),
+        };
       });
 
     const unsub = onSnapshot(doc(db, "versus_rooms", code), async (snap) => {
