@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useGameContext } from "../context/GameContext";
+import TurnBanner from "./TurnBanner";
 import BattleView from "./BattleView";
 import GuideScreen from "./GuideScreen";
 import CollectionScreen from "./CollectionScreen";
@@ -113,6 +114,19 @@ export default function GameRouter() {
     handleLogout,
     handleUpdateProfile,
   } = useGameContext();
+  // ─── Tur geçiş banner'ı: "battle" → "shop" geçişini yakala ────────────────
+  const [showTurnBanner, setShowTurnBanner] = useState(false);
+  const prevPhaseRef = useRef(phase);
+
+  useEffect(() => {
+    const prev = prevPhaseRef.current;
+    prevPhaseRef.current = phase;
+    // Sadece savaştan alışverişe geçişte ve ilk turdan sonra göster
+    if (prev === "battle" && phase === "shop" && turn > 1) {
+      setShowTurnBanner(true);
+    }
+  }, [phase, turn]);
+
   const notifications = (
     <GlobalNotifications
       friendsData={friendsData}
@@ -308,6 +322,14 @@ export default function GameRouter() {
         <ShopView />
       ) : (
         <BattleView />
+      )}
+
+      {/* Tur geçiş banner'ı — ShopView üstünde render edilir */}
+      {showTurnBanner && (
+        <TurnBanner
+          turn={turn}
+          onDone={() => setShowTurnBanner(false)}
+        />
       )}
     </div>
   );

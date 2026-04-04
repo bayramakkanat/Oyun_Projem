@@ -4,15 +4,22 @@ const menuMusic   = "/sounds/menu-music.mp3";
 const shopMusic   = "/sounds/shop-music.mp3";
 const battleMusic = "/sounds/battle-music.mp3";
 
-// Müzik çalmayı dene; tarayıcı izin vermezse (autoplay policy) sessizce devam et.
-// Hata production'da logError ile yakalanıyor, geliştirme ortamında console'a düşüyor.
+// Müziği çalmayı dene; tarayıcı autoplay politikası engellerse
+// ilk kullanıcı etkileşiminde (click/touch) tekrar dene.
 const tryPlay = (audio, label) => {
   if (!audio) return;
-  audio.play().catch((err) => {
-    // Autoplay engellemesi sık karşılaşılan durum — sessizce yutma, geliştirme ortamında logla
+  audio.play().catch(() => {
     if (process.env.NODE_ENV !== "production") {
-      console.warn(`[useMusic] "${label}" çalınamadı:`, err.message);
+      console.warn(`[useMusic] "${label}" autoplay engellendi, jest bekleniyor...`);
     }
+    // İlk kullanıcı etkileşiminde bir kez daha dene
+    const retry = () => {
+      if (audio.paused) {
+        audio.play().catch(() => {});
+      }
+    };
+    document.addEventListener("click",    retry, { once: true });
+    document.addEventListener("touchend", retry, { once: true });
   });
 };
 
