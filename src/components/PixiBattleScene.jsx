@@ -95,18 +95,15 @@ useEffect(() => {
                 tl.to(el, { x: -80, y: -20, rotation: -10, duration: 0.15, ease: "power1.inOut" })
                   .to(el, { x: 0, y: 0, rotation: 0, duration: 0.25, ease: "power2.out" });
             } else if (currentAnim === "damage") {
-                tl.to(el, {
-                    filter: "brightness(4) drop-shadow(0 0 24px #ef4444) saturate(2)",
-                    scale: 0.82, x: -10, y: 4,
-                    duration: 0.06, ease: "power2.in"
-                })
-                .to(el, { x: 11, y: -3, duration: 0.06, ease: "power1.inOut" })
-                .to(el, { x: -8, y: 3,  duration: 0.05, ease: "power1.inOut" })
-                .to(el, { x: 6,  y: -2, duration: 0.05, ease: "power1.inOut" })
-                .to(el, {
-                    filter: "none", scale: 1, x: 0, y: 0,
-                    duration: 0.22, ease: "elastic.out(1.2, 0.4)"
-                });
+    tl.to(el, {
+        filter: "drop-shadow(0 0 14px rgba(239,68,68,0.9))",
+        scale: 0.86, x: -5,
+        duration: 0.07, ease: "power2.in"
+    })
+    .to(el, {
+        filter: "none", scale: 1, x: 0,
+        duration: 0.22, ease: "elastic.out(1, 0.45)"
+    });
             } else if (currentAnim === "buff" || currentAnim === "heal") {
                 tl.to(el, { scale: 1.15, filter: "brightness(1.5) drop-shadow(0 0 20px #4ade80)", duration: 0.15 })
                   .to(el, { scale: 1, filter: "none", duration: 0.3, ease: "bounce.out" });
