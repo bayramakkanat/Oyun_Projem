@@ -15,6 +15,7 @@ import { logError, safeNumber, saveStats } from "../utils/helpers";
 import { playSound } from "../hooks/useSound";
 import { ACHIEVEMENTS_DEF, MAX_STAT, WIN_TURN } from "../data/gameData";
 import { useFriends } from "../hooks/useFriends";
+import { useCleanup } from "../hooks/useCleanup";
 
 export const UIContext = createContext();
 
@@ -72,6 +73,8 @@ export const UIProvider = ({ children }) => {
     user,
     onChallengeAccepted: null,
   });
+
+  useCleanup({ user });
 
   const handleLogoutWithCleanup = useCallback(async () => {
     try {
