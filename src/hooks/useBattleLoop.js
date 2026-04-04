@@ -318,5 +318,5 @@ export function useBattleLoop({
       isCancelled = true;
       clearTimeout(tmr);
     };
-  }, [phase, step]);
+  }, [phase, step, updateTaskProgress, updateCollectionStats, handleGameOver]);
 }
