@@ -67,8 +67,7 @@ const sellHandlers = {
       }, index * 200);
     });
 
-    nt[i] = null;
-    setTeam(nt);
+    setTeam(prev => { const u = [...prev]; u[i] = null; return u; });
     setGold((g) => g + goldGain);
     setSelI(null);
     return true;
@@ -99,17 +98,15 @@ const sellHandlers = {
       }, idx * 150);
     });
 
-    const updatedNt = [...team];
-    team.forEach((ally, idx) => {
-      if (!ally || idx === i) return;
-      updatedNt[idx] = {
-        ...ally,
-        hp:    clampStat((ally.hp    || 0) + healAmount),
-        curHp: clampStat((ally.curHp || 0) + healAmount),
-      };
-    });
-    updatedNt[i] = null;
-    setTeam(updatedNt);
+    setTeam(prev => {
+  const u = [...prev];
+  prev.forEach((ally, idx) => {
+    if (!ally || idx === i) return;
+    u[idx] = { ...ally, hp: clampStat((ally.hp||0)+healAmount), curHp: clampStat((ally.curHp||0)+healAmount) };
+  });
+  u[i] = null;
+  return u;
+});
     setGold((g) => g + goldGain);
     setSelI(null);
     setTimeout(() => spawnParticles(pet.id, "heal"), 100);
@@ -155,8 +152,7 @@ const sellHandlers = {
       return updated;
     });
 
-    nt[i] = null;
-    setTeam(nt);
+    setTeam(prev => { const u = [...prev]; u[i] = null; return u; });
     setGold((g) => g + goldGain);
     setSelI(null);
     return true;
