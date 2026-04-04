@@ -127,6 +127,12 @@ export function useBattle({
       setLives, setOver, versusRoom,
     });
 
+    const updateTaskProgressRef = useRef(updateTaskProgress);
+  useEffect(() => { updateTaskProgressRef.current = updateTaskProgress; }, [updateTaskProgress]);
+
+  const updateCollectionStatsRef = useRef(updateCollectionStats);
+  useEffect(() => { updateCollectionStatsRef.current = updateCollectionStats; }, [updateCollectionStats]);
+
   // ─── faint yardımcısı ────────────────────────────────────────────────────
   const faint = (d, al, en, isP, killer) =>
     resolveFaint(d, al, en, isP, killer, { pwr, clampStat, triggerAnim, spawnParticles, spawnProjectile, setTeam });
@@ -370,8 +376,8 @@ export function useBattle({
     triggerAnim, clampStat, pwr,
     playSound, faint,
     handleGameOver,
-    updateCollectionStats,
-    updateTaskProgress,
+    updateCollectionStats: (...args) => updateCollectionStatsRef.current(...args),
+    updateTaskProgress: (...args) => updateTaskProgressRef.current(...args),
     unlockAchievement,
     saveArenaTeam, difficultyLevel,
     buildUpdatedTeam,
