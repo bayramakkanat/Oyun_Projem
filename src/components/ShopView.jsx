@@ -269,7 +269,7 @@ export default function ShopView() {
               );
 
               return a ? (
-                <div key={a.id} className="flex-shrink-0 flex flex-col items-center" onClick={() => {
+                <div key={i} className="flex-shrink-0 flex flex-col items-center" onClick={() => {
                   if (sel?.pendingTargetBuff) {
                     if (team[i] && i !== sel.sourceSlot) {
                       const atkBuff = Number.isFinite(Number(sel?.targetBuff?.atk)) ? Number(sel.targetBuff.atk) : 0;

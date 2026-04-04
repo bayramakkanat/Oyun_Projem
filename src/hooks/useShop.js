@@ -580,11 +580,10 @@ if (stillMergeable) setTimeout(() => playSound("levelup"), 400);
     const handler = sellHandlers[pet.ability];
     if (handler && handler(pet, i, ctx)) return;
 
-    // Normal satış
-    nt[i] = null;
-    setTeam(nt);
-    setGold((g) => g + goldGain);
-    setSelI(null);
+   // Normal satış
+setTeam(prev => { const u = [...prev]; u[i] = null; return u; });
+setGold((g) => g + goldGain);
+setSelI(null);
   };
 
   // ─── Yer değiştir ─────────────────────────────────────────────────────────
