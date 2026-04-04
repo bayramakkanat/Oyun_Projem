@@ -51,10 +51,25 @@ useEffect(() => {
         if (pet.curHp <= 0) {
           if (!el.isDeadAnimated) {
              el.isDeadAnimated = true;
-             // data-pet-id'yi temizle: projectile bu hayvana artık ulaşamaz
              const cardEl = el.querySelector('[data-pet-id]');
              if (cardEl) cardEl.removeAttribute('data-pet-id');
-             gsap.to(el, { y: 150, autoAlpha: 0, duration: 0.5, ease: "power2.in" });
+
+             const dir = isPlayer ? -18 : 18; // Oyuncu sola, düşman sağa döner
+             gsap.timeline()
+               .to(el, {
+                   filter: "brightness(5) drop-shadow(0 0 40px white)",
+                   scale: 1.25, duration: 0.1, ease: "power2.out"
+               })
+               .to(el, {
+                   filter: "brightness(0.5) drop-shadow(0 0 20px #ef4444) saturate(3)",
+                   scale: 0.9, duration: 0.08
+               })
+               .to(el, {
+                   y: 140, autoAlpha: 0,
+                   scale: 0.25, rotation: dir,
+                   filter: "none",
+                   duration: 0.55, ease: "power3.in"
+               });
           }
           return;
         }
@@ -84,8 +99,18 @@ useEffect(() => {
                 tl.to(el, { x: -80, y: -20, rotation: -10, duration: 0.15, ease: "power1.inOut" })
                   .to(el, { x: 0, y: 0, rotation: 0, duration: 0.25, ease: "power2.out" });
             } else if (currentAnim === "damage") {
-                tl.to(el, { filter: "brightness(2) drop-shadow(0 0 30px white)", scale: 0.85, duration: 0.1 })
-                  .to(el, { filter: "none", scale: 1, duration: 0.25, ease: "elastic.out(1, 0.4)" });
+                tl.to(el, {
+                    filter: "brightness(4) drop-shadow(0 0 24px #ef4444) saturate(2)",
+                    scale: 0.82, x: -10, y: 4,
+                    duration: 0.06, ease: "power2.in"
+                })
+                .to(el, { x: 11, y: -3, duration: 0.06, ease: "power1.inOut" })
+                .to(el, { x: -8, y: 3,  duration: 0.05, ease: "power1.inOut" })
+                .to(el, { x: 6,  y: -2, duration: 0.05, ease: "power1.inOut" })
+                .to(el, {
+                    filter: "none", scale: 1, x: 0, y: 0,
+                    duration: 0.22, ease: "elastic.out(1.2, 0.4)"
+                });
             } else if (currentAnim === "buff" || currentAnim === "heal") {
                 tl.to(el, { scale: 1.15, filter: "brightness(1.5) drop-shadow(0 0 20px #4ade80)", duration: 0.15 })
                   .to(el, { scale: 1, filter: "none", duration: 0.3, ease: "bounce.out" });
