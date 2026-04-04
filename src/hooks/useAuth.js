@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   signInWithPopup,
   GoogleAuthProvider,
@@ -34,11 +34,13 @@ export function useAuth({
   setDisplayName,
   setShowSettingsModal,
 }) {
+  const [authReady, setAuthReady] = useState(false);
 
   // ─── Firebase Auth gözlemcisi ─────────────────────────────────────────────
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
+      setAuthReady(true);
       if (u) {
         setShowAuthModal(false);
         const base = loadStats(u.uid);
@@ -166,7 +168,6 @@ export function useAuth({
         }
 
         // Eski kullanıcı adını koleksiyondan gerçekten sil
-        // (önceki: { deleted: true } bırakıyordu → koleksiyonu şişiriyordu)
         if (currentUsername) {
           await deleteDoc(doc(db, "usernames", currentUsername.toLowerCase()));
         }
@@ -192,5 +193,5 @@ export function useAuth({
     }
   };
 
-  return { handleGoogleLogin, handleEmailAuth, handleLogout, handleUpdateProfile };
+  return { authReady, handleGoogleLogin, handleEmailAuth, handleLogout, handleUpdateProfile };
 }

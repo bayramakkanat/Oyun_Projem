@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [stats, setStats] = useState(loadStats);
 
   const {
+    authReady,
     handleGoogleLogin,
     handleEmailAuth,
     handleLogout,
@@ -41,6 +42,7 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{
       user, setUser,
+      authReady,
       showAuthModal, setShowAuthModal,
       authEmail, setAuthEmail,
       authPass, setAuthPass,
