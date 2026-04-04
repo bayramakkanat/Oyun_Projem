@@ -139,8 +139,8 @@ export default function ProfileScreen({ onClose, user, stats, onStartVersus, fri
                     {rank.icon}
                   </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-2xl font-black text-white truncate">{username}</div>
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="text-xl font-black text-white truncate break-all leading-tight">{username}</div>
                   <div className="text-gray-400 text-xs truncate mb-2">{user?.email}</div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-black"
                     style={{ background: `${rank.color}20`, border: `1px solid ${rank.color}60`, color: rank.color }}>

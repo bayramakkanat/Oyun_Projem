@@ -70,25 +70,39 @@ export function useAuth({
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      const result  = await signInWithPopup(auth, provider);
-      const u       = result.user;
-      const username = (u.displayName || u.email.split("@")[0])
-        .toLowerCase()
-        .replace(/\s+/g, "_");
+      const result = await signInWithPopup(auth, provider);
+      const u      = result.user;
 
       const existing = await getDocs(
         query(collection(db, "usernames"), where("uid", "==", u.uid))
       );
-      if (existing.empty) {
+
+      if (!existing.empty) {
+        // Mevcut kullanici: kaydedilmis displayName'i Firebase Auth'a geri yaz
+        const savedDisplayName = existing.docs[0].data().displayName;
+        if (savedDisplayName && u.displayName !== savedDisplayName) {
+          await updateProfile(u, { displayName: savedDisplayName });
+          await u.reload();
+          setUser(auth.currentUser);
+        }
+      } else {
+        // Yeni kullanici: Gmail adindan username turet ve kaydet
+        const username = (u.displayName || u.email.split("@")[0])
+          .toLowerCase()
+          .replace(/\s+/g, "_");
+        const newDisplayName = "🐺 " + username;
+        await updateProfile(u, { displayName: newDisplayName });
         await setDoc(doc(db, "usernames", username), {
           username,
           uid:         u.uid,
-          displayName: u.displayName || username,
+          displayName: newDisplayName,
         });
+        await u.reload();
+        setUser(auth.currentUser);
       }
     } catch (err) {
       logError(err, "Google Login");
-      alert("Giriş yapılamadı: " + err.message);
+      alert("Giris yapilamadi: " + err.message);
     }
   };
 
