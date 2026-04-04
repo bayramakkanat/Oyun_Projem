@@ -144,10 +144,11 @@ export function useAuth({
   const handleLogout = () => signOut(auth);
 
   // ─── Profil güncelle ─────────────────────────────────────────────────────
-  const handleUpdateProfile = async (user) => {
-    if (!user) return;
+  const handleUpdateProfile = async () => {
+    const liveUser = auth.currentUser;
+    if (!liveUser) return;
 
-    const currentUsername = (user.displayName || "").split(" ").slice(1).join(" ");
+    const currentUsername = (liveUser.displayName || "").split(" ").slice(1).join(" ");
     const finalUsername   = settingsUsername.trim() || currentUsername;
 
     try {
@@ -172,14 +173,15 @@ export function useAuth({
       }
 
       const newDisplayName = `${settingsAvatar} ${finalUsername}`;
-      await updateProfile(user, { displayName: newDisplayName });
+      const liveUser = auth.currentUser;
+      await updateProfile(liveUser, { displayName: newDisplayName });
       await setDoc(doc(db, "usernames", finalUsername.toLowerCase()), {
         username:    finalUsername.toLowerCase(),
-        uid:         user.uid,
+        uid:         liveUser.uid,
         displayName: newDisplayName,
       });
 
-      await user.reload();
+      await liveUser.reload();
       setUser(auth.currentUser);
       setDisplayName(newDisplayName);
       alert("Profil güncellendi!");
