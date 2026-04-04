@@ -13,6 +13,7 @@
 //   2. challenge_invites/{uid}/invites  → süresi dolmuş meydan okumalar
 //   3. versus_rooms                     → host'u kullanıcı olan süresi dolmuş odalar
 //   4. arena_teams                      → kullanıcıya ait süresi dolmuş takımlar
+//   5. arena_leaderboard_{ay}           → son 2 aydan eski koleksiyonlardaki kendi satırı
 
 import { useEffect, useRef } from "react";
 import {
@@ -69,6 +70,23 @@ const deleteExpiredDocs = async (collRef, label) => {
   }
 };
 
+// Son `keepMonths` ayı koruyarak daha eski ay key'lerini döndürür.
+// Örnek çıktı (keepMonths=2, bugün 2025-04):
+//   ["arena_leaderboard_2025_02", "arena_leaderboard_2025_01",
+//    "arena_leaderboard_2024_12", ... (12 ay geriye kadar)]
+const getOldLeaderboardKeys = (keepMonths = 2) => {
+  const keys = [];
+  const now = new Date();
+  // Geriye toplam 14 ay tara (2 korunan + 12 silinecek potansiyel)
+  for (let i = keepMonths; i < keepMonths + 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const year  = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    keys.push(`arena_leaderboard_${year}_${month}`);
+  }
+  return keys;
+};
+
 export function useCleanup({ user }) {
   const timerRef = useRef(null);
 
@@ -121,7 +139,24 @@ export function useCleanup({ user }) {
         logError(err, "useCleanup:versus_rooms");
       }
 
-      // 4. Arena takımları (uid_ prefix'li, süresi dolmuş)
+      // 4. Eski ay liderboard satırları (son 2 ay hariç)
+      //    Güvenlik kuralı: leaderboardCol.matches('arena_leaderboard_.*') && isOwner(uid)
+      try {
+        const oldKeys = getOldLeaderboardKeys(2); // son 2 ay korunur
+        for (const key of oldKeys) {
+          const ref = doc(db, key, uid);
+          try {
+            await deleteDoc(ref);
+            console.info(`[Cleanup] ${key}/${uid} silindi.`);
+          } catch {
+            // Doküman zaten yoksa hata fırlatır — önemli değil, geç.
+          }
+        }
+      } catch (err) {
+        logError(err, "useCleanup:leaderboard");
+      }
+
+      // 5. Arena takımları (uid_ prefix'li, süresi dolmuş)
       //    Güvenlik kuralı: docId.matches(uid + '_turn.*') → yazma yetkisi var.
       try {
         const arenaSnap = await getDocs(
