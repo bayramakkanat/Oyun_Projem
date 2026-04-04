@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useGameContext } from "../context/GameContext";
 import TurnBanner from "./TurnBanner";
+import VersusIntro from "./VersusIntro";
 import BattleView from "./BattleView";
 import GuideScreen from "./GuideScreen";
 import CollectionScreen from "./CollectionScreen";
@@ -127,7 +128,8 @@ export default function GameRouter() {
     }
   }, [phase, turn]);
 
-  const notifications = (
+  // ─── Versus intro: onRoomReady'den önce göster ───────────────────────────
+  const [versusIntroRoom, setVersusIntroRoom] = useState(null);
     <GlobalNotifications
       friendsData={friendsData}
       onChallengeAccept={(roomCode) => {
@@ -146,17 +148,28 @@ export default function GameRouter() {
   user={user}
   autoJoin={versusAutoJoin}
   onRoomReady={(roomInfo) => {
-          setVersusAutoJoin(null);
-          setVersusRoom(roomInfo);
-          setVersusPhase("playing");
-          reset("versus");
-          setGameStarted(true);
+          setVersusIntroRoom(roomInfo);
         }}
         onCancel={() => {
           setVersusPhase(null);
           setVersusRoom(null);
         }}
       />
+      {versusIntroRoom && (
+        <VersusIntro
+          roomInfo={versusIntroRoom}
+          user={user}
+          onDone={() => {
+            const roomInfo = versusIntroRoom;
+            setVersusIntroRoom(null);
+            setVersusAutoJoin(null);
+            setVersusRoom(roomInfo);
+            setVersusPhase("playing");
+            reset("versus");
+            setGameStarted(true);
+          }}
+        />
+      )}
       </>
     );
   }
