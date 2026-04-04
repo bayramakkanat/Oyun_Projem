@@ -65,7 +65,7 @@ export function useArena({ user, turnRef }) {
         timestamp: serverTimestamp(),
         expiresAt: getExpiryDate(TTL_DURATIONS.arenaTeam),
       });
-      console.log(`✅ Arena takımı kaydedildi! Tur: ${turn}`);
+      
     } catch (err) {
       logError(err, "Arena Save");
     }
@@ -108,14 +108,14 @@ const updateLeaderboard = async ({
   totalTurns = 0,
   taskXP = 0,
 }) => {
-  console.log("🎯 updateLeaderboard çağrıldı!", { won, turn: turnRef?.current });
+  
   if (!user) return;
   try {
     const monthKey = getMonthKey();
     const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
     const snap = await getDoc(ref);
     const prev = snap.exists() ? snap.data() : { xp: 0, bestTurn: 0, totalWins: 0, totalGames: 0 };
-    console.log("📦 Firebase'den okunan veri:", prev);
+    
     const isNewBestTurn = turn > (prev.bestTurn || 0);
   const earnedXP = Math.max(0, totalTurns * 2 + totalWins * 5 - totalLosses * 2 + totalDraws * 1) + (isNewBestTurn ? 50 : 0) + taskXP;
 const newXP = (prev.xp || 0) + earnedXP;
@@ -126,7 +126,7 @@ const newXP = (prev.xp || 0) + earnedXP;
     const newMonthlyWins = (prev.monthlyWins || 0) + (won ? 1 : 0);
     const newTotalLosses = (prev.totalLosses || 0) + totalLosses;
     const newTotalDraws = (prev.totalDraws || 0) + totalDraws;
-    console.log("🏆 won değeri:", won, "newTotalWins:", newTotalWins);
+    
 
  await setDoc(ref, {
   uid: user.uid,
@@ -154,7 +154,7 @@ await setDoc(profileRef, {
   allTimeBestTurn: newAllTimeBestTurn,
   lastPlayed: serverTimestamp(),
 }, { merge: true });
-console.log("✅ Firebase'e yazıldı!", { newXP, newBestTurn, newTotalWins });
+
    return { earnedXP, isNewRecord: isNewBestTurn };
   } catch (err) {
     logError(err, "Leaderboard Update");

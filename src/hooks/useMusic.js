@@ -1,42 +1,52 @@
 import { useEffect, useRef } from "react";
-const menuMusic = "/sounds/menu-music.mp3";
-const shopMusic = "/sounds/shop-music.mp3";
+
+const menuMusic   = "/sounds/menu-music.mp3";
+const shopMusic   = "/sounds/shop-music.mp3";
 const battleMusic = "/sounds/battle-music.mp3";
 
+// Müzik çalmayı dene; tarayıcı izin vermezse (autoplay policy) sessizce devam et.
+// Hata production'da logError ile yakalanıyor, geliştirme ortamında console'a düşüyor.
+const tryPlay = (audio, label) => {
+  if (!audio) return;
+  audio.play().catch((err) => {
+    // Autoplay engellemesi sık karşılaşılan durum — sessizce yutma, geliştirme ortamında logla
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(`[useMusic] "${label}" çalınamadı:`, err.message);
+    }
+  });
+};
+
 export function useMusic({ soundEnabled, phase, gameStarted }) {
-  const menuMusicRef = useRef(null);
-  const shopMusicRef = useRef(null);
-  const battleMusicRef = useRef(null);
+  const menuRef   = useRef(null);
+  const shopRef   = useRef(null);
+  const battleRef = useRef(null);
 
-  // Müzik nesnelerini bir kez oluştur
+  // ─── Müzik nesnelerini bir kez oluştur ────────────────────────────────────
   useEffect(() => {
-    const menu = new Audio(menuMusic);
-    menu.loop = true;
-    menu.volume = 0.4;
-    menuMusicRef.current = menu;
-
-    const shop = new Audio(shopMusic);
-    shop.loop = true;
-    shop.volume = 0.4;
-    shopMusicRef.current = shop;
-
+    const menu   = new Audio(menuMusic);
+    const shop   = new Audio(shopMusic);
     const battle = new Audio(battleMusic);
-    battle.loop = true;
-    battle.volume = 0.4;
-    battleMusicRef.current = battle;
+
+    menu.loop   = true; menu.volume   = 0.4;
+    shop.loop   = true; shop.volume   = 0.4;
+    battle.loop = true; battle.volume = 0.4;
+
+    menuRef.current   = menu;
+    shopRef.current   = shop;
+    battleRef.current = battle;
 
     return () => {
-      menu.pause();
-      shop.pause();
-      battle.pause();
+      menu.pause();   menu.src   = "";
+      shop.pause();   shop.src   = "";
+      battle.pause(); battle.src = "";
     };
   }, []);
 
-  // Müzik geçişlerini yönet
- useEffect(() => {
-    const menu = menuMusicRef.current;
-    const shop = shopMusicRef.current;
-    const battle = battleMusicRef.current;
+  // ─── Müzik geçişlerini yönet ──────────────────────────────────────────────
+  useEffect(() => {
+    const menu   = menuRef.current;
+    const shop   = shopRef.current;
+    const battle = battleRef.current;
     if (!menu || !shop || !battle) return;
 
     if (!soundEnabled) {
@@ -49,18 +59,20 @@ export function useMusic({ soundEnabled, phase, gameStarted }) {
     if (!gameStarted) {
       shop.pause();
       battle.pause();
-      if (menu.paused) menu.play().catch(() => {});
+      if (menu.paused) tryPlay(menu, "menu");
+
     } else if (phase === "battle") {
       menu.pause();
       shop.pause();
       if (battle.paused) {
         battle.currentTime = 0;
-        battle.play().catch(() => {});
+        tryPlay(battle, "battle");
       }
+
     } else if (phase === "shop") {
       menu.pause();
       battle.pause();
-      if (shop.paused) shop.play().catch(() => {});
+      if (shop.paused) tryPlay(shop, "shop");
     }
   }, [soundEnabled, phase, gameStarted]);
 }

@@ -175,7 +175,8 @@ export const UIProvider = ({ children }) => {
     setStats((prev) => {
       if (prev.achievements.includes(id)) return prev;
       const next = { ...prev, achievements: [...prev.achievements, id] };
-      saveStats(next, user?.uid);
+      // saveStats artık async — setStats callback'i dışında fire-and-forget olarak çağırıyoruz
+      saveStats(next, user?.uid).catch((err) => logError(err, "unlockAchievement:saveStats"));
       const def = ACHIEVEMENTS_DEF.find((a) => a.id === id);
       if (def) {
         setTimeout(() => {
@@ -190,21 +191,28 @@ export const UIProvider = ({ children }) => {
   // ─── Oyun sonu istatistik güncellemesi ───────────────────────────────────
   const updateStatsOnEnd = useCallback((won, currentTurn, currentWins, currentLives) => {
     clearGameState();
+    // setStats'ı önce çalıştır, sonra saveStats'ı dışarıda fire-and-forget çağır
+    let nextStats;
     setStats((prev) => {
-      const next = {
+      nextStats = {
         ...prev,
         totalGames: prev.totalGames + 1,
         totalWins:  prev.totalWins + (won ? 1 : 0),
         bestTurn:   Math.max(prev.bestTurn, currentTurn),
         bestWins:   Math.max(prev.bestWins, currentWins),
       };
-      saveStats(next, user?.uid);
       const nonSecretIds = ACHIEVEMENTS_DEF.filter((a) => !a.secret).map((a) => a.id);
-      if (nonSecretIds.every((id) => (next.achievements || []).includes(id))) {
+      if (nonSecretIds.every((id) => (nextStats.achievements || []).includes(id))) {
         unlockAchievement("secret_all");
       }
-      return next;
+      return nextStats;
     });
+    // async saveStats — callback dışında çağrılıyor, sıra garantisi için setTimeout(0)
+    setTimeout(() => {
+      if (nextStats) {
+        saveStats(nextStats, user?.uid).catch((err) => logError(err, "updateStatsOnEnd:saveStats"));
+      }
+    }, 0);
     unlockAchievement("first_game");
     if (won) unlockAchievement("first_win");
     if (won && currentTurn >= WIN_TURN) unlockAchievement("champion");

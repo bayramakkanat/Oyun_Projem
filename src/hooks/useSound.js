@@ -1,4 +1,19 @@
+// ─── Global singleton AudioContext ────────────────────────────────────────────
+// Her seste yeni AudioContext oluşturmak tarayıcı limitini (6-8 eşzamanlı)
+// doldurarak seslerin tamamen kesilmesine yol açıyordu. Tek instance kullanılıyor.
+let _ctx = null;
 let _soundEnabled = true;
+
+const getCtx = () => {
+  if (!_ctx || _ctx.state === "closed") {
+    _ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  // Tarayıcı etkileşim olmadan AudioContext suspend edebilir; resume et.
+  if (_ctx.state === "suspended") {
+    _ctx.resume().catch(() => {});
+  }
+  return _ctx;
+};
 
 export const setSoundFlag = (v) => {
   _soundEnabled = v;
@@ -7,191 +22,154 @@ export const setSoundFlag = (v) => {
 export const playSound = (type) => {
   if (!_soundEnabled) return;
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    const ctx = getCtx();
     const now = ctx.currentTime;
+
+    // Çok sesli (chord) tipler için yardımcı — ctx dışarıdan alıyor
+    const makeOsc = (freq, gainVal, startT, stopT, oscType = "sine") => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = oscType;
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.frequency.setValueAtTime(freq, startT);
+      g.gain.setValueAtTime(gainVal, startT);
+      g.gain.exponentialRampToValueAtTime(0.001, stopT);
+      o.start(startT);
+      o.stop(stopT);
+    };
+
     if (type === "attackLeft" || type === "attackRight") {
-      osc.frequency.value = 200;
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-      osc.start(now);
-      osc.stop(now + 0.1);
+      makeOsc(200, 0.3, now, now + 0.1);
+
     } else if (type === "damage") {
-      osc.frequency.value = 150;
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-      osc.start(now);
-      osc.stop(now + 0.15);
+      makeOsc(150, 0.2, now, now + 0.15);
+
     } else if (type === "buff") {
-      osc.frequency.value = 400;
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-      osc.start(now);
-      osc.stop(now + 0.2);
+      makeOsc(400, 0.2, now, now + 0.2);
+
     } else if (type === "buy") {
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(520, now);
-      osc.frequency.linearRampToValueAtTime(700, now + 0.12);
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-      osc.start(now);
-      osc.stop(now + 0.2);
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = "sine";
+      o.frequency.setValueAtTime(520, now);
+      o.frequency.linearRampToValueAtTime(700, now + 0.12);
+      g.gain.setValueAtTime(0.25, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      o.start(now); o.stop(now + 0.2);
+
     } else if (type === "sell") {
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(350, now);
-      osc.frequency.linearRampToValueAtTime(250, now + 0.15);
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-      osc.start(now);
-      osc.stop(now + 0.2);
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = "triangle";
+      o.frequency.setValueAtTime(350, now);
+      o.frequency.linearRampToValueAtTime(250, now + 0.15);
+      g.gain.setValueAtTime(0.2, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      o.start(now); o.stop(now + 0.2);
+
     } else if (type === "levelup") {
       [0, 0.1, 0.2].forEach((t, i) => {
-        const o2 = ctx.createOscillator();
-        const g2 = ctx.createGain();
-        o2.connect(g2);
-        g2.connect(ctx.destination);
-        o2.type = "sine";
-        o2.frequency.value = [440, 550, 660][i];
-        g2.gain.setValueAtTime(0.25, now + t);
-        g2.gain.exponentialRampToValueAtTime(0.01, now + t + 0.15);
-        o2.start(now + t);
-        o2.stop(now + t + 0.15);
+        makeOsc([440, 550, 660][i], 0.25, now + t, now + t + 0.15);
       });
-      return;
+
     } else if (type === "victory") {
       [0, 0.15, 0.3, 0.5].forEach((t, i) => {
-        const o2 = ctx.createOscillator();
-        const g2 = ctx.createGain();
-        o2.connect(g2);
-        g2.connect(ctx.destination);
-        o2.type = "sine";
-        o2.frequency.value = [523, 659, 784, 1047][i];
-        g2.gain.setValueAtTime(0.3, now + t);
-        g2.gain.exponentialRampToValueAtTime(0.01, now + t + 0.25);
-        o2.start(now + t);
-        o2.stop(now + t + 0.3);
+        makeOsc([523, 659, 784, 1047][i], 0.3, now + t, now + t + 0.3);
       });
-      return;
+
     } else if (type === "defeat") {
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(300, now);
-      osc.frequency.linearRampToValueAtTime(100, now + 0.5);
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-      osc.start(now);
-      osc.stop(now + 0.5);
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(300, now);
+      o.frequency.linearRampToValueAtTime(100, now + 0.5);
+      g.gain.setValueAtTime(0.3, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      o.start(now); o.stop(now + 0.5);
+
     } else if (type === "achievement") {
       [0, 0.08, 0.16, 0.24].forEach((t, i) => {
-        const o2 = ctx.createOscillator();
-        const g2 = ctx.createGain();
-        o2.connect(g2);
-        g2.connect(ctx.destination);
-        o2.type = "sine";
-        o2.frequency.value = [660, 784, 880, 1047][i];
-        g2.gain.setValueAtTime(0.2, now + t);
-        g2.gain.exponentialRampToValueAtTime(0.01, now + t + 0.12);
-        o2.start(now + t);
-        o2.stop(now + t + 0.15);
+        makeOsc([660, 784, 880, 1047][i], 0.2, now + t, now + t + 0.15);
       });
-      return;
+
     } else if (type === "shop_open") {
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(300, now);
-      osc.frequency.linearRampToValueAtTime(450, now + 0.1);
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-      osc.start(now);
-      osc.stop(now + 0.15);
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = "sine";
+      o.frequency.setValueAtTime(300, now);
+      o.frequency.linearRampToValueAtTime(450, now + 0.1);
+      g.gain.setValueAtTime(0.15, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      o.start(now); o.stop(now + 0.15);
+
     } else if (type === "death") {
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(180, now);
-      osc.frequency.linearRampToValueAtTime(60, now + 0.4);
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-      osc.start(now);
-      osc.stop(now + 0.4);
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(180, now);
+      o.frequency.linearRampToValueAtTime(60, now + 0.4);
+      g.gain.setValueAtTime(0.25, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      o.start(now); o.stop(now + 0.4);
+
     } else if (type === "boss_start") {
       [0, 0.2, 0.4, 0.6, 0.8].forEach((t, i) => {
-        const o2 = ctx.createOscillator();
-        const g2 = ctx.createGain();
-        o2.connect(g2);
-        g2.connect(ctx.destination);
-        o2.type = "sawtooth";
-        o2.frequency.value = [110, 98, 87, 82, 73][i];
-        g2.gain.setValueAtTime(0.3, now + t);
-        g2.gain.exponentialRampToValueAtTime(0.01, now + t + 0.25);
-        o2.start(now + t);
-        o2.stop(now + t + 0.3);
+        makeOsc([110, 98, 87, 82, 73][i], 0.3, now + t, now + t + 0.3, "sawtooth");
       });
-      return;
+
     } else if (type === "refresh") {
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(600, now);
-      osc.frequency.exponentialRampToValueAtTime(200, now + 0.2);
-      gain.gain.setValueAtTime(0.1, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-      osc.start(now);
-      osc.stop(now + 0.2);
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = "sine";
+      o.frequency.setValueAtTime(600, now);
+      o.frequency.exponentialRampToValueAtTime(200, now + 0.2);
+      g.gain.setValueAtTime(0.1, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      o.start(now); o.stop(now + 0.2);
+
     } else if (type === "freeze") {
       [0, 0.08, 0.16].forEach((t) => {
-        const o2 = ctx.createOscillator();
-        const g2 = ctx.createGain();
-        o2.connect(g2);
-        g2.connect(ctx.destination);
-        o2.type = "triangle";
-        o2.frequency.setValueAtTime(1200, now + t);
-        o2.frequency.linearRampToValueAtTime(800, now + t + 0.1);
-        g2.gain.setValueAtTime(0.1, now + t);
-        g2.gain.exponentialRampToValueAtTime(0.01, now + t + 0.1);
-        o2.start(now + t);
-        o2.stop(now + t + 0.12);
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = "triangle";
+        o.frequency.setValueAtTime(1200, now + t);
+        o.frequency.linearRampToValueAtTime(800, now + t + 0.1);
+        g.gain.setValueAtTime(0.1, now + t);
+        g.gain.exponentialRampToValueAtTime(0.001, now + t + 0.1);
+        o.start(now + t); o.stop(now + t + 0.12);
       });
-      return;
+
     } else if (type === "versus_ready") {
       [0, 0.07].forEach((t, i) => {
-        const o2 = ctx.createOscillator();
-        const g2 = ctx.createGain();
-        o2.connect(g2);
-        g2.connect(ctx.destination);
-        o2.type = "triangle";
-        o2.frequency.setValueAtTime([520, 680][i], now + t);
-        g2.gain.setValueAtTime(0.14, now + t);
-        g2.gain.exponentialRampToValueAtTime(0.01, now + t + 0.12);
-        o2.start(now + t);
-        o2.stop(now + t + 0.13);
+        makeOsc([520, 680][i], 0.14, now + t, now + t + 0.13, "triangle");
       });
-      return;
+
     } else if (type === "versus_match") {
       [0, 0.08, 0.16].forEach((t, i) => {
-        const o2 = ctx.createOscillator();
-        const g2 = ctx.createGain();
-        o2.connect(g2);
-        g2.connect(ctx.destination);
-        o2.type = "sawtooth";
-        o2.frequency.setValueAtTime([220, 300, 420][i], now + t);
-        g2.gain.setValueAtTime(0.12, now + t);
-        g2.gain.exponentialRampToValueAtTime(0.01, now + t + 0.12);
-        o2.start(now + t);
-        o2.stop(now + t + 0.14);
+        makeOsc([220, 300, 420][i], 0.12, now + t, now + t + 0.14, "sawtooth");
       });
-      return;
+
     } else if (type === "versus_disconnect") {
-      const o2 = ctx.createOscillator();
-      const g2 = ctx.createGain();
-      o2.connect(g2);
-      g2.connect(ctx.destination);
-      o2.type = "square";
-      o2.frequency.setValueAtTime(260, now);
-      o2.frequency.linearRampToValueAtTime(180, now + 0.22);
-      g2.gain.setValueAtTime(0.16, now);
-      g2.gain.exponentialRampToValueAtTime(0.01, now + 0.24);
-      o2.start(now);
-      o2.stop(now + 0.25);
-      return;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = "square";
+      o.frequency.setValueAtTime(260, now);
+      o.frequency.linearRampToValueAtTime(180, now + 0.22);
+      g.gain.setValueAtTime(0.16, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+      o.start(now); o.stop(now + 0.25);
     }
-    
-  } catch (e) {}
+
+  } catch (_e) {
+    // Ses sistemi erişilemezse sessizce devam et
+  }
 };

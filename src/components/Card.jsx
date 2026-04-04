@@ -1,13 +1,8 @@
 import { useState, useEffect } from "react";
 import { TBG, TBD, ABILITY_ICONS } from "../data/gameData";
 import { getDesc as getDescUtil } from "../utils/getDesc";
+import { getStatFontSize } from "../utils/helpers";
 
-const getStatFontSize = (value, isCompact) => {
-  const len = String(value).length;
-  if (len >= 3) return isCompact ? "13px" : "15px";
-  if (len === 2) return isCompact ? "15px" : "18px";
-  return isCompact ? "18px" : "22px";
-};
 
 function Card({
   a,

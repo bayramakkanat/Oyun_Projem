@@ -11,14 +11,14 @@ import {
 import {
   collection,
   setDoc,
+  deleteDoc,
   doc,
   getDocs,
   query,
   where,
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import { logError } from "../utils/helpers";
-import { loadStats } from "../utils/helpers";
+import { logError, loadStats } from "../utils/helpers";
 
 export function useAuth({
   authMode,
@@ -35,66 +35,71 @@ export function useAuth({
   setShowSettingsModal,
 }) {
 
-  // Firebase Auth Observer
+  // ─── Firebase Auth gözlemcisi ─────────────────────────────────────────────
   useEffect(() => {
-   const unsub = onAuthStateChanged(auth, async (u) => {
-  setUser(u);
-  if (u) {
-    setShowAuthModal(false);
-    const base = loadStats(u?.uid);
-    setStats(base);
-    // Firebase'den başarımları yükle
-    try {
-      const { doc, getDoc } = await import("firebase/firestore");
-      const { db } = await import("../firebase");
-      const profileSnap = await getDoc(doc(db, "user_profiles", u.uid));
-      if (profileSnap.exists()) {
-        const fbAchievements = profileSnap.data().achievements || [];
-        setStats(prev => ({ ...prev, achievements: fbAchievements }));
-        // Local'e de yaz ki unlockAchievement kontrolü çalışsın
-        const updated = { ...base, achievements: fbAchievements };
-        const { saveStats } = await import("../utils/helpers");
-        saveStats(updated, u.uid);
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      if (u) {
+        setShowAuthModal(false);
+        const base = loadStats(u.uid);
+        setStats(base);
+
+        // Firebase'den achievements yükle ve local cache ile birleştir
+        try {
+          const { doc: fsDoc, getDoc } = await import("firebase/firestore");
+          const { db: fsDb }           = await import("../firebase");
+          const profileSnap = await getDoc(fsDoc(fsDb, "user_profiles", u.uid));
+          if (profileSnap.exists()) {
+            const fbAchievements = profileSnap.data().achievements || [];
+            setStats((prev) => ({ ...prev, achievements: fbAchievements }));
+            // Local cache'i güncelle (unlockAchievement kontrolü için)
+            const { saveStats } = await import("../utils/helpers");
+            await saveStats({ ...base, achievements: fbAchievements }, u.uid);
+          }
+        } catch (err) {
+          logError(err, "useAuth:loadAchievements");
+        }
+      } else {
+        setStats(loadStats(null));
       }
-    } catch (e) {
-      console.error("Firebase achievements yüklenemedi:", e);
-    }
-  } else {
-    setStats(loadStats(null));
-  }
-});
+    });
     return () => unsub();
   }, []);
 
+  // ─── Google ile giriş ─────────────────────────────────────────────────────
   const handleGoogleLogin = async () => {
-  const provider = new GoogleAuthProvider();
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const u = result.user;
-    const username = (u.displayName || u.email.split("@")[0]).toLowerCase().replace(/\s+/g, "_");
-    const existing = await getDocs(
-      query(collection(db, "usernames"), where("uid", "==", u.uid))
-    );
-    if (existing.empty) {
-      await setDoc(doc(db, "usernames", username), {
-        username,
-        uid: u.uid,
-        displayName: u.displayName || username,
-      });
-    }
-  } catch (err) {
-    logError(err, "Google Login");
-    alert("Giriş yapılamadı: " + err.message);
-  }
-};
+    const provider = new GoogleAuthProvider();
+    try {
+      const result  = await signInWithPopup(auth, provider);
+      const u       = result.user;
+      const username = (u.displayName || u.email.split("@")[0])
+        .toLowerCase()
+        .replace(/\s+/g, "_");
 
+      const existing = await getDocs(
+        query(collection(db, "usernames"), where("uid", "==", u.uid))
+      );
+      if (existing.empty) {
+        await setDoc(doc(db, "usernames", username), {
+          username,
+          uid:         u.uid,
+          displayName: u.displayName || username,
+        });
+      }
+    } catch (err) {
+      logError(err, "Google Login");
+      alert("Giriş yapılamadı: " + err.message);
+    }
+  };
+
+  // ─── E-posta ile giriş / kayıt ────────────────────────────────────────────
   const handleEmailAuth = async (e) => {
     e.preventDefault();
     try {
       if (authMode === "login") {
         await signInWithEmailAndPassword(auth, authEmail, authPass);
       } else {
-        const usernameToCheck = authUsername || authEmail.split("@")[0];
+        const usernameToCheck = (authUsername || authEmail.split("@")[0]).trim();
         const usernameDoc = await getDocs(
           query(
             collection(db, "usernames"),
@@ -105,17 +110,13 @@ export function useAuth({
           alert("Bu kullanıcı adı zaten alınmış, başka bir isim dene.");
           return;
         }
-        const userCred = await createUserWithEmailAndPassword(
-          auth,
-          authEmail,
-          authPass
-        );
+        const userCred = await createUserWithEmailAndPassword(auth, authEmail, authPass);
         await updateProfile(userCred.user, {
           displayName: `${authAvatar} ${usernameToCheck}`,
         });
         await setDoc(doc(db, "usernames", usernameToCheck.toLowerCase()), {
-          username: usernameToCheck.toLowerCase(),
-          uid: userCred.user.uid,
+          username:    usernameToCheck.toLowerCase(),
+          uid:         userCred.user.uid,
           displayName: `${authAvatar} ${usernameToCheck}`,
         });
       }
@@ -125,18 +126,18 @@ export function useAuth({
     }
   };
 
+  // ─── Çıkış ───────────────────────────────────────────────────────────────
   const handleLogout = () => signOut(auth);
 
+  // ─── Profil güncelle ─────────────────────────────────────────────────────
   const handleUpdateProfile = async (user) => {
     if (!user) return;
 
-    const currentUsername = (user.displayName || "")
-      .split(" ")
-      .slice(1)
-      .join(" ");
-    const finalUsername = settingsUsername.trim() || currentUsername;
+    const currentUsername = (user.displayName || "").split(" ").slice(1).join(" ");
+    const finalUsername   = settingsUsername.trim() || currentUsername;
 
     try {
+      // Kullanıcı adı değiştiyse çakışma kontrolü yap
       if (finalUsername.toLowerCase() !== currentUsername.toLowerCase()) {
         const usernameDoc = await getDocs(
           query(
@@ -148,19 +149,22 @@ export function useAuth({
           alert("Bu kullanıcı adı zaten alınmış, başka bir isim dene.");
           return;
         }
+
+        // Eski kullanıcı adını koleksiyondan gerçekten sil
+        // (önceki: { deleted: true } bırakıyordu → koleksiyonu şişiriyordu)
         if (currentUsername) {
-          await setDoc(doc(db, "usernames", currentUsername.toLowerCase()), {
-            deleted: true,
-          });
+          await deleteDoc(doc(db, "usernames", currentUsername.toLowerCase()));
         }
       }
+
       const newDisplayName = `${settingsAvatar} ${finalUsername}`;
       await updateProfile(user, { displayName: newDisplayName });
       await setDoc(doc(db, "usernames", finalUsername.toLowerCase()), {
-        username: finalUsername.toLowerCase(),
-        uid: user.uid,
+        username:    finalUsername.toLowerCase(),
+        uid:         user.uid,
         displayName: newDisplayName,
       });
+
       await user.reload();
       setUser(auth.currentUser);
       setDisplayName(newDisplayName);
@@ -172,10 +176,5 @@ export function useAuth({
     }
   };
 
-  return {
-    handleGoogleLogin,
-    handleEmailAuth,
-    handleLogout,
-    handleUpdateProfile,
-  };
+  return { handleGoogleLogin, handleEmailAuth, handleLogout, handleUpdateProfile };
 }

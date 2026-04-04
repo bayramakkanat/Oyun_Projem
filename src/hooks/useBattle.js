@@ -1,3 +1,4 @@
+import { logError } from "../utils/helpers";
 import { useEffect, useRef, useCallback } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
@@ -143,16 +144,24 @@ export function useBattle({
     writeHeartbeat();
     heartbeatTimer = setInterval(writeHeartbeat, 5000);
 
-    const onPageHide = () => reportDisconnect();
-    const onBeforeUnload = () => reportDisconnect();
+    const onPageHide      = () => reportDisconnect();
+    const onBeforeUnload  = () => reportDisconnect();
+
+    // Mobilde sekme arka plana geçince setInterval throttle edilir (1sn+).
+    // Sekme tekrar aktif olunca anında heartbeat at — yanlış disconnect tespitini önler.
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") writeHeartbeat();
+    };
 
     window.addEventListener("pagehide", onPageHide);
     window.addEventListener("beforeunload", onBeforeUnload);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
       if (heartbeatTimer) clearInterval(heartbeatTimer);
       window.removeEventListener("pagehide", onPageHide);
       window.removeEventListener("beforeunload", onBeforeUnload);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [gameMode, versusRoom?.code, versusRoom?.role, versusPhase]);
 
@@ -270,12 +279,9 @@ export function useBattle({
   };
 
   const versusSetReady = useCallback(async () => {
-    console.log("versusSetReady çağrıldı", { versusRoom, versusReady, turn: turnRef.current });
     if (!versusRoom) {
-      console.log("versusRoom yok, çıkılıyor");
       return;
     }
-    console.log("Firebase'e yazılıyor...", { code: versusRoom.code, role: versusRoom.role });
     const { code, role } = versusRoom;
     const readyTurnField = role === "host" ? "hostReadyTurn" : "guestReadyTurn";
     const teamKey        = role === "host" ? "hostTeam"      : "guestTeam";
@@ -305,13 +311,13 @@ export function useBattle({
       setVersusReady(true);
       playSound("versus_ready");
     } catch (err) {
-      console.error("Versus hazır hatası:", err);
+      logError(err, "versusSetReady");
     }
   }, [versusRoom, versusReady, team, turnRef, clampStat]);
 
   // ─── Hata kurtarma: savaş sıkışırsa shop'a zorla dön ──────────────────────
   const recoverToShop = (errorMsg) => {
-    console.error("useBattle kurtarma:", errorMsg);
+    logError(new Error(errorMsg), "useBattle:recover");
     setIsBattleOver(true);
     setLog((l) => [...l, `⚠️ Beklenmeyen hata, mağazaya dönülüyor...`]);
     setTimeout(() => {
@@ -328,7 +334,7 @@ export function useBattle({
         setRewards([]);
         await versusSetReady();
       } catch (err) {
-        console.error("Versus hazır hatası:", err);
+        logError(err, "versusSetReady");
       }
       return;
     }
@@ -403,7 +409,7 @@ export function useBattle({
       payload.shopStartedAt = Date.now();
       payload.shopStartedTurn = turnRef.current;
     }
-    updateDoc(doc(db, "versus_rooms", code), payload).catch(console.error);
+    updateDoc(doc(db, "versus_rooms", code), payload).catch((err) => logError(err, "versusShopReset"));
   }, [gameMode, phase, versusRoom, versusPhase, turnRef]);
 
   // ─── VERSUS SNAPSHOT LISTENER ───────────────────────────────────────────
@@ -471,7 +477,7 @@ export function useBattle({
       if (role === "host" && !data.battleId) {
         const newId = `${code}_${turnRef.current}_${Date.now()}`;
         try { await updateDoc(doc(db, "versus_rooms", code), { battleId: newId }); }
-        catch (err) { console.error("battleId yazma hatası:", err); }
+        catch (err) { logError(err, "versusSnapshot:battleId"); }
         return;
       }
       if (!data.battleId) return;
@@ -493,7 +499,7 @@ export function useBattle({
         }, 2000);
       }
       } catch (err) {
-        console.error("Versus snapshot hatası:", err);
+        logError(err, "versusSnapshot");
       }
     });
 
@@ -508,10 +514,22 @@ export function useBattle({
     if (phase !== "battle" || isBattleOver) return;
     let isCancelled = false;
 
-    // Zaman aşımı
-    if (step > 200) {
-      setIsBattleOver(true);
-      setLog((l) => [...l, "⏱️ Savaş zaman aşımı!"]);
+    // Zaman aşımı — aynı takım boyutları art arda 30 adım tekrarlarsa savaş kilitlenmiş demektir.
+    // (Eski yöntem: step > 200 = 60 saniye bekleme. Yeni yöntem çok daha hızlı yakalar.)
+    if (step > 0) {
+      const stateKey = `${pT.length}-${eT.length}`;
+      if (!lastProcessedStepRef._stuckState) lastProcessedStepRef._stuckState = { key: null, count: 0 };
+      const stuck = lastProcessedStepRef._stuckState;
+      if (stuck.key === stateKey) {
+        stuck.count++;
+      } else {
+        stuck.key   = stateKey;
+        stuck.count = 1;
+      }
+      if (stuck.count > 30 || step > 200) {
+        stuck.key = null; stuck.count = 0;
+        setIsBattleOver(true);
+        setLog((l) => [...l, "⏱️ Savaş zaman aşımı!"]);
       setTimeout(async () => {
         try {
           const newLives = lives - 1;
@@ -526,7 +544,8 @@ export function useBattle({
         }
       }, 2000);
       return;
-    }
+      } // stuck.count > 30 || step > 200 kapanışı
+    }   // step > 0 kapanışı
 
     // Savaş bitti: takımlardan biri boşaldı
     if (pT.length === 0 || eT.length === 0) {
