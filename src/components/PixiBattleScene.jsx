@@ -57,10 +57,6 @@ useEffect(() => {
              const dir = isPlayer ? -18 : 18; // Oyuncu sola, düşman sağa döner
              gsap.timeline()
                .to(el, {
-                   filter: "brightness(5) drop-shadow(0 0 40px white)",
-                   scale: 1.25, duration: 0.1, ease: "power2.out"
-               })
-               .to(el, {
                    filter: "brightness(0.5) drop-shadow(0 0 20px #ef4444) saturate(3)",
                    scale: 0.9, duration: 0.08
                })
