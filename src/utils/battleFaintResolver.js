@@ -112,13 +112,6 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
     }
   }
 
-  // ── START_TRAMPLE ──────────────────────────────────────────────────────────
-  if (d.ability === AB.START_TRAMPLE && al.length > 0) {
-    al[0].atk = clampStat(al[0].atk + 5 * m);
-    al[0].trample = true;
-    lg.push(`🦏 ${pfx}${d.nick} -> +${5 * m} ATK (çiğneme aktif)`);
-  }
-
   // ── HURT_TEAM_BUFF ─────────────────────────────────────────────────────────
   if (d.ability === AB.HURT_TEAM_BUFF && al.length > 0) {
     al.forEach((pet) => {
