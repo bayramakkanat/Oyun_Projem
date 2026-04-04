@@ -5,6 +5,7 @@ import {
   serverTimestamp
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { playSound } from "./useSound";
 import { TTL_DURATIONS, getExpiryDate } from "../utils/ttl";
 
 /**
@@ -38,6 +39,13 @@ export function useFriends({ user, onChallengeAccepted }) {
     if (!user) return;
     const ref = collection(db, "friend_requests", user.uid, "incoming");
     const unsub = onSnapshot(ref, (snap) => {
+      const unsub = onSnapshot(ref, (snap) => {
+  const newCount = snap.docs.length;
+  setIncomingRequests(prev => {
+    if (newCount > prev.length) playSound("friend_request");
+    return snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+  });
+});
       setIncomingRequests(snap.docs.map(d => ({ uid: d.id, ...d.data() })));
     });
     return () => unsub();

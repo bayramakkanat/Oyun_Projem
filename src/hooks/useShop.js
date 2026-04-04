@@ -397,6 +397,7 @@ export function useShop({
     else                                                               spawnParticles(a.id, "attack");
 
     if (!a.isR && gold < a.cost) return;
+    playSound("buy");
 
     if ((a.ability === AB.BUY_TARGET_BUFF || a.ability === AB.BUY_TARGET_HP) && !a.pendingTargetBuff) {
       const nt = [...team];
@@ -583,6 +584,7 @@ if (stillMergeable) setTimeout(() => playSound("levelup"), 400);
    // Normal satış
 setTeam(prev => { const u = [...prev]; u[i] = null; return u; });
 setGold((g) => g + goldGain);
+playSound("sell");
 setSelI(null);
   };
 

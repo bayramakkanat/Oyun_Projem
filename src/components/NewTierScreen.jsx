@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import Card from "./Card";
 import { getDesc } from "../utils/getDesc";
 import { TIERS } from "../data/gameData";
+import { playSound } from "../hooks/useSound";
 
 const tierColors = ["", "gray", "green", "blue", "purple", "red", "orange"];
 const tierBgs = [
@@ -36,6 +37,7 @@ export default function NewTierScreen({ newTier, onContinue }) {
   const [flash, setFlash] = useState(true);
 
   useEffect(() => {
+    playSound("tier_up");
     const t = setTimeout(() => setFlash(false), 350);
     return () => clearTimeout(t);
   }, []);

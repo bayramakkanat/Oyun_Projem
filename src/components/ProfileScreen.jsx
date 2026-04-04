@@ -327,10 +327,15 @@ export default function ProfileScreen({ onClose, user, stats, onStartVersus, fri
               </div>
 
               {friends.length === 0 ? (
-                <div className="text-center text-gray-500 text-sm py-6">
-                  Henüz arkadaşın yok. Yukarıdan ekleyebilirsin!
-                </div>
-              ) : (
+  <div className="text-center py-8 flex flex-col items-center gap-1">
+    <div className="text-5xl mb-1" style={{ filter: "drop-shadow(0 0 10px rgba(139,92,246,0.5))" }}>
+      👥
+    </div>
+    <div className="text-xl -mt-1 opacity-60">✨</div>
+    <div className="text-sm text-gray-400 mt-2 font-semibold">Henüz arkadaşın yok.</div>
+    <div className="text-xs text-gray-500 mt-0.5">Yukarıdan kullanıcı adıyla ekleyebilirsin!</div>
+  </div>
+) : (
                 <div className="flex flex-col gap-2">
                   {friends.map(f => (
                     <div key={f.uid} className="flex items-center justify-between bg-gray-800/60 rounded-xl px-3 py-2.5">

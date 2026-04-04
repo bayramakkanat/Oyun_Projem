@@ -290,8 +290,12 @@ export default function VersusLobby({ user, onRoomReady, onCancel, autoJoin }) {
             <div className="bg-black/40 border border-white/10 rounded-2xl p-4 text-left">
               <div className="text-xs text-gray-500 uppercase tracking-widest mb-3">Açık Odalar</div>
               {openRooms.length === 0 ? (
-                <div className="text-sm text-gray-400">Şu anda katılınabilir oda yok.</div>
-              ) : (
+  <div className="text-center py-5 flex flex-col items-center gap-1">
+    <div className="text-3xl">🚪</div>
+    <div className="text-sm text-gray-400 font-semibold mt-1">Açık oda yok.</div>
+    <div className="text-xs text-gray-500">Oda oluştur, arkadaşını davet et!</div>
+  </div>
+) : (
                 <div className="max-h-56 overflow-y-auto space-y-2">
                   {openRooms.map((r) => (
                     <button

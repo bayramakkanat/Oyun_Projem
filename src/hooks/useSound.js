@@ -172,4 +172,5 @@ export const playSound = (type) => {
   } catch (_e) {
     // Ses sistemi erişilemezse sessizce devam et
   }
+  
 };
