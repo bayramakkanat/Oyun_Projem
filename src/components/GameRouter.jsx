@@ -130,6 +130,7 @@ export default function GameRouter() {
 
   // ─── Versus intro: onRoomReady'den önce göster ───────────────────────────
   const [versusIntroRoom, setVersusIntroRoom] = useState(null);
+  const notifications = (
     <GlobalNotifications
       friendsData={friendsData}
       onChallengeAccept={(roomCode) => {
