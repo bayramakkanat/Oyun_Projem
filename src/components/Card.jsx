@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { TBG, TBD, ABILITY_ICONS } from "../data/gameData";
 import { getDesc as getDescUtil } from "../utils/getDesc";
 import { getStatFontSize } from "../utils/helpers";
@@ -340,4 +340,18 @@ function Card({
   );
 }
 
-export default Card;
+export default React.memo(Card, (prev, next) => {
+  // Savaş adımında her kartta gereksiz render olmaz;
+  // sadece görsel olarak değişebilecek proplar karşılaştırılır.
+  return (
+    prev.a?.id    === next.a?.id    &&
+    prev.anim     === next.anim     &&
+    prev.selected === next.selected &&
+    prev.compact  === next.compact  &&
+    prev.a?.curHp === next.a?.curHp &&
+    prev.a?.atk   === next.a?.atk   &&
+    prev.a?.hp    === next.a?.hp    &&
+    prev.a?.lvl   === next.a?.lvl   &&
+    prev.a?.exp   === next.a?.exp
+  );
+});

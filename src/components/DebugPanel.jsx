@@ -189,7 +189,9 @@ function MiniCard({ animal, onRemove, onLvlChange, onMoveUp, onMoveDown, isFirst
   );
 }
 
-export default function DebugPanel({ onStartBattle, onClose }) {
+// Yalnızca geliştirme ortamında çalışan debug aracı.
+// Production'da null döner; tree-shaking bunu bundle'dan atar.
+function DebugPanelDev({ onStartBattle, onClose }) {
   const [activeTab, setActiveTab] = useState("scenarios"); // "scenarios" | "manual"
   const [playerTeam, setPlayerTeam] = useState([]);
   const [enemyTeam, setEnemyTeam] = useState([]);
@@ -555,3 +557,7 @@ isLast={realIdx === 0}
     </div>
   );
 }
+
+export default process.env.NODE_ENV === "production"
+  ? function DebugPanel() { return null; }
+  : DebugPanelDev;
