@@ -21,6 +21,8 @@ export default function ShopView() {
   } = useGameContext();
 
   const [showRewards, setShowRewards] = useState(false);
+  const [dragItem, setDragItem]       = useState(null); // sürüklenen mağaza hayvanı
+  const [dragOver, setDragOver]       = useState(null); // hover'daki takım slotu indeksi
   const [timeLeft, setTimeLeft] = useState(null);
   const [showVersusLockOverlay, setShowVersusLockOverlay] = useState(false);
 
@@ -164,6 +166,9 @@ export default function ShopView() {
             className={`relative transition-all duration-300 ${gold < a.cost ? "opacity-60 grayscale cursor-not-allowed" : "hover:scale-110 hover:-translate-y-2 cursor-pointer hover-lift"}`}
             onClick={() => setSel(sel?.id === a.id ? null : a)}
             onContextMenu={(e) => { e.preventDefault(); toggleFreeze(a); }}
+            draggable={gold >= a.cost}
+            onDragStart={() => { if (gold >= a.cost) { setDragItem(a); setSel(null); } }}
+            onDragEnd={() => setDragItem(null)}
           >
             <Card a={a} anim={anims[a.id]} selected={sel?.id === a.id} showName={false} getDesc={getDesc} shop={shop} team={team} mirror={true} />
             {a.frozen && <div className="absolute -top-1 -left-1 text-xl animate-pulse">❄️</div>}
@@ -195,17 +200,17 @@ export default function ShopView() {
 </div>
 
         {sel && (
-          <div className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:top-1/2 sm:right-4 sm:left-auto sm:-translate-y-1/2 sm:w-72 z-50 w-full bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-purple-500 rounded-2xl p-4 shadow-2xl backdrop-blur-sm">
+          <div className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:top-1/2 sm:right-4 sm:left-auto sm:-translate-y-1/2 sm:w-72 z-50 w-full bg-gradient-to-br from-gray-900/95 to-gray-800/95 border-2 border-purple-500 rounded-t-2xl sm:rounded-2xl p-3 sm:p-4 shadow-2xl backdrop-blur-sm max-h-[45vh] sm:max-h-none overflow-y-auto sm:overflow-visible">
             <button onClick={() => setSel(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white text-xl">✕</button>
             <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-700">
-              {sel.img ? <img src={`/images/animals/${sel.img}`} alt={sel.nick} className="w-16 h-16 object-contain drop-shadow-2xl" style={!sel.flip ? { transform: "scaleX(-1)" } : {}} /> : <span className="text-6xl">{sel.name}</span>}
+              {sel.img ? <img src={`/images/animals/${sel.img}`} alt={sel.nick} className="w-12 h-12 sm:w-16 sm:h-16 object-contain drop-shadow-2xl" style={!sel.flip ? { transform: "scaleX(-1)" } : {}} /> : <span className="text-6xl">{sel.name}</span>}
               <div>
-                <div className="text-white font-black text-lg">{sel.nick}</div>
+                <div className="text-white font-black text-base sm:text-lg">{sel.nick}</div>
                 <div className="text-gray-400 text-sm">Kademe {sel.tier}</div>
                 <div className="flex gap-2 mt-1"><span className="bg-orange-600/80 px-2 py-0.5 rounded-full text-xs font-bold">⚔️ {sel.atk}</span><span className="bg-green-600/80 px-2 py-0.5 rounded-full text-xs font-bold">❤️ {sel.hp}</span><span className="bg-yellow-600/80 px-2 py-0.5 rounded-full text-xs font-bold">💰 {sel.cost}</span></div>
               </div>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1 sm:gap-2">
               {[1, 2, 3].map((lvl) => (
                 <div key={lvl} className={`rounded-xl p-2.5 border ${lvl === 1 ? "border-gray-500 bg-gray-800/60" : lvl === 2 ? "border-blue-500/60 bg-blue-900/20" : "border-yellow-500/60 bg-yellow-900/20"}`}>
                   <div className="flex items-center gap-2 mb-1"><span className="text-sm">{lvl === 1 ? "⭐" : lvl === 2 ? "💎" : "👑"}</span><span className={`text-xs font-bold ${lvl === 1 ? "text-gray-300" : lvl === 2 ? "text-blue-300" : "text-yellow-300"}`}>{lvl === 1 ? "1. Seviye" : lvl === 2 ? "2. Seviye" : "3. Seviye (MAX)"}</span><span className="ml-auto text-xs text-gray-400">⚔️{sel.atk + lvl - 1} ❤️{sel.hp + lvl - 1}</span></div>
@@ -269,7 +274,11 @@ export default function ShopView() {
               );
 
               return a ? (
-                <div key={i} className="flex-shrink-0 flex flex-col items-center" onClick={() => {
+                <div key={i} className="flex-shrink-0 flex flex-col items-center"
+                onDragOver={(e) => { if (dragItem) { e.preventDefault(); setDragOver(i); } }}
+                onDragLeave={() => setDragOver(null)}
+                onDrop={(e) => { e.preventDefault(); if (dragItem) { buy(dragItem, i); setDragItem(null); setDragOver(null); } }}
+                onClick={() => {
                   if (sel?.pendingTargetBuff) {
                     if (team[i] && i !== sel.sourceSlot) {
                       const atkBuff = Number.isFinite(Number(sel?.targetBuff?.atk)) ? Number(sel.targetBuff.atk) : 0;
@@ -303,9 +312,12 @@ export default function ShopView() {
                 <div key={i} className="flex-shrink-0">
                   <button
                     onClick={() => { if (sel) buy(sel, i); else if (selI !== null) { const newTeam = [...team]; [newTeam[selI], newTeam[i]] = [newTeam[i], newTeam[selI]]; setTeam(newTeam); setSelI(null); } }}
-                    className={`w-32 h-40 rounded-2xl transition-all flex items-center justify-center group/slot ${sel || selI !== null ? "border-2 border-dashed border-green-400/70 bg-green-500/5 text-green-400/50 hover:border-green-400 hover:bg-green-500/10 hover:scale-105 active:scale-95" : "border-0 bg-transparent"}`}
+                    onDragOver={(e) => { if (dragItem) { e.preventDefault(); setDragOver(i); } }}
+                    onDragLeave={() => setDragOver(null)}
+                    onDrop={(e) => { e.preventDefault(); if (dragItem) { buy(dragItem, i); setDragItem(null); setDragOver(null); } }}
+                    className={`w-32 h-40 rounded-2xl transition-all flex items-center justify-center group/slot ${dragOver === i ? "border-2 border-green-400 bg-green-500/20 scale-105" : sel || selI !== null || dragItem ? "border-2 border-dashed border-green-400/70 bg-green-500/5 text-green-400/50 hover:border-green-400 hover:bg-green-500/10 hover:scale-105 active:scale-95" : "border-0 bg-transparent"}`}
                   >
-                    <span className={`transition-transform duration-300 ${sel || selI !== null ? "group-hover/slot:rotate-90 text-green-400/50" : "text-white/20 text-xs"}`}>+</span>
+                    <span className={`transition-transform duration-300 ${dragOver === i ? "rotate-90 text-green-400" : sel || selI !== null || dragItem ? "group-hover/slot:rotate-90 text-green-400/50" : "text-white/20 text-xs"}`}>+</span>
                   </button>
                 </div>
               );
