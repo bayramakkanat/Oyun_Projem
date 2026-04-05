@@ -236,9 +236,9 @@ export default function ShopView() {
         <div className="glass-panel-strong rounded-[2.5rem] p-3 sm:p-4 mb-3 border-2 border-green-500/20 shadow-2xl hover:border-green-500/40 transition-all duration-500">
           <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-4">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-green-400 to-emerald-300" style={{ animation: "shimmer 3s ease-in-out infinite", animationDelay: "0.5s" }}>⚔️ SAVAŞ TAKIMI</span>
-            {sel?.pendingTargetBuff ? <span className="text-cyan-300 animate-pulse"> 🎯 Buff vermek için hedef seç!</span> : sel ? <span className="text-yellow-300"> - Slot seç</span> : null}
+            {sel?.pendingTargetBuff ? <span className="text-cyan-300 animate-pulse"> 🎯 Güçlendirmek istediğin hayvanı seç!</span> : sel ? <span className="text-yellow-300"> - Slot seç</span> : null}
           </div>
-          {sel?.pendingTargetBuff && <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center">🎯 Buff vermek istediğin hayvana tıkla!</div>}
+          {sel?.pendingTargetBuff && <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center">🎯 Güçlendirmek istediğin hayvana tıkla!</div>}
 
           <div className="flex gap-1 sm:gap-2 w-full py-3 justify-center">
             {team.map((a, i) => {

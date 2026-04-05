@@ -182,8 +182,7 @@ export function useBattle({
         setNewTier(currentMaxT);
         setLastT(currentMaxT);
       } else {
-        // Önce TurnBanner gösterilsin; banner onDone'da shop açılır.
-        // GameRouter bu sinyali dinliyor: pendingShopRef üzerinden.
+        // Banner sinyali ver — GameRouter phase+anim+banner'ı başlatır
         setPendingShop(true);
       }
     }, delayMs);
