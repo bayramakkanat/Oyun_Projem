@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useGameContext } from "../context/GameContext";
-import TurnBanner from "./TurnBanner";
 import VersusIntro from "./VersusIntro";
 import BattleView from "./BattleView";
 import GuideScreen from "./GuideScreen";
@@ -52,8 +51,6 @@ export default function GameRouter() {
     setGuideLvl,
     newTier,
     setNewTier,
-    pendingShop, setPendingShop,
-    pendingEndTurnAnims, setPendingEndTurnAnims,
     phase,
     showDebugPanel,
     setShowDebugPanel,
@@ -117,21 +114,6 @@ export default function GameRouter() {
     handleLogout,
     handleUpdateProfile,
   } = useGameContext();
-  // ─── Tur geçiş banner'ı ─────────────────────────────────────────────────────
-  // Akış: savaş biter → transitionToShop → setPendingShop(true)
-  //   → phase="shop" + buff animasyonları başlar + banner gösterilir (üstte)
-  //   → banner kapanır → ShopView zaten hazır, animasyonlar devam eder
-  const [showTurnBanner, setShowTurnBanner] = useState(false);
-
-  useEffect(() => {
-    if (pendingShop) {
-      setPendingShop(false);
-      setPhase("shop");
-      setPendingEndTurnAnims(true);
-      setShowTurnBanner(true);
-    }
-  }, [pendingShop, setPendingShop, setPhase, setPendingEndTurnAnims]);
-
   // ─── Versus intro: onRoomReady'den önce göster ───────────────────────────
   const [versusIntroRoom, setVersusIntroRoom] = useState(null);
   const notifications = (
@@ -342,13 +324,6 @@ export default function GameRouter() {
         <BattleView />
       )}
 
-      {/* Tur geçiş banner'ı — her şeyin üstünde render edilir */}
-      {showTurnBanner && (
-        <TurnBanner
-          turn={turn}
-          onDone={() => setShowTurnBanner(false)}
-        />
-      )}
     </div>
   );
 }
