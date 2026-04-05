@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import {
   loadCollection,
   saveCollection,
@@ -21,6 +21,18 @@ export function useBattleResults({
   setOver,
   versusRoom,
 }) {
+  // ─── Ref'ler: closure stale sorununu önler ───────────────────────────────
+  const gameModeRef     = useRef(gameMode);
+  const turnRef         = useRef(turn);
+  const livesRef        = useRef(lives);
+  const userRef         = useRef(user);
+  const saveTasksDBRef  = useRef(saveTasksToDB);
+
+  useEffect(() => { gameModeRef.current    = gameMode;     }, [gameMode]);
+  useEffect(() => { turnRef.current        = turn;         }, [turn]);
+  useEffect(() => { livesRef.current       = lives;        }, [lives]);
+  useEffect(() => { userRef.current        = user;         }, [user]);
+  useEffect(() => { saveTasksDBRef.current = saveTasksToDB;}, [saveTasksToDB]);
   const updateCollectionStats = useCallback(
     (updatedTeam, won) => {
       if (gameMode !== "arena") return;
@@ -73,9 +85,16 @@ export function useBattleResults({
     [gameMode, user, unlockAchievement]
   );
 
+  // updateTaskProgress: tüm değerleri ref'ten okur → stale closure yok
   const updateTaskProgress = useCallback(
     (updatedTeam, won) => {
-      const taskData = loadTasks(user?.uid);
+      const uid      = userRef.current?.uid;
+      const mode     = gameModeRef.current;
+      const curTurn  = turnRef.current;
+      const curLives = livesRef.current;
+      const dbSave   = saveTasksDBRef.current;
+
+      const taskData = loadTasks(uid);
       if (!taskData) return;
 
       const updateTask = (tasks) =>
@@ -84,25 +103,25 @@ export function useBattleResults({
           let progress = t.progress;
           if (t.type === "battles") progress += 1;
           if (t.type === "wins" && won) progress += 1;
-          if (t.type === "arena_wins" && won && gameMode === "arena") progress += 1;
+          if (t.type === "arena_wins" && won && mode === "arena") progress += 1;
           if (t.type === "tier1_wins" && won && updatedTeam.some((p) => p?.tier === 1)) progress += 1;
           if (t.type === "lvl2" && updatedTeam.some((p) => p?.lvl >= 2)) progress = Math.max(progress, 1);
-          if (t.type === "comeback" && won && lives === 1) progress += 1;
+          if (t.type === "comeback" && won && curLives === 1) progress += 1;
           if (t.type === "unique_animals") {
             const used = new Set(updatedTeam.filter(Boolean).map((p) => p.nick));
             progress = Math.max(progress, used.size);
           }
-          if (t.type === "reach_turn10" && turn >= 10 && gameMode === "arena") progress = 1;
+          if (t.type === "reach_turn10" && curTurn >= 10 && mode === "arena") progress = 1;
           const done = progress >= t.target;
           return { ...t, progress: Math.min(progress, t.target), done };
         });
 
-      taskData.daily.tasks = updateTask(taskData.daily.tasks);
+      taskData.daily.tasks  = updateTask(taskData.daily.tasks);
       taskData.weekly.tasks = updateTask(taskData.weekly.tasks);
-      saveTasks(taskData, user?.uid);
-      if (saveTasksToDB) saveTasksToDB(taskData);
+      saveTasks(taskData, uid);
+      if (dbSave) dbSave(taskData);
     },
-    [user, gameMode, turn, lives, saveTasksToDB]
+    [] // Tüm değerler ref üzerinden okunuyor — dependency yok
   );
 
   const handleArenaGameOver = useCallback(
