@@ -183,7 +183,7 @@ export default function MenuScreen() {
               className="text-6xl font-black mb-2 text-center bg-gradient-to-b from-white via-gray-200 to-gray-500 bg-clip-text text-transparent drop-shadow-2xl italic tracking-tighter"
               style={{ animation: "menuTitleGlow 3s ease-in-out infinite" }}
             >
-              HAYVAN SAVAŞÇILARI
+              ANIMATHON
             </h1>
             <p className="text-gray-400 mb-12 text-center font-medium tracking-wide uppercase text-xs opacity-60">
               Takımını Kur • Stratejini Belirle • Arenaya Hükmet
