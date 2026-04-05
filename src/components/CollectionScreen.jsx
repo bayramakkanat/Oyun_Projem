@@ -21,13 +21,11 @@ export default function CollectionScreen({ onClose, userId }) {
     return { current: data.unlocked ? 1 : 0, max: 1, done: data.task3 };
   };
 
-  // Kilitli hayvanın görev tamamlanma oranı (0.0 – 1.0)
-  // Kullanım: 3/3, Galibiyet: 5/5, Seviye: 0/1 — ağırlıklı toplam
+  // Görev tamamlanma oranı (0.0 – 1.0) — kullanım + galibiyet ağırlıklı
   const getProgressRatio = (data) => {
     const useRatio = Math.min(data.used, 3) / 3;
     const winRatio = Math.min(data.wins, 5) / 5;
-    const lvlRatio = data.unlocked ? 1 : 0;
-    return (useRatio + winRatio + lvlRatio) / 3;
+    return (useRatio + winRatio) / 2;
   };
 
   return (
@@ -123,13 +121,11 @@ export default function CollectionScreen({ onClose, userId }) {
                 filter: !isUnlocked
                   ? (() => {
                       const r = getProgressRatio(data);
-                      // 0%  → brightness(0) opacity(0.15) — tamamen karanlık
-                      // 33% → brightness(0) opacity(0.25)
-                      // 66% → brightness(0.08) opacity(0.35) — hafif form belli
-                      // 100%→ brightness(0.15) opacity(0.45) — silüet belirgin
-                      const opacity    = 0.15 + r * 0.30;
-                      const brightness = r * 0.15;
-                      return `brightness(${brightness}) opacity(${opacity.toFixed(2)}) blur(${r < 0.3 ? 1.5 : r < 0.6 ? 1 : 0.5}px)`;
+                      // r=0: grayscale+çok karanlık, hayvan şekli hafif belli
+                      // r=1: grayscale+daha aydınlık, silüet net görünür
+                      const brightness = 0.15 + r * 0.45; // 0.15 → 0.60
+                      const blur       = 1.5 - r * 1.0;   // 1.5px → 0.5px
+                      return `grayscale(1) brightness(${brightness.toFixed(2)}) blur(${blur.toFixed(1)}px)`;
                     })()
                   : isComplete
                   ? "drop-shadow(0 0 16px rgba(251,191,36,0.7))"
@@ -143,18 +139,19 @@ export default function CollectionScreen({ onClose, userId }) {
             </span>
           )}
 
-          {/* Kilit overlay — progress oranına göre */}
+          {/* Kilit overlay — ilerlemeye göre kilit soluklaşır */}
           {!isUnlocked && (() => {
             const r = getProgressRatio(data);
-            const pct = Math.round(r * 100);
+            // İlerleme arttıkça kilit daha soluk ve küçük görünür
+            const lockOpacity = 0.9 - r * 0.6; // 0.9 → 0.3
+            const lockScale   = 1.0 - r * 0.3;  // 1.0 → 0.7
             return (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-3xl" style={{ opacity: 0.4 + (1 - r) * 0.6 }}>🔒</span>
-                  {pct > 0
-                    ? <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: `rgba(${Math.round(100 + r*155)}, ${Math.round(100 + r*100)}, 255, 0.8)` }}>{pct}%</span>
-                    : <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Kilitli</span>
-                  }
+              <div className="absolute inset-0 flex items-center justify-center"
+                style={{ background: `rgba(0,0,0,${0.45 - r * 0.35})` }}>
+                <div className="flex flex-col items-center gap-1"
+                  style={{ opacity: lockOpacity, transform: `scale(${lockScale.toFixed(2)})` }}>
+                  <span className="text-3xl">🔒</span>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Kilitli</span>
                 </div>
               </div>
             );
