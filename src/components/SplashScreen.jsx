@@ -44,7 +44,7 @@ export default function SplashScreen({ fading }) {
             lineHeight: 1,
           }}
         >
-          ⚔️
+          🐾
         </div>
 
         {/* Oyun adı */}
@@ -63,7 +63,7 @@ export default function SplashScreen({ fading }) {
             fontFamily: "system-ui, -apple-system, sans-serif",
           }}
         >
-          Pet Arena
+          Animathon
         </div>
 
         {/* Alt başlık */}
