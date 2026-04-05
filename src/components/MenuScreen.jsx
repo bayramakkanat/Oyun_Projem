@@ -477,7 +477,7 @@ export default function MenuScreen() {
             </button>
             <h2 className="text-4xl font-black mb-1">BAŞARIMLAR</h2>
            <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">
-            {stats.achievements.length} / {ACHIEVEMENTS_DEF.filter(a => ["any","standard","arena"].includes(a.mode)).length} açıldı
+            {ACHIEVEMENTS_DEF.filter(a => ["any","standard","arena"].includes(a.mode) && stats.achievements.includes(a.id)).length} / {ACHIEVEMENTS_DEF.filter(a => ["any","standard","arena"].includes(a.mode)).length} açıldı
             </p>
 
             {/* Kategori sekmeleri — her zaman üstte sabit */}
