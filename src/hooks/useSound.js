@@ -167,6 +167,26 @@ export const playSound = (type) => {
       g.gain.setValueAtTime(0.16, now);
       g.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
       o.start(now); o.stop(now + 0.25);
+
+    } else if (type === "tier_up") {
+      // Dramatik yükseliş: alçak → yüksek 5 nota + final chord
+      const notes = [261, 329, 392, 523, 659, 784];
+      notes.forEach((freq, i) => {
+        makeOsc(freq, 0.22, now + i * 0.09, now + i * 0.09 + 0.18);
+      });
+      // Final chord — parlak
+      [784, 988, 1175].forEach((freq, i) => {
+        makeOsc(freq, 0.18, now + 0.6 + i * 0.02, now + 1.1);
+      });
+
+    } else if (type === "friend_request") {
+      // Nazik bildirim: iki kısa ton
+      makeOsc(660, 0.15, now,        now + 0.12, "sine");
+      makeOsc(880, 0.12, now + 0.14, now + 0.25, "sine");
+
+    } else if (type === "ui_click") {
+      // Hafif UI tıklama geri bildirimi
+      makeOsc(520, 0.08, now, now + 0.06, "triangle");
     }
 
   } catch (_e) {
