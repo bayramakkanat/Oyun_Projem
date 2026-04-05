@@ -21,6 +21,15 @@ export default function CollectionScreen({ onClose, userId }) {
     return { current: data.unlocked ? 1 : 0, max: 1, done: data.task3 };
   };
 
+  // Kilitli hayvanın görev tamamlanma oranı (0.0 – 1.0)
+  // Kullanım: 3/3, Galibiyet: 5/5, Seviye: 0/1 — ağırlıklı toplam
+  const getProgressRatio = (data) => {
+    const useRatio = Math.min(data.used, 3) / 3;
+    const winRatio = Math.min(data.wins, 5) / 5;
+    const lvlRatio = data.unlocked ? 1 : 0;
+    return (useRatio + winRatio + lvlRatio) / 3;
+  };
+
   return (
     <div className="min-h-screen text-white p-4" style={{
       background: "radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a0f 100%)"
@@ -112,7 +121,16 @@ export default function CollectionScreen({ onClose, userId }) {
                 height: "75%",
                 objectFit: "contain",
                 filter: !isUnlocked
-                  ? "brightness(0) opacity(0.2) blur(1px)"
+                  ? (() => {
+                      const r = getProgressRatio(data);
+                      // 0%  → brightness(0) opacity(0.15) — tamamen karanlık
+                      // 33% → brightness(0) opacity(0.25)
+                      // 66% → brightness(0.08) opacity(0.35) — hafif form belli
+                      // 100%→ brightness(0.15) opacity(0.45) — silüet belirgin
+                      const opacity    = 0.15 + r * 0.30;
+                      const brightness = r * 0.15;
+                      return `brightness(${brightness}) opacity(${opacity.toFixed(2)}) blur(${r < 0.3 ? 1.5 : r < 0.6 ? 1 : 0.5}px)`;
+                    })()
                   : isComplete
                   ? "drop-shadow(0 0 16px rgba(251,191,36,0.7))"
                   : "drop-shadow(0 0 8px rgba(167,139,250,0.4))",
@@ -125,15 +143,22 @@ export default function CollectionScreen({ onClose, userId }) {
             </span>
           )}
 
-          {/* Kilit overlay */}
-          {!isUnlocked && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-3xl">🔒</span>
-                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Kilitli</span>
+          {/* Kilit overlay — progress oranına göre */}
+          {!isUnlocked && (() => {
+            const r = getProgressRatio(data);
+            const pct = Math.round(r * 100);
+            return (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-3xl" style={{ opacity: 0.4 + (1 - r) * 0.6 }}>🔒</span>
+                  {pct > 0
+                    ? <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: `rgba(${Math.round(100 + r*155)}, ${Math.round(100 + r*100)}, 255, 0.8)` }}>{pct}%</span>
+                    : <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Kilitli</span>
+                  }
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Unlocked parlama efekti — alt kenar */}
           {isUnlocked && (
