@@ -52,6 +52,8 @@ export default function GameRouter() {
     setGuideLvl,
     newTier,
     setNewTier,
+    pendingShop, setPendingShop,
+    pendingEndTurnAnims, setPendingEndTurnAnims,
     phase,
     showDebugPanel,
     setShowDebugPanel,
@@ -115,18 +117,17 @@ export default function GameRouter() {
     handleLogout,
     handleUpdateProfile,
   } = useGameContext();
-  // ─── Tur geçiş banner'ı: "battle" → "shop" geçişini yakala ────────────────
+  // ─── Tur geçiş banner'ı ─────────────────────────────────────────────────────
+  // Akış: savaş biter → transitionToShop → setPendingShop(true)
+  //        → banner gösterilir → onDone → setPhase("shop") + buff animasyonları
   const [showTurnBanner, setShowTurnBanner] = useState(false);
-  const prevPhaseRef = useRef(phase);
 
   useEffect(() => {
-    const prev = prevPhaseRef.current;
-    prevPhaseRef.current = phase;
-    // Sadece savaştan alışverişe geçişte ve ilk turdan sonra göster
-    if (prev === "battle" && phase === "shop" && turn > 1) {
+    if (pendingShop) {
+      setPendingShop(false);
       setShowTurnBanner(true);
     }
-  }, [phase, turn]);
+  }, [pendingShop, setPendingShop]);
 
   // ─── Versus intro: onRoomReady'den önce göster ───────────────────────────
   const [versusIntroRoom, setVersusIntroRoom] = useState(null);
@@ -342,7 +343,11 @@ export default function GameRouter() {
       {showTurnBanner && (
         <TurnBanner
           turn={turn}
-          onDone={() => setShowTurnBanner(false)}
+          onDone={() => {
+            setShowTurnBanner(false);
+            setPhase("shop");
+            setPendingEndTurnAnims(true);
+          }}
         />
       )}
     </div>

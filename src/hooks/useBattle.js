@@ -51,6 +51,7 @@ export function useBattle({
   setNewTier, setLastT, lastT,
   setNewlyOpenedSlot,
   setPendingEndTurnAnims,
+  setPendingShop,
   setShowSwordClash,
   setArenaOpponent,
   setVersusReady, setOpponentReady,
@@ -175,12 +176,15 @@ export function useBattle({
     setShowSwordClash(false);
 
     setTimeout(() => {
-      setPendingEndTurnAnims(true);
       if (willOpenNewTier) {
+        // Yeni kademe ekranı — banner yok, direkt geçiş
+        setPendingEndTurnAnims(true);
         setNewTier(currentMaxT);
         setLastT(currentMaxT);
       } else {
-        setPhase("shop");
+        // Önce TurnBanner gösterilsin; banner onDone'da shop açılır.
+        // GameRouter bu sinyali dinliyor: pendingShopRef üzerinden.
+        setPendingShop(true);
       }
     }, delayMs);
   };
