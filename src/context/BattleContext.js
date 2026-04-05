@@ -76,7 +76,6 @@ export const BattleProvider = ({ children }) => {
   const [pGold,               setPGold]               = useState(0);
   const [showSwordClash,      setShowSwordClash]      = useState(false);
   const [pendingEndTurnAnims, setPendingEndTurnAnims] = useState(false);
-  const [pendingShop,         setPendingShop]         = useState(false);
   const [versusReady,         setVersusReady]         = useState(false);
   const [opponentReady,       setOpponentReady]       = useState(false);
 
@@ -155,7 +154,7 @@ export const BattleProvider = ({ children }) => {
     gameMode, isDebugBattle, setIsDebugBattle, setPGold, setRewards,
     setOver, setVictory, setGameStarted, setShowDebugPanel,
     setNewTier, setLastT, lastT,
-    setNewlyOpenedSlot, setPendingEndTurnAnims, setPendingShop, setShowSwordClash,
+    setNewlyOpenedSlot, setPendingEndTurnAnims, setShowSwordClash,
     setArenaOpponent, setVersusReady, setOpponentReady,
     versusReady, versusRoom, versusPhase,
     battleSpeedRef, isPausedRef, battleGoldRef, lastProcessedStepRef,
@@ -290,7 +289,6 @@ export const BattleProvider = ({ children }) => {
     pGold, setPGold,
     showSwordClash, setShowSwordClash,
     pendingEndTurnAnims, setPendingEndTurnAnims,
-    pendingShop, setPendingShop,
     versusReady, setVersusReady,
     opponentReady, setOpponentReady,
     // Refs
@@ -309,7 +307,7 @@ export const BattleProvider = ({ children }) => {
     phase, pT, eT, log, step,
     isBattleOver, bossChallenge, bossResult, bossRewards,
     arenaResult, arenaOpponent, pGold, showSwordClash,
-    pendingEndTurnAnims, pendingShop, versusReady, opponentReady,
+    pendingEndTurnAnims, versusReady, opponentReady,
     isBossTurn, currentDiffConfig, diffMult, difficulty,
     battle, startBossBattle, startVersusBattle, versusSetReady,
     offerBoss, acceptBoss, declineBoss, goToShop, reset, restoreGame,
