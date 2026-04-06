@@ -239,16 +239,25 @@ export const BattleProvider = ({ children }) => {
   const restoreGame = useCallback((saved) => {
   const cfg = DIFFICULTY_CONFIGS[saved.difficultyLevel] || DIFFICULTY_CONFIGS.normal;
   const savedMode = saved.gameMode ?? "standard";
+
+  // Clamp: makul sınırları aşan değerleri reddet (hile önlemi)
+  const MAX_GOLD  = 200;
+  const MAX_LIVES = 10;
+  const MAX_TURN  = 200;
+  const safeGold  = Math.max(0, Math.min(saved.gold  ?? cfg.startingGold,  MAX_GOLD));
+  const safeLives = Math.max(1, Math.min(saved.lives ?? cfg.startingLives, MAX_LIVES));
+  const safeTurn  = Math.max(1, Math.min(saved.turn  ?? 1,                  MAX_TURN));
+
   // ShopContext
-  setGold(saved.gold ?? cfg.startingGold);
-  setTurnAndRef(saved.turn ?? 1);
+  setGold(safeGold);
+  setTurnAndRef(safeTurn);
   setTeam(saved.team ?? [null, null, null, null, null, null]);
   setShop([]);
   setShopResetKey((k) => k + 1);
   setRewards([]);
   // UIContext
-  setWins(saved.wins ?? 0);
-  setLives(saved.lives ?? cfg.startingLives);
+  setWins(Math.max(0, saved.wins ?? 0));
+  setLives(safeLives);
   setAnims({});
   setGuideLvl({});
   if (savedMode !== "versus") {
@@ -256,7 +265,6 @@ export const BattleProvider = ({ children }) => {
     setVersusRoom(null);
   }
   // BattleContext
-  if (saved.shop && saved.shop.length > 0) setShop(saved.shop);
   setPhase(saved.phase ?? "shop");
   setOver(false);
   setVictory(false);

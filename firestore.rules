@@ -12,9 +12,6 @@ service cloud.firestore {
     }
 
     // ─── arena_teams ─────────────────────────────────────────────────────────
-    // Doküman ID formatı: "{uid}_turn{N}"
-    // Login olan herkes okuyabilir (rakip takım çekme)
-    // Sadece kendi UID'iyle başlayan dokümanı yazabilir
     match /arena_teams/{docId} {
       allow read: if isLoggedIn();
       allow write: if isLoggedIn()
@@ -22,38 +19,31 @@ service cloud.firestore {
     }
 
     // ─── arena_leaderboard_{ay} ───────────────────────────────────────────────
-    // Koleksiyon adı dinamik: arena_leaderboard_2025_03 gibi
-    // Tüm arena_leaderboard_* koleksiyonlarını wildcard ile yakala
-    // Doküman ID = kullanıcının UID'i
-    // Login olan herkes okuyabilir (liderboard görüntüleme)
-    // Sadece kendi dokümanını yazabilir
     match /{leaderboardCol}/{uid} {
       allow read: if isLoggedIn()
                   && leaderboardCol.matches('arena_leaderboard_.*');
       allow write: if isOwner(uid)
-                   && leaderboardCol.matches('arena_leaderboard_.*');
+                   && leaderboardCol.matches('arena_leaderboard_.*')
+                   // Hile önlemi: makul olmayan tur sayısı yazılamaz
+                   && request.resource.data.bestTurn <= 200
+                   && request.resource.data.totalGames <= 10000
+                   && request.resource.data.xp <= 100000;
     }
 
     // ─── user_profiles ────────────────────────────────────────────────────────
-    // Login olan herkes okuyabilir (rakip profil görüntüleme, arena XP)
-    // Sadece kendi profilini yazabilir
     match /user_profiles/{uid} {
       allow read: if isLoggedIn();
       allow write: if isOwner(uid);
     }
 
     // ─── user_tasks ───────────────────────────────────────────────────────────
-    // Tamamen özel — sadece sahibi okuyup yazabilir
     match /user_tasks/{uid} {
       allow read, write: if isOwner(uid);
     }
 
     // ─── usernames ────────────────────────────────────────────────────────────
-    // Herkes okuyabilir (kullanıcı adı benzersizlik kontrolü)
-    // Sadece kendi kullanıcı adı dokümanını yazabilir
-    // (doküman ID = username, içinde uid alanı var)
     match /usernames/{username} {
-      allow read: if isLoggedIn();
+      allow read: if true;
       allow create: if isLoggedIn()
                     && request.resource.data.uid == request.auth.uid;
       allow update: if isLoggedIn()
@@ -63,9 +53,6 @@ service cloud.firestore {
     }
 
     // ─── animal_stats ─────────────────────────────────────────────────────────
-    // Kolektif istatistik (hangi hayvan ne kadar kullanıldı/kazandı)
-    // Login olan herkes okuyup yazabilir (increment işlemleri)
-    // Sadece "used" ve "wins" alanlarına dokunulabilir
     match /animal_stats/{nick} {
       allow read: if isLoggedIn();
       allow write: if isLoggedIn()
@@ -73,9 +60,6 @@ service cloud.firestore {
     }
 
     // ─── versus_rooms ─────────────────────────────────────────────────────────
-    // Oda host'u veya guest'i okuyup yazabilir
-    // Create: sadece login olan biri, host.uid = kendi UID'i olmalı
-    // Update/Delete: host veya guest olduğun oda
     match /versus_rooms/{code} {
       allow read: if isLoggedIn()
                   && (resource == null

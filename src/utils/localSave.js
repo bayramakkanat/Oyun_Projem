@@ -1,5 +1,9 @@
 const SAVE_KEY = "petgame_save";
 
+// Basit checksum — manuel localStorage düzenlemesini engeller
+const makeHash = (turn, gold, lives) =>
+  btoa(`${turn}|${gold}|${lives}|petgame`).slice(0, 12);
+
 export function saveGameState(state) {
   try {
     const data = {
@@ -8,11 +12,11 @@ export function saveGameState(state) {
       lives: state.lives,
       wins: state.wins,
       team: state.team,
-      shop: state.shop,
       phase: state.phase,
       gameMode: state.gameMode,
       difficultyLevel: state.difficultyLevel,
       savedAt: Date.now(),
+      _h: makeHash(state.turn, state.gold, state.lives),
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch (e) {
@@ -24,7 +28,17 @@ export function loadGameState() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    const { _h, ...rest } = parsed;
+    // Hash kontrolü — uyuşmazsa kayıt geçersiz say ve sil
+    if (_h) {
+      const expected = makeHash(rest.turn, rest.gold, rest.lives);
+      if (_h !== expected) {
+        localStorage.removeItem(SAVE_KEY);
+        return null;
+      }
+    }
+    return rest;
   } catch (e) {
     return null;
   }
