@@ -63,7 +63,6 @@ const deleteExpiredDocs = async (collRef, label) => {
       }
     }
     if (deleted > 0) {
-      console.info(`[Cleanup] ${label}: ${deleted} doküman silindi.`);
     }
   } catch (err) {
     logError(err, `useCleanup:${label}`);
@@ -133,7 +132,6 @@ export function useCleanup({ user }) {
           }
         }
         if (deletedRooms > 0) {
-          console.info(`[Cleanup] versus_rooms: ${deletedRooms} oda silindi.`);
         }
       } catch (err) {
         logError(err, "useCleanup:versus_rooms");
@@ -147,7 +145,6 @@ export function useCleanup({ user }) {
           const ref = doc(db, key, uid);
           try {
             await deleteDoc(ref);
-            console.info(`[Cleanup] ${key}/${uid} silindi.`);
           } catch {
             // Doküman zaten yoksa hata fırlatır — önemli değil, geç.
           }
@@ -173,9 +170,6 @@ export function useCleanup({ user }) {
           }
         }
         if (deletedArena > 0) {
-          console.info(
-            `[Cleanup] arena_teams: ${deletedArena} takım silindi.`
-          );
         }
       } catch (err) {
         logError(err, "useCleanup:arena_teams");
