@@ -8,13 +8,13 @@ const pwr = (a) => {
 
 export const getDesc = (a, lvlOverride) => {
   const m = lvlOverride || pwr(a);
-  if (a.ability === AB.FAINT_BUFF) return `Ölünce: Rastgele dosta +${m} Atak, +${m} Can verir`;
+  if (a.ability === AB.FAINT_BUFF) return `Ölünce: Rastgele bir dosta +${m} atak ve +${m} can verir`;
   if (a.ability === AB.NONE) return "Yetenek yok";
   if (a.ability === AB.START_BUFF) return `Savaş başı: Kendine +${m} Atak verir`;
   if (a.ability === AB.END_HEAL_ONE)
     return `Tur sonu: Rastgele dosta +${m} Can verir (kalıcı)`;
-  if (a.ability === AB.FAINT_GOLD) return `Ölünce: +${m} altın`;
-  if (a.ability === AB.SELL_GOLD) return `Satınca: +${m} altın`;
+  if (a.ability === AB.FAINT_GOLD) return `Ölünce: +${m} altın kazandırır`;
+  if (a.ability === AB.SELL_GOLD) return `Satınca: fazladan +${m} altın kazandırır`;
   if (a.ability === AB.BUY_BUFF_RANDOM)
     return `Hayvan alınca: Rastgele dosta +${m} Atak, +${m} Can verir (kalıcı)`;
   if (a.ability === AB.START_TEAM_SHIELD) return `Savaş başı: Takıma +${m} Can verir`;
@@ -24,12 +24,12 @@ export const getDesc = (a, lvlOverride) => {
     return `Dost seviye atlayınca: +${m} Atak, +${m} Can kazanır (kalıcı).`;
   if (a.ability === AB.FAINT_COPY) {
     const pct = m === 1 ? 25 : m === 2 ? 50 : 100;
-    return `Ölünce: Rastgele dosta %${pct} stat`;
+    return `Ölünce: Rastgele bir dosta statlarının %${pct}'ini verir`;
   }
   if (a.ability === AB.START_DMG)
-    return `Savaş başı: Rastgele düşmana ${2 * m} hasar`;
+    return `Savaş başı: Rastgele bir düşmana ${2 * m} hasar verir`;
   if (a.ability === AB.ATK_BUFF) return `Her vuruşta: Kendine +${m} Atak verir`;
-  if (a.ability === AB.FAINT_DMG) return `Ölünce: Tüm düşmanlara ${m * 2} hasar`;
+  if (a.ability === AB.FAINT_DMG) return `Ölünce: Tüm düşmanlara ${m * 2} hasar verir`;
   if (a.ability === AB.START_POISON)
     return `Savaş başı: Ön düşmana -${m * 2} Atak uygular`;
   if (a.ability === AB.FRIEND_SUMMON)
@@ -37,10 +37,10 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.SELL_BUFF_FRIEND)
     return `Satınca: Rastgele ${m} dosta +${AM.SELL_BUFF_AMT * m} Atak, +${AM.SELL_BUFF_AMT * m} Can verir (kalıcı).`;
   if (a.ability === AB.SHOP_DISCOUNT)
-    return `Alınca: Sonraki yenilemede tüm hayvanlara ${m} altın indirim`;
+    return `Alınca: Sonraki yenilemede tüm hayvanlara ${m} altın indirim uygular`;
   if (a.ability === AB.FAINT_SHIELD) return `Ölünce: Tüm dostlara +${2 * m} Can verir`;
   if (a.ability === AB.START_SNIPE)
-    return `Savaş başı: Arka düşmana ${3 * m} hasar`;
+    return `Savaş başı: Arka sıradaki düşmana ${3 * m} hasar verir`;
   if (a.ability === AB.FRIEND_FAINT)
     return `Dost ölünce: Kendine +${2 * m} Atak, +${2 * m} Can verir`;
   if (a.ability === AB.END_TEAM_BUFF)
@@ -68,24 +68,22 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.END_BUFF_AHEAD)
     return `Tur sonu: Öndeki 3 dosta +${m * 2} Atak, +${m * 2} Can verir (kalıcı)`;
   if (a.ability === AB.BUY_DISCOUNT_NEXT)
-    return `Mağazada: Hayvanlara -${m} altın indirim`;
+    return `Mağazada: Tüm hayvanlara -${m} altın indirim uygular`;
   if (a.ability === AB.END_SELF_BUFF)
     return `Tur sonu: Kendine +${m * 3} Atak, +${m * 3} Can verir (kalıcı)`;
   if (a.ability === AB.START_FEAR)
     return `Savaş başı: Ön 2 düşmanın Atağını -${10 * m} azaltır`;
   if (a.ability === AB.HURT_DMG)
-    return `Hasar alınca: Rastgele düşmana ${9 * m} hasar`;
+    return `Hasar alınca: Rastgele bir düşmana ${9 * m} hasar verir`;
   if (a.ability === AB.START_TRAMPLE)
     return `Savaş başı: Kendine +${5 * m} Atak verir. Taşan hasar arkadaki düşmana geçer.`;
   if (a.ability === AB.FAINT_RAGE)
     return `Ölünce: Tüm takıma +${8 * m} Atak, +${8 * m} Can verir`;
-  if (a.ability === AB.START_TRIPLE)
-    return `Savaş başı: İlk ${m} saldırı 3x hasar`;
   if (a.ability === AB.KILL_FEAR_ALL)
     return `Öldürünce: Tüm düşmanlara -${5 * m} Atak, -${5 * m} Can uygular`;
   if (a.ability === AB.START_FREEZE_ENEMY)
     return `Savaş başı: Ön ve arka düşmanın Atağını %${33 * m} azaltır`;
-  if (a.ability === AB.END_GAIN_GOLD) return `Tur sonu: +${m} altın`;
+  if (a.ability === AB.END_GAIN_GOLD) return `Tur sonu: +${m} altın kazandırır`;
   if (a.ability === AB.START_FIRE)
     return `Savaş başı: Tüm düşmanlara ${6 * m} hasar verir. Kendine +${4 * m} Atak kazanır (kalıcı).`;
   if (a.ability === AB.STAG_COMBO)
@@ -93,9 +91,8 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.DEVOUR)
     return `Öldürünce: Düşmanın statlarının %${30 + 10 * m}'unu alır.`;
   if (a.ability === AB.FAINT_WAVE)
-    return `Ölünce: Tüm düşmanlara ${9 * m} hasar`;
-  if (a.ability === AB.DOUBLE) return `Tüm saldırılar: 2x hasar`;
-  if (a.ability === AB.WEAKEN_STRONG)
+    return `Ölünce: Tüm düşmanlara ${9 * m} hasar verir`;
+    if (a.ability === AB.WEAKEN_STRONG)
     return `Savaş başı: En güçlü düşmanın Atak ve Can değerlerini %${25 * m} azaltır`;
   if (a.ability === AB.KILL_HEAL_TEAM)
     return `Öldürünce: Takıma +${3 * m} Atak, +${3 * m} Can verir (kalıcı)`;
@@ -108,7 +105,7 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.SELL_BUFF_SHOP)
     return `Satınca: Mağazadaki hayvanlara +${2 * m} Atak, +${2 * m} Can verir (kalıcı)`;
   if (a.ability === AB.BUY_TARGET_HP)
-    return `Satın alınınca: Seçilen dosta +${3 * m} Can verir (kalıcı)`;
+    return `Satın alınınca: Seçilen dosta kalıcı olarak +${3 * m} can verir`;
   if (a.ability === AB.SUMMON_BUFF)
     return `Savaşta çıkan yavruya +${AM.SUMMON_BUFF_AMT * m} Atak, +${AM.SUMMON_BUFF_AMT * m} Can verir`;
   if (a.ability === AB.SUMMON_RETRIGGER)
@@ -117,7 +114,7 @@ export const getDesc = (a, lvlOverride) => {
     return `Ölünce: Tüm takıma +${8 * m} Atak, +${8 * m} Can verir`;
   if (a.ability === AB.BUY_TARGET_BUFF) {
     const buffAmount = m === 1 ? 1 : m === 2 ? 2 : 4;
-    return `Satın alınınca: Seçilen dosta +${buffAmount} Atak, +${buffAmount} Can verir (kalıcı)`;
+    return `Satın alınınca: Seçilen dosta kalıcı olarak +${buffAmount} atak ve +${buffAmount} can verir`;
   }
   if (a.ability === AB.FAINT_WEAKEN_ALL) {
     const debuff = m === 1 ? 3 : m === 2 ? 5 : 8;

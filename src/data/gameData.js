@@ -30,7 +30,6 @@ export const AB = Object.freeze({
   // Battle start
   START_BUFF            : "start_buff",
   START_TEAM_SHIELD     : "start_team_shield",
-  START_TRIPLE          : "start_triple",
   START_ALL             : "start_all",
   START_ALL_PERM        : "start_all_perm",
   START_SNIPE           : "start_snipe",
@@ -97,7 +96,6 @@ export const AB = Object.freeze({
   STAG_COMBO            : "stag_combo",
   DEVOUR                : "devour",
   WEAKEN_STRONG         : "weaken_strong",
-  DOUBLE                : "double",
   NONE                  : "none",
 });
 
