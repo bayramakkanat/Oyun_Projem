@@ -1,39 +1,19 @@
 import { useState, useEffect } from "react";
 import { initTasks, saveTasks, getTodayString, getWeekStart } from "../utils/helpers";
 
-export default function TasksScreen({ onClose, userId, user, loadTasksFromDB, saveTasksToDB }) {
+export default function TasksScreen({ onClose, userId }) {
   const [taskData, setTaskData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const load = async () => {
-    const localData = initTasks(userId);
-    if (!user || !loadTasksFromDB) {
+    const load = async () => {
+      // Görevler sadece localStorage'dan okunur
+      const localData = initTasks(userId);
       setTaskData(localData);
       setLoading(false);
-      return;
-    }
-    try {
-      const dbData = await loadTasksFromDB();
-      if (dbData) {
-        // Firebase'den gelen veriyi kontrol et, günlük/haftalık sıfırlama yap
-        const today = getTodayString();
-        const weekStart = getWeekStart();
-        if (dbData.daily?.date !== today) dbData.daily = localData.daily;
-        if (dbData.weekly?.weekStart !== weekStart) dbData.weekly = localData.weekly;
-        saveTasks(dbData, userId);
-        setTaskData(dbData);
-      } else {
-        await saveTasksToDB(localData);
-        setTaskData(localData);
-      }
-    } catch {
-      setTaskData(localData);
-    }
-    setLoading(false);
-  };
-  load();
-}, [loadTasksFromDB, saveTasksToDB, user, userId]);
+    };
+    load();
+  }, [userId]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-white">Yükleniyor...</div>;
 if (!taskData) return null;
@@ -64,7 +44,6 @@ if (!taskData) return null;
     t.done = true;
     saveTasks(updated, userId);
     setTaskData({ ...updated });
-    if (saveTasksToDB) await saveTasksToDB(updated);
   }
 }}
   >

@@ -15,7 +15,6 @@ export function useBattleResults({
   wins,
   unlockAchievement,
   updateLeaderboard,
-  saveTasksToDB,
   setArenaResult,
   setLives,
   setOver,
@@ -26,13 +25,11 @@ export function useBattleResults({
   const turnRef         = useRef(turn);
   const livesRef        = useRef(lives);
   const userRef         = useRef(user);
-  const saveTasksDBRef  = useRef(saveTasksToDB);
 
   useEffect(() => { gameModeRef.current    = gameMode;     }, [gameMode]);
   useEffect(() => { turnRef.current        = turn;         }, [turn]);
   useEffect(() => { livesRef.current       = lives;        }, [lives]);
   useEffect(() => { userRef.current        = user;         }, [user]);
-  useEffect(() => { saveTasksDBRef.current = saveTasksToDB;}, [saveTasksToDB]);
   const updateCollectionStats = useCallback(
     (updatedTeam, won) => {
       if (gameMode !== "arena") return;
@@ -92,7 +89,6 @@ export function useBattleResults({
       const mode     = gameModeRef.current;
       const curTurn  = turnRef.current;
       const curLives = livesRef.current;
-      const dbSave   = saveTasksDBRef.current;
 
       const taskData = loadTasks(uid);
       if (!taskData) return;
@@ -119,7 +115,7 @@ export function useBattleResults({
       taskData.daily.tasks  = updateTask(taskData.daily.tasks);
       taskData.weekly.tasks = updateTask(taskData.weekly.tasks);
       saveTasks(taskData, uid);
-      if (dbSave) dbSave(taskData);
+      // Görevler sadece localStorage — DB çağrısı yok
     },
     [] // Tüm değerler ref üzerinden okunuyor — dependency yok
   );
@@ -144,7 +140,7 @@ export function useBattleResults({
           t.done ? { ...t, xpClaimed: true } : t
         );
         saveTasks(freshTaskData, user?.uid);
-        if (saveTasksToDB) saveTasksToDB(freshTaskData);
+        // Görevler sadece localStorage — DB çağrısı yok
       }
 
       const totalWins = Number.isFinite(arenaStats.wins) ? arenaStats.wins : finalWins;
@@ -183,7 +179,7 @@ export function useBattleResults({
         });
       });
     },
-    [user, updateLeaderboard, saveTasksToDB, setArenaResult]
+    [user, updateLeaderboard, setArenaResult]
   );
 
   const handleGameOver = useCallback(

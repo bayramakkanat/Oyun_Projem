@@ -160,30 +160,9 @@ await setDoc(profileRef, {
     logError(err, "Leaderboard Update");
   }
 };
-const loadTasksFromDB = async () => {
-  if (!user) return null;
-  try {
-    const ref = doc(db, "user_tasks", user.uid);
-    const snap = await getDoc(ref);
-    return snap.exists() ? snap.data().tasks : null;
-  } catch (err) {
-    logError(err, "Load Tasks");
-    return null;
-  }
-};
+// Görevler sadece localStorage'da tutulur — Firebase okuma/yazma maliyeti yok
+const loadTasksFromDB = async () => null;
+const saveTasksToDB = async () => {};
 
-const saveTasksToDB = async (taskData) => {
-  if (!user) return;
-  try {
-    const ref = doc(db, "user_tasks", user.uid);
-    await setDoc(ref, {
-      uid: user.uid,
-      tasks: taskData,
-      updatedAt: serverTimestamp(),
-    });
-  } catch (err) {
-    logError(err, "Save Tasks");
-  }
-};
  return { saveArenaTeam, fetchArenaOpponent, updateLeaderboard, loadTasksFromDB, saveTasksToDB };
 }

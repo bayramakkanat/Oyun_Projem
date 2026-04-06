@@ -64,8 +64,6 @@ export default function GameRouter() {
     stats,
     difficultyLevel,
     setDifficultyLevel,
-    loadTasksFromDB,
-    saveTasksToDB,
     unlockAchievement,
     // BattleView için gerekenler
     turn,

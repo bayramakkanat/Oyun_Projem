@@ -71,7 +71,6 @@ export function useBattle({
   fetchArenaOpponent,
   updateLeaderboard,
   setArenaResult,
-  saveTasksToDB,
   difficultyLevel,
   maxT,
   teamSlots,
@@ -123,7 +122,7 @@ export function useBattle({
     useBattleResults({
       user, gameMode, turn, lives, wins,
       unlockAchievement, updateLeaderboard,
-      saveTasksToDB, setArenaResult,
+      setArenaResult,
       setLives, setOver, versusRoom,
     });
 

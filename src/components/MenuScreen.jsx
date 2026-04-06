@@ -26,7 +26,7 @@ export default function MenuScreen() {
     setAuthUsername, authAvatar, setAuthAvatar, settingsUsername, 
     setSettingsUsername, settingsAvatar, setSettingsAvatar, 
     handleEmailAuth, handleGoogleLogin, handleLogout, handleUpdateProfile, 
-    friendsData, loadTasksFromDB, saveTasksToDB, 
+    friendsData,
     setVersusPhase, reset, setGameStarted, unlockAchievement, 
     setVersusAutoJoin, restoreGame, setShowDebugPanel 
   } = useGameContext();
@@ -565,9 +565,6 @@ export default function MenuScreen() {
           <TasksScreen
   onClose={() => setMenuView("main")}
   userId={user?.uid}
-  user={user}
-  loadTasksFromDB={loadTasksFromDB}
-  saveTasksToDB={saveTasksToDB}
 />
           </div>
         )}

@@ -126,8 +126,6 @@ export const BattleProvider = ({ children }) => {
     saveArenaTeam,
     fetchArenaOpponent,
     updateLeaderboard,
-    loadTasksFromDB,
-    saveTasksToDB,
   } = useArena({ user, turnRef });
 
   useEndTurn({
@@ -163,7 +161,7 @@ export const BattleProvider = ({ children }) => {
     turnRef, setTurnAndRef,
     triggerAnim, clampStat, pwr, unlockAchievement, playSound,
     spawnBuffAnimation,
-    saveArenaTeam, fetchArenaOpponent, updateLeaderboard, setArenaResult, saveTasksToDB,
+    saveArenaTeam, fetchArenaOpponent, updateLeaderboard, setArenaResult,
     user,
     difficultyLevel, maxT, teamSlots, difficulty,
   });
@@ -318,7 +316,6 @@ export const BattleProvider = ({ children }) => {
     restoreGame,
     // Arena
     saveArenaTeam, fetchArenaOpponent, updateLeaderboard,
-    loadTasksFromDB, saveTasksToDB,
   }), [
     phase, pT, eT, log, step,
     isBattleOver, bossChallenge, bossResult, bossRewards,
@@ -328,7 +325,6 @@ export const BattleProvider = ({ children }) => {
     battle, startBossBattle, startVersusBattle, versusSetReady,
     offerBoss, acceptBoss, declineBoss, goToShop, reset, restoreGame,
     saveArenaTeam, fetchArenaOpponent, updateLeaderboard,
-    loadTasksFromDB, saveTasksToDB,
   ]);
 
   return (
