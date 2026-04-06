@@ -76,11 +76,12 @@ export const ShopProvider = ({ children }) => {
     lives,
     wins,
     team,
+    shop,
     phase: "shop",
     gameMode,
     difficultyLevel,
   });
-}, [turn, gold, team]);
+}, [turn, gold, team, shop]);
   // ─── Shop hook ────────────────────────────────────────────────────────────
   const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
     team, setTeam,
@@ -124,7 +125,7 @@ export const ShopProvider = ({ children }) => {
     // Shop actions
     refresh, toggleFreeze, buy, mergeT, sell, swap,
   }), [
-    gold, shop, team, sel, selI, rewards,
+    gold, shop, setShop, team, sel, selI, rewards,
     discountNext, shopResetKey, targetBuffHint, turn,
     maxT, teamSlots, shopSlots, empty, hasR,
     setTurnAndRef,

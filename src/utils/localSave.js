@@ -8,6 +8,7 @@ export function saveGameState(state) {
       lives: state.lives,
       wins: state.wins,
       team: state.team,
+      shop: state.shop,
       phase: state.phase,
       gameMode: state.gameMode,
       difficultyLevel: state.difficultyLevel,
