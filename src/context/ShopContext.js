@@ -54,6 +54,10 @@ export const ShopProvider = ({ children }) => {
 
   // ─── Ref'ler ──────────────────────────────────────────────────────────────
   const turnRef = useRef(1);
+  // Kayıtlı oyun yüklenirken refresh()'i atlamak için kullanılır.
+  // BattleContext'teki restoreGame buraya kaydedilen shop'u yazar;
+  // useShop'taki effect ilk tetiklendiğinde refresh() yerine bunu kullanır.
+  const restoredShopRef = useRef(null);
 
   // ─── Türetilmiş değerler ──────────────────────────────────────────────────
   const maxT      = useMemo(() => Math.min(Math.ceil(turn / 2), 6), [turn]);
@@ -103,6 +107,7 @@ export const ShopProvider = ({ children }) => {
     unlockAchievement,
     spawnBuffAnimation,
     onGoldSpent,
+    restoredShopRef,
   });
 
   // ─── Context value ────────────────────────────────────────────────────────
@@ -120,6 +125,7 @@ export const ShopProvider = ({ children }) => {
     turn, setTurn, setTurnAndRef,
     // Refs
     turnRef,
+    restoredShopRef,
     // Derived
     maxT, teamSlots, shopSlots, empty, hasR,
     // Shop actions

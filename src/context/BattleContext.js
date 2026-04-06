@@ -59,6 +59,7 @@ export const BattleProvider = ({ children }) => {
     rewards, setRewards,
     teamSlots, maxT,
     setShop, setShopResetKey,
+    restoredShopRef,
   } = useShopContext();
 
   // ─── Savaş state'leri ─────────────────────────────────────────────────────
@@ -253,6 +254,10 @@ export const BattleProvider = ({ children }) => {
   setTurnAndRef(safeTurn);
   setTeam(saved.team ?? [null, null, null, null, null, null]);
   setShop([]);
+  // Kaydedilmiş shop varsa ref'e yaz — useShop'taki effect refresh() yerine bunu kullanacak
+  if (saved.shop?.length) {
+    restoredShopRef.current = saved.shop;
+  }
   setShopResetKey((k) => k + 1);
   setRewards([]);
   // UIContext
@@ -280,7 +285,7 @@ export const BattleProvider = ({ children }) => {
   setGold, setTurnAndRef, setTeam, setShop, setShopResetKey, setRewards,
   setWins, setLives, setAnims, setGuideLvl,
   setOver, setVictory, setNewTier, setLastT,
-  setVersusPhase, setVersusRoom,
+  setVersusPhase, setVersusRoom, restoredShopRef,
  ]);
   // ─── Context value ────────────────────────────────────────────────────────
   const value = useMemo(() => ({

@@ -179,6 +179,7 @@ export function useShop({
   unlockAchievement,
   spawnBuffAnimation: _spawnBuffAnimation,
   onGoldSpent,
+  restoredShopRef,
 }) {
 
   // ─── Ödül havuzu ──────────────────────────────────────────────────────────
@@ -379,7 +380,15 @@ export function useShop({
     if (hasMergeable) setTimeout(() => playSound("levelup"), 300);
   };
 
-  useEffect(() => { refresh(); }, [turn, shopSlots, shopResetKey]);
+  useEffect(() => {
+    // Kayıtlı oyun restore ediliyorsa refresh() yerine kaydedilen shop'u kullan
+    if (restoredShopRef?.current) {
+      setShop(restoredShopRef.current);
+      restoredShopRef.current = null;
+      return;
+    }
+    refresh();
+  }, [turn, shopSlots, shopResetKey]);
 
   // ─── Dondur ───────────────────────────────────────────────────────────────
   const toggleFreeze = (a) => {
