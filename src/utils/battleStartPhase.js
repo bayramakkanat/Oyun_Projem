@@ -54,8 +54,9 @@ async function runSelfBuffPhase({
       nextTeam[i].trample = true;
       setLog((l) => [...l, `🦏 ${pfx}${a.nick} -> +${AM.START_TRAMPLE_ATK * m} ATK (çiğneme)`]);
     } else if (a.ability === AB.START_CHARGE) {
-      nextTeam[i].atk += AM.START_CHARGE_AMT * m;
-      setLog((l) => [...l, `🐗 ${pfx}${a.nick} -> +${AM.START_CHARGE_AMT * m} ATK`]);
+      nextTeam[i].hp    += AM.START_CHARGE_AMT * m;
+      nextTeam[i].curHp += AM.START_CHARGE_AMT * m;
+      setLog((l) => [...l, `🐗 ${pfx}${a.nick} -> +${AM.START_CHARGE_AMT * m} HP`]);
     } else if (a.ability === AB.START_TANK) {
       nextTeam[i].curHp += 3 * m;
       setLog((l) => [...l, `🦀 ${pfx}${a.nick} -> +${AM.START_TANK_HP * m} HP`]);
