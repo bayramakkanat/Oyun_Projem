@@ -4,7 +4,8 @@ import { loadCollection, getDefaultAnimalData } from "../utils/helpers";
 
 export default function CollectionScreen({ onClose, userId }) {
   const [selectedTier, setSelectedTier] = useState(1);
-  const collection = loadCollection(userId);
+  // loadCollection artık in-memory cache'den okur — giriş anında Firebase'den yüklendi
+  const collection = loadCollection();
 
   const tiers = [1, 2, 3, 4, 5, 6];
   const animals = TIERS[selectedTier] || [];
@@ -21,17 +22,11 @@ export default function CollectionScreen({ onClose, userId }) {
     return { current: data.unlocked ? 1 : 0, max: 1, done: data.task3 };
   };
 
-  // Görev tamamlanma oranı (0.0 – 1.0) — kullanım + galibiyet ağırlıklı
-  const getProgressRatio = (data) => {
-    const useRatio = Math.min(data.used, 3) / 3;
-    const winRatio = Math.min(data.wins, 5) / 5;
-    return (useRatio + winRatio) / 2;
-  };
-
   return (
     <div className="min-h-screen text-white p-4" style={{
       background: "radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a0f 100%)"
     }}>
+
       <div className="max-w-4xl mx-auto">
         {/* Başlık */}
         <div className="flex items-center justify-between mb-6">
@@ -119,14 +114,7 @@ export default function CollectionScreen({ onClose, userId }) {
                 height: "75%",
                 objectFit: "contain",
                 filter: !isUnlocked
-                  ? (() => {
-                      const r = getProgressRatio(data);
-                      // r=0: grayscale+çok karanlık, hayvan şekli hafif belli
-                      // r=1: grayscale+daha aydınlık, silüet net görünür
-                      const brightness = 0.15 + r * 0.45; // 0.15 → 0.60
-                      const blur       = 1.5 - r * 1.0;   // 1.5px → 0.5px
-                      return `grayscale(1) brightness(${brightness.toFixed(2)}) blur(${blur.toFixed(1)}px)`;
-                    })()
+                  ? "brightness(0) opacity(0.2) blur(1px)"
                   : isComplete
                   ? "drop-shadow(0 0 16px rgba(251,191,36,0.7))"
                   : "drop-shadow(0 0 8px rgba(167,139,250,0.4))",
@@ -139,23 +127,15 @@ export default function CollectionScreen({ onClose, userId }) {
             </span>
           )}
 
-          {/* Kilit overlay — ilerlemeye göre kilit soluklaşır */}
-          {!isUnlocked && (() => {
-            const r = getProgressRatio(data);
-            // İlerleme arttıkça kilit daha soluk ve küçük görünür
-            const lockOpacity = 0.9 - r * 0.6; // 0.9 → 0.3
-            const lockScale   = 1.0 - r * 0.3;  // 1.0 → 0.7
-            return (
-              <div className="absolute inset-0 flex items-center justify-center"
-                style={{ background: `rgba(0,0,0,${0.45 - r * 0.35})` }}>
-                <div className="flex flex-col items-center gap-1"
-                  style={{ opacity: lockOpacity, transform: `scale(${lockScale.toFixed(2)})` }}>
-                  <span className="text-3xl">🔒</span>
-                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Kilitli</span>
-                </div>
+          {/* Kilit overlay */}
+          {!isUnlocked && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-3xl">🔒</span>
+                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Kilitli</span>
               </div>
-            );
-          })()}
+            </div>
+          )}
 
           {/* Unlocked parlama efekti — alt kenar */}
           {isUnlocked && (

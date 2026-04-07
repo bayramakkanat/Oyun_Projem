@@ -18,7 +18,7 @@ import {
   where,
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import { logError, loadStats } from "../utils/helpers";
+import { logError, loadStats, setCollectionCache } from "../utils/helpers";
 
 export function useAuth({
   authMode,
@@ -52,11 +52,16 @@ export function useAuth({
           const { db: fsDb }           = await import("../firebase");
           const profileSnap = await getDoc(fsDoc(fsDb, "user_profiles", u.uid));
           if (profileSnap.exists()) {
-            const fbAchievements = profileSnap.data().achievements || [];
+            const profileData    = profileSnap.data();
+            const fbAchievements = profileData.achievements || [];
             setStats((prev) => ({ ...prev, achievements: fbAchievements }));
             // Local cache'i güncelle (unlockAchievement kontrolü için)
             const { saveStats } = await import("../utils/helpers");
             await saveStats({ ...base, achievements: fbAchievements }, u.uid);
+            // Koleksiyon verisini belleğe al
+            if (profileData.collection) {
+              setCollectionCache(profileData.collection);
+            }
           }
         } catch (err) {
           logError(err, "useAuth:loadAchievements");

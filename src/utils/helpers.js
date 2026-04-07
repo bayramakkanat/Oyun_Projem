@@ -93,26 +93,16 @@ export const calcArenaXP = ({ won, turn, isNewBestTurn }) => {
 };
 
 // ─── Koleksiyon sistemi ──────────────────────────────────────────────────────
-export const loadCollection = (userId) => {
-  try {
-    const key = "oyunKoleksiyon_" + (userId || "guest");
-    const s = localStorage.getItem(key);
-    return s ? JSON.parse(s) : {};
-  } catch {
-    return {};
-  }
-};
+// In-memory collection cache — localStorage yerine bellekte tutulur
+// Cihazdan cihaza taşınmaz ama Firebase her oturumda senkronize eder
+let _collectionCache = {};
+
+export const loadCollection = () => _collectionCache;
+
+export const setCollectionCache = (data) => { _collectionCache = data || {}; };
 
 export const saveCollection = async (data, userId) => {
-  // 1. localStorage
-  try {
-    const key = "oyunKoleksiyon_" + (userId || "guest");
-    localStorage.setItem(key, JSON.stringify(data));
-  } catch (err) {
-    logError(err, "saveCollection:localStorage");
-  }
-
-  // 2. Firebase
+  _collectionCache = data; // Önce cache'i güncelle (senkron, hızlı)
   if (!userId) return;
   try {
     const { db }          = await import("../firebase");
