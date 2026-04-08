@@ -1734,3 +1734,36 @@
   background: radial-gradient(circle at center, rgba(34, 211, 238, 0.16), rgba(3, 7, 18, 0.7) 70%);
   animation: versusOverlayIn 180ms ease-out;
 }
+
+/* ─── Savaş log — zafer / yenilgi satır animasyonları ───────────────────────── */
+
+/* Büyük satır giriş animasyonu (zafer & yenilgi) */
+@keyframes logEntryBig {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.96); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+/* Zafer satırı: altın parlama */
+@keyframes logFlashVictory {
+  0%   { background: rgba(251, 191, 36, 0);    }
+  25%  { background: rgba(251, 191, 36, 0.18); }
+  100% { background: rgba(251, 191, 36, 0);    }
+}
+
+/* Yenilgi satırı: kırmızı parlama */
+@keyframes logFlashDefeat {
+  0%   { background: rgba(239, 68, 68, 0);    }
+  25%  { background: rgba(239, 68, 68, 0.18); }
+  100% { background: rgba(239, 68, 68, 0);    }
+}
+
+.log-flash-victory {
+  animation: logFlashVictory 1.2s ease-out !important;
+  border-radius: 4px;
+}
+
+.log-flash-defeat {
+  animation: logFlashDefeat 1.2s ease-out !important;
+  border-radius: 4px;
+}

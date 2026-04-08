@@ -102,13 +102,13 @@ export default function HUD({ reset }) {
         <div className="ml-auto sm:ml-0 flex gap-1.5">
           <button
             onClick={() => setSoundEnabled(s => !s)}
-            className="p-2 bg-gray-900/70 rounded-xl text-sm sm:text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 w-[40px] h-[36px] sm:w-auto sm:h-auto flex items-center justify-center"
+            className="bg-gray-900/70 rounded-xl text-sm sm:text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 w-[40px] h-[44px] sm:w-[48px] sm:h-[52px] flex items-center justify-center flex-shrink-0"
           >
             {soundEnabled ? "🔊" : "🔇"}
           </button>
           <button
             onClick={() => { reset(); setMenuView("main"); setGameStarted(false); }}
-            className="p-2 bg-gray-900/70 rounded-xl text-sm sm:text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 w-[40px] h-[36px] sm:w-auto sm:h-auto flex items-center justify-center"
+            className="bg-gray-900/70 rounded-xl text-sm sm:text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 w-[40px] h-[44px] sm:w-[48px] sm:h-[52px] flex items-center justify-center flex-shrink-0"
           >
             🏠
           </button>

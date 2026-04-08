@@ -127,7 +127,7 @@ export default function ShopView() {
   </div>
 
   {/* 6 sütunlu grid: 5 hayvan slotu + 1 yenile butonu */}
-  <div className="grid grid-cols-6 gap-2 items-end">
+  <div className="grid grid-cols-6 gap-2 items-center">
     {[0, 1, 2, 3, 4].map((idx) => {
       const a = shop[idx];
       const isLocked = (idx === 3 && turn < 5) || (idx === 4 && turn < 7);
@@ -245,14 +245,14 @@ export default function ShopView() {
           </div>
           {sel?.pendingTargetBuff && <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center">🎯 Güçlendirmek istediğin hayvana tıkla!</div>}
 
-          <div className="flex gap-1 sm:gap-2 w-full py-3 justify-center">
+          <div className="grid grid-cols-6 gap-2 w-full py-3">
             {team.map((a, i) => {
               const isLocked = (i === 4 && turn < 5) || (i === 5 && turn < 7);
               const lockedTurn = i === 4 ? 5 : 7;
               const isJustOpened = (i === 4 && newlyOpenedSlot === "shop_4_team_4") || (i === 5 && newlyOpenedSlot === "shop_5_team_5");
 
               if (isJustOpened) return (
-                <div key={i} className="flex-shrink-0">
+                <div key={i}>
                   <button
                     onClick={() => { if (sel) buy(sel, i); else if (selI !== null) mergeT(selI, i); }}
                     className="w-32 h-40 rounded-2xl border-2 border-green-500/50 text-green-400 transition-all bg-green-500/10 flex flex-col items-center justify-center"
@@ -265,7 +265,7 @@ export default function ShopView() {
               );
 
               if (isLocked) return (
-                <div key={i} className="flex-shrink-0 opacity-40">
+                <div key={i} className="opacity-40">
                   <div className="w-32 h-40 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center">
                     <span className="text-xl">🔒</span>
                     <span className="text-[9px] font-black mt-1 text-yellow-400 uppercase">Tur {lockedTurn}</span>
@@ -274,7 +274,7 @@ export default function ShopView() {
               );
 
               return a ? (
-                <div key={i} className="flex-shrink-0 flex flex-col items-center"
+                <div key={i} className="flex flex-col items-center"
                 onDragOver={(e) => { if (dragItem) { e.preventDefault(); setDragOver(i); } }}
                 onDragLeave={() => setDragOver(null)}
                 onDrop={(e) => { e.preventDefault(); if (dragItem) { buy(dragItem, i); setDragItem(null); setDragOver(null); } }}
@@ -309,7 +309,7 @@ export default function ShopView() {
                   </div>
                 </div>
               ) : (
-                <div key={i} className="flex-shrink-0">
+                <div key={i}>
                   <button
                     onClick={() => { if (sel) buy(sel, i); else if (selI !== null) { const newTeam = [...team]; [newTeam[selI], newTeam[i]] = [newTeam[i], newTeam[selI]]; setTeam(newTeam); setSelI(null); } }}
                     onDragOver={(e) => { if (dragItem) { e.preventDefault(); setDragOver(i); } }}

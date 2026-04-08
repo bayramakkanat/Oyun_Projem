@@ -38,13 +38,7 @@ useEffect(() => {
   }, [log]);
   return (
     <div
-      className="fixed inset-0 z-40 flex flex-col overflow-hidden"
-      style={{
-        backgroundImage: `url(/images/themes/battle_bg.jpg)`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
+      className="fixed inset-0 z-40 flex flex-col overflow-hidden animated-bg"
     >
       {/* Üst bilgi barı */}
       <div className="flex justify-between items-center px-8 py-3 bg-gradient-to-r from-black/70 via-purple-950/50 to-black/70 backdrop-blur-xl border-b border-purple-500/20 z-10 flex-shrink-0">
@@ -127,11 +121,16 @@ useEffect(() => {
 
       {/* Ana savaş alanı */}
       <div className="flex-1 flex flex-col justify-center items-center relative overflow-hidden min-h-0">
-        <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-purple-900/20 via-purple-800/10 to-transparent pointer-events-none"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(60,20,100,0.15)_0%,transparent_70%)] pointer-events-none"></div>
-        {/* Dinamik ışık efektleri */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-3xl animate-pulse pointer-events-none"></div>
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-red-500/5 rounded-full blur-3xl animate-pulse pointer-events-none" style={{ animationDelay: '1s' }}></div>
+        {/* Atmosfer katman 1: ust koyu sis */}
+        <div className="absolute inset-x-0 top-0 h-2/3 bg-gradient-to-b from-black/60 via-purple-950/30 to-transparent pointer-events-none"></div>
+        {/* Atmosfer katman 2: merkez radial parlakligi */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_60%,rgba(109,40,217,0.18)_0%,transparent_65%)] pointer-events-none"></div>
+        {/* Atmosfer katman 3: oyuncu tarafi yesil sis */}
+        <div className="absolute bottom-1/4 left-0 w-1/2 h-64 bg-gradient-to-r from-emerald-500/8 via-green-500/5 to-transparent rounded-full blur-3xl animate-pulse pointer-events-none"></div>
+        {/* Atmosfer katman 4: dusaman tarafi kirmizi sis */}
+        <div className="absolute bottom-1/4 right-0 w-1/2 h-64 bg-gradient-to-l from-red-500/8 via-rose-500/5 to-transparent rounded-full blur-3xl animate-pulse pointer-events-none" style={{ animationDelay: "1.2s" }}></div>
+        {/* Atmosfer katman 5: alt zemin isigi */}
+        <div className="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-purple-950/40 via-purple-900/10 to-transparent pointer-events-none"></div>
        <div
           className="absolute bottom-0 w-[150%] h-[40%] border-t border-white/10"
           style={{
@@ -219,10 +218,12 @@ style={{
           style={{ height: "calc(22vh - 36px)" }}
         >
          {log.map((l, i) => {
+  const isVictory = l.includes("🎉 ZAFER");
+  const isDefeat  = l.includes("💀 Yenilgi") || l.includes("BOSS SAVAŞI");
   let color = "text-gray-300";
-  if (l.includes("🎉 ZAFER"))
+  if (isVictory)
     color = "text-yellow-300 font-black text-base";
-  else if (l.includes("💀 Yenilgi") || l.includes("BOSS SAVAŞI"))
+  else if (isDefeat)
     color = "text-red-400 font-black";
   else if (l.includes("KALICI")) color = "text-purple-300 font-bold";
   else if (l.includes("🦤 Dodo")) color = "text-orange-300 font-bold";
@@ -238,8 +239,10 @@ style={{
   return (
     <div
       key={i}
-      className={`${color} py-0.5 border-b border-gray-800/20 last:border-b-0`}
-      style={{ animation: "fadeIn 0.2s ease-out" }}
+      className={`${color} py-0.5 border-b border-gray-800/20 last:border-b-0 ${
+        isVictory ? "log-flash-victory" : isDefeat ? "log-flash-defeat" : ""
+      }`}
+      style={{ animation: isVictory || isDefeat ? "logEntryBig 0.4s ease-out" : "fadeIn 0.2s ease-out" }}
     >
       {l}
     </div>

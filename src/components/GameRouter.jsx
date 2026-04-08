@@ -276,14 +276,7 @@ export default function GameRouter() {
   // ana oyun ekranı (shop veya battle)
   return (
     <div
-     className="min-h-screen text-white p-2 flex flex-col justify-center overflow-x-hidden"
-      style={{
-        backgroundImage: `url(/images/themes/battle_bg.jpg)`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
-      }}
+     className="min-h-screen text-white p-2 flex flex-col justify-center overflow-x-hidden animated-bg"
     >
       {notifications}
       <StarField />
