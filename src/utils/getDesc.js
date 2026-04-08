@@ -59,7 +59,6 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.START_ALL_PERM)
     return `Savaş başı: Tüm takıma +${2 * m} Atak verir (kalıcı)`;
   if (a.ability === AB.START_ALL) return `Savaş başı: Tüm takıma +${2 * m} Atak verir`;
-  if (a.ability === AB.HURT_BUFF) return `Hasar alınca: Kendine +${4 * m} Atak verir`;
   if (a.ability === AB.END_ALL)
     return `Tur sonu: Tüm takıma +${m * 3} Can verir (kalıcı)`;
   if (a.ability === AB.START_TANK) return `Savaş başı: Kendine +${3 * m} Can verir`;

@@ -58,7 +58,7 @@ const SCENARIOS = [
       { nick: "Fare", name: "🐀", atk: 2, hp: 2, curHp: 2, ability: "atk_buff", tier: 2, lvl: 1, exp: 0 },
       { nick: "Fare", name: "🐀", atk: 2, hp: 2, curHp: 2, ability: "atk_buff", tier: 2, lvl: 1, exp: 0 },
       { nick: "Fare", name: "🐀", atk: 2, hp: 2, curHp: 2, ability: "atk_buff", tier: 2, lvl: 1, exp: 0 },
-      { nick: "Bufalo", name: "🐃", atk: 4, hp: 8, curHp: 8, ability: "hurt_buff", tier: 4, lvl: 2, exp: 0 },
+      { nick: "Bufalo", name: "🐃", atk: 4, hp: 8, curHp: 8, ability: "faint_weaken_all", tier: 4, lvl: 2, exp: 0 },
     ],
   },
   {

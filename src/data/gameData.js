@@ -70,7 +70,6 @@ export const AB = Object.freeze({
   HURT_DMG              : "hurt_dmg",
   HURT_REFLECT          : "hurt_reflect",
   HURT_TEAM_BUFF        : "hurt_team_buff",
-  HURT_BUFF             : "hurt_buff",
   HURT_WEAKEN_ATTACKER  : "hurt_weaken_attacker",
   // Friend events
   FRIEND_FAINT          : "friend_faint",
