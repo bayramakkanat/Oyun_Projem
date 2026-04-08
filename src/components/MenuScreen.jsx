@@ -206,7 +206,7 @@ export default function MenuScreen() {
   </button>
 )}
              <button
-                onClick={() => setMenuView("play_setup")}
+                onClick={() => { playSound("ui_click"); setMenuView("play_setup"); }}
                 className="group relative w-full py-6 bg-white text-black rounded-3xl font-black text-3xl shadow-[0_20px_40px_rgba(255,255,255,0.15)] hover:scale-[1.03] transition-all active:scale-95 overflow-hidden"
                 style={{ boxShadow: "0 0 30px rgba(255,255,255,0.1), 0 20px 60px rgba(255,255,255,0.15)" }}
               >
@@ -217,7 +217,7 @@ export default function MenuScreen() {
               </button>
             <div className="grid grid-cols-4 gap-2 w-full">
   <button
-    onClick={() => setMenuView("achievements")}
+    onClick={() => { playSound("ui_click"); setMenuView("achievements"); }}
     className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
   >
     <span className="text-2xl">🏆</span>
@@ -226,7 +226,7 @@ export default function MenuScreen() {
     </span>
   </button>
   <button
-    onClick={() => setMenuView("leaderboard")}
+    onClick={() => { playSound("ui_click"); setMenuView("leaderboard"); }}
     className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
   >
     <span className="text-2xl">🏅</span>
@@ -235,7 +235,7 @@ export default function MenuScreen() {
     </span>
   </button>
   <button
-    onClick={() => setMenuView("tasks")}
+    onClick={() => { playSound("ui_click"); setMenuView("tasks"); }}
     className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
   >
     <span className="text-2xl">📅</span>
@@ -244,7 +244,7 @@ export default function MenuScreen() {
     </span>
   </button>
   <button
-    onClick={() => setMenuView("collection")}
+    onClick={() => { playSound("ui_click"); setMenuView("collection"); }}
     className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex flex-col items-center gap-1 hover:bg-white/10 transition-all active:scale-95"
   >
     <span className="text-2xl">📖</span>

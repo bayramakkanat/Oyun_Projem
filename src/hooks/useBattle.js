@@ -318,6 +318,7 @@ export function useBattle({
       setPT(pt);
       setLog([]);
       setStep(0);
+      playSound("battle_start");
       setPhase("battle");
     } catch (err) {
       logError(err, "useBattle:battle");

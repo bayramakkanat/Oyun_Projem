@@ -377,7 +377,7 @@ export function useShop({
     const hasMergeable = newShop.some((sp) =>
       team.some((t) => t && t.name === sp.name && t.tier === sp.tier && t.lvl < 3)
     );
-    if (hasMergeable) setTimeout(() => playSound("levelup"), 300);
+    if (hasMergeable) setTimeout(() => playSound("merge_burst"), 300);
   };
 
   useEffect(() => {
@@ -533,7 +533,7 @@ export function useShop({
     setTeam(nt);
 
     const stillMergeable = shop.some(sp => sp && sp.id !== a.id && nt.some(t => t && t.name === sp.name && t.tier === sp.tier && t.lvl < 3));
-if (stillMergeable) setTimeout(() => playSound("levelup"), 400);
+if (stillMergeable) setTimeout(() => playSound("merge_burst"), 400);
     setSel(null);
   };
 

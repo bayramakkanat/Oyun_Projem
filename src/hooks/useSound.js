@@ -184,6 +184,22 @@ export const playSound = (type) => {
       makeOsc(660, 0.15, now,        now + 0.12, "sine");
       makeOsc(880, 0.12, now + 0.14, now + 0.25, "sine");
 
+    } else if (type === "battle_start") {
+      // Kısa gerilim akoru — normal savaş başlangıcı
+      makeOsc(220, 0.18, now,        now + 0.12, "sawtooth");
+      makeOsc(330, 0.14, now + 0.06, now + 0.18, "sawtooth");
+      makeOsc(440, 0.20, now + 0.14, now + 0.32, "square");
+
+    } else if (type === "merge_burst") {
+      // Merge patlaması — levelup'tan daha güçlü, 4 nota + tiz final
+      [0, 0.08, 0.17, 0.28].forEach((t, i) => {
+        makeOsc([330, 440, 554, 659][i], 0.22, now + t, now + t + 0.2, "sine");
+      });
+      // Parlak final akoru
+      [659, 784, 988].forEach((freq, i) => {
+        makeOsc(freq, 0.18, now + 0.4 + i * 0.03, now + 0.75, "sine");
+      });
+
     } else if (type === "ui_click") {
       // Hafif UI tıklama geri bildirimi
       makeOsc(520, 0.08, now, now + 0.06, "triangle");

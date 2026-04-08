@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useGameContext } from "../context/GameContext";
 import VersusIntro from "./VersusIntro";
+import BattleIntro from "./BattleIntro";
 import BattleView from "./BattleView";
 import GuideScreen from "./GuideScreen";
 import CollectionScreen from "./CollectionScreen";
@@ -114,6 +115,15 @@ export default function GameRouter() {
   } = useGameContext();
   // ─── Versus intro: onRoomReady'den önce göster ───────────────────────────
   const [versusIntroRoom, setVersusIntroRoom] = useState(null);
+  // Normal/arena savaşı başlangıç intro state'i
+  const [showBattleIntro, setShowBattleIntro] = useState(false);
+  // Phase "battle" olunca normal/arena modunda intro göster
+  useEffect(() => {
+    if (phase === "battle" && gameMode !== "versus" && gameStarted) {
+      setShowBattleIntro(true);
+    }
+  }, [phase]);
+
   const notifications = (
     <GlobalNotifications
       friendsData={friendsData}
@@ -313,6 +323,19 @@ export default function GameRouter() {
         <ShopView />
       ) : (
         <BattleView />
+      )}
+      {/* Normal/arena savaşı başlangıç intro overlay */}
+      {showBattleIntro && gameMode !== "versus" && (
+        <BattleIntro
+          playerName={user?.displayName || user?.email?.split("@")[0] || "Oyuncu"}
+          opponentName={
+            bossChallenge === "battle"
+              ? (BOSSES[turn]?.name || "Boss")
+              : arenaOpponent?.userName || "Düşman"
+          }
+          isBoss={bossChallenge === "battle"}
+          onDone={() => setShowBattleIntro(false)}
+        />
       )}
 
     </div>

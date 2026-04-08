@@ -227,7 +227,7 @@ export default function ShopView() {
             <div className="text-sm text-yellow-300 mb-2 font-bold">🎁 Seviye Ödülü (1 seç!) {team.filter(x => x).length === teamSlots && <span className="text-red-400">- Slot boşalt!</span>}</div>
             <div className="flex gap-3 justify-center flex-wrap">
               {rewards.map((a) => (
-                <div key={a.id} className="flex flex-col items-center relative" onClick={() => setSel(sel?.id === a.id ? null : a)}>
+                <div key={a.id} className="flex flex-col items-center relative" onClick={() => { playSound("buy"); setSel(sel?.id === a.id ? null : a); }}>
                   <Card a={a} anim={anims[a.id]} selected={sel?.id === a.id} showName={false} getDesc={getDesc} shop={shop} team={team} mirror={true} />
                   {sel?.id === a.id && <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white z-[60]"><span className="text-white text-xs font-black">✓</span></div>}
                   <span className="text-xs text-green-300 font-bold mt-1">K{a.rT}</span>
