@@ -295,7 +295,7 @@ export function useBattle({
       let et;
       if (gameMode === "arena") {
         unlockAchievement("arena_first");
-        const opponentData = await fetchArenaOpponent(difficultyLevel);
+        const opponentData = await fetchArenaOpponent();
         if (opponentData) {
           setArenaOpponent(opponentData);
           et = sanitizeBattleTeam(

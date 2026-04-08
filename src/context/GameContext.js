@@ -13,7 +13,7 @@
  * fonksiyonunu çağıranlar) burada GameEffects bileşeninde yaşıyor.
  */
 
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { playSound } from "../hooks/useSound";
 import { clearGameState } from "../utils/localSave";
 
@@ -97,10 +97,20 @@ export const GameProvider = ({ children }) => (
 // ─── Geriye dönük uyumlu hook ─────────────────────────────────────────────────
 // Mevcut bileşenler useGameContext() kullanmaya devam edebilir.
 // Üç context'in tüm değerlerini birleştirir.
-// Not: Yüksek frekanslı state değişimlerinde re-render optimizasyonu istiyorsan
+//
+// DÜZELTME: Önceki versiyonda her çağrıda yeni bir obje üretiliyordu ({...a, ...b, ...c}).
+// Bu, hook'u kullanan her bileşenin ilgisiz bir context değiştiğinde de re-render
+// olmasına yol açıyordu. useMemo ile birleştirilmiş obje memoize ediliyor;
+// yalnızca üç context'ten biri gerçekten değiştiğinde yeni obje üretiliyor.
+//
+// Not: Yüksek frekanslı state değişimlerinde daha ince optimizasyon için
 // bileşenleri doğrudan useUIContext / useShopContext / useBattleContext ile güncelle.
-export const useGameContext = () => ({
-  ...useUIContext(),
-  ...useShopContext(),
-  ...useBattleContext(),
-});
+export const useGameContext = () => {
+  const ui     = useUIContext();
+  const shop   = useShopContext();
+  const battle = useBattleContext();
+  return useMemo(
+    () => ({ ...ui, ...shop, ...battle }),
+    [ui, shop, battle]
+  );
+};

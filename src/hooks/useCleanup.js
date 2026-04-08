@@ -23,6 +23,7 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { logError } from "../utils/helpers";
@@ -33,10 +34,12 @@ const CLEANUP_INTERVAL_MS = 30 * 60 * 1000; // 30 dakika
 // localStorage anahtarı — fazla sık çalışmayı önlemek için son zamanı saklar.
 const LS_KEY = "petgame_last_cleanup";
 
+// Firestore batch başına maksimum 500 işlem desteklenir.
+const BATCH_LIMIT = 500;
+
 // Belirtilen sürenin dolup dolmadığını kontrol eder.
 const isExpired = (expiresAt) => {
-  if (!expiresAt) return false; // expiresAt yoksa dokunma
-  // Firestore Timestamp veya JS Date veya number olabilir
+  if (!expiresAt) return false;
   const ts =
     typeof expiresAt.toMillis === "function"
       ? expiresAt.toMillis()
@@ -49,20 +52,20 @@ const isExpired = (expiresAt) => {
   return ts < Date.now();
 };
 
-// Belirli bir alt koleksiyondaki süresi dolmuş dokümanları siler.
-// Firestore'da alt koleksiyonlarda where("expiresAt", "<", now) çalışmaz
-// (composite index gerektirir), bu yüzden istemci tarafında filtreleriz.
+// Belirli bir alt koleksiyondaki süresi dolmuş dokümanları batch ile siler.
+// Tek tek deleteDoc yerine writeBatch kullanmak hem daha hızlı hem daha az
+// Firestore write birimi tüketir.
 const deleteExpiredDocs = async (collRef, label) => {
   try {
     const snap = await getDocs(collRef);
-    let deleted = 0;
-    for (const d of snap.docs) {
-      if (isExpired(d.data().expiresAt)) {
-        await deleteDoc(d.ref);
-        deleted++;
-      }
-    }
-    if (deleted > 0) {
+    const expired = snap.docs.filter((d) => isExpired(d.data().expiresAt));
+    if (expired.length === 0) return;
+
+    // 500'lük gruplara böl (Firestore batch limiti)
+    for (let i = 0; i < expired.length; i += BATCH_LIMIT) {
+      const batch = writeBatch(db);
+      expired.slice(i, i + BATCH_LIMIT).forEach((d) => batch.delete(d.ref));
+      await batch.commit();
     }
   } catch (err) {
     logError(err, `useCleanup:${label}`);
@@ -70,13 +73,9 @@ const deleteExpiredDocs = async (collRef, label) => {
 };
 
 // Son `keepMonths` ayı koruyarak daha eski ay key'lerini döndürür.
-// Örnek çıktı (keepMonths=2, bugün 2025-04):
-//   ["arena_leaderboard_2025_02", "arena_leaderboard_2025_01",
-//    "arena_leaderboard_2024_12", ... (12 ay geriye kadar)]
 const getOldLeaderboardKeys = (keepMonths = 2) => {
   const keys = [];
   const now = new Date();
-  // Geriye toplam 14 ay tara (2 korunan + 12 silinecek potansiyel)
   for (let i = keepMonths; i < keepMonths + 12; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const year  = d.getFullYear();
@@ -95,9 +94,8 @@ export function useCleanup({ user }) {
     const runCleanup = async () => {
       const now = Date.now();
 
-      // Son cleanup zamanını kontrol et
       const lastRun = parseInt(localStorage.getItem(LS_KEY) || "0", 10);
-      if (now - lastRun < CLEANUP_INTERVAL_MS) return; // Henüz erken
+      if (now - lastRun < CLEANUP_INTERVAL_MS) return;
 
       localStorage.setItem(LS_KEY, String(now));
 
@@ -115,61 +113,49 @@ export function useCleanup({ user }) {
         "challenge_invites/invites"
       );
 
-      // 3. Kendi versus odaları (host olduğun, süresi dolmuş)
-      //    Güvenlik kuralları: host.uid === kendi UID → silme yetkisi var.
+      // 3. Kendi versus odaları (host olduğun, süresi dolmuş) — batch ile
       try {
         const roomsSnap = await getDocs(
-          query(
-            collection(db, "versus_rooms"),
-            where("host.uid", "==", uid)
-          )
+          query(collection(db, "versus_rooms"), where("host.uid", "==", uid))
         );
-        let deletedRooms = 0;
-        for (const d of roomsSnap.docs) {
-          if (isExpired(d.data().expiresAt)) {
-            await deleteDoc(doc(db, "versus_rooms", d.id));
-            deletedRooms++;
-          }
-        }
-        if (deletedRooms > 0) {
+        const expiredRooms = roomsSnap.docs.filter((d) =>
+          isExpired(d.data().expiresAt)
+        );
+        if (expiredRooms.length > 0) {
+          const batch = writeBatch(db);
+          expiredRooms.forEach((d) =>
+            batch.delete(doc(db, "versus_rooms", d.id))
+          );
+          await batch.commit();
         }
       } catch (err) {
         logError(err, "useCleanup:versus_rooms");
       }
 
-      // 4. Eski ay liderboard satırları (son 2 ay hariç)
-      //    Güvenlik kuralı: leaderboardCol.matches('arena_leaderboard_.*') && isOwner(uid)
+      // 4. Eski ay liderboard satırları (son 2 ay hariç) — batch ile
       try {
-        const oldKeys = getOldLeaderboardKeys(2); // son 2 ay korunur
-        for (const key of oldKeys) {
-          const ref = doc(db, key, uid);
-          try {
-            await deleteDoc(ref);
-          } catch {
-            // Doküman zaten yoksa hata fırlatır — önemli değil, geç.
-          }
-        }
-      } catch (err) {
-        logError(err, "useCleanup:leaderboard");
+        const oldKeys = getOldLeaderboardKeys(2);
+        const batch = writeBatch(db);
+        oldKeys.forEach((key) => batch.delete(doc(db, key, uid)));
+        await batch.commit();
+      } catch {
+        // Var olmayan dokümanlar için hata fırlatılır — önemli değil, geç.
       }
 
-      // 5. Arena takımları (uid_ prefix'li, süresi dolmuş)
-      //    Güvenlik kuralı: docId.matches(uid + '_turn.*') → yazma yetkisi var.
+      // 5. Arena takımları (uid_ prefix'li, süresi dolmuş) — batch ile
       try {
         const arenaSnap = await getDocs(
-          query(
-            collection(db, "arena_teams"),
-            where("uid", "==", uid)
-          )
+          query(collection(db, "arena_teams"), where("uid", "==", uid))
         );
-        let deletedArena = 0;
-        for (const d of arenaSnap.docs) {
-          if (isExpired(d.data().expiresAt)) {
-            await deleteDoc(doc(db, "arena_teams", d.id));
-            deletedArena++;
-          }
-        }
-        if (deletedArena > 0) {
+        const expiredArena = arenaSnap.docs.filter((d) =>
+          isExpired(d.data().expiresAt)
+        );
+        if (expiredArena.length > 0) {
+          const batch = writeBatch(db);
+          expiredArena.forEach((d) =>
+            batch.delete(doc(db, "arena_teams", d.id))
+          );
+          await batch.commit();
         }
       } catch (err) {
         logError(err, "useCleanup:arena_teams");
@@ -185,5 +171,5 @@ export function useCleanup({ user }) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [user?.uid]); // user değişince (login/logout) yeniden bağlan
+  }, [user?.uid]);
 }
