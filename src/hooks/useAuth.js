@@ -152,6 +152,9 @@ export function useAuth({
 
   // ─── Profil güncelle ─────────────────────────────────────────────────────
   const handleUpdateProfile = async () => {
+    // DÜZELTME: Önceki versiyonda fonksiyon içinde `const liveUser` iki kez
+    // tanımlanıyordu (satır 155 ve 182). İkinci tanım ilkini gölgeliyordu
+    // (variable shadowing). Artık tek bir tanım var, tüm blok bunu kullanıyor.
     const liveUser = auth.currentUser;
     if (!liveUser) return;
 
@@ -172,14 +175,13 @@ export function useAuth({
           return;
         }
 
-        // Eski kullanıcı adını koleksiyondan gerçekten sil
+        // Eski kullanıcı adını koleksiyondan sil
         if (currentUsername) {
           await deleteDoc(doc(db, "usernames", currentUsername.toLowerCase()));
         }
       }
 
       const newDisplayName = `${settingsAvatar} ${finalUsername}`;
-      const liveUser = auth.currentUser;
       await updateProfile(liveUser, { displayName: newDisplayName });
       await setDoc(doc(db, "usernames", finalUsername.toLowerCase()), {
         username:    finalUsername.toLowerCase(),

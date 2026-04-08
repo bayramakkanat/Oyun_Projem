@@ -24,7 +24,7 @@ service cloud.firestore {
                   && leaderboardCol.matches('arena_leaderboard_.*');
       allow write: if isOwner(uid)
                    && leaderboardCol.matches('arena_leaderboard_.*')
-                   // Hile önlemi: makul olmayan tur sayısı yazılamaz
+                   // Hile önlemi: makul olmayan değerler yazılamaz
                    && request.resource.data.bestTurn <= 200
                    && request.resource.data.totalGames <= 10000
                    && request.resource.data.xp <= 100000;
@@ -60,9 +60,12 @@ service cloud.firestore {
     }
 
     // ─── versus_rooms ─────────────────────────────────────────────────────────
+    // "waiting" odalar herkes tarafından okunabilir (lobi listesi için gerekli).
+    // Aktif oyun odaları yalnızca host ve guest tarafından okunabilir.
     match /versus_rooms/{code} {
       allow read: if isLoggedIn()
                   && (resource == null
+                      || resource.data.status == "waiting"
                       || resource.data.host.uid == request.auth.uid
                       || (resource.data.guest != null
                           && resource.data.guest.uid == request.auth.uid));
@@ -77,6 +80,40 @@ service cloud.firestore {
 
       allow delete: if isLoggedIn()
                     && resource.data.host.uid == request.auth.uid;
+    }
+
+    // ─── friend_requests ─────────────────────────────────────────────────────
+    // Sadece sahibi kendi gelen isteklerini okuyabilir/silebilir.
+    // Giriş yapmış herhangi bir kullanıcı başkasına istek gönderebilir.
+    match /friend_requests/{toUid}/incoming/{fromUid} {
+      allow read, delete: if isOwner(toUid);
+      allow create: if isLoggedIn()
+                    && request.resource.data.uid == request.auth.uid;
+    }
+
+    // ─── friends ─────────────────────────────────────────────────────────────
+    // Her kullanıcı yalnızca kendi arkadaş listesini yönetebilir.
+    match /friends/{uid}/list/{friendUid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // ─── challenge_invites ────────────────────────────────────────────────────
+    // Davet sahibi kendi davetlerini okur/siler.
+    // Giriş yapmış herhangi bir kullanıcı davet gönderebilir ve
+    // kabul sırasında karşı tarafın davetini de silebilir.
+    match /challenge_invites/{toUid}/invites/{fromUid} {
+      allow read: if isOwner(toUid);
+      allow create: if isLoggedIn()
+                    && request.resource.data.uid == request.auth.uid;
+      allow delete: if isOwner(toUid)
+                    || isOwner(fromUid);
+    }
+
+    // ─── feedback ─────────────────────────────────────────────────────────────
+    // Giriş yapmış kullanıcılar geri bildirim gönderebilir; okuma kapalı.
+    match /feedback/{docId} {
+      allow create: if isLoggedIn();
+      allow read, update, delete: if false;
     }
 
   }

@@ -550,6 +550,7 @@ export default function MenuScreen() {
           <LeaderboardScreen
             onBack={() => setMenuView("main")}
             user={user}
+            onShowAuth={() => setShowAuthModal(true)}
           />
         )}
        {menuView === "collection" && (

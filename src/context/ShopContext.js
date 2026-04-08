@@ -22,10 +22,13 @@ export const ShopProvider = ({ children }) => {
     difficultyLevel,
     user,
     gameStarted,
-  gameMode,      
-  lives,         
-  wins,          
-  phase,         // ← BattleContext'te ama GameEffects üzerinden
+    gameMode,
+    lives,
+    wins,
+    // DÜZELTME: `phase` UIContext'te tanımlı değil, BattleContext'e ait.
+    // UIContext'ten okumak her zaman undefined döndürüyordu.
+    // saveGameState çağrısı zaten sadece shop fazında yapılmalı;
+    // bu context shop'a özel olduğundan phase sabit "shop" olarak yazılıyor.
   } = useUIContext();
 
   // Altın harcama görev takibi
@@ -71,21 +74,24 @@ export const ShopProvider = ({ children }) => {
     setTurn(newTurn);
     turnRef.current = newTurn;
   }, []);
+
+  // ─── Oyun durumu kaydet (yalnızca shop fazında anlamlı) ───────────────────
   useEffect(() => {
-  if (!gameStarted) return;
-  if (gameMode === "versus") return;
-  saveGameState({
-    turn,
-    gold,
-    lives,
-    wins,
-    team,
-    shop,
-    phase: "shop",
-    gameMode,
-    difficultyLevel,
-  });
-}, [turn, gold, team, shop]);
+    if (!gameStarted) return;
+    if (gameMode === "versus") return;
+    saveGameState({
+      turn,
+      gold,
+      lives,
+      wins,
+      team,
+      shop,
+      phase: "shop",
+      gameMode,
+      difficultyLevel,
+    });
+  }, [turn, gold, team, shop]);
+
   // ─── Shop hook ────────────────────────────────────────────────────────────
   const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
     team, setTeam,
@@ -137,6 +143,7 @@ export const ShopProvider = ({ children }) => {
     setTurnAndRef,
     refresh, toggleFreeze, buy, mergeT, sell, swap,
   ]);
+
   return (
     <ShopContext.Provider value={value}>
       {children}

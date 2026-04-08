@@ -35,18 +35,18 @@ export function useFriends({ user, onChallengeAccepted }) {
   }, [user]);
 
   // ── Gelen arkadaşlık isteklerini dinle ──────────────────────────────────
+  // DÜZELTME: Daha önce callback içinde ikinci bir onSnapshot açılıyordu.
+  // Her state değişiminde yeni listener birikip bellek sızıntısına yol açıyordu.
+  // Şimdi tek listener var; ses bildirimi de burada yönetiliyor.
   useEffect(() => {
     if (!user) return;
     const ref = collection(db, "friend_requests", user.uid, "incoming");
     const unsub = onSnapshot(ref, (snap) => {
-      const unsub = onSnapshot(ref, (snap) => {
-  const newCount = snap.docs.length;
-  setIncomingRequests(prev => {
-    if (newCount > prev.length) playSound("friend_request");
-    return snap.docs.map(d => ({ uid: d.id, ...d.data() }));
-  });
-});
-      setIncomingRequests(snap.docs.map(d => ({ uid: d.id, ...d.data() })));
+      const newCount = snap.docs.length;
+      setIncomingRequests(prev => {
+        if (newCount > prev.length) playSound("friend_request");
+        return snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+      });
     });
     return () => unsub();
   }, [user]);
@@ -62,6 +62,9 @@ export function useFriends({ user, onChallengeAccepted }) {
   }, [user]);
 
   // ── Kullanıcı adıyla ara ─────────────────────────────────────────────────
+  // DÜZELTME: Önceki versiyonda snap.empty kontrolü iki kez yazılmıştı;
+  // ilk daldan erken return yapılmasına rağmen aynı kontrol tekrar ediyordu.
+  // Şimdi akış tek bir yoldan ilerliyor: tam eşleşme → prefix arama → bulunamadı.
   const searchUser = async (username) => {
     if (!username.trim()) return;
     setSearchLoading(true);
@@ -69,55 +72,42 @@ export function useFriends({ user, onChallengeAccepted }) {
     setSearchResult(null);
     try {
       const searchTerm = username.toLowerCase().trim();
-const snap = await getDocs(
-  query(collection(db, "usernames"), where("username", "==", searchTerm))
-);
-if (snap.empty) {
-  // displayName ile de dene
- const snap2 = await getDocs(
-  query(collection(db, "usernames"), where("username", ">=", searchTerm), where("username", "<=", searchTerm + "\uf8ff"))
-);
-  if (snap2.empty) {
-    setSearchError("Kullanıcı bulunamadı.");
-    setSearchLoading(false);
-    return;
-  }
-  // snap2 ile devam et
-  const data = snap2.docs[0].data();
-  if (data.uid === user.uid) {
-    setSearchError("Kendinize istek gönderemezsiniz.");
-    setSearchLoading(false);
-    return;
-  }
-  const alreadyFriend = friends.some(f => f.uid === data.uid);
-  const reqSnap = await getDoc(doc(db, "friend_requests", data.uid, "incoming", user.uid));
-  setSearchResult({ ...data, alreadyFriend, requestSent: reqSnap.exists() });
-  setSearchLoading(false);
-  return;
-}
-      if (snap.empty) {
+
+      // Önce tam eşleşme dene
+      const snap = await getDocs(
+        query(collection(db, "usernames"), where("username", "==", searchTerm))
+      );
+
+      // Tam eşleşme yoksa prefix araması yap
+      const resultDoc = snap.empty
+        ? (await getDocs(
+            query(
+              collection(db, "usernames"),
+              where("username", ">=", searchTerm),
+              where("username", "<=", searchTerm + "\uf8ff")
+            )
+          )).docs[0]
+        : snap.docs[0];
+
+      if (!resultDoc) {
         setSearchError("Kullanıcı bulunamadı.");
-      } else {
-        const data = snap.docs[0].data();
-        if (data.uid === user.uid) {
-          setSearchError("Kendinize istek gönderemezsiniz.");
-        } else {
-          // Zaten arkadaş mı?
-          const alreadyFriend = friends.some(f => f.uid === data.uid);
-          // Zaten istek gönderilmiş mi?
-          const reqSnap = await getDoc(doc(db, "friend_requests", data.uid, "incoming", user.uid));
-          setSearchResult({
-            ...data,
-            alreadyFriend,
-            requestSent: reqSnap.exists(),
-          });
-        }
+        return;
       }
-   } catch (e) {
-  setSearchError("Hata: " + e.message);
-} finally {
-  setSearchLoading(false);
-}
+
+      const data = resultDoc.data();
+      if (data.uid === user.uid) {
+        setSearchError("Kendinize istek gönderemezsiniz.");
+        return;
+      }
+
+      const alreadyFriend = friends.some(f => f.uid === data.uid);
+      const reqSnap = await getDoc(doc(db, "friend_requests", data.uid, "incoming", user.uid));
+      setSearchResult({ ...data, alreadyFriend, requestSent: reqSnap.exists() });
+    } catch (e) {
+      setSearchError("Hata: " + e.message);
+    } finally {
+      setSearchLoading(false);
+    }
   };
 
   // ── Arkadaşlık isteği gönder ─────────────────────────────────────────────
@@ -188,13 +178,13 @@ if (snap.empty) {
     }
   };
 
- // ── Meydan okumayı kabul et ──────────────────────────────────────────────
+  // ── Meydan okumayı kabul et ──────────────────────────────────────────────
   const acceptChallenge = async (challenge, onAccepted) => {
     if (!user) return;
     try {
-      // Sadece kendi invite'ını sil, karşıya yazma — döngüyü önler
+      // Kendi davetini sil
       await deleteDoc(doc(db, "challenge_invites", user.uid, "invites", challenge.uid));
-      // Karşı taraftaki orijinal invite'ı da sil
+      // Karşı tarafın davetini de sil
       await deleteDoc(doc(db, "challenge_invites", challenge.uid, "invites", user.uid));
       onAccepted(challenge.roomCode);
     } catch (e) {

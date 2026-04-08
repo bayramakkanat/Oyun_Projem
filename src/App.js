@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./styles.css";
 import { AuthProvider } from "./context/AuthContext";
 import { GameProvider } from "./context/GameContext";
@@ -11,14 +11,18 @@ function AppInner() {
   const [showSplash, setShowSplash] = useState(true);
   const [splashFading, setSplashFading] = useState(false);
 
+  // DÜZELTME: startTime artık bileşen mount anında kaydediliyor.
+  // Önceki versiyonda startTime ve elapsed aynı satır bloğunda hesaplandığından
+  // fark her zaman ~0ms oluyor ve remaining her zaman tam MIN_DISPLAY oluyordu.
+  // Artık Firebase ne kadar hızlı hazır olursa olsun gerçek süre hesaplanıyor.
+  const mountTimeRef = useRef(performance.now());
+
   useEffect(() => {
     if (!authReady) return;
 
-    // Firebase hazır — minimum 1.2s göster ki animasyon tamamlansın
     const MIN_DISPLAY = 1200;
-    const startTime = performance.now();
-    const elapsed = performance.now() - startTime;
-    const remaining = Math.max(0, MIN_DISPLAY - elapsed);
+    const elapsed     = performance.now() - mountTimeRef.current;
+    const remaining   = Math.max(0, MIN_DISPLAY - elapsed);
 
     const t = setTimeout(() => {
       setSplashFading(true);
