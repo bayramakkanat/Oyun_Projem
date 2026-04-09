@@ -38,10 +38,19 @@ useEffect(() => {
   }, [log]);
   return (
     <div
-      className="fixed inset-0 z-40 flex flex-col overflow-hidden animated-bg"
+      className="fixed inset-0 z-40 flex flex-col overflow-hidden"
+      style={{ background: "linear-gradient(160deg, #1a1f4e 0%, #1e2460 30%, #1a1e55 60%, #161840 100%)" }}
     >
       {/* Üst bilgi barı */}
-      <div className="flex justify-between items-center px-8 py-3 bg-gradient-to-r from-black/70 via-purple-950/50 to-black/70 backdrop-blur-xl border-b border-purple-500/20 z-10 flex-shrink-0">
+      <div
+        className="flex justify-between items-center px-6 py-2.5 z-10 flex-shrink-0"
+        style={{
+          background: "linear-gradient(90deg, rgba(26,24,80,0.90) 0%, rgba(55,48,163,0.55) 50%, rgba(26,24,80,0.90) 100%)",
+          backdropFilter: "blur(24px) saturate(180%)",
+          borderBottom: "1px solid rgba(165,180,252,0.20)",
+          boxShadow: "0 2px 24px rgba(99,102,241,0.22), inset 0 -1px 0 rgba(139,92,246,0.15)",
+        }}
+      >
         <div className="flex gap-6 items-center">
           <div className="flex flex-col">
             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
@@ -121,35 +130,36 @@ useEffect(() => {
 
       {/* Ana savaş alanı */}
       <div className="flex-1 flex flex-col justify-center items-center relative overflow-hidden min-h-0">
-        {/* Atmosfer katman 1: ust koyu sis */}
-        <div className="absolute inset-x-0 top-0 h-2/3 bg-gradient-to-b from-black/60 via-purple-950/30 to-transparent pointer-events-none"></div>
-        {/* Atmosfer katman 2: merkez radial parlakligi */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_60%,rgba(109,40,217,0.18)_0%,transparent_65%)] pointer-events-none"></div>
-        {/* Atmosfer katman 3: oyuncu tarafi yesil sis */}
-        <div className="absolute bottom-1/4 left-0 w-1/2 h-64 bg-gradient-to-r from-emerald-500/8 via-green-500/5 to-transparent rounded-full blur-3xl animate-pulse pointer-events-none"></div>
-        {/* Atmosfer katman 4: dusaman tarafi kirmizi sis */}
-        <div className="absolute bottom-1/4 right-0 w-1/2 h-64 bg-gradient-to-l from-red-500/8 via-rose-500/5 to-transparent rounded-full blur-3xl animate-pulse pointer-events-none" style={{ animationDelay: "1.2s" }}></div>
-        {/* Atmosfer katman 5: alt zemin isigi */}
-        <div className="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-purple-950/40 via-purple-900/10 to-transparent pointer-events-none"></div>
-       <div
-          className="absolute bottom-0 w-[150%] h-[40%] border-t border-white/10"
+        {/* Atmosfer 1: üst ışık hâlesi */}
+        <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.28) 0%, transparent 100%)" }} />
+        {/* Atmosfer 2: merkez parlaklık */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 55%, rgba(139,92,246,0.18) 0%, transparent 70%)" }} />
+        {/* Atmosfer 3: oyuncu tarafi yesil sis */}
+        <div className="absolute bottom-1/4 left-0 w-1/2 h-56 rounded-full blur-3xl pointer-events-none" style={{ background: "radial-gradient(ellipse at right, rgba(52,211,153,0.14) 0%, transparent 70%)", animation: "groundReflection 5s ease-in-out infinite" }} />
+        {/* Atmosfer 4: düşman tarafı kırmızı sis */}
+        <div className="absolute bottom-1/4 right-0 w-1/2 h-56 rounded-full blur-3xl pointer-events-none" style={{ background: "radial-gradient(ellipse at left, rgba(239,68,68,0.13) 0%, transparent 70%)", animation: "groundReflection 5s ease-in-out infinite", animationDelay: "1.5s" }} />
+        {/* Zemin ışığı */}
+        <div className="absolute bottom-0 inset-x-0 h-1/3 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(55,48,163,0.35), transparent)" }} />
+        {/* Zemin perspektif */}
+        <div
+          className="absolute bottom-0 w-[150%] h-[38%] pointer-events-none"
           style={{
-            transform: "perspective(1000px) rotateX(60deg)",
+            transform: "perspective(900px) rotateX(58deg)",
             transformOrigin: "bottom center",
-            background:
-              "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08) 0%, rgba(139,92,246,0.03) 40%, transparent 80%)",
-            animation: "groundReflection 4s ease-in-out infinite",
+            background: "radial-gradient(ellipse at 50% 0%, rgba(165,180,252,0.10) 0%, rgba(99,102,241,0.04) 40%, transparent 80%)",
+            borderTop: "1px solid rgba(165,180,252,0.12)",
+            animation: "groundReflection 5s ease-in-out infinite",
           }}
-        ></div>
+        />
         {/* Zemin grid çizgileri */}
         <div
-          className="absolute bottom-0 w-[150%] h-[40%] opacity-20 pointer-events-none"
+          className="absolute bottom-0 w-[150%] h-[38%] opacity-15 pointer-events-none"
           style={{
-            transform: "perspective(1000px) rotateX(60deg)",
+            transform: "perspective(900px) rotateX(58deg)",
             transformOrigin: "bottom center",
-            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(139,92,246,0.1) 50px, rgba(139,92,246,0.1) 51px)",
+            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 44px, rgba(165,180,252,0.18) 44px, rgba(165,180,252,0.18) 45px), repeating-linear-gradient(90deg, transparent, transparent 70px, rgba(165,180,252,0.08) 70px, rgba(165,180,252,0.08) 71px)",
           }}
-        ></div>
+        />
         <div className="relative z-10 flex flex-col items-center gap-2 w-full px-4 mt-24">
           {/* Takım İsimleri */}
           <div className="w-full max-w-2xl flex justify-between px-16 mb-2">
@@ -200,10 +210,13 @@ style={{
 
       {/* Alt log paneli */}
       <div
-        className="flex-shrink-0 glass-panel-strong border-t-2 border-purple-500/40 z-10"
-        style={{ 
+        className="flex-shrink-0 z-10"
+        style={{
           height: "22vh",
-          boxShadow: "0 -4px 30px rgba(139, 92, 246, 0.15)"
+          background: "rgba(15,17,55,0.82)",
+          backdropFilter: "blur(28px) saturate(160%)",
+          borderTop: "1px solid rgba(165,180,252,0.18)",
+          boxShadow: "0 -6px 36px rgba(99,102,241,0.18), inset 0 1px 0 rgba(165,180,252,0.12)",
         }}
       >
         <div className="flex justify-between items-center px-4 pt-1.5 pb-1">

@@ -91,7 +91,7 @@ export default function ShopView() {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto w-full min-w-0">
+      <div className="max-w-4xl mx-auto w-full min-w-0" style={{ paddingBottom: "8px" }}>
         <HUD reset={reset} />
 
         {gameMode === "versus" && timeLeft !== null && (
@@ -120,10 +120,18 @@ export default function ShopView() {
           </div>
         )}
         {/* MAĞAZA */}
-<div className="glass-panel-strong rounded-[2.5rem] p-3 sm:p-4 mb-4 border-2 border-purple-500/20 shadow-2xl hover:border-purple-500/40 transition-all duration-500">
-  <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 flex items-center justify-between">
-    <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-300">🛒 HAYVAN MAĞAZASI</span>
-    <span className="hidden sm:inline text-blue-300/90 font-bold px-3 py-1.5 glass-panel border border-blue-400/40 rounded-lg">SAĞ TIK = ❄️ DONDUR</span>
+<div className="relative rounded-[2rem] p-3 sm:p-5 mb-4 overflow-hidden"
+  style={{
+    background: "rgba(30,35,90,0.60)",
+    backdropFilter: "blur(24px) saturate(170%)",
+    border: "1px solid rgba(148,163,255,0.22)",
+    boxShadow: "0 4px 32px rgba(79,70,229,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
+  }}
+>
+  <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.13) 0%, transparent 65%)" }} />
+  <div className="relative z-10 text-[11px] font-black uppercase tracking-[0.2em] mb-3 flex items-center justify-between">
+    <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-300 to-amber-200">🛒 HAYVAN MAĞAZASI</span>
+    <span className="hidden sm:inline text-blue-200/80 font-bold px-3 py-1.5 bg-blue-500/10 border border-blue-400/30 rounded-lg text-[10px]">SAĞ TIK = ❄️ DONDUR</span>
   </div>
 
   {/* 6 sütunlu grid: 5 hayvan slotu + 1 yenile butonu */}
@@ -238,8 +246,16 @@ export default function ShopView() {
         )}
 
         {/* SAVAŞ TAKIMI */}
-        <div className="glass-panel-strong rounded-[2.5rem] p-3 sm:p-4 mb-3 border-2 border-green-500/20 shadow-2xl hover:border-green-500/40 transition-all duration-500">
-          <div className="text-[11px] font-black uppercase tracking-[0.2em] mb-4">
+        <div className="relative rounded-[2rem] p-3 sm:p-5 mb-3 overflow-hidden"
+          style={{
+            background: "rgba(15,40,35,0.58)",
+            backdropFilter: "blur(24px) saturate(170%)",
+            border: "1px solid rgba(52,211,153,0.22)",
+            boxShadow: "0 4px 32px rgba(16,185,129,0.12), inset 0 1px 0 rgba(255,255,255,0.06)",
+          }}
+        >
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(34,197,94,0.10) 0%, transparent 65%)" }} />
+          <div className="relative z-10 text-[11px] font-black uppercase tracking-[0.2em] mb-4">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-green-400 to-emerald-300" style={{ animation: "shimmer 3s ease-in-out infinite", animationDelay: "0.5s" }}>⚔️ SAVAŞ TAKIMI</span>
             {sel?.pendingTargetBuff ? <span className="text-cyan-300 animate-pulse"> 🎯 Güçlendirmek istediğin hayvanı seç!</span> : sel ? <span className="text-yellow-300"> - Slot seç</span> : null}
           </div>

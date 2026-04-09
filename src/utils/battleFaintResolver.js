@@ -34,11 +34,13 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
 
   // ── FAINT_BUFF ─────────────────────────────────────────────────────────────
   if (d.ability === AB.FAINT_BUFF && al.length > 0) {
-    applyFaintBuffEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `💀 ${pfx}`, logSuffix: " -> " });
-    al.forEach((a, i) => setTimeout(() => {
-      triggerAnim?.(a.id, "buff");
-      spawnParticles?.(a.id, "buff");
-    }, i * 80));
+    const buffedIdx = applyFaintBuffEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `💀 ${pfx}`, logSuffix: " -> " });
+    if (buffedIdx >= 0) {
+      setTimeout(() => {
+        triggerAnim?.(al[buffedIdx]?.id, "buff");
+        spawnParticles?.(al[buffedIdx]?.id, "buff");
+      }, 0);
+    }
   }
 
   // ── FAINT_COPY ─────────────────────────────────────────────────────────────
@@ -175,7 +177,8 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
     const dodoM = pwr(ally);
     for (let dodoI = 0; dodoI < dodoM; dodoI++) {
       if (d.ability === AB.FAINT_BUFF && al.length > 0) {
-        applyFaintBuffEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, logSuffix: " efekti tekrar! " });
+        const rIdx = applyFaintBuffEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, logSuffix: " efekti tekrar! " });
+        if (rIdx >= 0) { triggerAnim?.(al[rIdx]?.id, "buff"); spawnParticles?.(al[rIdx]?.id, "buff"); }
       }
       if (d.ability === AB.FAINT_DMG) {
         applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, targetLabel: `Tüm ${enemyLabel}a`, logSuffix: " efekti tekrar! " });

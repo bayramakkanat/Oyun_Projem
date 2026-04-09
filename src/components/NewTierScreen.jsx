@@ -131,23 +131,26 @@ export default function NewTierScreen({ newTier, onContinue }) {
 
       {/* Hayvan kartları */}
       <div
-        className="flex flex-wrap gap-6 justify-center mb-10 max-w-3xl mt-8"
+        className="flex flex-wrap gap-6 justify-center mb-10 max-w-4xl mt-8"
         style={{ animation: "slideInFromBottom 0.5s ease-out 0.5s both" }}
       >
         {TIERS[newTier].map((a, i) => (
           <div
             key={i}
-            className="pb-6"
+            className="flex flex-col items-center gap-1"
             style={{ animation: `cardFlip 0.5s ease-out ${0.6 + i * 0.08}s both` }}
           >
             <Card
               a={{ ...a, id: i, lvl: 1, exp: 0, curHp: a.hp }}
               onClick={() => {}}
               selected={false}
-              showName={true}
+              showName={false}
               getDesc={getDesc}
               mirror={true}
             />
+            <span className="text-xs text-gray-300 font-semibold text-center leading-tight max-w-[90px]">
+              {a.nick}
+            </span>
           </div>
         ))}
       </div>

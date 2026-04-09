@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { TBG, TBD, ABILITY_ICONS } from "../data/gameData";
 import { getDesc as getDescUtil } from "../utils/getDesc";
 import { getStatFontSize } from "../utils/helpers";
@@ -20,6 +21,21 @@ function Card({
   team,
 }) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState(null);
+  const cardRef = useRef(null);
+
+  const handleMouseEnter = useCallback(() => {
+    if (!cardRef.current || compact || battle || !a.ability || a.ability === "none") return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setTooltipPos({
+      left: rect.left + rect.width / 2,
+      bottom: window.innerHeight - rect.top + 8,
+    });
+  }, [compact, battle, a.ability]);
+
+  const handleMouseLeave = useCallback(() => {
+    setTooltipPos(null);
+  }, []);
   useEffect(() => {
     if (!compact && !battle && !anim) {
       setTimeout(() => setIsFlipped(true), Math.random() * 400);
@@ -45,7 +61,6 @@ function Card({
   if (anim === "damage")
     animStyle = {
       animation: "shake 0.5s",
-      background: "linear-gradient(135deg, rgba(239,68,68,0.2), transparent)",
     };
 
   if (anim === "attackLeft")
@@ -154,7 +169,7 @@ function Card({
   );
 
  return (
-    <div className="relative group overflow-visible">
+    <div ref={cardRef} className="relative group overflow-visible" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {/* Merge uyarısı — mevcut yıldız */}
       {!compact &&
         shop &&
@@ -307,23 +322,36 @@ function Card({
           </div>
         )}
       </div>
-      {!compact && a.ability && a.ability !== "none" && (
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 z-[9999] w-72">
-          <div className="bg-gray-900 text-white text-xs rounded-lg p-3 shadow-2xl border-2 border-purple-500 backdrop-blur-sm">
-            <div className="flex items-center gap-2 mb-2 border-b border-gray-700 pb-2">
-              <span className="text-2xl">{ABILITY_ICONS[a.ability]}</span>
-              <div>
-                <div className="font-bold text-yellow-300">{a.nick}</div>
-                <div className="text-gray-400 text-xs">Kademe {a.tier}</div>
+      {!compact && a.ability && a.ability !== "none" && tooltipPos &&
+        createPortal(
+          <div
+            style={{
+              position: "fixed",
+              left: tooltipPos.left,
+              bottom: tooltipPos.bottom,
+              transform: "translateX(-50%)",
+              zIndex: 99999,
+              pointerEvents: "none",
+              width: "18rem",
+            }}
+          >
+            <div className="bg-gray-900 text-white text-xs rounded-lg p-3 shadow-2xl border-2 border-purple-500 backdrop-blur-sm">
+              <div className="flex items-center gap-2 mb-2 border-b border-gray-700 pb-2">
+                <span className="text-2xl">{ABILITY_ICONS[a.ability]}</span>
+                <div>
+                  <div className="font-bold text-yellow-300">{a.nick}</div>
+                  <div className="text-gray-400 text-xs">Kademe {a.tier}</div>
+                </div>
+              </div>
+              <div className="text-gray-200 leading-relaxed">
+                {getDesc ? getDesc(a) : getDescUtil(a)}
               </div>
             </div>
-            <div className="text-gray-200 leading-relaxed">
-              {getDesc ? getDesc(a) : getDescUtil(a)}
-            </div>
-          </div>
-          <div className="w-3 h-3 bg-gray-900 border-r-2 border-b-2 border-purple-500 transform rotate-45 mx-auto -mt-1.5"></div>
-        </div>
-      )}
+            <div className="w-3 h-3 bg-gray-900 border-r-2 border-b-2 border-purple-500 transform rotate-45 mx-auto -mt-1.5"></div>
+          </div>,
+          document.body
+        )
+      }
       {onSell && (
         <span
           onClick={(e) => {
