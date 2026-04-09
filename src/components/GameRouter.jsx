@@ -324,7 +324,8 @@ export default function GameRouter() {
       ) : (
         <BattleView />
       )}
-      {/* Normal/arena savaşı başlangıç intro overlay */}
+      {/* Battle intro — BattleView’in üstünde overlay olarak çalışır.
+           BattleView zaten mount olmuştur; intro kapanınca altında hazır bekliyordur. */}
       {showBattleIntro && gameMode !== "versus" && (
         <BattleIntro
           playerName={user?.displayName || user?.email?.split("@")[0] || "Oyuncu"}
