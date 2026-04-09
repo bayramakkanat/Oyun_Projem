@@ -16,11 +16,9 @@ export default function BattleIntro({ playerName, opponentName, isBoss, onDone }
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("clash"), 500);
     const t2 = setTimeout(() => setPhase("hold"),  750);
-    const t3 = setTimeout(() => setPhase("out"),  1400);
-    const t4 = setTimeout(() => onDone(),          1850);
+    const t3 = setTimeout(() => { setPhase("out"); onDone(); }, 1400);
     return () => {
-      clearTimeout(t1); clearTimeout(t2);
-      clearTimeout(t3); clearTimeout(t4);
+      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
     };
   }, []);
 
@@ -37,7 +35,7 @@ export default function BattleIntro({ playerName, opponentName, isBoss, onDone }
   const oppAvatar = isBoss ? "💀" : "⚔️";
 
   const overlayOpacity   = phase === "out" ? 0 : 1;
-  const overlayTransition = phase === "out" ? "opacity 0.45s ease-in" : "opacity 0.25s ease-out";
+  const overlayTransition = phase === "out" ? "opacity 0.05s ease-in" : "opacity 0.25s ease-out";
 
   const playerX =
     phase === "slide" ? "-110%" :
