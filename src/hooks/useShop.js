@@ -484,11 +484,10 @@ export function useShop({
     if (nt[slot] && nt[slot].name === a.name && nt[slot].tier === a.tier && nt[slot].lvl < 3) {
       const { merged, rewards: newRewards } = merge(nt[slot], a);
       nt[slot] = merged;
-      setTeam(nt);
       if (!a.isR) {
         setGold((g) => g - a.cost);
         if (onGoldSpent) onGoldSpent(a.cost);
-        // ✨ Sabit slot
+        // ✨ Sabit slot: hayvanı null yap, filter yapma
         setShop(prev => {
           const idx = prev.findIndex(p => p?.id === a.id);
           if (idx !== -1) {
@@ -504,7 +503,7 @@ export function useShop({
         setRewards((prev) => [...prev.filter((x) => x.grp !== a.grp), ...newRewards]);
       }
       applyBuyBuffs(nt, slot);
-      setTeam(nt);
+      setTeam(nt);  // tek setTeam — merge + buyBuff birlikte
       setSel(null);
       return;
     }

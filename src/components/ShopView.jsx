@@ -21,10 +21,12 @@ export default function ShopView() {
   } = useGameContext();
 
   const [showRewards, setShowRewards] = useState(false);
-  const [dragItem, setDragItem]       = useState(null); // sürüklenen mağaza hayvanı
-  const [dragOver, setDragOver]       = useState(null); // hover'daki takım slotu indeksi
+  const [dragItem, setDragItem]       = useState(null);
+  const [dragOver, setDragOver]       = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
   const [showVersusLockOverlay, setShowVersusLockOverlay] = useState(false);
+
+  const isPendingBuff = !!sel?.pendingTargetBuff;
 
   // ── Versus timer ──────────────────────────────────────────────────────────
   const getTimerDuration = (currentTurn) => {
@@ -128,6 +130,14 @@ export default function ShopView() {
     boxShadow: "0 4px 32px rgba(79,70,229,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
   }}
 >
+  {/* pendingTargetBuff aktifken mağazayı kilitle */}
+  {isPendingBuff && (
+    <div className="absolute inset-0 z-30 rounded-[2rem] flex flex-col items-center justify-center gap-2"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(3px)" }}>
+      <span className="text-3xl">🎯</span>
+      <span className="text-cyan-300 font-black text-sm text-center px-4">Takımdan bir hayvana buff ver!</span>
+    </div>
+  )}
   <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.13) 0%, transparent 65%)" }} />
   <div className="relative z-10 text-[11px] font-black uppercase tracking-[0.2em] mb-3 flex items-center justify-between">
     <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-300 to-amber-200">🛒 HAYVAN MAĞAZASI</span>
@@ -207,7 +217,7 @@ export default function ShopView() {
   </div>
 </div>
 
-        {sel && (
+        {sel && !isPendingBuff && (
           <div className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:top-1/2 sm:right-4 sm:left-auto sm:-translate-y-1/2 sm:w-72 z-50 w-full bg-gradient-to-br from-gray-900/95 to-gray-800/95 border-2 border-purple-500 rounded-t-2xl sm:rounded-2xl p-3 sm:p-4 shadow-2xl backdrop-blur-sm max-h-[45vh] sm:max-h-none overflow-y-auto sm:overflow-visible">
             <button onClick={() => setSel(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white text-xl">✕</button>
             <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-700">
@@ -230,7 +240,7 @@ export default function ShopView() {
           </div>
         )}
 
-        {showRewards && (
+        {showRewards && !sel?.pendingTargetBuff && (
           <div className="bg-gradient-to-br from-yellow-900/60 to-orange-900/60 border-2 border-yellow-500 rounded-xl p-3 mb-3 shadow-xl" style={{ animation: "fadeIn 0.4s ease-out" }}>
             <div className="text-sm text-yellow-300 mb-2 font-bold">🎁 Seviye Ödülü (1 seç!) {team.filter(x => x).length === teamSlots && <span className="text-red-400">- Slot boşalt!</span>}</div>
             <div className="flex gap-3 justify-center flex-wrap">
@@ -259,7 +269,7 @@ export default function ShopView() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-green-400 to-emerald-300" style={{ animation: "shimmer 3s ease-in-out infinite", animationDelay: "0.5s" }}>⚔️ SAVAŞ TAKIMI</span>
             {sel?.pendingTargetBuff ? <span className="text-cyan-300 animate-pulse"> 🎯 Güçlendirmek istediğin hayvanı seç!</span> : sel ? <span className="text-yellow-300"> - Slot seç</span> : null}
           </div>
-          {sel?.pendingTargetBuff && <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center">🎯 Güçlendirmek istediğin hayvana tıkla!</div>}
+          {sel?.pendingTargetBuff && <div className="mb-3 px-4 py-2 bg-cyan-900/60 border border-cyan-400/50 rounded-xl text-cyan-300 text-sm font-bold text-center">🎯 Güçlendirmek istediğin hayvana tıkla! {showRewards && <span className="text-yellow-300 text-xs font-normal ml-2">(Seviye ödülü seçiminden sonra açılacak)</span>}</div>}
 
           <div className="grid grid-cols-6 gap-2 w-full py-3">
             {team.map((a, i) => {
@@ -270,7 +280,7 @@ export default function ShopView() {
               if (isJustOpened) return (
                 <div key={i}>
                   <button
-                    onClick={() => { if (sel) buy(sel, i); else if (selI !== null) mergeT(selI, i); }}
+                    onClick={() => { if (sel && !sel.pendingTargetBuff) buy(sel, i); else if (selI !== null) mergeT(selI, i); }}
                     className="w-32 h-40 rounded-2xl border-2 border-green-500/50 text-green-400 transition-all bg-green-500/10 flex flex-col items-center justify-center"
                     style={{ animation: "slotUnlock 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards" }}
                   >
@@ -315,11 +325,13 @@ export default function ShopView() {
                       setSel(null);
                       playSound("buff");
                     }
-                  } else if (sel) buy(sel, i);
+                  } else if (sel) {
+                    if (!sel.pendingTargetBuff) buy(sel, i);
+                  }
                   else if (selI !== null && selI !== i) { if (!mergeT(selI, i)) { const newTeam = [...team]; [newTeam[selI], newTeam[i]] = [newTeam[i], newTeam[selI]]; setTeam(newTeam); setSelI(null); } }
                   else setSelI(selI === i ? null : i);
                 }}>
-                  <div className="relative group w-full flex justify-center">
+                  <div className={`relative group w-full flex justify-center ${sel?.pendingTargetBuff && i !== sel.sourceSlot ? "target-selectable" : ""}`}>
                     <Card a={a} anim={anims[a.id]} selected={selI === i} onSell={() => sell(i)} showName={false} getDesc={getDesc} mirror={true} />
                     {selI === i && <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full border-2 border-black z-20 flex items-center justify-center text-[8px] font-black text-black">✓</div>}
                   </div>
@@ -327,7 +339,7 @@ export default function ShopView() {
               ) : (
                 <div key={i}>
                   <button
-                    onClick={() => { if (sel) buy(sel, i); else if (selI !== null) { const newTeam = [...team]; [newTeam[selI], newTeam[i]] = [newTeam[i], newTeam[selI]]; setTeam(newTeam); setSelI(null); } }}
+                    onClick={() => { if (sel && !sel.pendingTargetBuff) buy(sel, i); else if (selI !== null) { const newTeam = [...team]; [newTeam[selI], newTeam[i]] = [newTeam[i], newTeam[selI]]; setTeam(newTeam); setSelI(null); } }}
                     onDragOver={(e) => { if (dragItem) { e.preventDefault(); setDragOver(i); } }}
                     onDragLeave={() => setDragOver(null)}
                     onDrop={(e) => { e.preventDefault(); if (dragItem) { buy(dragItem, i); setDragItem(null); setDragOver(null); } }}

@@ -44,7 +44,7 @@ export default function NewTierScreen({ newTier, onContinue }) {
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-b ${tierBgs[newTier]} text-white flex flex-col items-center justify-center p-4 relative overflow-hidden`}
+      className={`min-h-screen bg-gradient-to-b ${tierBgs[newTier]} text-white flex flex-col items-center justify-start py-6 px-4 relative overflow-y-auto`}
     >
       {/* Giriş flaşı */}
       <div
@@ -82,11 +82,11 @@ export default function NewTierScreen({ newTier, onContinue }) {
 
       {/* "YENİ" rozeti */}
       <div
-        className="relative mb-2"
+        className="relative mb-1"
         style={{ animation: "victoryBounce 0.6s ease-out" }}
       >
         <div
-          className="text-7xl font-black tracking-wider text-transparent bg-clip-text"
+          className="text-5xl font-black tracking-wider text-transparent bg-clip-text"
           style={{
             backgroundImage: `linear-gradient(135deg, #fff 0%, ${
               ["#9ca3af","#4ade80","#60a5fa","#c084fc","#f87171","#fb923c"][newTier - 1]
@@ -101,7 +101,7 @@ export default function NewTierScreen({ newTier, onContinue }) {
 
       {/* Kademe bilgisi */}
       <div
-        className={`text-4xl font-black mb-1 text-${tierColors[newTier]}-400`}
+        className={`text-3xl font-black mb-1 text-${tierColors[newTier]}-400`}
         style={{ animation: "slideInFromBottom 0.5s ease-out 0.2s both" }}
       >
         Kademe {newTier} Açıldı!
@@ -109,7 +109,7 @@ export default function NewTierScreen({ newTier, onContinue }) {
 
       {/* Bonus slotlar */}
       <div
-        className="text-base text-gray-300 mb-6 text-center"
+        className="text-sm text-gray-300 mb-3 text-center"
         style={{ animation: "slideInFromBottom 0.5s ease-out 0.4s both" }}
       >
         {newTier === 3 && (
@@ -129,18 +129,20 @@ export default function NewTierScreen({ newTier, onContinue }) {
         )}
       </div>
 
-      {/* Hayvan kartları — 3 satır dengeli dağılım */}
+      {/* Hayvan kartları — 5 üst / 4 alt, küçültme ile ekrana sığdır */}
       {(() => {
         const animals = TIERS[newTier];
-        const rowSize = Math.ceil(animals.length / 3);
-        const topRow = animals.slice(0, rowSize);
-        const midRow = animals.slice(rowSize, rowSize * 2);
-        const botRow = animals.slice(rowSize * 2);
+        const topRow = animals.slice(0, 5);
+        const botRow = animals.slice(5);
         const renderCard = (a, i) => (
           <div
             key={i}
             className="flex flex-col items-center gap-1"
-            style={{ animation: `cardFlip 0.5s ease-out ${0.6 + i * 0.08}s both` }}
+            style={{
+              animation: `cardFlip 0.5s ease-out ${0.6 + i * 0.08}s both`,
+              transform: "scale(0.82)",
+              transformOrigin: "top center",
+            }}
           >
             <Card
               a={{ ...a, id: i, lvl: 1, exp: 0, curHp: a.hp }}
@@ -157,20 +159,15 @@ export default function NewTierScreen({ newTier, onContinue }) {
         );
         return (
           <div
-            className="flex flex-col gap-4 mb-10 mt-8 items-center"
+            className="flex flex-col gap-1 mb-6 mt-2 items-center w-full"
             style={{ animation: "slideInFromBottom 0.5s ease-out 0.5s both" }}
           >
-            <div className="flex gap-6 justify-center">
+            <div className="flex gap-1 justify-center flex-wrap">
               {topRow.map((a, i) => renderCard(a, i))}
             </div>
-            {midRow.length > 0 && (
-              <div className="flex gap-6 justify-center">
-                {midRow.map((a, i) => renderCard(a, rowSize + i))}
-              </div>
-            )}
             {botRow.length > 0 && (
-              <div className="flex gap-6 justify-center">
-                {botRow.map((a, i) => renderCard(a, rowSize * 2 + i))}
+              <div className="flex gap-1 justify-center flex-wrap">
+                {botRow.map((a, i) => renderCard(a, 5 + i))}
               </div>
             )}
           </div>
