@@ -12,7 +12,7 @@ async function runTempBuffPhase({ playerTeam, delay, triggerAnim, addBattleLog, 
     triggerAnim(pet.id, "ability");
     if (pet.tempAtk) playerTeam[i].atk += pet.tempAtk;
     if (pet.tempHp) playerTeam[i].curHp += pet.tempHp;
-    addBattleLog(`? ${pet.nick} +${pet.tempAtk || 0} ATK / +${pet.tempHp || 0} HP (Gecici)`);
+    addBattleLog(`✨ ${pet.nick} +${pet.tempAtk || 0} ATK / +${pet.tempHp || 0} HP (geçici)`);
     syncBattleTeams(playerTeam, null);
     await delay(800);
     if (isCancelled()) return false;
@@ -26,7 +26,7 @@ async function runSelfBuffPhase({
   team, delay, triggerAnim, clampStat, pwr, spawnParticles,
   setLog, setTeam, syncBattleTeams, isCancelled, isPlayer,
 }) {
-  const pfx = isPlayer ? "" : "Düsman ";
+  const pfx = isPlayer ? "" : "Düşman ";
   let nextTeam = [...team];
 
   for (let i = 0; i < nextTeam.length; i++) {
@@ -39,7 +39,7 @@ async function runSelfBuffPhase({
       setLog((l) => [...l, `⚡ ${pfx}${a.nick} -> +${m} ATK`]);
     } else if (a.ability === AB.START_TEAM_SHIELD) {
       nextTeam = nextTeam.map((x) => x ? { ...x, hp: clampStat(x.hp + m), curHp: clampStat(x.curHp + m) } : x);
-      setLog((l) => [...l, `🛡️ ${pfx}${a.nick} -> Tüm takima +${m} HP`]);
+      setLog((l) => [...l, `🛡️ ${pfx}${a.nick} -> Tüm takıma +${m} HP`]);
     } else if (a.ability === AB.START_ALL_PERM) {
       const buffAmount = 2 * m;
       nextTeam = nextTeam.map((x) => x ? { ...x, atk: clampStat(x.atk + buffAmount) } : x);
@@ -48,7 +48,7 @@ async function runSelfBuffPhase({
         setTeam((prev) => prev.map((pet) => pet ? { ...pet, atk: clampStat(pet.atk + buffAmount) } : pet));
       }
       nextTeam.forEach((x) => { if (x) triggerAnim(x.id, "buff"); });
-      setLog((l) => [...l, `🦅 ${pfx}${a.nick} -> Tüm takima +${buffAmount} ATK KALICI`]);
+      setLog((l) => [...l, `🦅 ${pfx}${a.nick} -> Tüm takıma +${buffAmount} ATK KALICI`]);
     } else if (a.ability === AB.START_TRAMPLE) {
       nextTeam[i].atk += AM.START_TRAMPLE_ATK * m;
       nextTeam[i].trample = true;
@@ -105,7 +105,7 @@ export async function runBattleStartPhase({
       const m = pwr(pet);
       pp = pp.map((a) => a ? { ...a, atk: clampStat(a.atk + 2 * m), hp: clampStat(a.hp + 2 * m), curHp: clampStat(a.curHp + 2 * m) } : a);
       setTeam((prev) => prev.map((p) => p ? { ...p, atk: clampStat(p.atk + 2 * m), hp: clampStat(p.hp + 2 * m), curHp: clampStat(p.curHp + 2 * m) } : p));
-      addBattleLog(`🦌 ${pet.nick} -> Takima +${AM.STAG_COMBO_AMT * m}/+${AM.STAG_COMBO_AMT * m} KALICI`);
+      addBattleLog(`🦌 ${pet.nick} -> Takıma +${AM.STAG_COMBO_AMT * m}/+${AM.STAG_COMBO_AMT * m} KALICI`);
       syncBattleTeams(pp, null);
       await delay(1000);
       if (isCancelled()) return;
@@ -117,7 +117,7 @@ export async function runBattleStartPhase({
       triggerAnim(pet.id, "ability");
       const m = pwr(pet);
       ee = ee.map((a) => a ? { ...a, atk: clampStat(a.atk + 2 * m), hp: clampStat(a.hp + 2 * m), curHp: clampStat(a.curHp + 2 * m) } : a);
-      addBattleLog(`🦌 Düsman ${pet.nick} -> Düsman takimina +${AM.STAG_COMBO_AMT * m}/+${AM.STAG_COMBO_AMT * m} KALICI`);
+      addBattleLog(`🦌 Düşman ${pet.nick} -> Düşman takımına +${AM.STAG_COMBO_AMT * m}/+${AM.STAG_COMBO_AMT * m} KALICI`);
       syncBattleTeams(null, ee);
       await delay(1000);
       if (isCancelled()) return;
@@ -161,7 +161,7 @@ export async function runBattleStartPhase({
       const dmg = 6 * m;
       // 1. Projektiller fırlatılır
       targets.forEach((x) => { spawnProjectile(a.id, x.id, "start_fire"); });
-      addBattleLog(`🐉 ${isPlayer ? "" : "Düsman "}${a.nick} -> Tüm ${isPlayer ? "düsmanlara" : "takima"} ${dmg} hasar`);
+      addBattleLog(`🐉 ${isPlayer ? "" : "Düşman "}${a.nick} -> Tüm ${isPlayer ? "düşmanlara" : "takıma"} ${dmg} hasar`);
       // 2. Projektil uçuş süresi beklenir
       await delay(PROJ_FLY_MS);
       // 3. Projektil hedefe ulaştı → stat güncelle + hasar animasyonu
@@ -174,7 +174,7 @@ export async function runBattleStartPhase({
       spawnProjectile(a.id, aliveTargets[0].id, "start_fear");
       if (aliveTargets.length > 1) spawnProjectile(a.id, aliveTargets[1].id, "start_fear");
       const fearT = aliveTargets.length > 1 ? `${aliveTargets[0].nick} ve ${aliveTargets[1].nick}` : aliveTargets[0].nick;
-      addBattleLog(`🦁 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${fearT} -${AM.START_FEAR_ATK_RED * m} ATK`);
+      addBattleLog(`🦁 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${fearT} -${AM.START_FEAR_ATK_RED * m} ATK`);
       await delay(PROJ_FLY_MS);
       aliveTargets[0].atk = Math.max(1, aliveTargets[0].atk - 10 * m);
       triggerAnim(aliveTargets[0].id, "damage");
@@ -190,7 +190,7 @@ export async function runBattleStartPhase({
       if (aliveTargets.length === 0) continue;
       const snipeTarget = aliveTargets[aliveTargets.length - 1];
       spawnProjectile(a.id, snipeTarget.id, "start_snipe", null, true);
-      addBattleLog(`🎯 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${snipeTarget.nick} e ${AM.START_SNIPE_DMG * m} hasar`);
+      addBattleLog(`🎯 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${snipeTarget.nick}'e ${AM.START_SNIPE_DMG * m} hasar`);
       await delay(PROJ_FLY_MS);
       snipeTarget.curHp -= 3 * m;
       triggerAnim(snipeTarget.id, "damage");
@@ -212,7 +212,7 @@ export async function runBattleStartPhase({
         if (!stillAlive) continue;
 
         spawnProjectile(a.id, t.id, "start_multi_snipe", null, true);
-        addBattleLog(`🦑 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${AM.START_MULTI_SNIPE_DMG * m} hasar`);
+        addBattleLog(`🦑 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${t.nick}'e ${AM.START_MULTI_SNIPE_DMG * m} hasar`);
         await delay(PROJ_FLY_MS);
         // ID ile bul — referans stale olabilir
         const currentT = targets.find((x) => x.id === t.id);
@@ -229,7 +229,7 @@ export async function runBattleStartPhase({
       if (alive.length === 0) continue;
       const t = alive[Math.floor(Math.random() * alive.length)];
       spawnProjectile(a.id, t.id, "start_dmg", null, true);
-      addBattleLog(`💥 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${t.nick} e ${AM.START_DMG * m} hasar`);
+      addBattleLog(`💥 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${t.nick}'e ${AM.START_DMG * m} hasar`);
       await delay(PROJ_FLY_MS);
       t.curHp -= 2 * m;
       triggerAnim(t.id, "damage");
@@ -237,7 +237,7 @@ export async function runBattleStartPhase({
       await delay(1200 - PROJ_FLY_MS);
     } else if (a.ability === AB.START_POISON) {
       spawnProjectile(a.id, targets[0].id, "start_poison");
-      addBattleLog(`🐍 ${isPlayer ? "" : "Düsman "}${a.nick} -> On düsmana -${AM.START_POISON_ATK_RED * m} ATK`);
+      addBattleLog(`🐍 ${isPlayer ? "" : "Düşman "}${a.nick} -> Ön düşmana -${AM.START_POISON_ATK_RED * m} ATK`);
       await delay(PROJ_FLY_MS);
       targets[0].atk = Math.max(1, targets[0].atk - m * 2);
       triggerAnim(targets[0].id, "damage");
@@ -247,7 +247,7 @@ export async function runBattleStartPhase({
       const reduction = (m * 30) / 100;
       spawnProjectile(a.id, targets[0].id, "start_freeze_enemy");
       if (targets.length > 1) spawnProjectile(a.id, targets[targets.length - 1].id, "start_freeze_enemy");
-      addBattleLog(`🦣 ${isPlayer ? "" : "Düsman "}${a.nick} -> On ve arka düsmani %${m * 30} yavaslatti`);
+      addBattleLog(`🦣 ${isPlayer ? "" : "Düşman "}${a.nick} -> Ön ve arka düşmanı %${m * 30} yavaşlattı`);
       await delay(PROJ_FLY_MS);
       targets[0].atk = Math.max(1, Math.floor(targets[0].atk * (1 - reduction)));
       triggerAnim(targets[0].id, "damage");
@@ -261,7 +261,7 @@ export async function runBattleStartPhase({
       let mxI = 0, mxP = 0;
       targets.forEach((en, idx) => { if (en.atk + en.curHp > mxP) { mxP = en.atk + en.curHp; mxI = idx; } });
       spawnProjectile(a.id, targets[mxI].id, "weaken_strong");
-      addBattleLog(`🐧 ${isPlayer ? "" : "Düsman "}${a.nick} -> ${targets[mxI].nick} i %${25 * m} zayiflatti`);
+      addBattleLog(`🐧 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${targets[mxI].nick}'i %${25 * m} zayıflattı`);
       await delay(PROJ_FLY_MS);
       const r = (25 * m) / 100;
       targets[mxI].atk = Math.max(1, Math.floor(targets[mxI].atk * (1 - r)));

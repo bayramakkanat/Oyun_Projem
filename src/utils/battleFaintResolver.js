@@ -211,8 +211,8 @@ export function resolveFaint(d, al, en, isP, killer, callbacks) {
   d.isDead = true;
 
   const labels = isP
-    ? { pfx: "",        allyLabel: "oyuncu takım", enemyLabel: "düşman takım", summonNick: "Yavru",      summonFlip: false }
-    : { pfx: "Düşman ", allyLabel: "düşman takım", enemyLabel: "oyuncu takım", summonNick: "Düş.Yavru", summonFlip: false };
+    ? { pfx: "",        allyLabel: "oyuncu takımı", enemyLabel: "düşman takımı", summonNick: "Yavru",      summonFlip: false }
+    : { pfx: "Düşman ", allyLabel: "düşman takımı", enemyLabel: "oyuncu takımı", summonNick: "Düş.Yavru", summonFlip: false };
 
   return _resolveFaintCore(d, al, en, isP, killer, callbacks, labels);
 }

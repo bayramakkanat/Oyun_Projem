@@ -269,6 +269,7 @@ function Card({
     ? compact ? "w-16 h-16" : "w-24 h-24"
   : compact ? "w-12 h-12" : "w-16 h-16"
     } ${!battle && !compact && !anim ? `pet-idle phase-${(a.id ?? 0) % 6} group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_currentColor]` : ""}`}
+   style={{}}
     onError={(e) => {
       e.target.style.display = "none";
       e.target.nextSibling.style.display = "inline";

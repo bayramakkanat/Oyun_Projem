@@ -129,12 +129,14 @@ export default function NewTierScreen({ newTier, onContinue }) {
         )}
       </div>
 
-      {/* Hayvan kartları */}
-      <div
-        className="flex flex-wrap gap-6 justify-center mb-10 max-w-4xl mt-8"
-        style={{ animation: "slideInFromBottom 0.5s ease-out 0.5s both" }}
-      >
-        {TIERS[newTier].map((a, i) => (
+      {/* Hayvan kartları — 3 satır dengeli dağılım */}
+      {(() => {
+        const animals = TIERS[newTier];
+        const rowSize = Math.ceil(animals.length / 3);
+        const topRow = animals.slice(0, rowSize);
+        const midRow = animals.slice(rowSize, rowSize * 2);
+        const botRow = animals.slice(rowSize * 2);
+        const renderCard = (a, i) => (
           <div
             key={i}
             className="flex flex-col items-center gap-1"
@@ -152,8 +154,28 @@ export default function NewTierScreen({ newTier, onContinue }) {
               {a.nick}
             </span>
           </div>
-        ))}
-      </div>
+        );
+        return (
+          <div
+            className="flex flex-col gap-4 mb-10 mt-8 items-center"
+            style={{ animation: "slideInFromBottom 0.5s ease-out 0.5s both" }}
+          >
+            <div className="flex gap-6 justify-center">
+              {topRow.map((a, i) => renderCard(a, i))}
+            </div>
+            {midRow.length > 0 && (
+              <div className="flex gap-6 justify-center">
+                {midRow.map((a, i) => renderCard(a, rowSize + i))}
+              </div>
+            )}
+            {botRow.length > 0 && (
+              <div className="flex gap-6 justify-center">
+                {botRow.map((a, i) => renderCard(a, rowSize * 2 + i))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       <button
         onClick={onContinue}
