@@ -414,7 +414,7 @@ export function useShop({
       const getTargetBuff = (petLike) => {
         if (petLike.ability === AB.BUY_TARGET_HP) {
           const m = pwr({ ...petLike, lvl: petLike.lvl || 1 });
-          return { atk: 0, hp: 3 * m };
+          return { atk: 0, hp: 4 * m };
         }
         const m = pwr({ ...petLike, lvl: petLike.lvl || 1 });
         const amount = m === 1 ? 1 : m === 2 ? 2 : 4;

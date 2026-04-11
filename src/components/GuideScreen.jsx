@@ -96,7 +96,7 @@ export default function GuideScreen({ onClose, guideLvl, setGuideLvl }) {
         </div>
 
         {/* Sağ: Seçili hayvan detay paneli */}
-        <div className={`w-72 flex-shrink-0 border-l border-white/10 bg-black/30 backdrop-blur-md flex flex-col transition-all duration-300 ${selPet ? "opacity-100" : "opacity-40"}`}>
+        <div className="w-72 flex-shrink-0 border-l border-white/10 bg-black/30 backdrop-blur-md flex flex-col">
           {selPet ? (
             <div className="p-5 flex flex-col gap-4 h-full overflow-y-auto">
               {/* Hayvan başlığı */}
@@ -198,8 +198,8 @@ export default function GuideScreen({ onClose, guideLvl, setGuideLvl }) {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full gap-3 text-center p-6">
-              <span className="text-5xl opacity-30">👆</span>
-              <div className="text-gray-500 text-sm">Detay görmek için bir hayvana tıkla</div>
+              <span className="text-5xl opacity-70">👆</span>
+              <div className="text-yellow-300 text-sm font-semibold drop-shadow">Detay görmek için bir hayvana tıkla</div>
             </div>
           )}
         </div>

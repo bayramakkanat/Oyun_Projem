@@ -252,10 +252,10 @@ style={{
   return (
     <div
       key={i}
-      className={`${color} py-0.5 border-b border-gray-800/20 last:border-b-0 ${
+      className={`${color} py-0.5 border-b border-gray-800/20 last:border-b-0 break-words whitespace-pre-wrap ${
         isVictory ? "log-flash-victory" : isDefeat ? "log-flash-defeat" : ""
       }`}
-      style={{ animation: isVictory || isDefeat ? "logEntryBig 0.4s ease-out" : "fadeIn 0.2s ease-out" }}
+      style={{ animation: isVictory || isDefeat ? "logEntryBig 0.4s ease-out" : "fadeIn 0.2s ease-out", wordBreak: "break-word", overflowWrap: "anywhere" }}
     >
       {l}
     </div>

@@ -1800,3 +1800,14 @@
   animation: logFlashDefeat 1.2s ease-out !important;
   border-radius: 4px;
 }
+
+/* Nefes alma animasyonu — boş takım butonu için */
+@keyframes breathe {
+  0%, 100% { transform: scale(1);    opacity: 0.85; }
+  50%       { transform: scale(1.12); opacity: 1;    }
+}
+
+.breathe {
+  animation: breathe 2.6s ease-in-out infinite;
+  display: inline-block;
+}

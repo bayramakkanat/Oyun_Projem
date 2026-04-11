@@ -192,7 +192,7 @@ export async function runBattleStartPhase({
       spawnProjectile(a.id, snipeTarget.id, "start_snipe", null, true);
       addBattleLog(`🎯 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${snipeTarget.nick}'e ${AM.START_SNIPE_DMG * m} hasar`);
       await delay(PROJ_FLY_MS);
-      snipeTarget.curHp -= 3 * m;
+      snipeTarget.curHp -= 5 * m;
       triggerAnim(snipeTarget.id, "damage");
       syncBattleTeams(pp, ee);
       await delay(1200 - PROJ_FLY_MS);
@@ -217,7 +217,7 @@ export async function runBattleStartPhase({
         // ID ile bul — referans stale olabilir
         const currentT = targets.find((x) => x.id === t.id);
         if (currentT && currentT.curHp > 0) {
-          currentT.curHp -= 8 * m;
+          currentT.curHp -= 10 * m;
           triggerAnim(currentT.id, "damage");
           syncBattleTeams(pp, ee);
         }

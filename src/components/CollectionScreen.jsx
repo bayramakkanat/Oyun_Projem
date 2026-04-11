@@ -113,8 +113,12 @@ export default function CollectionScreen({ onClose, userId }) {
                 width: "75%",
                 height: "75%",
                 objectFit: "contain",
-                filter: !isUnlocked
-                  ? "brightness(0) opacity(0.2) blur(1px)"
+                filter: completedTasks === 0
+                  ? "brightness(0) opacity(0.15)"
+                  : completedTasks === 1
+                  ? "brightness(0) invert(0.15) opacity(0.45) blur(0.5px)"
+                  : completedTasks === 2
+                  ? "brightness(0) invert(0.3) opacity(0.7)"
                   : isComplete
                   ? "drop-shadow(0 0 16px rgba(251,191,36,0.7))"
                   : "drop-shadow(0 0 8px rgba(167,139,250,0.4))",
@@ -122,18 +126,28 @@ export default function CollectionScreen({ onClose, userId }) {
               }}
             />
           ) : (
-            <span className={`text-6xl ${!isUnlocked ? "opacity-20 grayscale" : ""}`}>
+            <span className={`text-6xl ${completedTasks === 0 ? "opacity-10 grayscale" : completedTasks < 3 ? "opacity-50 grayscale" : ""}`}>
               {animal.name}
             </span>
           )}
 
           {/* Kilit overlay */}
-          {!isUnlocked && (
+          {completedTasks === 0 && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="flex flex-col items-center gap-1">
                 <span className="text-3xl">🔒</span>
                 <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Kilitli</span>
               </div>
+            </div>
+          )}
+          {completedTasks === 1 && (
+            <div className="absolute bottom-1 left-0 right-0 flex justify-center">
+              <span className="text-[9px] text-purple-400/70 font-bold">1/3 Görev</span>
+            </div>
+          )}
+          {completedTasks === 2 && (
+            <div className="absolute bottom-1 left-0 right-0 flex justify-center">
+              <span className="text-[9px] text-purple-300/80 font-bold">2/3 Görev</span>
             </div>
           )}
 
@@ -152,12 +166,14 @@ export default function CollectionScreen({ onClose, userId }) {
 
         {/* Alt bilgi alanı */}
         <div className="p-3">
-          <div className={`font-black text-sm text-center ${isUnlocked ? "text-white" : "text-gray-600"}`}>
-            {isUnlocked ? animal.nick : "???"}
+          <div className={`font-black text-sm text-center ${completedTasks > 0 ? "text-white" : "text-gray-600"}`}>
+            {completedTasks > 0 ? animal.nick : "???"}
           </div>
           <div className="text-xs text-gray-500 text-center mb-2">Kademe {animal.tier}</div>
           {isComplete && <div className="text-xs text-yellow-400 font-bold text-center">✨ Tam Koleksiyon!</div>}
-          {isUnlocked && !isComplete && <div className="text-xs text-green-400/70 text-center">✓ Koleksiyonda</div>}
+          {completedTasks === 2 && !isComplete && <div className="text-xs text-purple-300/80 text-center">Neredeyse tamamlandı...</div>}
+          {completedTasks === 1 && <div className="text-xs text-purple-400/60 text-center">Keşfedilmeye başlandı</div>}
+          {completedTasks === 0 && <div className="text-xs text-gray-600 text-center">Henüz keşfedilmedi</div>}
         </div>
 
             {/* İstatistikler */}

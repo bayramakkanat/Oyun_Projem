@@ -123,9 +123,9 @@ export const createFriendSummonUnit = ({ allyUnit, power, name, nick, img, flip 
   const summon = {
     name,
     nick,
-    atk: power * 2,
-    hp: power * 3,
-    curHp: power * 3,
+    atk: power + 1,
+    hp: power + 1,
+    curHp: power + 1,
     ability: AB.NONE,
     tier: 1,
     lvl: 1,
