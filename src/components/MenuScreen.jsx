@@ -590,12 +590,14 @@ export default function MenuScreen() {
 )}
       </div>
       <div className="absolute bottom-6 left-6 z-20">
-        <button
-          onClick={onDebug}
-          className="px-4 py-2 bg-purple-900/40 border border-purple-500/20 rounded-xl text-purple-400 text-xs font-bold hover:bg-purple-800/60 transition-all"
-        >
-          🧪 Debug
-        </button>
+        {process.env.NODE_ENV !== "production" && (
+          <button
+            onClick={() => setShowDebugPanel(true)}
+            className="px-4 py-2 bg-purple-900/40 border border-purple-500/20 rounded-xl text-purple-400 text-xs font-bold hover:bg-purple-800/60 transition-all"
+          >
+            🧪 Debug
+          </button>
+        )}
         <button
           onClick={() => setMenuView("feedback")}
           className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-gray-400 text-xs font-bold hover:bg-white/10 transition-all"
