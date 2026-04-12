@@ -18,16 +18,20 @@ service cloud.firestore {
                    && docId.matches(request.auth.uid + '_turn.*');
     }
 
-    // ─── arena_leaderboard_{ay} ───────────────────────────────────────────────
-    match /{leaderboardCol}/{uid} {
-      allow read: if isLoggedIn()
-                  && leaderboardCol.matches('arena_leaderboard_.*');
+    // ─── arena_leaderboard (kalıcı tek sıralama) ──────────────────────────────
+    match /arena_leaderboard/{uid} {
+      allow read: if isLoggedIn();
       allow write: if isOwner(uid)
-                   && leaderboardCol.matches('arena_leaderboard_.*')
-                   // Hile önlemi: makul olmayan değerler yazılamaz
                    && request.resource.data.bestTurn <= 200
                    && request.resource.data.totalGames <= 10000
                    && request.resource.data.xp <= 100000;
+    }
+
+    // ─── arena_leaderboard_{ay} (eski aylık — artık sadece okuma) ──────────
+    match /{leaderboardCol}/{uid} {
+      allow read: if isLoggedIn()
+                  && leaderboardCol.matches('arena_leaderboard_.*');
+      allow write: if false;
     }
 
     // ─── user_profiles ────────────────────────────────────────────────────────

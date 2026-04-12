@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
-import { getCurrentMonthLabel } from "../hooks/useArena";
 import { db } from "../firebase";
 import { getRank } from "../utils/helpers";
 
@@ -17,9 +16,8 @@ export default function LeaderboardScreen({ onBack, user, onShowAuth }) {
 
     const fetch = async () => {
       try {
-        const monthKey = `${new Date().getFullYear()}_${String(new Date().getMonth() + 1).padStart(2, "0")}`;
         const q = query(
-          collection(db, `arena_leaderboard_${monthKey}`),
+          collection(db, "arena_leaderboard"),
           orderBy("xp", "desc"),
           limit(20)
         );
@@ -56,7 +54,7 @@ export default function LeaderboardScreen({ onBack, user, onShowAuth }) {
       </button>
 
       <h2 className="text-4xl font-black mb-2">LİDERLİK TABLOSU</h2>
-      <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">🏆 {getCurrentMonthLabel()} Sıralaması</p>
+      <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">🏆 Tüm Zamanlar Sıralaması</p>
 
       <div className="flex items-center gap-2 mb-6 px-3 py-2 rounded-xl bg-blue-900/20 border border-blue-500/20">
         <span className="text-blue-400 text-sm">🏅</span>
@@ -71,7 +69,7 @@ export default function LeaderboardScreen({ onBack, user, onShowAuth }) {
           <div className="text-5xl">🔒</div>
           <div className="text-white font-black text-lg">Sıralamayı görmek için giriş yap</div>
           <div className="text-gray-400 text-sm max-w-xs">
-            Gerçek oyuncularla yarış, aylık sıralamada yerini al ve XP kazan.
+            Gerçek oyuncularla yarış, sıralamada yerini al ve XP kazan.
           </div>
           {onShowAuth && (
             <button

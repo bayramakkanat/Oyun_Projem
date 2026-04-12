@@ -116,8 +116,7 @@ export function useArena({ user, turnRef }) {
   }) => {
     if (!user) return;
     try {
-      const monthKey = getMonthKey();
-      const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
+      const ref = doc(db, "arena_leaderboard", user.uid);
       const snap = await getDoc(ref);
       const prev = snap.exists()
         ? snap.data()
@@ -139,9 +138,7 @@ export function useArena({ user, turnRef }) {
         totalTurns: (prev.totalTurns || 0) + totalTurns,
         totalLosses: (prev.totalLosses || 0) + totalLosses,
         totalDraws: (prev.totalDraws || 0) + totalDraws,
-        monthlyWins: (prev.monthlyWins || 0) + (won ? 1 : 0),
         lastPlayed: serverTimestamp(),
-        month: getMonthKey(),
       });
 
       // Kalıcı profil güncelle
