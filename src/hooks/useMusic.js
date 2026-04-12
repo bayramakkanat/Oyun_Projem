@@ -4,29 +4,36 @@ const menuMusic   = "/sounds/menu-music.mp3";
 const shopMusic   = "/sounds/shop-music.mp3";
 const battleMusic = "/sounds/battle-music.mp3";
 
-// Müziği çalmayı dene; tarayıcı autoplay politikası engellerse
-// ilk kullanıcı etkileşiminde (click/touch) tekrar dene.
-const tryPlay = (audio, label) => {
+const tryPlay = (audio, label, intendedAudioRef) => {
   if (!audio) return;
-  audio.play().catch(() => {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn(`[useMusic] "${label}" autoplay engellendi, jest bekleniyor...`);
-    }
-    // İlk kullanıcı etkileşiminde bir kez daha dene
-    const retry = () => {
-      if (audio.paused) {
-        audio.play().catch(() => {});
+  
+  const playPromise = audio.play();
+  if (playPromise !== undefined) {
+    playPromise.catch((err) => {
+      // Yalnızca autoplay engellendiyse (NotAllowedError) etkileşim bekle.
+      // AbortError genellikle play() çağrısının hemen ardına pause() gelirse oluşur.
+      if (err.name === 'NotAllowedError') {
+        const events = ["click", "touchstart", "keydown", "pointerdown"];
+        const retry = () => {
+          events.forEach((e) => document.removeEventListener(e, retry));
+          // Eğer bu ses artık o anki çalınması gereken ses değilse, çalma!
+          if (intendedAudioRef && intendedAudioRef.current !== audio) return;
+          if (!audio.paused) return; // zaten çalıyorsa dokunma
+          audio.play().catch(e => console.error(`[useMusic] Retry failed for ${label}:`, e));
+        };
+        events.forEach((e) => document.addEventListener(e, retry, { once: true }));
+      } else if (err.name !== 'AbortError') {
+        console.error(`[useMusic] Error playing ${label}:`, err);
       }
-    };
-    document.addEventListener("click",    retry, { once: true });
-    document.addEventListener("touchend", retry, { once: true });
-  });
+    });
+  }
 };
 
 export function useMusic({ soundEnabled, phase, gameStarted }) {
   const menuRef   = useRef(null);
   const shopRef   = useRef(null);
   const battleRef = useRef(null);
+  const intendedAudioRef = useRef(null);
 
   // ─── Müzik nesnelerini bir kez oluştur ────────────────────────────────────
   useEffect(() => {
@@ -57,6 +64,7 @@ export function useMusic({ soundEnabled, phase, gameStarted }) {
     if (!menu || !shop || !battle) return;
 
     if (!soundEnabled) {
+      intendedAudioRef.current = null;
       menu.pause();
       shop.pause();
       battle.pause();
@@ -64,22 +72,28 @@ export function useMusic({ soundEnabled, phase, gameStarted }) {
     }
 
     if (!gameStarted) {
+      intendedAudioRef.current = menu;
       shop.pause();
       battle.pause();
-      if (menu.paused) tryPlay(menu, "menu");
+      if (menu.paused) {
+        menu.currentTime = 0;
+        tryPlay(menu, "menu", intendedAudioRef);
+      }
 
     } else if (phase === "battle") {
+      intendedAudioRef.current = battle;
       menu.pause();
       shop.pause();
       if (battle.paused) {
         battle.currentTime = 0;
-        tryPlay(battle, "battle");
+        tryPlay(battle, "battle", intendedAudioRef);
       }
 
     } else if (phase === "shop") {
+      intendedAudioRef.current = shop;
       menu.pause();
       battle.pause();
-      if (shop.paused) tryPlay(shop, "shop");
+      if (shop.paused) tryPlay(shop, "shop", intendedAudioRef);
     }
   }, [soundEnabled, phase, gameStarted]);
 }
