@@ -9,6 +9,7 @@ import { getDesc } from "../utils/getDesc";
 import { playSound } from "../hooks/useSound";
 import { ABILITY_ICONS, BOSSES } from "../data/gameData";
 import HUD from "./HUD";
+import TutorialOverlay from "./TutorialOverlay";
 
 export default function ShopView() {
   const {
@@ -387,6 +388,7 @@ export default function ShopView() {
           onContinue={() => { setNewTier(null); setPhase("shop"); }}
         />
       )}
+      <TutorialOverlay />
     </>
   );
 }

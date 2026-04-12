@@ -60,7 +60,9 @@ export const ShopProvider = ({ children }) => {
   // Kayıtlı oyun yüklenirken refresh()'i atlamak için kullanılır.
   // BattleContext'teki restoreGame buraya kaydedilen shop'u yazar;
   // useShop'taki effect ilk tetiklendiğinde refresh() yerine bunu kullanır.
-  const restoredShopRef = useRef(null);
+  const restoredShopRef    = useRef(null);
+  // Tutorial aktifken refresh() bu ref'i okur ve random pool yerine tutorial hayvanını inject eder
+  const tutorialAnimalRef  = useRef(null);
 
   // ─── Türetilmiş değerler ──────────────────────────────────────────────────
   const maxT      = useMemo(() => Math.min(Math.ceil(turn / 2), 6), [turn]);
@@ -114,6 +116,7 @@ export const ShopProvider = ({ children }) => {
     spawnBuffAnimation,
     onGoldSpent,
     restoredShopRef,
+    tutorialAnimalRef,
   });
 
   // ─── Context value ────────────────────────────────────────────────────────
@@ -132,6 +135,7 @@ export const ShopProvider = ({ children }) => {
     // Refs
     turnRef,
     restoredShopRef,
+    tutorialAnimalRef,
     // Derived
     maxT, teamSlots, shopSlots, empty, hasR,
     // Shop actions

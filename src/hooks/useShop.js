@@ -180,6 +180,7 @@ export function useShop({
   spawnBuffAnimation: _spawnBuffAnimation,
   onGoldSpent,
   restoredShopRef,
+  tutorialAnimalRef,
 }) {
 
   // ─── Ödül havuzu ──────────────────────────────────────────────────────────
@@ -385,6 +386,16 @@ export function useShop({
     if (restoredShopRef?.current) {
       setShop(restoredShopRef.current);
       restoredShopRef.current = null;
+      return;
+    }
+    // Tutorial aktifse → random pool yerine tutorial hayvanını 2 slota inject et
+    if (tutorialAnimalRef?.current) {
+      const ta = tutorialAnimalRef.current;
+      setShop([
+        { ...ta, id: Math.random(), lvl: 1, exp: 0, curHp: ta.hp, frozen: false },
+        { ...ta, id: Math.random(), lvl: 1, exp: 0, curHp: ta.hp, frozen: false },
+        null, null, null,
+      ]);
       return;
     }
     refresh();
