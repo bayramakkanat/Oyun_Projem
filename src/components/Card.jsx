@@ -262,7 +262,7 @@ function Card({
     : (a.flip ? { transform: "scaleX(-1)" } : {})
 }>
  <img
-    src={a.img ? `/images/animals/${a.img}` : `https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u${a.name.codePointAt(0).toString(16)}.svg`}
+    src={a.img ? (a.img.startsWith("http") || a.img.startsWith("/") ? a.img : `/images/animals/${a.img}`) : `https://raw.githack.com/googlefonts/noto-emoji/main/svg/emoji_u${a.name.codePointAt(0).toString(16)}.svg`}
     alt={a.nick}
    className={`pet-glow drop-shadow-2xl object-contain transition-all duration-300 ${
   a.img

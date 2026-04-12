@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useGameContext } from "../context/GameContext";
+import React, { useState, useEffect, Suspense, lazy } from "react";
+import { useUIContext } from "../context/UIContext";
+import { useShopContext } from "../context/ShopContext";
+import { useBattleContext } from "../context/BattleContext";
 import VersusIntro from "./VersusIntro";
 import BattleView from "./BattleView";
 import GuideScreen from "./GuideScreen";
@@ -14,7 +16,7 @@ import ShopView from "./ShopView";
 import ArenaResultScreen from "./ArenaResultScreen";
 import StarField from "./StarField";
 import GlobalNotifications from "./GlobalNotifications";
-import DebugPanel from "./DebugPanel";
+const DebugPanel = lazy(() => import("./DebugPanel"));
 import { playSound } from "../hooks/useSound";
 import { BOSSES, DIFFICULTY_CONFIGS } from "../data/gameData";
 
@@ -111,7 +113,7 @@ export default function GameRouter() {
     handleEmailAuth,
     handleLogout,
     handleUpdateProfile,
-  } = useGameContext();
+  } = { ...useUIContext(), ...useShopContext(), ...useBattleContext() };
   // ─── Versus intro: onRoomReady'den önce göster ───────────────────────────
   const [versusIntroRoom, setVersusIntroRoom] = useState(null);
   // Normal/arena savaşı başlangıç intro state'i
@@ -169,19 +171,21 @@ export default function GameRouter() {
         {notifications}
         <MenuScreen />
         {showDebugPanel && (
-        <DebugPanel
-          onClose={() => setShowDebugPanel(false)}
-          onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
-            setIsDebugBattle(true); 
-            setPT(playerTeam);
-            setET(enemyTeam);
-            if (bossTurn) setBossChallenge("battle");
-            setPhase("battle");
-            setGameStarted(true);
-            setShowDebugPanel(false); 
-          }}
-        />
-      )}
+          <Suspense fallback={<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 text-white">Yükleniyor...</div>}>
+            <DebugPanel
+              onClose={() => setShowDebugPanel(false)}
+              onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
+                setIsDebugBattle(true); 
+                setPT(playerTeam);
+                setET(enemyTeam);
+                if (bossTurn) setBossChallenge("battle");
+                setPhase("battle");
+                setGameStarted(true);
+                setShowDebugPanel(false); 
+              }}
+            />
+          </Suspense>
+        )}
       </>
     );
   }
@@ -284,19 +288,21 @@ export default function GameRouter() {
       {notifications}
       <StarField />
       {showDebugPanel && (
-        <DebugPanel
-          onClose={() => setShowDebugPanel(false)}
-          onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
-            // debug başlatma
-            setShowDebugPanel(false);
-            setIsDebugBattle(true);
-            setPT(playerTeam);
-            setET(enemyTeam);
-            if (bossTurn) setBossChallenge("battle");
-            setPhase("battle");
-            setGameStarted(true);
-          }}
-        />
+        <Suspense fallback={<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 text-white">Yükleniyor...</div>}>
+          <DebugPanel
+            onClose={() => setShowDebugPanel(false)}
+            onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
+              // debug başlatma
+              setShowDebugPanel(false);
+              setIsDebugBattle(true);
+              setPT(playerTeam);
+              setET(enemyTeam);
+              if (bossTurn) setBossChallenge("battle");
+              setPhase("battle");
+              setGameStarted(true);
+            }}
+          />
+        </Suspense>
       )}
       {lastError && (
         <div className="fixed top-4 left-4 z-[9999] bg-red-900 border-2 border-red-500 rounded-lg p-3 max-w-md shadow-2xl">

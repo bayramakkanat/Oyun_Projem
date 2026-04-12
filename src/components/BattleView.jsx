@@ -13,25 +13,9 @@ export default function BattleView() {
     if (isPausedRef) isPausedRef.current = !isPausedRef.current;
     if (setIsPaused) setIsPaused((p) => !p);
   };
-  // remove trailing lines...
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   const logR = useRef(null);
-useEffect(() => {
+  useEffect(() => {
     if (logR.current) {
       logR.current.scrollTop = logR.current.scrollHeight;
     }

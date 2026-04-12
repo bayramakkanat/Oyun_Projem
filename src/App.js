@@ -5,6 +5,7 @@ import { GameProvider } from "./context/GameContext";
 import GameRouter from "./components/GameRouter";
 import SplashScreen from "./components/SplashScreen";
 import { useAuthContext } from "./context/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function AppInner() {
   const { authReady } = useAuthContext();
@@ -36,7 +37,9 @@ function AppInner() {
   return (
     <>
       <GameProvider>
-        <GameRouter />
+        <ErrorBoundary>
+          <GameRouter />
+        </ErrorBoundary>
       </GameProvider>
       {showSplash && <SplashScreen fading={splashFading} />}
     </>

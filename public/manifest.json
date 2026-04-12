@@ -1,0 +1,16 @@
+{
+  "short_name": "Animathon",
+  "name": "Animathon - Auto Battler",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1a1e55",
+  "background_color": "#111827",
+  "description": "Stratejik, hızlı ve eğlenceli bir Auto-Battler deneyimi."
+}

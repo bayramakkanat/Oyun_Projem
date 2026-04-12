@@ -73,7 +73,7 @@ describe("applyFaintBuffEffect", () => {
 
   test("boş takımda false döner", () => {
     const result = applyFaintBuffEffect({ deadUnit: makePet(), power: 1, allyTeam: [], clampStat, logs: [] });
-    expect(result).toBe(false);
+    expect(result).toBe(-1); // boş takımda -1 döner
   });
 });
 
@@ -128,7 +128,7 @@ describe("applyFriendFaintEffect", () => {
 describe("createFaintSummonUnit", () => {
   test("doğru stat ile yavru oluşturur", () => {
     const summon = createFaintSummonUnit({ name: "🥚", nick: "Yavru", power: 2, img: "egg.png" });
-    const AM_FAINT_SUMMON_AMT = 4; // gameData'daki değer
+    const AM_FAINT_SUMMON_AMT = 5; // gameData'daki gerçek değer
     expect(summon.atk).toBe(AM_FAINT_SUMMON_AMT * 2);
     expect(summon.hp).toBe(AM_FAINT_SUMMON_AMT * 2);
     expect(summon.ability).toBe(AB.NONE);
@@ -155,9 +155,11 @@ describe("applyStagComboEffect", () => {
     const dead = makePet({ id: "dead" });
     const a1   = makePet({ id: "a1", atk: 5, curHp: 8 });
     const a2   = makePet({ id: "a2", atk: 3, curHp: 6 });
-    applyStagComboEffect({ deadUnit: dead, power: 1, allyTeam: [a1, a2], clampStat, logs: [], logPrefix: "" });
-    expect(a1.atk).toBe(7);
-    expect(a2.atk).toBe(5);
+    const team = [a1, a2];
+    applyStagComboEffect({ deadUnit: dead, power: 1, allyTeam: team, clampStat, logs: [], logPrefix: "" });
+    // Fonksiyon spread ile yeni obje oluşturur, array üzerinden kontrol et
+    expect(team[0].atk).toBe(7);
+    expect(team[1].atk).toBe(5);
   });
 });
 

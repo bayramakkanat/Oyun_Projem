@@ -174,15 +174,15 @@ describe("runBattleTurnPhase — HURT_TEAM_BUFF", () => {
 describe("runBattleTurnPhase — DEVOUR", () => {
   test("düşmanı öldürünce stat yutulur", async () => {
     const p = [makePet({ ability: AB.DEVOUR, atk: 20, curHp: 20 })];
-    const e = [makePet({ atk: 1, hp: 6, curHp: 3 })]; // öldürülecek
+    const e = [makePet({ atk: 10, hp: 6, curHp: 3 })]; // öldürülecek, atk:10 → %40 = 4 gain
 
     const atkBefore = p[0].atk;
     await runBattleTurnPhase(baseArgs(p, e));
 
     // %40 (30 + 10*1) stat yutulur
     const pct = (30 + 10 * 1) / 100;
-    const expectedAtkGain = Math.floor(e[0].atk * pct);
-    expect(p[0].atk).toBeGreaterThan(atkBefore);
+    const expectedAtkGain = Math.floor(10 * pct); // Math.floor(10 * 0.4) = 4
+    expect(expectedAtkGain).toBeGreaterThan(0); // sanity check
     expect(p[0].atk).toBe(atkBefore + expectedAtkGain);
   });
 });
