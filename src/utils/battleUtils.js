@@ -368,10 +368,6 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
               ), i * 150);
             });
           }
-          if (targetCenter) {
-            const rect = targetCenter.getBoundingClientRect();
-            spawnFloatingText(`+${buff}/+${buff}`, rect.left + rect.width / 2, rect.top, "buff");
-          }
         }, 50);
         logArr.push(
           `🐻 ${pet.nick} → Yavru ${summon.nick}'e +${buff}/+${buff} güçlendirdi!`
@@ -402,10 +398,6 @@ export const applySummonBuffs = (newSummons, alliedTeam, logArr, callbacks) => {
                     icon, cx, cy, cx + (i * 20 - 10), cy - 40, 800
                   ), i * 150);
                 });
-              }
-              if (targetEl) {
-                const rect = targetEl.getBoundingClientRect();
-                spawnFloatingText(`+${extraBuff}/+${extraBuff}`, rect.left + rect.width / 2, rect.top, "buff");
               }
             }, 50);
             logArr.push(
