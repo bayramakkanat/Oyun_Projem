@@ -18,7 +18,7 @@ import {
   where,
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import { logError, loadStats, setCollectionCache } from "../utils/helpers";
+import { logError, loadStats, setCollectionCache, initTasks } from "../utils/helpers";
 
 export function useAuth({
   authMode,
@@ -45,6 +45,8 @@ export function useAuth({
         setShowAuthModal(false);
         const base = loadStats(u.uid);
         setStats(base);
+        // Görevleri initialize et (yoksa oluştur, varsa güncelle)
+        initTasks(u.uid);
 
         // Firebase'den achievements yükle ve local cache ile birleştir
         try {
@@ -68,6 +70,8 @@ export function useAuth({
         }
       } else {
         setStats(loadStats(null));
+        // Misafir kullanıcı için de görevleri initialize et
+        initTasks(null);
       }
     });
     return () => unsub();
