@@ -1,5 +1,124 @@
 import React, { useEffect, useState } from "react";
 
+/**
+ * Favicon'daki A harfi tasarımını yansıtan özel A bileşeni.
+ * Koyu/indigo arka plan üzerinde beyaz bold "A" + altında yeşil gülümseyen yay.
+ * em tabanlı boyutlandırma ile çevre font-size'a otomatik uyum sağlar.
+ */
+export function AnimathonA({ style = {} }) {
+  return (
+    <svg
+      viewBox="0 0 100 110"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        display: "inline-block",
+        width: "0.88em",
+        height: "0.97em",
+        verticalAlign: "middle",
+        position: "relative",
+        top: "0.06em",
+        ...style,
+      }}
+    >
+      <defs>
+        <linearGradient id="aBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#3730a3" />
+          <stop offset="100%" stopColor="#1e1b4b" />
+        </linearGradient>
+      </defs>
+      <rect width="100" height="100" rx="20" fill="url(#aBg)" />
+      <text
+        x="50"
+        y="68"
+        fontFamily="Arial, sans-serif"
+        fontSize="62"
+        fontWeight="bold"
+        fill="#fff"
+        textAnchor="middle"
+      >
+        A
+      </text>
+      <path
+        d="M18 80 Q50 97 82 80"
+        fill="none"
+        stroke="#4ade80"
+        strokeWidth="8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/* ─── AY Games yayın logosu ─── */
+function AyGamesLogo() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "0px",
+        animation: "ayLogoFadeIn 1.2s ease-out 0.5s both",
+        userSelect: "none",
+      }}
+    >
+      {/* Hilal SVG */}
+      <svg
+        width="50"
+        height="42"
+        viewBox="0 0 50 42"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ marginBottom: "5px" }}
+      >
+        <defs>
+          <radialGradient id="moonGrad" cx="38%" cy="32%" r="62%">
+            <stop offset="0%"   stopColor="#fef9e7" />
+            <stop offset="40%"  stopColor="#fbbf24" />
+            <stop offset="100%" stopColor="#b45309" />
+          </radialGradient>
+          <filter id="moonGlow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
+        <circle cx="21" cy="21" r="17" fill="url(#moonGrad)" filter="url(#moonGlow)" />
+        <circle cx="29" cy="17" r="15" fill="#0a0a1a" />
+      </svg>
+
+      {/* AY yazısı */}
+      <div
+        style={{
+          fontSize: "clamp(20px, 5.5vw, 26px)",
+          fontWeight: 900,
+          letterSpacing: "0.30em",
+          color: "#fbbf24",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          lineHeight: 1,
+          textShadow: "0 0 10px rgba(251,191,36,0.65), 0 0 30px rgba(251,191,36,0.22)",
+          marginBottom: "3px",
+        }}
+      >
+        AY
+      </div>
+
+      {/* GAMES yazısı */}
+      <div
+        style={{
+          fontSize: "clamp(7px, 1.6vw, 9px)",
+          fontWeight: 600,
+          letterSpacing: "0.40em",
+          color: "rgba(251,191,36,0.50)",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          textTransform: "uppercase",
+        }}
+      >
+        GAMES
+      </div>
+    </div>
+  );
+}
+
 export default function SplashScreen({ fading }) {
   const [dotIndex, setDotIndex] = useState(0);
 
@@ -50,20 +169,30 @@ export default function SplashScreen({ fading }) {
         {/* Oyun adı */}
         <div
           style={{
-            fontSize: "clamp(28px, 7vw, 44px)",
+            fontSize: "clamp(34px, 8.5vw, 54px)",
             fontWeight: 900,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            background: "linear-gradient(135deg, #c084fc 0%, #818cf8 50%, #38bdf8 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
             animation: "splashTitleGlow 3s ease-in-out infinite",
             marginBottom: "6px",
             fontFamily: "system-ui, -apple-system, sans-serif",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.05em",
           }}
         >
-          Animathon
+          <AnimathonA />
+          <span
+            style={{
+              background: "linear-gradient(135deg, #c084fc 0%, #818cf8 50%, #38bdf8 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            nimathon
+          </span>
         </div>
 
         {/* Alt başlık */}
@@ -113,6 +242,21 @@ export default function SplashScreen({ fading }) {
         </div>
       </div>
 
+      {/* AY Games logosu — ekranın altında ortalı */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "clamp(22px, 5vh, 42px)",
+          left: 0,
+          right: 0,
+          display: "flex",
+          justifyContent: "center",
+          zIndex: 2,
+        }}
+      >
+        <AyGamesLogo />
+      </div>
+
       <style>{`
         @keyframes splashBounce {
           0%, 100% { transform: translateY(0px) scale(1); }
@@ -130,6 +274,10 @@ export default function SplashScreen({ fading }) {
         @keyframes splashStar {
           0%, 100% { opacity: 0.12; transform: scale(1); }
           50%       { opacity: 0.85; transform: scale(1.5); }
+        }
+        @keyframes ayLogoFadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0);   }
         }
       `}</style>
     </div>
