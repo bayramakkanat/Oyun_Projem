@@ -181,6 +181,7 @@ export function useShop({
   onGoldSpent,
   restoredShopRef,
   tutorialAnimalRef,
+  setShopResetKey,
 }) {
 
   // ─── Ödül havuzu ──────────────────────────────────────────────────────────
@@ -344,60 +345,84 @@ export function useShop({
 
   // ─── Mağaza yenile ────────────────────────────────────────────────────────
   const refresh = () => {
-    const currentFrozen = shop.filter((s) => s && s.frozen);
-    setDiscountNext(false);
-    const slotsNeeded = shopSlots - currentFrozen.length;
-    const pool = [];
-    for (let t = 1; t <= maxT; t++) {
-      const weight =
-        difficultyLevel === "hard"  ? t * 2 :
-        difficultyLevel === "easy"  ? (maxT - t + 1) * 2 : 1;
-      for (let w = 0; w < weight; w++) pool.push(...TIERS[t]);
-    }
-    const s = [];
-    for (let i = 0; i < slotsNeeded; i++) {
-      const a = pool[Math.floor(Math.random() * pool.length)];
-      let cost = a.cost;
-      team.forEach((pet) => {
-        if (pet && pet.ability === AB.BUY_DISCOUNT_NEXT) cost = Math.max(1, cost - pwr(pet));
-      });
-      if (discountNext) {
-        team.forEach((pet) => {
-          if (pet && pet.ability === AB.SHOP_DISCOUNT) {
-            const pct = pwr(pet) === 1 ? 0.33 : pwr(pet) === 2 ? 0.66 : 0.99;
-            cost = Math.max(1, Math.floor(cost * (1 - pct)));
-          }
-        });
-      }
-      s.push({ ...a, id: Math.random(), lvl: 1, exp: 0, curHp: a.hp, frozen: false, cost });
-    }
-    if (discountNext) setDiscountNext(false);
-    const newShop = [...currentFrozen, ...s];
-    setShop(newShop);
 
-    const hasMergeable = newShop.some((sp) =>
-      team.some((t) => t && t.name === sp.name && t.tier === sp.tier && t.lvl < 3)
-    );
-    if (hasMergeable) setTimeout(() => playSound("merge_burst"), 300);
+    setShop((prevShop) => {
+      // Tutorial aktifse → Kelebek enjekte et
+      if (tutorialAnimalRef?.current) {
+        const ta = tutorialAnimalRef.current;
+        const currentFrozen = prevShop.filter((s) => s && s.frozen);
+        return [
+          ...currentFrozen,
+          { ...ta, id: Math.random(), lvl: 1, exp: 0, curHp: ta.hp, frozen: false, cost: 3 },
+          null, null, null, null
+        ].slice(0, shopSlots || 3);
+      }
+
+      // Normal yenileme mantığı
+      const currentFrozen = prevShop.filter((s) => s && s.frozen);
+      setDiscountNext(false);
+      
+      const slotsNeeded = Math.max(0, (shopSlots || 3) - currentFrozen.length);
+      const pool = [];
+      for (let t = 1; t <= (maxT || 1); t++) {
+        const tierData = TIERS[t];
+        if (!tierData || tierData.length === 0) continue;
+        const weight =
+          difficultyLevel === "hard"  ? t * 2 :
+          difficultyLevel === "easy"  ? ((maxT || 1) - t + 1) * 2 : 1;
+        for (let w = 0; w < weight; w++) pool.push(...tierData);
+      }
+
+      if (pool.length === 0) {
+        console.error("Pool is empty!");
+        return prevShop;
+      }
+
+      const s = [];
+      for (let i = 0; i < slotsNeeded; i++) {
+        const a = pool[Math.floor(Math.random() * pool.length)];
+        let cost = a.cost || 3;
+        team.forEach((pet) => {
+          if (pet && pet.ability === AB.BUY_DISCOUNT_NEXT) cost = Math.max(1, cost - pwr(pet));
+        });
+        if (discountNext) {
+          team.forEach((pet) => {
+            if (pet && pet.ability === AB.SHOP_DISCOUNT) {
+              const pct = pwr(pet) === 1 ? 0.33 : pwr(pet) === 2 ? 0.66 : 0.99;
+              cost = Math.max(1, Math.floor(cost * (1 - pct)));
+            }
+          });
+        }
+        s.push({ ...a, id: Math.random(), lvl: 1, exp: 0, curHp: a.hp, frozen: false, cost });
+      }
+
+      const newShop = [...currentFrozen, ...s];
+      const hasMergeable = newShop.some((sp) =>
+        team.some((t) => t && t.name === sp.name && t.tier === sp.tier && t.lvl < 3)
+      );
+      if (hasMergeable) setTimeout(() => playSound("merge_burst"), 300);
+
+      return newShop;
+    });
   };
 
   useEffect(() => {
-    // Kayıtlı oyun restore ediliyorsa refresh() yerine kaydedilen shop'u kullan
-    if (restoredShopRef?.current) {
+    if (restoredShopRef?.current && restoredShopRef.current.length > 0) {
       setShop(restoredShopRef.current);
       restoredShopRef.current = null;
       return;
     }
-    // Tutorial aktifse → random pool yerine tutorial hayvanını 2 slota inject et
+    
     if (tutorialAnimalRef?.current) {
       const ta = tutorialAnimalRef.current;
       setShop([
-        { ...ta, id: Math.random(), lvl: 1, exp: 0, curHp: ta.hp, frozen: false },
-        { ...ta, id: Math.random(), lvl: 1, exp: 0, curHp: ta.hp, frozen: false },
+        { ...ta, id: Math.random(), lvl: 1, exp: 0, curHp: ta.hp, frozen: false, cost: 3 },
+        { ...ta, id: Math.random(), lvl: 1, exp: 0, curHp: ta.hp, frozen: false, cost: 3 },
         null, null, null,
-      ]);
+      ].slice(0, shopSlots || 3));
       return;
     }
+
     refresh();
   }, [turn, shopSlots, shopResetKey]);
 

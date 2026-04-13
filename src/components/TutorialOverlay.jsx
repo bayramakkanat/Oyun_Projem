@@ -4,8 +4,7 @@ import { useUIContext }   from "../context/UIContext";
 
 const TKEY = "petgame_tutorial_v1";
 
-// Kelebek: tier 1 gerçek hayvan, LEVELUP_BUFF_SELF — başka hayvana buff VERMİYOR,
-// satın alınca direkt takıma giriyor, pendingTargetBuff tetiklenmiyor.
+// Kelebek: tier 1 gerçek hayvan, LEVELUP_BUFF_SELF
 const TUTORIAL_ANIMAL = {
   name: "🦋",
   nick: "Kelebek",
@@ -29,6 +28,8 @@ const STYLES = `
   @keyframes tut-badge     { from{transform:scale(0) rotate(-20deg)} to{transform:scale(1) rotate(0deg)} }
   @keyframes tut-arrowDown { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
   @keyframes tut-slot-glow { 0%,100%{box-shadow:0 0 8px 2px rgba(74,222,128,0.3)} 50%{box-shadow:0 0 22px 7px rgba(74,222,128,0.7)} }
+  @keyframes tut-pulse     { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  @keyframes tut-appear-slow { from{opacity:0} to{opacity:1} }
 `;
 
 /* ─── Karartma ─────────────────────────────────────────────────────────────── */
@@ -51,85 +52,52 @@ function StepDots({ current, total }) {
   );
 }
 
-/* ─── Merkezi modal ────────────────────────────────────────────────────────── */
+/* ─── Merkezi modal ───────────────────────────────────────────────────────── */
 function Modal({ emoji, badge, title, body, bodyExtra, primaryLabel, onPrimary, secondaryLabel, onSecondary, accent = "#7c3aed" }) {
   return (
     <>
       <style>{STYLES}</style>
       <Dim />
-      <div className="fixed z-[9999] flex flex-col items-center"
-        style={{ top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "min(94vw,420px)", animation: "tut-appear 0.35s cubic-bezier(0.175,0.885,0.32,1.275) both" }}>
-        <div className="w-full rounded-3xl p-6 flex flex-col items-center gap-4 text-center shadow-2xl relative overflow-hidden"
-          style={{ background: "linear-gradient(145deg,#1a1740 0%,#0c1220 100%)", border: `2px solid ${accent}99`, boxShadow: `0 12px 60px ${accent}44` }}>
-          <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% -20%, ${accent}22 0%, transparent 65%)` }} />
-          {emoji && (
-            <div className="relative" style={{ animation: "tut-float 3s ease-in-out infinite" }}>
-              <span className="text-6xl block">{emoji}</span>
-              {badge && <span className="absolute -top-1 -right-3 text-2xl block" style={{ animation: "tut-badge 0.4s 0.3s cubic-bezier(0.175,0.885,0.32,1.275) both" }}>{badge}</span>}
-            </div>
-          )}
-          {title    && <p className="relative text-white font-black text-xl leading-snug">{title}</p>}
-          {body     && <p className="relative text-gray-300 text-sm leading-relaxed whitespace-pre-line">{body}</p>}
-          {bodyExtra}
-          <div className="flex flex-col gap-2 w-full mt-1 relative">
-            {primaryLabel && (
-              <button onClick={onPrimary} className="w-full py-3 rounded-2xl font-black text-base active:scale-95 transition-all"
-                style={{ background: `linear-gradient(135deg,${accent} 0%,#4f46e5 100%)`, boxShadow: `0 4px 24px ${accent}55`, color: "#fff" }}>
-                {primaryLabel}
-              </button>
+      <div className="fixed z-[9999] flex flex-col items-center justify-center"
+        style={{
+          top: 0, left: 0, right: 0, bottom: 0,
+          pointerEvents: "none"
+        }}>
+        <div className="flex flex-col items-center"
+          style={{
+            width: "min(94vw, 420px)",
+            maxHeight: "90vh",
+            overflowY: "auto",
+            pointerEvents: "auto",
+            animation: "tut-appear 0.35s cubic-bezier(0.175,0.885,0.32,1.275) both"
+          }}>
+          <div className="w-full rounded-3xl p-6 flex flex-col items-center gap-4 text-center shadow-2xl relative overflow-hidden"
+            style={{ background: "linear-gradient(145deg,#1a1740 0%,#0c1220 100%)", border: `2px solid ${accent}99`, boxShadow: `0 12px 60px ${accent}44` }}>
+            <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% -20%, ${accent}22 0%, transparent 65%)` }} />
+            {emoji && (
+              <div className="relative" style={{ animation: "tut-float 3s ease-in-out infinite" }}>
+                <span className="text-6xl block">{emoji}</span>
+                {badge && <span className="absolute -top-1 -right-3 text-2xl block" style={{ animation: "tut-badge 0.4s 0.3s cubic-bezier(0.175,0.885,0.32,1.275) both" }}>{badge}</span>}
+              </div>
             )}
-            {secondaryLabel && (
-              <button onClick={onSecondary} className="w-full py-2 rounded-2xl font-bold text-sm text-gray-500 hover:text-gray-300 transition-colors">
-                {secondaryLabel}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-/* ─── Boş slot okları (takım bölgesine bakan animasyonlu oklar) ─────────────── */
-function SlotArrowOverlay({ teamSlots, team }) {
-  const emptyCount = Array.from({ length: teamSlots || 4 }).filter((_, i) => !team[i]).length;
-  if (emptyCount === 0) return null;
-  return (
-    <div className="fixed left-0 right-0 z-[9995] flex justify-center gap-6 pointer-events-none" style={{ bottom: 148 }}>
-      {Array.from({ length: Math.min(emptyCount, 4) }).map((_, i) => (
-        <div key={i} className="flex flex-col items-center">
-          <span className="font-black text-green-400 text-2xl leading-none"
-            style={{ animation: "tut-arrowDown 0.75s ease-in-out infinite", animationDelay: `${i * 0.12}s` }}>▼</span>
-          <span className="font-black text-green-300 text-xl leading-none"
-            style={{ animation: "tut-arrowDown 0.75s ease-in-out infinite", animationDelay: `${i * 0.12 + 0.1}s` }}>▼</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ─── Altta yüzen kabarcık ─────────────────────────────────────────────────── */
-function Bubble({ icon, title, text, arrowUp, accent = "#facc15", showSlotArrows, team, teamSlots, onSkip, children }) {
-  return (
-    <>
-      <style>{STYLES}</style>
-      {showSlotArrows && <SlotArrowOverlay teamSlots={teamSlots} team={team || []} />}
-      <div className="fixed left-1/2 z-[9999] flex flex-col items-center gap-2 pointer-events-auto"
-        style={{ transform: "translateX(-50%)", bottom: 86, width: "min(96vw,390px)", animation: "tut-appear 0.3s ease both" }}>
-        {arrowUp && <span className="text-3xl block text-yellow-300" style={{ animation: "tut-bounce 0.85s ease-in-out infinite" }}>⬆</span>}
-        <div className="w-full rounded-2xl px-4 py-4 flex flex-col gap-2"
-          style={{ background: "rgba(10,16,40,0.97)", border: `2px solid ${accent}bb`, backdropFilter: "blur(18px)", boxShadow: `0 0 32px ${accent}44` }}>
-          <div className="flex items-center gap-3">
-            <span className="text-3xl flex-shrink-0" style={{ animation: "tut-float 2.5s ease-in-out infinite" }}>{icon}</span>
-            <div className="flex-1 text-left">
-              {title && <p className="text-white font-black text-sm mb-0.5">{title}</p>}
-              <p className="text-gray-300 text-xs leading-snug">{text}</p>
+            {title    && <p className="relative text-white font-black text-xl leading-snug">{title}</p>}
+            {body     && <p className="relative text-gray-300 text-sm leading-relaxed whitespace-pre-line">{body}</p>}
+            {bodyExtra}
+            <div className="flex flex-col gap-2 w-full mt-1 relative">
+              {primaryLabel && (
+                <button onClick={onPrimary} className="w-full py-3 rounded-2xl font-black text-base active:scale-95 transition-all"
+                  style={{ background: `linear-gradient(135deg,${accent} 0%,#4f46e5 100%)`, boxShadow: `0 4px 24px ${accent}55`, color: "#fff" }}>
+                  {primaryLabel}
+                </button>
+              )}
+              {secondaryLabel && (
+                <button onClick={onSecondary} className="w-full py-2 rounded-2xl font-bold text-sm text-gray-500 hover:text-gray-300 transition-colors">
+                  {secondaryLabel}
+                </button>
+              )}
             </div>
           </div>
-          {children}
         </div>
-        {!arrowUp && <span className="text-3xl block text-green-400" style={{ animation: "tut-bounceD 0.85s ease-in-out infinite" }}>⬇</span>}
-        <button onClick={onSkip} className="text-xs text-gray-600 hover:text-gray-400 transition-colors mt-0.5">Atla</button>
       </div>
     </>
   );
@@ -145,6 +113,32 @@ function HRow({ icon, label, desc }) {
         <span className="text-gray-400">{desc}</span>
       </p>
     </div>
+  );
+}
+
+/* ─── Altta yüzen kabarcık ─────────────────────────────────────────────────── */
+function Bubble({ icon, title, text, arrowUp, accent = "#facc15", onSkip, children }) {
+  return (
+    <>
+      <style>{STYLES}</style>
+      <div className="fixed left-1/2 z-[9999] flex flex-col items-center gap-2 pointer-events-auto"
+        style={{ transform: "translateX(-50%)", bottom: 86, width: "min(96vw,390px)", animation: "tut-appear 0.3s ease both" }}>
+        {arrowUp && <span className="text-3xl block text-yellow-300" style={{ animation: "tut-bounce 0.85s ease-in-out infinite" }}>⬆</span>}
+        <div className="w-full rounded-2xl px-4 py-4 flex flex-col gap-2"
+          style={{ background: "rgba(10,16,40,0.97)", border: `2px solid ${accent}bb`, backdropFilter: "blur(18px)", boxShadow: `0 0 32px ${accent}44` }}>
+          <div className="flex items-center gap-3">
+            <span className="text-3xl flex-shrink-0" style={{ animation: "tut-float 2.5s ease-in-out infinite" }}>{icon}</span>
+            <div className="flex-1 text-left">
+              {title && <p className="text-white font-black text-sm mb-0.5">{title}</p>}
+              <p className="text-gray-300 text-xs leading-snug">{text}</p>
+            </div>
+          </div>
+          {children}
+        </div>
+        {!arrowUp && <span className="text-3xl block text-green-400" style={{ animation: "tut-bounceD 0.85s ease-in-out infinite" }}>⬇</span>}
+        <button onClick={onSkip} className="text-xs text-gray-500 hover:text-gray-300 transition-colors mt-0.5">Rehberi atla</button>
+      </div>
+    </>
   );
 }
 
@@ -172,7 +166,6 @@ export default function TutorialOverlay() {
   }, [gameMode]);
 
   const finish = useCallback(() => {
-    // Tutorial bitince ref'i temizle — normal refresh devreye girsin
     if (tutorialAnimalRef) tutorialAnimalRef.current = null;
     localStorage.setItem(TKEY, "1");
     setVisible(false);
@@ -186,7 +179,7 @@ export default function TutorialOverlay() {
     }
   }, [sel, visible, step]);
 
-  /* Adım 2 → 3: ilk satın alma (takıma 1 hayvan eklendi) */
+  /* Adım 2 → 3: ilk satın alma */
   useEffect(() => {
     if (!visible) return;
     const tc = team.filter(Boolean).length;
@@ -194,72 +187,54 @@ export default function TutorialOverlay() {
     prevTeamCount.current = tc;
   }, [team, visible, step]);
 
-  /* Adım 3 → 4: birinci birleşme (exp > 0) */
+  /* Adım 3 → 4: birleşme */
   useEffect(() => {
     if (!visible || step !== 3) return;
     if (team.some(a => a && a.exp > 0)) {
-      const t = setTimeout(() => setStep(4), 900);
-      return () => clearTimeout(t);
+      setStep(4);
     }
   }, [team, visible, step]);
 
-  /* Adım 4'e girilince mağazayı boşalt — oyuncu refresh'e basınca tutorial hayvanı gelsin */
-  const step4Cleared = useRef(false);
+  /* Adım 4: Refresh yapıldığında geç */
   useEffect(() => {
     if (!visible || step !== 4) return;
-    if (step4Cleared.current) return;
-    step4Cleared.current = true;
-    // Mağazayı temizle ki "shop değişti = refresh yapıldı" tespiti güvenilir olsun
-    setShop([null, null, null, null, null]);
-  }, [step, visible, setShop]);
+    if (shopResetKey !== prevResetKey.current) {
+      setStep(5);
+    }
+    prevResetKey.current = shopResetKey;
+  }, [shopResetKey, visible, step]);
 
-  /* Adım 4 → 5: mağaza temizlendikten sonra shop tekrar dolunca (refresh yapıldı) ilerlet */
-  const step4Done = useRef(false);
+  /* Adım 5: Kelebek tekrar çıktı mı kontrolü */
   useEffect(() => {
-    if (!visible || step !== 4) return;
-    if (!step4Cleared.current) return; // henüz temizleme olmadı
-    if (step4Done.current) return;
+    if (!visible || step !== 5) return;
     const hasTutAnimal = shop.some(s => s && s.name === TUTORIAL_ANIMAL.name);
     if (hasTutAnimal) {
-      step4Done.current = true;
-      setTimeout(() => setStep(5), 300);
+      setStep(6);
     }
   }, [shop, visible, step]);
 
-  /* Adım 4'ten çıkınca ref'leri sıfırla */
+  /* Adım 6 → 7: ödül paneli açıldı */
   useEffect(() => {
-    if (step !== 4) {
-      step4Cleared.current = false;
-      step4Done.current = false;
-    }
-  }, [step]);
-
-  /* Adım 5 → 6: ödül paneli açıldı (seviye 2 oldu) */
-  useEffect(() => {
-    if (!visible || step !== 5) return;
-    if (hasR && !prevHasR.current) setStep(6);
+    if (!visible || step !== 6) return;
+    if (hasR && !prevHasR.current) setStep(7);
     prevHasR.current = hasR;
   }, [hasR, visible, step]);
 
-  /* Adım 6 → 7: ödül seçildi */
+  /* Adım 7 → 8: ödül seçildi */
   useEffect(() => {
-    if (!visible || step !== 6) return;
+    if (!visible || step !== 7) return;
     if (!hasR && prevHasR.current) {
-      // Ödül seçildikten sonra tutorial bitti — ref'i temizle, normal oyun başlasın
       if (tutorialAnimalRef) tutorialAnimalRef.current = null;
-      setStep(7);
+      setStep(8);
     }
     prevHasR.current = hasR;
   }, [hasR, visible, step, tutorialAnimalRef]);
 
   if (!visible) return null;
 
-  /* ── Shop'a Kelebek enjeksiyonu + adım başlatma ── */
+  /* ── Shop'a Kelebek enjeksiyonu ── */
   const handleStart = () => {
-    // tutorialAnimalRef'e Kelebek'i yaz — bundan sonraki her refresh() bunu kullanır
     if (tutorialAnimalRef) tutorialAnimalRef.current = TUTORIAL_ANIMAL;
-
-    // İlk görünüm için mağazayı hemen set et
     setShop([
       { ...TUTORIAL_ANIMAL, id: Math.random(), lvl: 1, exp: 0, curHp: TUTORIAL_ANIMAL.hp, frozen: false },
       { ...TUTORIAL_ANIMAL, id: Math.random(), lvl: 1, exp: 0, curHp: TUTORIAL_ANIMAL.hp, frozen: false },
@@ -268,14 +243,13 @@ export default function TutorialOverlay() {
     setStep(1);
   };
 
-  const TOTAL = 9;
+  const TOTAL = 10;
 
-  /* ── Step 0: Karşılama ── */
   if (step === 0) return (
     <Modal
       emoji="🐾" badge="✨"
       title="Merhaba, oyuna hoş geldin!"
-      body={"Bu kısa rehber sana mağazayı,\nhayvan birleştirmeyi ve\nönemli bilgileri adım adım gösterecek."}
+      body="Bu kısa rehber sana mağazayı, hayvan birleştirmeyi ve önemli bilgileri adım adım gösterecek."
       bodyExtra={<StepDots current={0} total={TOTAL} />}
       primaryLabel="Başlayalım! →"
       onPrimary={handleStart}
@@ -285,7 +259,6 @@ export default function TutorialOverlay() {
     />
   );
 
-  /* ── Step 1: Aynı 2 hayvana tıkla ── */
   if (step === 1) return (
     <Bubble
       icon="🦋" arrowUp accent="#facc15"
@@ -306,31 +279,28 @@ export default function TutorialOverlay() {
     </Bubble>
   );
 
-  /* ── Step 2: Satın al ── */
   if (step === 2) return (
     <Bubble
       icon="🛒" arrowUp={false} accent="#34d399"
       title="Şimdi satın al!"
       text="'Satın Al' butonuna bas — VEYA aşağıdaki boş takım slotlarından birine doğrudan tıkla."
-      showSlotArrows team={team} teamSlots={teamSlots || 4}
       onSkip={finish}
     >
-      <div className="flex items-center justify-center gap-3 mt-1">
-        <div className="px-3 py-1.5 rounded-xl text-xs font-black text-green-300"
-          style={{ background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.4)" }}>
-          ✅ Satın Al butonu
+        <div className="flex items-center justify-center gap-3 mt-1">
+          <div className="px-3 py-1.5 rounded-xl text-xs font-black text-green-300"
+            style={{ background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.4)" }}>
+            ✅ Satın Al butonu
+          </div>
+          <span className="text-gray-500 text-xs">ya da</span>
+          <div className="px-3 py-1.5 rounded-xl text-xs font-black text-green-300"
+            style={{ background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.4)", animation: "tut-slot-glow 1.5s ease-in-out infinite" }}>
+            ⬇ Boş Slot
+          </div>
         </div>
-        <span className="text-gray-500 text-xs">ya da</span>
-        <div className="px-3 py-1.5 rounded-xl text-xs font-black text-green-300"
-          style={{ background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.4)", animation: "tut-slot-glow 1.5s ease-in-out infinite" }}>
-          ⬇ Boş Slot
-        </div>
-      </div>
-      <StepDots current={2} total={TOTAL} />
-    </Bubble>
+        <StepDots current={2} total={TOTAL} />
+      </Bubble>
   );
 
-  /* ── Step 3: Birleştir ── */
   if (step === 3) return (
     <Bubble
       icon="✨" arrowUp accent="#a78bfa"
@@ -358,17 +328,16 @@ export default function TutorialOverlay() {
     </Bubble>
   );
 
-  /* ── Step 4: Yenile ── */
   if (step === 4) return (
     <Bubble
       icon="🔄" arrowUp accent="#fb923c"
       title="Mağazayı yenile!"
-      text="Mağazanın sağındaki 🔄 Yenile butonuna bas (1💰 harcar). Tutorial hediyesi: yenilemede aynı Kelebek tekrar çıkacak!"
+      text="Mağazanın sağındaki 🔄 Yenile butonuna bas (1💰 harcar). Yenilediğinde Kelebek tekrar çıkacak!"
       onSkip={finish}
     >
       <div className="flex items-center gap-3 mt-1 px-3 py-2 rounded-xl"
         style={{ background: "rgba(251,146,60,0.08)", border: "1px dashed rgba(251,146,60,0.45)" }}>
-        <span className="text-3xl" style={{ animation: "tut-float 1.5s ease-in-out infinite" }}>🔄</span>
+        <span className="text-3xl" style={{ animation: "tut-pulse 1.5s ease-in-out infinite" }}>🔄</span>
         <div className="text-left">
           <p className="text-orange-300 font-black text-xs">Yenile Butonu</p>
           <p className="text-gray-400 text-xs">Mağaza ızgarasının en sağında</p>
@@ -379,8 +348,22 @@ export default function TutorialOverlay() {
     </Bubble>
   );
 
-  /* ── Step 5: Yenilemeden sonra tekrar Kelebek çıktı ── */
   if (step === 5) return (
+    <Bubble
+      icon="⏳" arrowUp={false} accent="#facc15"
+      title="Yenileme yapıldı!"
+      text="Mağaza yenilendi. Biraz bekleyelim, Kelebek tekrar gelecek..."
+      onSkip={finish}
+    >
+      <div className="flex items-center justify-center gap-2 mt-1">
+        <span className="text-2xl animate-spin">🔄</span>
+        <span className="text-yellow-300 text-xs">Kelebek geliyor...</span>
+      </div>
+      <StepDots current={5} total={TOTAL} />
+    </Bubble>
+  );
+
+  if (step === 6) return (
     <Bubble
       icon="⭐" arrowUp accent="#34d399"
       title="Kelebek tekrar çıktı!"
@@ -393,26 +376,24 @@ export default function TutorialOverlay() {
         <span className="text-xl">⭐🦋</span>
         <span className="text-green-400 font-black text-lg mx-1">=</span>
         <span className="text-2xl">👑🦋</span>
-        <span className="text-green-300 font-black text-xs ml-1">Seviye 2!</span>
+        <span className="text-green-300 font-black text-xs ml-1">Seviye 3!</span>
       </div>
-      <StepDots current={5} total={TOTAL} />
+      <StepDots current={6} total={TOTAL} />
     </Bubble>
   );
 
-  /* ── Step 6: Ödül seçimi ── */
-  if (step === 6) return (
+  if (step === 7) return (
     <Bubble
       icon="🎁" arrowUp={false} accent="#fbbf24"
       title="Seviye ödülü!"
       text="Kelebek seviye atladı! Açılan ödül havuzundan bir hayvanı seç ve takımına ekle."
       onSkip={finish}
     >
-      <StepDots current={6} total={TOTAL} />
+      <StepDots current={7} total={TOTAL} />
     </Bubble>
   );
 
-  /* ── Step 7: HUD tanıtımı ── */
-  if (step === 7) return (
+  if (step === 8) return (
     <Modal
       emoji="🗺️"
       title="Üst çubuğu tanıyalım"
@@ -426,34 +407,32 @@ export default function TutorialOverlay() {
           <HRow icon="🗺️" label="Rehber"     desc="Tüm hayvanları ve yeteneklerini listeler." />
           <HRow icon="📖" label="Koleksiyon" desc="Kullandığın hayvanların istatistikleri." />
           <HRow icon="🏠" label="Menü"       desc="Ana menüye döner." />
-          <StepDots current={7} total={TOTAL} />
+          <StepDots current={8} total={TOTAL} />
         </div>
       }
       primaryLabel="Anladım →"
-      onPrimary={() => setStep(8)}
+      onPrimary={() => setStep(9)}
       accent="#6366f1"
     />
   );
 
-  /* ── Step 8: Satma ── */
-  if (step === 8) return (
+  if (step === 9) return (
     <Modal
       emoji="💸"
       title="Hayvan nasıl satılır?"
-      body={"Takımındaki hayvanın altındaki\naltın simgesinin üzerine fareyi getir\n(mobilde uzun bas).\n\n'SAT' yazısı belirince tıkla\n— altın kazanırsın!"}
-      bodyExtra={<StepDots current={8} total={TOTAL} />}
+      body="Takımındaki hayvanın altındaki altın simgesinin üzerine fareyi getir (mobilde uzun bas). 'SAT' yazısı belirince tıkla — altın kazanırsın!"
+      bodyExtra={<StepDots current={9} total={TOTAL} />}
       primaryLabel="Anladım →"
-      onPrimary={() => setStep(9)}
+      onPrimary={() => setStep(10)}
       accent="#d97706"
     />
   );
 
-  /* ── Step 9: Hazırsın! ── */
-  if (step === 9) return (
+  if (step === 10) return (
     <Modal
       emoji="🎉" badge="🚀"
       title="Artık hazırsın!"
-      body={"Takımını kur, hayvanları birleştir,\ngüçlendir ve savaşa gönder.\n\nİyi oyunlar! ⚔️"}
+      body="Takımını kur, hayvanları birleştir, güçlendir ve savaşa gönder. İyi oyunlar! ⚔️"
       primaryLabel="Oynayalım! →"
       onPrimary={finish}
       accent="#16a34a"

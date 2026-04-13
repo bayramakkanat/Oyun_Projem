@@ -117,6 +117,7 @@ export const ShopProvider = ({ children }) => {
     onGoldSpent,
     restoredShopRef,
     tutorialAnimalRef,
+    setShopResetKey,
   });
 
   // ─── Context value ────────────────────────────────────────────────────────

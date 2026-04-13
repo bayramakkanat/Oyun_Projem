@@ -17,7 +17,7 @@ export default function ShopView() {
     isBossTurn, mergeT, newTier, newlyOpenedSlot,
     offerBoss, phase, refresh, reset, rewards, sel, selI, sell,
     setNewTier, setPhase, setRewards,
-    setSel, setSelI, setTeam, setGold,
+    setSel, setSelI, setTeam, setGold, setShopResetKey,
     shop, team, teamSlots, toggleFreeze, turn, versusReady, gameMode, goToShop, versusRoom,
   } = useGameContext();
 
@@ -203,7 +203,14 @@ export default function ShopView() {
     {/* Yenile butonu (6. sütun) */}
     <div className="flex flex-col items-center gap-1">
       <button
-  onClick={() => { const unfrozen = shop.filter(s => s && !s.frozen); if (unfrozen.length === 0 || gold >= 1) { if (unfrozen.length > 0) setGold(g => g - 1); refresh(); playSound("refresh"); } }}
+  onClick={() => { 
+    const unfrozen = shop.filter(s => s && !s.frozen); 
+    if (unfrozen.length === 0 || gold >= 1) { 
+      if (unfrozen.length > 0) setGold(g => g - 1); 
+      setShopResetKey(k => k + 1); 
+      playSound("refresh"); 
+    } 
+  }}
   disabled={gold < 1 && shop.filter(s => s && !s.frozen).length > 0}
   className="w-32 h-40 rounded-2xl bg-transparent disabled:opacity-40 flex flex-col items-center justify-center hover:bg-purple-500/10 transition-all duration-300 border-2 border-dashed border-purple-400/30 hover:border-purple-400/60 group/roll"
 >
