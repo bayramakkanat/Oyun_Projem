@@ -80,7 +80,7 @@ export const ShopProvider = ({ children }) => {
   // ─── Oyun durumu kaydet (yalnızca shop fazında anlamlı) ───────────────────
   useEffect(() => {
     if (!gameStarted) return;
-    if (gameMode === "versus") return;
+    if (gameMode === "versus" || gameMode === "arena") return;
     saveGameState({
       turn,
       gold,

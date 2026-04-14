@@ -20,7 +20,7 @@ import GlobalNotifications from "./GlobalNotifications";
 const DebugPanel = lazy(() => import("./DebugPanel"));
 import { playSound } from "../hooks/useSound";
 import { BOSSES, DIFFICULTY_CONFIGS } from "../data/gameData";
-import { isArenaUnlocked, unlockArena } from "../utils/localSave";
+import { isArenaUnlocked, unlockArena, isArenaIntroSeen, markArenaIntroSeen } from "../utils/localSave";
 
 export default function GameRouter() {
   const {
@@ -195,11 +195,12 @@ export default function GameRouter() {
             />
           </Suspense>
         )}
-        {/* Arena sinematik giriş — menünün üstünde katmanlı çalışır */}
+        {/* Arena sinematik giriş — ilk girişte 1 kez gösterilir */}
         {showArenaIntro && (
           <ArenaIntro
             playerName={displayName || user?.displayName || ""}
             onDone={() => {
+              markArenaIntroSeen();
               setShowArenaIntro(false);
               reset();
               setGameStarted(true);

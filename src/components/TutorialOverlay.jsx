@@ -15,7 +15,6 @@ const TUTORIAL_ANIMAL = {
   ability: "levelup_buff_self",
   img: "butterfly.png",
   flip: true,
-  isTutorial: true,
 };
 
 /* ─── Keyframes ────────────────────────────────────────────────────────────── */
@@ -160,7 +159,7 @@ export default function TutorialOverlay() {
 
   /* İlk açılış */
   useEffect(() => {
-    if (gameMode === "versus") return;
+    if (gameMode === "versus" || gameMode === "arena") return;
     if (localStorage.getItem(TKEY)) return;
     setVisible(true);
   }, [gameMode]);

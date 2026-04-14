@@ -63,3 +63,14 @@ export function isArenaUnlocked() {
 export function unlockArena() {
   localStorage.setItem(ARENA_KEY, "1");
 }
+
+// ─── Arena intro (1 kez göster) ──────────────────────────────────────────────
+const ARENA_INTRO_KEY = "petgame_arena_intro_seen_v1";
+
+export function isArenaIntroSeen() {
+  return localStorage.getItem(ARENA_INTRO_KEY) === "1";
+}
+
+export function markArenaIntroSeen() {
+  localStorage.setItem(ARENA_INTRO_KEY, "1");
+}

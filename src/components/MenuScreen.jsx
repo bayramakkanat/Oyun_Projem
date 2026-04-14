@@ -13,7 +13,7 @@ import CollectionScreen from "./CollectionScreen";
 import TasksScreen from "./TasksScreen";
 import ProfileScreen from "./ProfileScreen";
 import FeedbackScreen from "./FeedbackScreen";
-import { hasSavedGame, loadGameState, isArenaUnlocked } from "../utils/localSave";
+import { hasSavedGame, loadGameState, isArenaUnlocked, isArenaIntroSeen } from "../utils/localSave";
 import { useGameContext } from "../context/GameContext";
 import { playSound } from "../hooks/useSound";
 
@@ -36,9 +36,17 @@ export default function MenuScreen({ onArenaStart }) {
     if (gameMode === "arena" && !isArenaUnlocked()) return;
     if (gameMode === "versus") {
       setVersusPhase("lobby");
-    } else if (gameMode === "arena" && onArenaStart) {
-      // Arena: önce sinematik intro göster, intro bitince GameRouter oyunu başlatır
-      onArenaStart();
+    } else if (gameMode === "arena") {
+      if (!isArenaIntroSeen() && onArenaStart) {
+        // İlk kez: sinematik intro göster
+        onArenaStart();
+      } else {
+        // Daha önce gördü: direkt başlat
+        reset();
+        setGameStarted(true);
+        unlockAchievement("first_game");
+        playSound("shop_open");
+      }
     } else {
       reset();
       setGameStarted(true);

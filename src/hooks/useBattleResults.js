@@ -160,14 +160,22 @@ export function useBattleResults({
         taskXP: pendingTaskXP,
       }).then((result) => {
         const isNewRecord = result?.isNewRecord || false;
+
+        // ─── FIX: Görev XP'si breakdown'a ve earnedXP hesabına dahil edildi ───
+        // Önce task XP hariç breakdown oluştur
         const xpBreakdown = [
           { label: `${finalTurn} Tur x 2 XP`, xp: finalTurn * 2 },
           { label: `${totalWins} Zafer x 5 XP`, xp: totalWins * 5 },
           { label: `${totalLosses} Yenilgi x -2 XP`, xp: -(totalLosses * 2) },
           { label: `${totalDraws} Beraberlik x 1 XP`, xp: totalDraws * 1 },
           ...(isNewRecord ? [{ label: "Yeni Rekor Bonusu", xp: 50 }] : []),
+          // Görev XP'si sadece sıfırdan büyükse göster — kullanıcı ne kazandığını net görsün
+          ...(pendingTaskXP > 0 ? [{ label: "Görev Ödülleri", xp: pendingTaskXP }] : []),
         ];
+
+        // earnedXP artık breakdown'daki tüm kalemleri topluyor (görev XP dahil)
         const earnedXP = xpBreakdown.reduce((s, x) => s + x.xp, 0);
+
         setArenaResult({
           reachedTurn: finalTurn,
           totalWins,
