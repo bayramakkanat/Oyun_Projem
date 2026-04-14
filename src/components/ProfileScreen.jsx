@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { getRank, RANKS, loadTasks } from "../utils/helpers";
-import { getCurrentMonthLabel } from "../hooks/useArena";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -39,8 +38,8 @@ export default function ProfileScreen({ onClose, user, stats, onStartVersus, fri
     const fetchXP = async () => {
       if (!user) return;
       try {
-        const monthKey = `${new Date().getFullYear()}_${String(new Date().getMonth() + 1).padStart(2, "0")}`;
-        const ref = doc(db, `arena_leaderboard_${monthKey}`, user.uid);
+        // Tek kalıcı sıralama collection'ı — aylık değil
+        const ref = doc(db, "arena_leaderboard", user.uid);
         const snap = await getDoc(ref);
         if (snap.exists()) {
           setXp(snap.data().xp || 0);
@@ -154,7 +153,7 @@ export default function ProfileScreen({ onClose, user, stats, onStartVersus, fri
             {/* XP Bar */}
             <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-4">
               <div className="flex justify-between items-center mb-2">
-                <div className="text-xs text-gray-400 uppercase tracking-widest font-bold">{getCurrentMonthLabel()} XP</div>
+                <div className="text-xs text-gray-400 uppercase tracking-widest font-bold">Arena XP</div>
                 <div className="text-xl font-black text-yellow-300">{xp.toLocaleString()} XP</div>
               </div>
               <div className="w-full h-3 bg-gray-800 rounded-full overflow-hidden mb-2">

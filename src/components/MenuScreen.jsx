@@ -13,10 +13,11 @@ import CollectionScreen from "./CollectionScreen";
 import TasksScreen from "./TasksScreen";
 import ProfileScreen from "./ProfileScreen";
 import FeedbackScreen from "./FeedbackScreen";
-import { hasSavedGame, loadGameState } from "../utils/localSave";
+import { hasSavedGame, loadGameState, isArenaUnlocked } from "../utils/localSave";
 import { useGameContext } from "../context/GameContext";
 import { playSound } from "../hooks/useSound";
-export default function MenuScreen() {
+
+export default function MenuScreen({ onArenaStart }) {
   const { 
     menuView, setMenuView, soundEnabled, setSoundEnabled, stats, 
     difficultyLevel, setDifficultyLevel, gameMode, setGameMode, 
@@ -32,8 +33,12 @@ export default function MenuScreen() {
   } = useGameContext();
 
   const onStart = () => {
+    if (gameMode === "arena" && !isArenaUnlocked()) return;
     if (gameMode === "versus") {
       setVersusPhase("lobby");
+    } else if (gameMode === "arena" && onArenaStart) {
+      // Arena: önce sinematik intro göster, intro bitince GameRouter oyunu başlatır
+      onArenaStart();
     } else {
       reset();
       setGameStarted(true);
@@ -384,29 +389,31 @@ export default function MenuScreen() {
               <div className="grid grid-cols-1 gap-3">
                 {Object.entries(GAME_MODES).map(([key, mode]) => {
                   const isLocked = mode.requiresAuth && !user;
+                  const isArenaLocked = key === "arena" && !isArenaUnlocked();
                   const isSelected = gameMode === key;
                   return (
                     <button
                       key={key}
-                      disabled={!mode.available}
+                      disabled={!mode.available || isArenaLocked}
                      onClick={() => {
   if (isLocked) setShowAuthModal(true);
+  else if (isArenaLocked) return;
   else if (mode.available) {
     setGameMode(key);
     if (key !== "standard") setDifficultyLevel("normal");
   }
 }}
                       className={`relative w-full p-4 rounded-2xl border-2 transition-all flex items-center gap-4 ${
-                        isSelected && mode.available
+                        isSelected && mode.available && !isArenaLocked
                           ? "bg-white border-white translate-x-1"
                           : "bg-white/5 border-white/10 hover:bg-white/10"
-                      } ${!mode.available ? "opacity-30" : ""}`}
+                      } ${!mode.available || isArenaLocked ? "opacity-40 cursor-not-allowed" : ""}`}
                     >
                       <div className="text-3xl">{mode.icon}</div>
                       <div className="text-left">
                         <div
                           className={`font-black text-sm uppercase italic ${
-                            isSelected && mode.available
+                            isSelected && mode.available && !isArenaLocked
                               ? "text-black"
                               : "text-white"
                           }`}
@@ -415,12 +422,12 @@ export default function MenuScreen() {
                         </div>
                         <div
                           className={`text-[10px] ${
-                            isSelected && mode.available
+                            isSelected && mode.available && !isArenaLocked
                               ? "text-gray-600"
                               : "text-gray-400"
                           }`}
                         >
-                          {mode.description}
+                          {isArenaLocked ? "Standart modu bitirerek aç" : mode.description}
                         </div>
                       </div>
                       {isLocked && (
@@ -428,7 +435,12 @@ export default function MenuScreen() {
                           🔒 Giriş Gerekli
                         </div>
                       )}
-                      {!mode.available && (
+                      {isArenaLocked && (
+                        <div className="ml-auto bg-purple-900/60 border border-purple-500/40 p-2 rounded-lg text-xs text-purple-300 font-black">
+                          🔒 Kilitli
+                        </div>
+                      )}
+                      {!mode.available && !isArenaLocked && (
                         <div className="ml-auto text-[8px] font-black tracking-widest bg-white/10 px-2 py-1 rounded">
                           YAKINDA
                         </div>
@@ -456,7 +468,6 @@ export default function MenuScreen() {
           const catBorders = { any: "border-gray-500/30", standard: "border-blue-500/30", arena: "border-purple-500/30" };
           const catBgs     = { any: "bg-gray-800/30",     standard: "bg-blue-900/20",     arena: "bg-purple-900/20" };
           const catColors  = { any: "text-gray-300",      standard: "text-blue-300",       arena: "text-purple-300" };
-          // activeCat state — IIFE içinde useState kullanamayız, o yüzden DOM trick: window._achCat
           const activeCat = achCat;
           const setActiveCat = (k) => setAchCat(k);
           const catAchievements = ACHIEVEMENTS_DEF.filter(a => a.mode === activeCat);
@@ -480,7 +491,6 @@ export default function MenuScreen() {
             {ACHIEVEMENTS_DEF.filter(a => ["any","standard","arena"].includes(a.mode) && stats.achievements.includes(a.id)).length} / {ACHIEVEMENTS_DEF.filter(a => ["any","standard","arena"].includes(a.mode)).length} açıldı
             </p>
 
-            {/* Kategori sekmeleri — her zaman üstte sabit */}
             <div className="flex gap-2 mb-4">
               {categories.map(cat => {
                 const isActive = activeCat === cat.key;
@@ -505,7 +515,6 @@ export default function MenuScreen() {
               })}
             </div>
 
-            {/* İlerleme çubuğu */}
             <div className={`flex items-center gap-3 mb-4 px-3 py-2 rounded-xl border ${catBorders[activeCat]} ${catBgs[activeCat]}`}>
               <span className={`font-black text-xs uppercase tracking-widest ${catColors[activeCat]}`}>
                 {catEarned}/{catAchievements.length} tamamlandı
@@ -516,7 +525,6 @@ export default function MenuScreen() {
               </div>
             </div>
 
-            {/* Başarım listesi */}
             <div className="max-h-[52vh] overflow-y-auto pr-2 custom-scrollbar">
               <div className="grid grid-cols-2 gap-2">
                 {catAchievements.map((a) => {

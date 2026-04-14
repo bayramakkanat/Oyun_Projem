@@ -52,3 +52,14 @@ export function clearGameState() {
 export function hasSavedGame() {
   return !!localStorage.getItem(SAVE_KEY);
 }
+
+// ─── Arena kilidi ────────────────────────────────────────────────────────────
+const ARENA_KEY = "petgame_arena_unlocked";
+
+export function isArenaUnlocked() {
+  return localStorage.getItem(ARENA_KEY) === "1";
+}
+
+export function unlockArena() {
+  localStorage.setItem(ARENA_KEY, "1");
+}

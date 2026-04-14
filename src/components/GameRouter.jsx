@@ -3,6 +3,7 @@ import { useUIContext } from "../context/UIContext";
 import { useShopContext } from "../context/ShopContext";
 import { useBattleContext } from "../context/BattleContext";
 import VersusIntro from "./VersusIntro";
+import ArenaIntro from "./ArenaIntro";
 import BattleView from "./BattleView";
 import GuideScreen from "./GuideScreen";
 import CollectionScreen from "./CollectionScreen";
@@ -19,6 +20,7 @@ import GlobalNotifications from "./GlobalNotifications";
 const DebugPanel = lazy(() => import("./DebugPanel"));
 import { playSound } from "../hooks/useSound";
 import { BOSSES, DIFFICULTY_CONFIGS } from "../data/gameData";
+import { isArenaUnlocked, unlockArena } from "../utils/localSave";
 
 export default function GameRouter() {
   const {
@@ -114,10 +116,14 @@ export default function GameRouter() {
     handleLogout,
     handleUpdateProfile,
   } = { ...useUIContext(), ...useShopContext(), ...useBattleContext() };
-  // ─── Versus intro: onRoomReady'den önce göster ───────────────────────────
-  const [versusIntroRoom, setVersusIntroRoom] = useState(null);
-  // Normal/arena savaşı başlangıç intro state'i
 
+  // ─── Versus intro state ───────────────────────────────────────────────────
+  const [versusIntroRoom, setVersusIntroRoom] = useState(null);
+
+  // ─── Arena intro state ────────────────────────────────────────────────────
+  // true olunca menünün üstünde ArenaIntro gösterilir,
+  // intro bitince reset() + setGameStarted(true) tetiklenir.
+  const [showArenaIntro, setShowArenaIntro] = useState(false);
 
   const notifications = (
     <GlobalNotifications
@@ -129,15 +135,16 @@ export default function GameRouter() {
       }}
     />
   );
+
   // versus lobby
   if (gameMode === "versus" && versusPhase === "lobby") {
     return (
        <>
         {notifications}
       <VersusLobby
-  user={user}
-  autoJoin={versusAutoJoin}
-  onRoomReady={(roomInfo) => {
+        user={user}
+        autoJoin={versusAutoJoin}
+        onRoomReady={(roomInfo) => {
           setVersusIntroRoom(roomInfo);
         }}
         onCancel={() => {
@@ -169,7 +176,9 @@ export default function GameRouter() {
     return (
       <>
         {notifications}
-        <MenuScreen />
+        <MenuScreen
+          onArenaStart={() => setShowArenaIntro(true)}
+        />
         {showDebugPanel && (
           <Suspense fallback={<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 text-white">Yükleniyor...</div>}>
             <DebugPanel
@@ -186,12 +195,26 @@ export default function GameRouter() {
             />
           </Suspense>
         )}
+        {/* Arena sinematik giriş — menünün üstünde katmanlı çalışır */}
+        {showArenaIntro && (
+          <ArenaIntro
+            playerName={displayName || user?.displayName || ""}
+            onDone={() => {
+              setShowArenaIntro(false);
+              reset();
+              setGameStarted(true);
+              unlockAchievement("first_game");
+              playSound("shop_open");
+            }}
+          />
+        )}
       </>
     );
   }
 
   // zafer ekranı
   if (victory) {
+    const isFirstStandardWin = gameMode === "standard" && !isArenaUnlocked();
     return (
       <VictoryScreen
         wins={wins}
@@ -199,12 +222,18 @@ export default function GameRouter() {
         team={team}
         perfectRun={lives === (DIFFICULTY_CONFIGS[difficultyLevel]?.startingLives || 5)}
         onRestart={reset}
-       onMenu={() => { reset(); setMenuView("main"); setGameStarted(false); }}
+        onMenu={() => {
+          if (gameMode === "standard") unlockArena();
+          reset();
+          setMenuView("main");
+          setGameStarted(false);
+        }}
         gameMode={gameMode}
         onRematch={() => {
           reset();
           setVersusPhase("lobby");
         }}
+        isFirstStandardWin={isFirstStandardWin}
       />
     );
   }
@@ -292,7 +321,6 @@ export default function GameRouter() {
           <DebugPanel
             onClose={() => setShowDebugPanel(false)}
             onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
-              // debug başlatma
               setShowDebugPanel(false);
               setIsDebugBattle(true);
               setPT(playerTeam);

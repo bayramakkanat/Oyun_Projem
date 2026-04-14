@@ -12,6 +12,7 @@ export default function VictoryScreen({
   onMenu,
   gameMode,
   onRematch,
+  isFirstStandardWin,
 }) {
   const teamSnapshot = team.filter((x) => x);
   return (
@@ -104,6 +105,31 @@ export default function VictoryScreen({
             ? "⚔️ Zorlu bir yolculuktu ama sonunda kazandın!"
             : "💀 Son nefeste bile pes etmedin. Gerçek bir savaşçı!"}
         </div>
+
+        {/* ── Arena Modu Açıldı banner'ı — yalnızca ilk standard zaferinde ── */}
+        {isFirstStandardWin && (
+          <div
+            className="mb-6 p-4 rounded-2xl border text-center"
+            style={{
+              background: "linear-gradient(135deg, rgba(124,58,237,0.18) 0%, rgba(168,85,247,0.12) 100%)",
+              border: "1px solid rgba(167,139,250,0.5)",
+              boxShadow: "0 0 30px rgba(124,58,237,0.25)",
+              animation: "arenaUnlockGlow 2s ease-in-out infinite",
+            }}
+          >
+            <div className="text-3xl mb-2">🏟️</div>
+            <div
+              className="font-black text-base uppercase tracking-widest mb-1"
+              style={{ color: "#a78bfa" }}
+            >
+              Arena Modu Açıldı!
+            </div>
+            <div className="text-sm text-gray-300 leading-relaxed">
+              Artık en yüksek turu yapmak için diğer oyunculara meydan okuyabilirsin.
+            </div>
+          </div>
+        )}
+
        <div className="flex gap-3">
   {gameMode === "versus" && onRematch ? (
     <button
@@ -124,4 +150,17 @@ export default function VictoryScreen({
       </div>
     </div>
   );
+}
+
+/* ── Arena unlock animasyonu ── */
+const _style = document.createElement("style");
+_style.textContent = `
+  @keyframes arenaUnlockGlow {
+    0%, 100% { box-shadow: 0 0 30px rgba(124,58,237,0.25); }
+    50%       { box-shadow: 0 0 50px rgba(124,58,237,0.55); }
+  }
+`;
+if (!document.head.querySelector("[data-victory-styles]")) {
+  _style.setAttribute("data-victory-styles", "1");
+  document.head.appendChild(_style);
 }
