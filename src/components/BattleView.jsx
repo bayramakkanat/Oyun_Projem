@@ -187,7 +187,7 @@ style={{
 
           {/* Savaş Sahnesi */}
           <div className="flex flex-row items-center justify-center w-full max-w-7xl gap-4">
-               <PixiBattleScene pT={pT} eT={eT} anims={anims} step={step} turn={turn} />
+               <PixiBattleScene pT={pT} eT={eT} anims={anims} step={step} turn={turn} battleSpeedRef={battleSpeedRef} />
           </div>
         </div>
       </div>

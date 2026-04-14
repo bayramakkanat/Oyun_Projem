@@ -3,13 +3,16 @@ import gsap from "gsap";
 import Card from "./Card";
 import { BOSSES } from "../data/gameData";
 
-export default function PixiBattleScene({ pT, eT, anims, step, turn }) {
+export default function PixiBattleScene({ pT, eT, anims, step, turn, battleSpeedRef }) {
   const playerRefs = useRef({});
   const enemyRefs = useRef({});
   const animStateRef = useRef({});
   const cameraRef = useRef(null);
 
   const [swordVisible, setSwordVisible] = useState(true);
+
+  // Mevcut hız çarpanını güvenli şekilde döndürür (1, 2 veya 4)
+  const spd = () => Math.max(1, battleSpeedRef?.current || 1);
 
 useEffect(() => {
   if (step === 1) {
@@ -87,27 +90,59 @@ useEffect(() => {
             
             // GSAP Animasyon Zaman Çizelgesi
             const tl = gsap.timeline();
-            
+            // Hız çarpanı: 2x'te süreler yarıya, 4x'te çeyreğe iner
+            const s = spd();
+
             if (currentAnim === "attackRight") {
-                tl.to(el, { x: 80, y: -20, rotation: 10, duration: 0.15, ease: "power1.inOut" })
-                  .to(el, { x: 0, y: 0, rotation: 0, duration: 0.25, ease: "power2.out" });
+                tl.to(el, { x: 80, y: -20, rotation: 10, duration: 0.15 / s, ease: "power1.inOut" })
+                  .to(el, { x: 0, y: 0, rotation: 0, duration: 0.25 / s, ease: "power2.out" });
+
             } else if (currentAnim === "attackLeft") {
-                tl.to(el, { x: -80, y: -20, rotation: -10, duration: 0.15, ease: "power1.inOut" })
-                  .to(el, { x: 0, y: 0, rotation: 0, duration: 0.25, ease: "power2.out" });
+                tl.to(el, { x: -80, y: -20, rotation: -10, duration: 0.15 / s, ease: "power1.inOut" })
+                  .to(el, { x: 0, y: 0, rotation: 0, duration: 0.25 / s, ease: "power2.out" });
+
             } else if (currentAnim === "damage") {
-    tl.to(el, {
-        filter: "drop-shadow(0 0 14px rgba(239,68,68,0.9))",
-        scale: 0.86, x: -5,
-        duration: 0.07, ease: "power2.in"
-    })
-    .to(el, {
-        filter: "none", scale: 1, x: 0,
-        duration: 0.22, ease: "elastic.out(1, 0.45)"
-    });
+                tl.to(el, {
+                    filter: "drop-shadow(0 0 14px rgba(239,68,68,0.9))",
+                    scale: 0.86, x: -5,
+                    duration: 0.07 / s, ease: "power2.in"
+                })
+                .to(el, {
+                    filter: "none", scale: 1, x: 0,
+                    duration: 0.22 / s, ease: "elastic.out(1, 0.45)"
+                });
+
             } else if (currentAnim === "buff" || currentAnim === "heal") {
-                tl.to(el, { scale: 1.15, filter: "brightness(1.5) drop-shadow(0 0 20px #4ade80)", duration: 0.15 })
-                  .to(el, { scale: 1, filter: "none", duration: 0.3, ease: "bounce.out" });
+                tl.to(el, { scale: 1.15, filter: "brightness(1.5) drop-shadow(0 0 20px #4ade80)", duration: 0.15 / s })
+                  .to(el, { scale: 1, filter: "none", duration: 0.3 / s, ease: "bounce.out" });
+
+            } else if (currentAnim === "ability") {
+                // ── Beceri öncesi "sahneye çık" animasyonu ─────────────────────
+                // Tüm süreler battleSpeedRef ile orantılı olarak kısalır:
+                //   1x → büyü 0.28s + bekle 0.32s + küçül 0.28s = ~0.88s toplam
+                //   2x → büyü 0.14s + bekle 0.16s + küçül 0.14s = ~0.44s toplam
+                //   4x → büyü 0.07s + bekle 0.08s + küçül 0.07s = ~0.22s toplam
+                tl.to(el, {
+                    scale: 1.35,
+                    y: -18,
+                    filter: "brightness(1.8) drop-shadow(0 0 22px rgba(250,204,21,0.95)) drop-shadow(0 0 8px rgba(255,255,255,0.8))",
+                    duration: 0.28 / s,
+                    ease: "back.out(1.4)",
+                })
+                .to(el, {
+                    scale: 1.35,
+                    duration: 0.32 / s,
+                    ease: "none",
+                })
+                .to(el, {
+                    scale: 1,
+                    y: 0,
+                    filter: "none",
+                    duration: 0.28 / s,
+                    ease: "power2.inOut",
+                });
             }
+
         } else if (!currentAnim) {
             animState[pet.id] = null; // Sıfırla
         }

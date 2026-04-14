@@ -5,6 +5,37 @@ const selfBuffAbilities = [
   AB.START_TRAMPLE, AB.START_CHARGE, AB.START_TANK,
 ];
 
+// ─── Saldırı yeteneklerini 3 gruba ayırır ─────────────────────────────────────
+// Grup 0: Alan hasarı  — tüm takıma vurur  (Ejderha)
+// Grup 1: Rastgele/çoklu hedef             (Kertenkele, Kalamar)
+// Grup 2: Hedefi belli                     (Baykuş, Aslan, Penguen, Yılan, Mamut)
+const ATTACK_GROUP = {
+  [AB.START_FIRE]:         0,
+  [AB.START_DMG]:          1,
+  [AB.START_MULTI_SNIPE]:  1,
+  [AB.START_SNIPE]:        2,
+  [AB.START_FEAR]:         2,
+  [AB.START_POISON]:       2,
+  [AB.START_FREEZE_ENEMY]: 2,
+  [AB.WEAKEN_STRONG]:      2,
+};
+const getAttackGroup = (ability) => ATTACK_GROUP[ability] ?? 2;
+
+// ─── DOM'da pet elementi görünür mü? ──────────────────────────────────────────
+// spawnProjectile'a geçmeden önce hedef DOM'da yoksa boşa atım olur.
+const isPetVisibleInDOM = (petId) => {
+  const el = document.querySelector(`[data-pet-id="${petId}"]`);
+  if (!el) return false;
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0;
+};
+
+// ─── Ability "sahneye çık" animasyon süresi ───────────────────────────────────
+// PixiBattleScene'deki "ability" GSAP bloğu: 0.28s büyü + 0.32s bekle + 0.28s küçül = ~880ms
+// Projektili bu sürenin en az yarısında fırlatıyoruz (hayvan hâlâ büyük görünürken).
+const ABILITY_RISE_MS  = 580; // triggerAnim → bu kadar bekle → projektil fırlat
+const PROJ_FLY_MS      = 700; // projektil havada → hasar uygula
+
 async function runTempBuffPhase({ playerTeam, delay, triggerAnim, addBattleLog, syncBattleTeams, isCancelled, faint }) {
   for (let i = 0; i < playerTeam.length; i++) {
     const pet = playerTeam[i];
@@ -94,7 +125,12 @@ export async function runBattleStartPhase({
 }) {
   const addBattleLog = (msg) => setLog((l) => [...l, msg]);
 
-  await delay(1200);
+  // FIX 3: Spawn animasyonu bitmeden saldırıya geçme.
+  // PixiBattleScene'de her hayvan idx * 150ms delay + 650ms bounce süresiyle giriyor.
+  // En fazla hayvan sayısına göre dinamik hesapla, minimum 1200ms.
+  const maxPetCount = Math.max(pp.length, ee.length);
+  const spawnWaitMs = Math.max(1200, maxPetCount * 150 + 700);
+  await delay(spawnWaitMs);
   if (isCancelled()) return;
 
   // 1. Stag combo
@@ -137,42 +173,56 @@ export async function runBattleStartPhase({
   if (enemyPhase.cancelled) return;
   ee = enemyPhase.enemyTeam;
 
-  // 4. Attack abilities (ATK sıralı)
-  const attackAbilities = [AB.START_FIRE, AB.START_FEAR, AB.START_SNIPE, AB.START_MULTI_SNIPE, AB.START_DMG, AB.START_POISON, AB.START_FREEZE_ENEMY, AB.WEAKEN_STRONG];
+  // 4. Attack abilities
+  // FIX 1: Önce grupla (Alan → Rastgele → Hedef belli), sonra aynı grupta ATK'ya göre sırala.
+  const attackAbilities = [
+    AB.START_FIRE,
+    AB.START_DMG, AB.START_MULTI_SNIPE,
+    AB.START_SNIPE, AB.START_FEAR, AB.START_POISON, AB.START_FREEZE_ENEMY, AB.WEAKEN_STRONG,
+  ];
   let attackers = [];
   pp.forEach((a, idx) => { if (a && attackAbilities.includes(a.ability)) attackers.push({ pet: a, isPlayer: true, idx }); });
   ee.forEach((a, idx) => { if (a && attackAbilities.includes(a.ability)) attackers.push({ pet: a, isPlayer: false, idx }); });
+
   attackers.sort((x, y) => {
-    if (y.pet.atk !== x.pet.atk) return y.pet.atk - x.pet.atk;
+    const gx = getAttackGroup(x.pet.ability);
+    const gy = getAttackGroup(y.pet.ability);
+    if (gx !== gy) return gx - gy;              // Önce grup sırası (0→1→2)
+    if (y.pet.atk !== x.pet.atk) return y.pet.atk - x.pet.atk; // Aynı grupta ATK yüksek önce
     if (y.pet.curHp !== x.pet.curHp) return y.pet.curHp - x.pet.curHp;
     return x.idx - y.idx;
   });
-
-  // Projektil uçuş süresi (ms) - statlar bu süreden sonra güncellenecek
-  const PROJ_FLY_MS = 700;
 
   for (const { pet: a, isPlayer } of attackers) {
     const m = pwr(a);
     const targets = isPlayer ? ee : pp;
     if (targets.length === 0) continue;
-    triggerAnim(a.id, "ability");
 
+    // ── ADIM 1: Hayvan büyüyüp sahneye çıkıyor ──────────────────────────────
+    // triggerAnim("ability") → PixiBattleScene'de 0.28s büyü + 0.32s bekle animasyonu başlar.
+    // ABILITY_RISE_MS kadar bekleyerek hayvan tam büyük/parlakken projektil fırlatıyoruz.
+    triggerAnim(a.id, "ability");
+    await delay(ABILITY_RISE_MS);
+    if (isCancelled()) return;
+
+    // ── ADIM 2: Projektil fırlatılır + log ──────────────────────────────────
     if (a.ability === AB.START_FIRE) {
       const dmg = 6 * m;
-      // 1. Projektiller fırlatılır
-      targets.forEach((x) => { spawnProjectile(a.id, x.id, "start_fire"); });
+      const aliveTargets = targets.filter((x) => x.curHp > 0);
+      aliveTargets.forEach((x) => {
+        if (isPetVisibleInDOM(x.id)) spawnProjectile(a.id, x.id, "start_fire");
+      });
       addBattleLog(`🐉 ${isPlayer ? "" : "Düşman "}${a.nick} -> Tüm ${isPlayer ? "düşmanlara" : "takıma"} ${dmg} hasar`);
-      // 2. Projektil uçuş süresi beklenir
       await delay(PROJ_FLY_MS);
-      // 3. Projektil hedefe ulaştı → stat güncelle + hasar animasyonu
-      targets.forEach((x) => { x.curHp -= dmg; triggerAnim(x.id, "damage"); });
+      aliveTargets.forEach((x) => { x.curHp -= dmg; triggerAnim(x.id, "damage"); });
       syncBattleTeams(pp, ee);
-      await delay(1400 - PROJ_FLY_MS);
+      await delay(500);
+
     } else if (a.ability === AB.START_FEAR) {
       const aliveTargets = targets.filter((x) => x.curHp > 0);
-      if (aliveTargets.length === 0) continue;
-      spawnProjectile(a.id, aliveTargets[0].id, "start_fear");
-      if (aliveTargets.length > 1) spawnProjectile(a.id, aliveTargets[1].id, "start_fear");
+      if (aliveTargets.length === 0) { triggerAnim(a.id, null); continue; }
+      if (isPetVisibleInDOM(aliveTargets[0].id)) spawnProjectile(a.id, aliveTargets[0].id, "start_fear");
+      if (aliveTargets.length > 1 && isPetVisibleInDOM(aliveTargets[1].id)) spawnProjectile(a.id, aliveTargets[1].id, "start_fear");
       const fearT = aliveTargets.length > 1 ? `${aliveTargets[0].nick} ve ${aliveTargets[1].nick}` : aliveTargets[0].nick;
       addBattleLog(`🦁 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${fearT} -${AM.START_FEAR_ATK_RED * m} ATK`);
       await delay(PROJ_FLY_MS);
@@ -183,38 +233,40 @@ export async function runBattleStartPhase({
         triggerAnim(aliveTargets[1].id, "damage");
       }
       syncBattleTeams(pp, ee);
-      await delay(1200 - PROJ_FLY_MS);
+      await delay(500);
+
     } else if (a.ability === AB.START_SNIPE) {
       const currentTargets = isPlayer ? ee : pp;
       const aliveTargets = currentTargets.filter((x) => x.curHp > 0);
-      if (aliveTargets.length === 0) continue;
+      if (aliveTargets.length === 0) { triggerAnim(a.id, null); continue; }
       const snipeTarget = aliveTargets[aliveTargets.length - 1];
-      spawnProjectile(a.id, snipeTarget.id, "start_snipe", null, true);
-      addBattleLog(`🎯 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${snipeTarget.nick}'e ${AM.START_SNIPE_DMG * m} hasar`);
+      // FIX 2: DOM kontrolü — görünür değilse alternatif ara
+      const finalTarget = isPetVisibleInDOM(snipeTarget.id)
+        ? snipeTarget
+        : [...aliveTargets].reverse().find((x) => isPetVisibleInDOM(x.id));
+      if (!finalTarget) { triggerAnim(a.id, null); continue; }
+      spawnProjectile(a.id, finalTarget.id, "start_snipe", null, true);
+      addBattleLog(`🎯 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${finalTarget.nick}'e ${AM.START_SNIPE_DMG * m} hasar`);
       await delay(PROJ_FLY_MS);
-      snipeTarget.curHp -= 5 * m;
-      triggerAnim(snipeTarget.id, "damage");
+      finalTarget.curHp -= 5 * m;
+      triggerAnim(finalTarget.id, "damage");
       syncBattleTeams(pp, ee);
-      await delay(1200 - PROJ_FLY_MS);
+      await delay(500);
+
     } else if (a.ability === AB.START_MULTI_SNIPE) {
-      // Tüm hedefleri BAŞTA seç (snapshot) — sonra sırayla fırlat
       const alive = targets.filter((x) => x.curHp > 0);
       const targetCount = Math.min(m + 1, alive.length);
-      // Rastgele karıştır ve ilk N tanesini al
       const selectedTargets = [...alive]
         .sort(() => Math.random() - 0.5)
         .slice(0, targetCount);
 
       for (let j = 0; j < selectedTargets.length; j++) {
         const t = selectedTargets[j];
-        // Hedef hala hayatta mı kontrol et (önceki atıştan öldüyse atla)
         const stillAlive = targets.find((x) => x.id === t.id && x.curHp > 0);
-        if (!stillAlive) continue;
-
+        if (!stillAlive || !isPetVisibleInDOM(t.id)) continue;
         spawnProjectile(a.id, t.id, "start_multi_snipe", null, true);
         addBattleLog(`🦑 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${t.nick}'e ${AM.START_MULTI_SNIPE_DMG * m} hasar`);
         await delay(PROJ_FLY_MS);
-        // ID ile bul — referans stale olabilir
         const currentT = targets.find((x) => x.id === t.id);
         if (currentT && currentT.curHp > 0) {
           currentT.curHp -= 10 * m;
@@ -223,10 +275,11 @@ export async function runBattleStartPhase({
         }
         await delay(300);
       }
+
     } else if (a.ability === AB.START_DMG) {
       const currentTargets = isPlayer ? ee : pp;
-      const alive = currentTargets.filter((x) => x.curHp > 0);
-      if (alive.length === 0) continue;
+      const alive = currentTargets.filter((x) => x.curHp > 0 && isPetVisibleInDOM(x.id));
+      if (alive.length === 0) { triggerAnim(a.id, null); continue; }
       const t = alive[Math.floor(Math.random() * alive.length)];
       spawnProjectile(a.id, t.id, "start_dmg", null, true);
       addBattleLog(`💥 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${t.nick}'e ${AM.START_DMG * m} hasar`);
@@ -234,52 +287,71 @@ export async function runBattleStartPhase({
       t.curHp -= 2 * m;
       triggerAnim(t.id, "damage");
       syncBattleTeams(pp, ee);
-      await delay(1200 - PROJ_FLY_MS);
+      await delay(500);
+
     } else if (a.ability === AB.START_POISON) {
-      spawnProjectile(a.id, targets[0].id, "start_poison");
+      const aliveTargets = targets.filter((x) => x.curHp > 0);
+      if (aliveTargets.length === 0) { triggerAnim(a.id, null); continue; }
+      const frontTarget = aliveTargets[0];
+      if (isPetVisibleInDOM(frontTarget.id)) spawnProjectile(a.id, frontTarget.id, "start_poison");
       addBattleLog(`🐍 ${isPlayer ? "" : "Düşman "}${a.nick} -> Ön düşmana -${AM.START_POISON_ATK_RED * m} ATK`);
       await delay(PROJ_FLY_MS);
-      targets[0].atk = Math.max(1, targets[0].atk - m * 2);
-      triggerAnim(targets[0].id, "damage");
+      frontTarget.atk = Math.max(1, frontTarget.atk - m * 2);
+      triggerAnim(frontTarget.id, "damage");
       syncBattleTeams(pp, ee);
-      await delay(1200 - PROJ_FLY_MS);
+      await delay(500);
+
     } else if (a.ability === AB.START_FREEZE_ENEMY) {
+      const aliveTargets = targets.filter((x) => x.curHp > 0);
+      if (aliveTargets.length === 0) { triggerAnim(a.id, null); continue; }
       const reduction = (m * 30) / 100;
-      spawnProjectile(a.id, targets[0].id, "start_freeze_enemy");
-      if (targets.length > 1) spawnProjectile(a.id, targets[targets.length - 1].id, "start_freeze_enemy");
+      const frontT = aliveTargets[0];
+      const backT  = aliveTargets.length > 1 ? aliveTargets[aliveTargets.length - 1] : null;
+      if (isPetVisibleInDOM(frontT.id)) spawnProjectile(a.id, frontT.id, "start_freeze_enemy");
+      if (backT && isPetVisibleInDOM(backT.id)) spawnProjectile(a.id, backT.id, "start_freeze_enemy");
       addBattleLog(`🦣 ${isPlayer ? "" : "Düşman "}${a.nick} -> Ön ve arka düşmanı %${m * 30} yavaşlattı`);
       await delay(PROJ_FLY_MS);
-      targets[0].atk = Math.max(1, Math.floor(targets[0].atk * (1 - reduction)));
-      triggerAnim(targets[0].id, "damage");
-      if (targets.length > 1) {
-        targets[targets.length - 1].atk = Math.max(1, Math.floor(targets[targets.length - 1].atk * (1 - reduction)));
-        triggerAnim(targets[targets.length - 1].id, "damage");
+      frontT.atk = Math.max(1, Math.floor(frontT.atk * (1 - reduction)));
+      triggerAnim(frontT.id, "damage");
+      if (backT) {
+        backT.atk = Math.max(1, Math.floor(backT.atk * (1 - reduction)));
+        triggerAnim(backT.id, "damage");
       }
       syncBattleTeams(pp, ee);
-      await delay(1200 - PROJ_FLY_MS);
+      await delay(500);
+
     } else if (a.ability === AB.WEAKEN_STRONG) {
-      let mxI = 0, mxP = 0;
-      targets.forEach((en, idx) => { if (en.atk + en.curHp > mxP) { mxP = en.atk + en.curHp; mxI = idx; } });
-      spawnProjectile(a.id, targets[mxI].id, "weaken_strong");
-      addBattleLog(`🐧 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${targets[mxI].nick}'i %${25 * m} zayıflattı`);
+      const aliveTargets = targets.filter((x) => x.curHp > 0);
+      if (aliveTargets.length === 0) { triggerAnim(a.id, null); continue; }
+      const strongestTarget = aliveTargets.reduce(
+        (best, en) => (en.atk + en.curHp > best.atk + best.curHp ? en : best),
+        aliveTargets[0]
+      );
+      if (isPetVisibleInDOM(strongestTarget.id)) spawnProjectile(a.id, strongestTarget.id, "weaken_strong");
+      addBattleLog(`🐧 ${isPlayer ? "" : "Düşman "}${a.nick} -> ${strongestTarget.nick}'i %${25 * m} zayıflattı`);
       await delay(PROJ_FLY_MS);
       const r = (25 * m) / 100;
-      targets[mxI].atk = Math.max(1, Math.floor(targets[mxI].atk * (1 - r)));
-      targets[mxI].curHp = Math.max(1, Math.floor(targets[mxI].curHp * (1 - r)));
-      triggerAnim(targets[mxI].id, "damage");
+      strongestTarget.atk   = Math.max(1, Math.floor(strongestTarget.atk   * (1 - r)));
+      strongestTarget.curHp = Math.max(1, Math.floor(strongestTarget.curHp * (1 - r)));
+      triggerAnim(strongestTarget.id, "damage");
       syncBattleTeams(pp, ee);
-      await delay(1200 - PROJ_FLY_MS);
+      await delay(500);
     }
 
+    // ── ADIM 3: Hayvan normale dönüyor (GSAP kendi bitiyor, sıradakine geçiyoruz) ──
+    // GSAP animasyonunun küçülme aşaması ~280ms — ölenleri temizlemeden önce kısa bekle.
+    await delay(320);
+
+    // Ölenleri temizle
     if (isPlayer) {
-  const dead = ee.filter((x) => x.curHp <= 0);
-  ee = ee.filter((x) => x.curHp > 0);
-  if (faint) dead.forEach((d) => faint(d, ee, pp, false, null));
-} else {
-  const dead = pp.filter((x) => x.curHp <= 0);
-  pp = pp.filter((x) => x.curHp > 0);
-  if (faint) dead.forEach((d) => faint(d, pp, ee, true, null));
-}
+      const dead = ee.filter((x) => x.curHp <= 0);
+      ee = ee.filter((x) => x.curHp > 0);
+      if (faint) dead.forEach((d) => faint(d, ee, pp, false, null));
+    } else {
+      const dead = pp.filter((x) => x.curHp <= 0);
+      pp = pp.filter((x) => x.curHp > 0);
+      if (faint) dead.forEach((d) => faint(d, pp, ee, true, null));
+    }
     syncBattleTeams(pp, ee);
     if (isCancelled()) return;
   }
