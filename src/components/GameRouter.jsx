@@ -20,110 +20,48 @@ import GlobalNotifications from "./GlobalNotifications";
 const DebugPanel = lazy(() => import("./DebugPanel"));
 import { playSound } from "../hooks/useSound";
 import { BOSSES, DIFFICULTY_CONFIGS } from "../data/gameData";
-import { isArenaUnlocked, unlockArena, isArenaIntroSeen, markArenaIntroSeen } from "../utils/localSave";
 
 export default function GameRouter() {
   const {
-    // Oyun temel state'leri
-    gameMode,
-    setGameMode,
-    gameStarted,
-    setGameStarted,
-    reset,
-    restoreGame,
+    gameMode, setGameMode,
+    gameStarted, setGameStarted,
+    reset, restoreGame,
     friendsData,
-    versusAutoJoin,
-    setVersusAutoJoin,
-    menuView,
-    setMenuView,
-    victory,
-    wins,
-    lives,
-    team,
+    versusAutoJoin, setVersusAutoJoin,
+    menuView, setMenuView,
+    victory, wins, lives, team,
     arenaResult,
     over,
-    bossChallenge,
-    acceptBoss,
-    declineBoss,
-    showCollection,
-    setShowCollection,
-    guide,
-    setGuide,
-    openTiers,
-    setOpenTiers,
-    guideLvl,
-    setGuideLvl,
-    newTier,
-    setNewTier,
+    bossChallenge, acceptBoss, declineBoss,
+    showCollection, setShowCollection,
+    guide, setGuide,
+    openTiers, setOpenTiers,
+    guideLvl, setGuideLvl,
+    newTier, setNewTier,
     phase,
-    showDebugPanel,
-    setShowDebugPanel,
-    lastError,
-    setLastError,
+    showDebugPanel, setShowDebugPanel,
+    lastError, setLastError,
     achievementPopup,
-    soundEnabled,
-    setSoundEnabled,
-    user,
-    displayName,
-    stats,
-    difficultyLevel,
-    setDifficultyLevel,
+    soundEnabled, setSoundEnabled,
+    user, displayName, stats,
+    difficultyLevel, setDifficultyLevel,
     unlockAchievement,
-    // BattleView için gerekenler
-    turn,
-    gold,
-    pT,
-    eT,
-    log,
-    step,
-    anims,
-    arenaOpponent,
-    battleSpeedRef,
-    isPaused,
-    setIsPaused,
-    isPausedRef,
-    // Versus
-    versusPhase,
-    setVersusPhase,
-    setVersusRoom,
-    // Diğer yardımcılar
-    setBossChallenge,
-    setPhase,
-    setPT,
-    setET,
-    setIsDebugBattle,
-    // Auth modal için gerekenler
-    showAuthModal,
-    setShowAuthModal,
-    authEmail,
-    setAuthEmail,
-    authPass,
-    setAuthPass,
-    authMode,
-    setAuthMode,
-    authUsername,
-    setAuthUsername,
-    authAvatar,
-    setAuthAvatar,
-    showSettingsModal,
-    setShowSettingsModal,
-    settingsUsername,
-    setSettingsUsername,
-    settingsAvatar,
-    setSettingsAvatar,
-    handleGoogleLogin,
-    handleEmailAuth,
-    handleLogout,
-    handleUpdateProfile,
+    turn, gold, pT, eT, log, step, anims,
+    arenaOpponent, battleSpeedRef,
+    isPaused, setIsPaused, isPausedRef,
+    versusPhase, setVersusPhase, setVersusRoom,
+    setBossChallenge, setPhase, setPT, setET, setIsDebugBattle,
+    showAuthModal, setShowAuthModal,
+    authEmail, setAuthEmail, authPass, setAuthPass,
+    authMode, setAuthMode,
+    authUsername, setAuthUsername, authAvatar, setAuthAvatar,
+    showSettingsModal, setShowSettingsModal,
+    settingsUsername, setSettingsUsername, settingsAvatar, setSettingsAvatar,
+    handleGoogleLogin, handleEmailAuth, handleLogout, handleUpdateProfile,
   } = { ...useUIContext(), ...useShopContext(), ...useBattleContext() };
 
-  // ─── Versus intro state ───────────────────────────────────────────────────
   const [versusIntroRoom, setVersusIntroRoom] = useState(null);
-
-  // ─── Arena intro state ────────────────────────────────────────────────────
-  // true olunca menünün üstünde ArenaIntro gösterilir,
-  // intro bitince reset() + setGameStarted(true) tetiklenir.
-  const [showArenaIntro, setShowArenaIntro] = useState(false);
+  const [showArenaIntro, setShowArenaIntro]   = useState(false);
 
   const notifications = (
     <GlobalNotifications
@@ -139,34 +77,29 @@ export default function GameRouter() {
   // versus lobby
   if (gameMode === "versus" && versusPhase === "lobby") {
     return (
-       <>
+      <>
         {notifications}
-      <VersusLobby
-        user={user}
-        autoJoin={versusAutoJoin}
-        onRoomReady={(roomInfo) => {
-          setVersusIntroRoom(roomInfo);
-        }}
-        onCancel={() => {
-          setVersusPhase(null);
-          setVersusRoom(null);
-        }}
-      />
-      {versusIntroRoom && (
-        <VersusIntro
-          roomInfo={versusIntroRoom}
+        <VersusLobby
           user={user}
-          onDone={() => {
-            const roomInfo = versusIntroRoom;
-            setVersusIntroRoom(null);
-            setVersusAutoJoin(null);
-            setVersusRoom(roomInfo);
-            setVersusPhase("playing");
-            reset("versus");
-            setGameStarted(true);
-          }}
+          autoJoin={versusAutoJoin}
+          onRoomReady={(roomInfo) => setVersusIntroRoom(roomInfo)}
+          onCancel={() => { setVersusPhase(null); setVersusRoom(null); }}
         />
-      )}
+        {versusIntroRoom && (
+          <VersusIntro
+            roomInfo={versusIntroRoom}
+            user={user}
+            onDone={() => {
+              const roomInfo = versusIntroRoom;
+              setVersusIntroRoom(null);
+              setVersusAutoJoin(null);
+              setVersusRoom(roomInfo);
+              setVersusPhase("playing");
+              reset("versus");
+              setGameStarted(true);
+            }}
+          />
+        )}
       </>
     );
   }
@@ -176,31 +109,30 @@ export default function GameRouter() {
     return (
       <>
         {notifications}
-        <MenuScreen
-          onArenaStart={() => setShowArenaIntro(true)}
-        />
+        {/* FIX: Arena intro aktifken MenuScreen gizlenir — geçiş anında menü flash olmaz */}
+        {!showArenaIntro && (
+          <MenuScreen onArenaStart={() => setShowArenaIntro(true)} />
+        )}
         {showDebugPanel && (
           <Suspense fallback={<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 text-white">Yükleniyor...</div>}>
             <DebugPanel
               onClose={() => setShowDebugPanel(false)}
               onStartBattle={(playerTeam, enemyTeam, bossTurn) => {
-                setIsDebugBattle(true); 
+                setIsDebugBattle(true);
                 setPT(playerTeam);
                 setET(enemyTeam);
                 if (bossTurn) setBossChallenge("battle");
                 setPhase("battle");
                 setGameStarted(true);
-                setShowDebugPanel(false); 
+                setShowDebugPanel(false);
               }}
             />
           </Suspense>
         )}
-        {/* Arena sinematik giriş — ilk girişte 1 kez gösterilir */}
         {showArenaIntro && (
           <ArenaIntro
             playerName={displayName || user?.displayName || ""}
             onDone={() => {
-              markArenaIntroSeen();
               setShowArenaIntro(false);
               reset();
               setGameStarted(true);
@@ -215,7 +147,6 @@ export default function GameRouter() {
 
   // zafer ekranı
   if (victory) {
-    const isFirstStandardWin = gameMode === "standard" && !isArenaUnlocked();
     return (
       <VictoryScreen
         wins={wins}
@@ -223,28 +154,15 @@ export default function GameRouter() {
         team={team}
         perfectRun={lives === (DIFFICULTY_CONFIGS[difficultyLevel]?.startingLives || 5)}
         onRestart={reset}
-        onMenu={() => {
-          if (gameMode === "standard") unlockArena();
-          reset();
-          setMenuView("main");
-          setGameStarted(false);
-        }}
+        onMenu={() => { reset(); setMenuView("main"); setGameStarted(false); }}
         gameMode={gameMode}
-        onRematch={() => {
-          reset();
-          setVersusPhase("lobby");
-        }}
-        isFirstStandardWin={isFirstStandardWin}
+        onRematch={() => { reset(); setVersusPhase("lobby"); }}
       />
     );
   }
 
-  // arena sonuç ekranı
-  if (arenaResult) {
-    return <ArenaResultScreen />;
-  }
+  if (arenaResult) return <ArenaResultScreen />;
 
-  // oyun bitti
   if (over) {
     return (
       <GameOverScreen
@@ -255,15 +173,11 @@ export default function GameRouter() {
         onRestart={reset}
         onMenu={() => { reset(); setMenuView("main"); setGameStarted(false); }}
         gameMode={gameMode}
-        onRematch={() => {
-          reset();
-          setVersusPhase("lobby");
-        }}
+        onRematch={() => { reset(); setVersusPhase("lobby"); }}
       />
     );
   }
 
-  // boss teklif ekranı
   if (bossChallenge === "offer" && gameMode === "standard") {
     return (
       <BossOfferScreen
@@ -274,17 +188,10 @@ export default function GameRouter() {
     );
   }
 
-  // koleksiyon
   if (showCollection) {
-    return (
-      <CollectionScreen
-        onClose={() => setShowCollection(false)}
-        userId={user?.uid}
-      />
-    );
+    return <CollectionScreen onClose={() => setShowCollection(false)} userId={user?.uid} />;
   }
 
-  // rehber
   if (guide) {
     return (
       <GuideScreen
@@ -297,24 +204,18 @@ export default function GameRouter() {
     );
   }
 
-  // yeni kademe
   if (newTier) {
     return (
       <NewTierScreen
         newTier={newTier}
-        onContinue={() => {
-          setNewTier(null);
-          setPhase("shop");
-        }}
+        onContinue={() => { setNewTier(null); setPhase("shop"); }}
       />
     );
   }
-  
-  // ana oyun ekranı (shop veya battle)
+
+  // ana oyun ekranı
   return (
-    <div
-     className="min-h-screen text-white p-2 flex flex-col justify-center overflow-x-hidden animated-bg"
-    >
+    <div className="min-h-screen text-white p-2 flex flex-col justify-center overflow-x-hidden animated-bg">
       {notifications}
       <StarField />
       {showDebugPanel && (
@@ -343,16 +244,13 @@ export default function GameRouter() {
       {achievementPopup && (
         <div className="fixed top-6 right-6 z-50 bg-gradient-to-br from-yellow-900 to-orange-900 border-2 border-yellow-400 rounded-xl p-4 shadow-2xl flex items-center gap-3">
           <span className="text-3xl">{achievementPopup.icon}</span>
-          <div><div className="text-yellow-300 font-bold text-sm">Başarım Kazandın!</div><div className="text-white font-bold">{achievementPopup.name}</div></div>
+          <div>
+            <div className="text-yellow-300 font-bold text-sm">Başarım Kazandın!</div>
+            <div className="text-white font-bold">{achievementPopup.name}</div>
+          </div>
         </div>
       )}
-
-      {phase === "shop" ? (
-        <ShopView />
-      ) : (
-        <BattleView />
-      )}
-
+      {phase === "shop" ? <ShopView /> : <BattleView />}
     </div>
   );
 }

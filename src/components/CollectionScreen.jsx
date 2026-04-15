@@ -4,7 +4,6 @@ import { loadCollection, getDefaultAnimalData } from "../utils/helpers";
 
 export default function CollectionScreen({ onClose, userId }) {
   const [selectedTier, setSelectedTier] = useState(1);
-  // loadCollection artık in-memory cache'den okur — giriş anında Firebase'den yüklendi
   const collection = loadCollection();
 
   const tiers = [1, 2, 3, 4, 5, 6];
@@ -46,9 +45,11 @@ export default function CollectionScreen({ onClose, userId }) {
         <div className="flex gap-2 mb-6 flex-wrap">
           {tiers.map((t) => {
             const tierAnimals = TIERS[t] || [];
-            const unlockedCount = tierAnimals.filter((a) => {
+            // FIX: Tam koleksiyon sayımı — unlocked (task3) değil,
+            // 3 görevin tamamı bitmiş olanlar sayılır.
+            const completeCount = tierAnimals.filter((a) => {
               const data = collection[a.nick] || getDefaultAnimalData();
-              return data.unlocked;
+              return data.task1 && data.task2 && data.task3;
             }).length;
             return (
               <button
@@ -61,7 +62,7 @@ export default function CollectionScreen({ onClose, userId }) {
                 }`}
               >
                 <span className="text-lg">💎{t}</span>
-                <span className="text-xs">{unlockedCount}/{tierAnimals.length}</span>
+                <span className="text-xs">{completeCount}/{tierAnimals.length}</span>
               </button>
             );
           })}
@@ -87,7 +88,7 @@ export default function CollectionScreen({ onClose, userId }) {
             : { background: "rgba(17,17,27,0.8)", borderColor: "rgba(75,85,99,0.4)" }
         }
       >
-        {/* Üst görsel alanı — dikdörtgen çerçeve */}
+        {/* Üst görsel alanı */}
         <div
           className="relative w-full overflow-hidden flex items-center justify-center"
           style={{
@@ -99,7 +100,6 @@ export default function CollectionScreen({ onClose, userId }) {
               : "rgba(0,0,0,0.3)",
           }}
         >
-          {/* Tam koleksiyon rozeti */}
           {isComplete && (
             <div className="absolute top-2 right-2 z-10 text-xl" style={{ filter: "drop-shadow(0 0 8px rgba(251,191,36,0.9))" }}>👑</div>
           )}
@@ -131,7 +131,6 @@ export default function CollectionScreen({ onClose, userId }) {
             </span>
           )}
 
-          {/* Kilit overlay */}
           {completedTasks === 0 && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="flex flex-col items-center gap-1">
@@ -151,7 +150,6 @@ export default function CollectionScreen({ onClose, userId }) {
             </div>
           )}
 
-          {/* Unlocked parlama efekti — alt kenar */}
           {isUnlocked && (
             <div
               className="absolute bottom-0 left-0 right-0 h-8"

@@ -88,7 +88,6 @@ export async function runBattleTurnPhase({
   }
 
   // Hayalet savaş koruması: ön hayvanlar gerçekten var mı?
-  // React state gecikmesi yüzünden curHp <= 0 olan bir hayvan p[0] olabilir
   if (!p[0] || p[0].curHp <= 0) { setIsBattleOver(true); return; }
   if (!e[0] || e[0].curHp <= 0) { setIsBattleOver(true); return; }
 
@@ -136,7 +135,6 @@ export async function runBattleTurnPhase({
 
   triggerAnim(a.id, "damage");
   triggerAnim(d.id, "damage");
-  // Hasar animasyonu başladı → HP barları şimdi güncellenir
   syncBattleTeams(p, e);
   await delay(1400);
   if (isCancelled()) return;
@@ -231,7 +229,10 @@ export async function runBattleTurnPhase({
     setLog((l) => [...l, `🦭 ${a.nick} -> Takıma +${3 * pwr(a)}/+${3 * pwr(a)} KALICI`]);
     await delay(800);
   }
-  if (a.ability === AB.KILL_FEAR_ALL && e[0].curHp <= 0 && p[0].id === a.id) {
+  // FIX Kaplan: KILL_FEAR_ALL yalnızca Kaplan hayattaysa çalışır (p[0].curHp > 0).
+  // Önceki kodda p[0].id === a.id kontrolü vardı ama curHp kontrolü yoktu;
+  // bu yüzden Kaplan ölünce de tetikleniyordu.
+  if (a.ability === AB.KILL_FEAR_ALL && e[0].curHp <= 0 && p[0].curHp > 0 && p[0].id === a.id) {
     const debuff = applyFearToTeam(e, pwr(a));
     e.forEach((enemy) => {
       spawnProjectile(a.id, enemy.id, "kill_fear_all");
@@ -268,7 +269,9 @@ export async function runBattleTurnPhase({
     setLog((l) => [...l, `🦭 Düşman ${d.nick} -> Takıma +${3 * km}/+${3 * km} KALICI`]);
     await delay(800);
   }
-  if (d.ability === AB.KILL_FEAR_ALL && p[0].curHp <= 0) {
+  // FIX Düşman Kaplanı: KILL_FEAR_ALL yalnızca düşman Kaplan hayattaysa çalışır (e[0].curHp > 0).
+  // Önceden bu kontrol hiç yoktu — düşman Kaplan ölse de debuff uygulanıyordu.
+  if (d.ability === AB.KILL_FEAR_ALL && p[0].curHp <= 0 && e[0].curHp > 0) {
     const debuff = applyFearToTeam(p.filter((pet) => pet.curHp > 0), pwr(d), 1);
     setLog((l) => [...l, `😱 Düşman ${d.nick} → Oyuncu takımına -${debuff}/-${debuff} (korku efekti)`]);
     await delay(500);

@@ -52,7 +52,7 @@ export const pushFaintDuplicateEffect = ({ deadUnit, allyTeam, summons, logs, lo
     curHp: allyTeam[i].hp,
     ability: allyTeam[i].ability === AB.FAINT_DUPLICATE ? AB.NONE : allyTeam[i].ability,
   });
-  logs.push(`${logPrefix}${deadUnit.nick} -> ${allyTeam[i].nick} kopyalandi`);
+  logs.push(`${logPrefix}${deadUnit.nick} -> ${allyTeam[i].nick} kopyalandı`);
   return true;
 };
 
@@ -95,7 +95,7 @@ export const applyDodoTeamRetriggerEffect = ({ ability, sourceNick, power, allyT
     return true;
   }
   if (ability === AB.STAG_COMBO) {
-    const buff = 2 * power; // AM.STAG_COMBO_AMT
+    const buff = 2 * power;
     allyTeam.forEach((pet, idx) => {
       if (!pet) return;
       allyTeam[idx] = {
@@ -110,6 +110,7 @@ export const applyDodoTeamRetriggerEffect = ({ ability, sourceNick, power, allyT
   }
   return false;
 };
+
 export const applyFriendFaintEffect = ({ allyUnit, power, clampStat, logs, logPrefix = "", logSuffix = "" }) => {
   allyUnit.atk = clampStat(allyUnit.atk + 2 * power);
   allyUnit.curHp = clampStat(allyUnit.curHp + 2 * power);
@@ -150,10 +151,18 @@ export const applyTeamWideFaintEffect = ({
   teamBuffLabel = "takım",
   enemyLabel = "düşman takımı",
 }) => {
-  if (ability === AB.FAINT_RAGE || ability === AB.CHEETAH_FAINT) {
+  if (ability === AB.FAINT_RAGE) {
     const buff = getTeamBuffAmount(power);
     applyTeamBuff(allyTeam, buff, clampStat);
-    logs.push(`${sourceNick} ${ability} -> ${teamBuffLabel} +${buff}/+${buff}`);
+    // FIX: ability string yerine Türkçe açıklama
+    logs.push(`😡 ${sourceNick} öldü → ${teamBuffLabel} +${buff}/+${buff} (öfke)`);
+    return true;
+  }
+  if (ability === AB.CHEETAH_FAINT) {
+    const buff = getTeamBuffAmount(power);
+    applyTeamBuff(allyTeam, buff, clampStat);
+    // FIX: ability string yerine Türkçe açıklama
+    logs.push(`🐆 ${sourceNick} öldü → ${teamBuffLabel} +${buff}/+${buff} (hız patlaması)`);
     return true;
   }
   if (ability === AB.FAINT_WAVE) {

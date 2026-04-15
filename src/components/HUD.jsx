@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useShopContext } from "../context/ShopContext";
 import { useUIContext } from "../context/UIContext";
 import { BOSSES, WIN_TURN } from "../data/gameData";
@@ -17,8 +17,22 @@ export default function HUD({ reset }) {
     setGameStarted,
   } = useUIContext();
 
+  // ── 17. tur geçince kalp efekti ───────────────────────────────────────────
+  // Arena modunda, turn WIN_TURN'ü geçtiğinde can artışını vurgula.
+  const prevLivesRef = useRef(lives);
+  const [heartBurst, setHeartBurst] = useState(false);
+
+  useEffect(() => {
+    if (gameMode === "arena" && lives > prevLivesRef.current) {
+      // Can arttı — efekti tetikle
+      setHeartBurst(true);
+      const t = setTimeout(() => setHeartBurst(false), 2000);
+      return () => clearTimeout(t);
+    }
+    prevLivesRef.current = lives;
+  }, [lives, gameMode]);
+
   return (
-    // Mobil: flex-col (2 satır) | Masaüstü: flex-row justify-between (1 satır)
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-stretch gap-1.5 mb-3 px-1">
 
       {/* SOL / SATIR 1: Tur / Kademe / Rehber / Koleksiyon / Boss */}
@@ -86,10 +100,46 @@ export default function HUD({ reset }) {
           <span className="text-yellow-200 font-black text-sm sm:text-base leading-none">💰{gold}</span>
         </div>
 
-        {/* Can */}
-        <div className="flex flex-col items-center bg-red-900/60 border border-red-500/40 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-2xl min-w-[44px] sm:min-w-[48px]">
+        {/* Can — 17. tur geçince parlak efekt */}
+        <div
+          className="flex flex-col items-center px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-2xl min-w-[44px] sm:min-w-[48px] relative overflow-visible transition-all duration-300"
+          style={heartBurst ? {
+            background: "linear-gradient(135deg, rgba(190,18,60,0.8) 0%, rgba(239,68,68,0.6) 100%)",
+            border: "2px solid rgba(251,113,133,0.9)",
+            boxShadow: "0 0 20px rgba(251,113,133,0.8), 0 0 40px rgba(239,68,68,0.5)",
+            animation: "hudHeartBurst 0.6s cubic-bezier(0.34,1.5,0.64,1)",
+          } : {
+            background: "rgba(127,29,29,0.6)",
+            border: "1px solid rgba(239,68,68,0.4)",
+          }}
+        >
           <span className="text-[8px] sm:text-[9px] text-red-400 uppercase tracking-widest font-black">CAN</span>
-          <span className="text-red-200 font-black text-sm sm:text-base leading-none">❤️{lives}</span>
+          <span
+            className="text-red-200 font-black text-sm sm:text-base leading-none"
+            style={heartBurst ? { animation: "hudHeartScale 0.5s cubic-bezier(0.34,1.5,0.64,1)" } : {}}
+          >
+            ❤️{lives}
+          </span>
+          {/* +1 yüzen yazı */}
+          {heartBurst && (
+            <div
+              style={{
+                position: "absolute",
+                top: "-20px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                fontSize: "13px",
+                fontWeight: 900,
+                color: "#fda4af",
+                textShadow: "0 0 8px rgba(251,113,133,0.9)",
+                animation: "hudLifeFloat 1.6s ease-out forwards",
+                whiteSpace: "nowrap",
+                pointerEvents: "none",
+              }}
+            >
+              +1 ❤️
+            </div>
+          )}
         </div>
 
         {/* Zafer */}
@@ -98,7 +148,7 @@ export default function HUD({ reset }) {
           <span className="text-green-200 font-black text-sm sm:text-base leading-none">✓{wins}</span>
         </div>
 
-        {/* Ses + Menü — mobilde ml-auto ile sağa yapışık */}
+        {/* Ses + Menü */}
         <div className="ml-auto sm:ml-0 flex gap-1.5">
           <button
             onClick={() => setSoundEnabled(s => !s)}
@@ -115,6 +165,23 @@ export default function HUD({ reset }) {
         </div>
       </div>
 
+      <style>{`
+        @keyframes hudHeartBurst {
+          0%   { transform: scale(1); }
+          40%  { transform: scale(1.18); }
+          100% { transform: scale(1); }
+        }
+        @keyframes hudHeartScale {
+          0%   { transform: scale(1); }
+          50%  { transform: scale(1.4); }
+          100% { transform: scale(1); }
+        }
+        @keyframes hudLifeFloat {
+          0%   { opacity: 1; transform: translateX(-50%) translateY(0); }
+          70%  { opacity: 1; transform: translateX(-50%) translateY(-28px); }
+          100% { opacity: 0; transform: translateX(-50%) translateY(-36px); }
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,18 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-/**
- * ArenaIntro — Arena moduna ilk kez veya her girişte gösterilen sinematik karşılama.
- *
- * 4 aşamalı sekans:
- *   "dark"   → Ekran siyah, Arena rozeti merkezden büyüyerek gelir (0–700ms)
- *   "reveal" → Başlık ve sloganlar açılır, arka plan efektleri aktif (700–2800ms)
- *   "info"   → "Sonu olmayan mod" bilgi kartları sırayla damgalanır (2800–4800ms)
- *   "out"    → Ekran solar, onDone() tetiklenir (4800–5300ms)
- *
- * Props:
- *   playerName — oyuncunun displayName'i (opsiyonel, gösterilir)
- *   onDone     — animasyon bitince çağrılır
- */
 export default function ArenaIntro({ playerName, onDone }) {
   const [phase, setPhase] = useState("dark");
   const [visibleCards, setVisibleCards] = useState(0);
@@ -20,14 +7,13 @@ export default function ArenaIntro({ playerName, onDone }) {
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("reveal"), 700);
     const t2 = setTimeout(() => setPhase("info"),   2800);
-    // Bilgi kartlarını sırayla göster
     const c1 = setTimeout(() => setVisibleCards(1), 3050);
     const c2 = setTimeout(() => setVisibleCards(2), 3500);
     const c3 = setTimeout(() => setVisibleCards(3), 3950);
     const c4 = setTimeout(() => setVisibleCards(4), 4400);
-    // t3/t4 (otomatik kapanma) kaldırıldı — oyuncu butona basarak girer
+    const c5 = setTimeout(() => setVisibleCards(5), 4850);
     return () => {
-      [t1,t2,c1,c2,c3,c4].forEach(clearTimeout);
+      [t1,t2,c1,c2,c3,c4,c5].forEach(clearTimeout);
     };
   }, []);
 
@@ -45,7 +31,6 @@ export default function ArenaIntro({ playerName, onDone }) {
   const avatar   = parseAvatar(playerName || "");
   const username = parseUsername(playerName || "");
 
-  // ── Bilgi kartları — Arenayı diğer modlardan ayıran 4 şey ────────────────
   const infoCards = [
     {
       icon:  "∞",
@@ -80,6 +65,15 @@ export default function ArenaIntro({ playerName, onDone }) {
       glow:  "rgba(248,113,113,0.35)",
       border:"rgba(248,113,113,0.4)",
     },
+    {
+      // 5. kart — 17. tur can bonusu
+      icon:  "❤️",
+      title: "17. TUR BONUSU",
+      desc:  "17. tura ulaştığında +1 can kazanırsın. Sonsuz bir döngüde tırmanmaya devam edebilirsin!",
+      color: "#fb7185",
+      glow:  "rgba(251,113,133,0.35)",
+      border:"rgba(251,113,133,0.4)",
+    },
   ];
 
   return (
@@ -99,7 +93,7 @@ export default function ArenaIntro({ playerName, onDone }) {
         pointerEvents: "all",
       }}
     >
-      {/* ── Arka plan: hareketli ışın çizgileri ───────────────────────────── */}
+      {/* Arka plan ışın çizgileri */}
       <div style={{ position:"absolute", inset:0, pointerEvents:"none", overflow:"hidden" }}>
         {RAYS.map((r, i) => (
           <div
@@ -120,7 +114,7 @@ export default function ArenaIntro({ playerName, onDone }) {
         ))}
       </div>
 
-      {/* ── Merkez ışık hâlesi ─────────────────────────────────────────────── */}
+      {/* Merkez ışık hâlesi */}
       <div
         style={{
           position: "absolute",
@@ -132,7 +126,7 @@ export default function ArenaIntro({ playerName, onDone }) {
         }}
       />
 
-      {/* ── Üst: oyuncu adı ───────────────────────────────────────────────── */}
+      {/* Üst: oyuncu adı */}
       {username && (
         <div
           style={{
@@ -169,7 +163,7 @@ export default function ArenaIntro({ playerName, onDone }) {
         </div>
       )}
 
-      {/* ── Ana içerik: rozetli başlık bloğu ─────────────────────────────── */}
+      {/* Ana içerik */}
       <div
         style={{
           display: "flex",
@@ -180,7 +174,6 @@ export default function ArenaIntro({ playerName, onDone }) {
           transition: "margin-bottom 0.5s ease",
         }}
       >
-        {/* Arena rozeti — ilk büyüyüp gelir */}
         <div
           style={{
             fontSize: "clamp(64px, 16vw, 110px)",
@@ -195,7 +188,6 @@ export default function ArenaIntro({ playerName, onDone }) {
           🏟️
         </div>
 
-        {/* Etiket: "MOD" */}
         <div
           style={{
             fontSize: "clamp(9px,2vw,11px)",
@@ -210,7 +202,6 @@ export default function ArenaIntro({ playerName, onDone }) {
           ✦ ANIMATHON ✦
         </div>
 
-        {/* Başlık */}
         <h1
           style={{
             fontSize: "clamp(38px, 12vw, 88px)",
@@ -233,7 +224,6 @@ export default function ArenaIntro({ playerName, onDone }) {
           ARENA
         </h1>
 
-        {/* Slogan */}
         <div
           style={{
             fontSize: "clamp(11px, 2.5vw, 15px)",
@@ -242,15 +232,13 @@ export default function ArenaIntro({ playerName, onDone }) {
             textTransform: "uppercase",
             textAlign: "center",
             fontWeight: 600,
-            opacity: phase === "dark" || phase === "reveal" && false ? 0 : (phase === "reveal" ? 1 : 1),
-            // reveal → görünür, info → görünür
+            opacity: phase === "dark" ? 0 : 1,
             transition: "opacity 0.6s ease 1.2s",
           }}
         >
           Ne kadar dayanabilirsin?
         </div>
 
-        {/* Kırmızı "Sonu Yok" şerit — reveal aşamasında damgalanır */}
         <div
           style={{
             display: "flex",
@@ -283,68 +271,65 @@ export default function ArenaIntro({ playerName, onDone }) {
         </div>
       </div>
 
-      {/* ── Bilgi kartları — info aşamasında sırayla belirir ────────────── */}
+      {/* Bilgi kartları — 5 kart, 3+2 grid */}
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "clamp(6px, 1.5vw, 12px)",
-          width: "clamp(280px, 80vw, 560px)",
+          width: "clamp(280px, 88vw, 620px)",
           opacity: phase === "info" ? 1 : 0,
           transform: phase === "info" ? "translateY(0)" : "translateY(20px)",
           transition: "opacity 0.4s ease, transform 0.4s ease",
           pointerEvents: "none",
         }}
       >
-        {infoCards.map((card, i) => (
+        {/* İlk 4 kart — 2x2 */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "clamp(6px, 1.5vw, 10px)",
+            marginBottom: "clamp(6px, 1.5vw, 10px)",
+          }}
+        >
+          {infoCards.slice(0, 4).map((card, i) => (
+            <InfoCard key={i} card={card} visible={visibleCards > i} />
+          ))}
+        </div>
+        {/* 5. kart — tam genişlik */}
+        <div
+          style={{
+            opacity: visibleCards > 4 ? 1 : 0,
+            transform: visibleCards > 4 ? "translateY(0) scale(1)" : "translateY(12px) scale(0.97)",
+            transition: "opacity 0.35s ease, transform 0.35s cubic-bezier(0.34,1.3,0.64,1)",
+          }}
+        >
           <div
-            key={i}
             style={{
-              background: `rgba(15,5,30,0.85)`,
-              border: `1px solid ${card.border}`,
+              background: "rgba(15,5,30,0.85)",
+              border: `1px solid ${infoCards[4].border}`,
               borderRadius: "clamp(10px,2vw,16px)",
-              padding: "clamp(10px,2.5vw,16px)",
+              padding: "clamp(10px,2.5vw,14px)",
               display: "flex",
-              flexDirection: "column",
-              gap: "6px",
-              boxShadow: `0 0 20px ${card.glow}, inset 0 1px 0 rgba(255,255,255,0.05)`,
-              opacity: visibleCards > i ? 1 : 0,
-              transform: visibleCards > i ? "translateY(0) scale(1)" : "translateY(12px) scale(0.95)",
-              transition: "opacity 0.35s ease, transform 0.35s cubic-bezier(0.34,1.3,0.64,1)",
+              alignItems: "center",
+              gap: "clamp(10px,2vw,16px)",
+              boxShadow: `0 0 20px ${infoCards[4].glow}, inset 0 1px 0 rgba(255,255,255,0.05)`,
             }}
           >
-            <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
-              <span style={{
-                fontSize: card.iconStyle ? undefined : "clamp(20px,5vw,28px)",
-                color: card.color,
-                filter: `drop-shadow(0 0 8px ${card.glow})`,
-                lineHeight: 1,
-                ...card.iconStyle,
-              }}>
-                {card.icon}
-              </span>
-              <div style={{
-                fontSize: "clamp(9px,2vw,11px)",
-                fontWeight: 900,
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                color: card.color,
-              }}>
-                {card.title}
+            <span style={{ fontSize: "clamp(22px,5vw,32px)", filter: `drop-shadow(0 0 8px ${infoCards[4].glow})`, flexShrink: 0 }}>
+              {infoCards[4].icon}
+            </span>
+            <div>
+              <div style={{ fontSize:"clamp(9px,2vw,11px)", fontWeight:900, letterSpacing:"0.15em", textTransform:"uppercase", color: infoCards[4].color, marginBottom:"4px" }}>
+                {infoCards[4].title}
+              </div>
+              <div style={{ fontSize:"clamp(10px,2.2vw,12px)", color:"rgba(203,213,225,0.7)", lineHeight:1.45 }}>
+                {infoCards[4].desc}
               </div>
             </div>
-            <div style={{
-              fontSize: "clamp(10px,2.2vw,12px)",
-              color: "rgba(203,213,225,0.7)",
-              lineHeight: 1.45,
-            }}>
-              {card.desc}
-            </div>
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* ── Alt bant: "Arenaya Gir" butonu — tüm kartlar belirdikten sonra çıkar ── */}
+      {/* Alt buton */}
       <div
         style={{
           position: "absolute",
@@ -353,10 +338,10 @@ export default function ArenaIntro({ playerName, onDone }) {
           right: 0,
           display: "flex",
           justifyContent: "center",
-          opacity: phase === "info" && visibleCards >= 4 ? 1 : 0,
-          transform: phase === "info" && visibleCards >= 4 ? "translateY(0)" : "translateY(12px)",
+          opacity: phase === "info" && visibleCards >= 5 ? 1 : 0,
+          transform: phase === "info" && visibleCards >= 5 ? "translateY(0)" : "translateY(12px)",
           transition: "opacity 0.5s ease, transform 0.5s ease",
-          pointerEvents: phase === "info" && visibleCards >= 4 ? "all" : "none",
+          pointerEvents: phase === "info" && visibleCards >= 5 ? "all" : "none",
         }}
       >
         <button
@@ -398,7 +383,44 @@ export default function ArenaIntro({ playerName, onDone }) {
   );
 }
 
-// ── Arka plan ışın verileri ────────────────────────────────────────────────────
+function InfoCard({ card, visible }) {
+  return (
+    <div
+      style={{
+        background: "rgba(15,5,30,0.85)",
+        border: `1px solid ${card.border}`,
+        borderRadius: "clamp(10px,2vw,16px)",
+        padding: "clamp(10px,2.5vw,16px)",
+        display: "flex",
+        flexDirection: "column",
+        gap: "6px",
+        boxShadow: `0 0 20px ${card.glow}, inset 0 1px 0 rgba(255,255,255,0.05)`,
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0) scale(1)" : "translateY(12px) scale(0.95)",
+        transition: "opacity 0.35s ease, transform 0.35s cubic-bezier(0.34,1.3,0.64,1)",
+      }}
+    >
+      <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+        <span style={{
+          fontSize: card.iconStyle ? undefined : "clamp(20px,5vw,28px)",
+          color: card.color,
+          filter: `drop-shadow(0 0 8px ${card.glow})`,
+          lineHeight: 1,
+          ...card.iconStyle,
+        }}>
+          {card.icon}
+        </span>
+        <div style={{ fontSize:"clamp(9px,2vw,11px)", fontWeight:900, letterSpacing:"0.15em", textTransform:"uppercase", color: card.color }}>
+          {card.title}
+        </div>
+      </div>
+      <div style={{ fontSize:"clamp(10px,2.2vw,12px)", color:"rgba(203,213,225,0.7)", lineHeight:1.45 }}>
+        {card.desc}
+      </div>
+    </div>
+  );
+}
+
 const RAYS = [
   { angle:  15, color:"rgba(167,139,250,0.18)", opacity:0.9, delay:0.2 },
   { angle:  45, color:"rgba(236,72,153,0.12)",  opacity:0.7, delay:0.4 },

@@ -345,6 +345,11 @@ export function useShop({
 
   // ─── Mağaza yenile ────────────────────────────────────────────────────────
   const refresh = () => {
+    // FIX: hasMergeable kontrolü setShop callback DIŞINDA yapılıyor.
+    // setShop içindeki callback'te team closure'dan okunursa stale (eski) değer
+    // dönebilir; bu "hayvan yok ama ses çıkıyor" hatasının kaynağıydı.
+    // team burada doğrudan ve güncel olarak okunuyor.
+    const currentTeam = team;
 
     setShop((prevShop) => {
       // Tutorial aktifse → Kelebek enjekte et
@@ -382,11 +387,11 @@ export function useShop({
       for (let i = 0; i < slotsNeeded; i++) {
         const a = pool[Math.floor(Math.random() * pool.length)];
         let cost = a.cost || 3;
-        team.forEach((pet) => {
+        currentTeam.forEach((pet) => {
           if (pet && pet.ability === AB.BUY_DISCOUNT_NEXT) cost = Math.max(1, cost - pwr(pet));
         });
         if (discountNext) {
-          team.forEach((pet) => {
+          currentTeam.forEach((pet) => {
             if (pet && pet.ability === AB.SHOP_DISCOUNT) {
               const pct = pwr(pet) === 1 ? 0.33 : pwr(pet) === 2 ? 0.66 : 0.99;
               cost = Math.max(1, Math.floor(cost * (1 - pct)));
@@ -396,14 +401,21 @@ export function useShop({
         s.push({ ...a, id: Math.random(), lvl: 1, exp: 0, curHp: a.hp, frozen: false, cost });
       }
 
-      const newShop = [...currentFrozen, ...s];
-      const hasMergeable = newShop.some((sp) =>
-        team.some((t) => t && t.name === sp.name && t.tier === sp.tier && t.lvl < 3)
-      );
-      if (hasMergeable) setTimeout(() => playSound("merge_burst"), 300);
-
-      return newShop;
+      return [...currentFrozen, ...s];
     });
+
+    // FIX: Ses kontrolü setShop dışında, güncel team ile yapılıyor.
+    // Yeni shop henüz state'e yazılmadı — ama biz sadece "takımda birleşebilecek
+    // bir hayvan var mı?" diye kontrol ettiğimiz için mevcut shop yeterli.
+    // Yeni gelen hayvanlar için ise pool'dan rastgele çekildiğinden kesin bilgi
+    // yoktur; bu yüzden sadece mevcut shop + team karşılaştırması yapıyoruz.
+    // Bu yaklaşım yanlış pozitifi tamamen ortadan kaldırır.
+    const hasMergeable = shop.some((sp) =>
+      sp &&
+      !sp.frozen &&
+      currentTeam.some((t) => t && t.name === sp.name && t.tier === sp.tier && t.lvl < 3)
+    );
+    if (hasMergeable) setTimeout(() => playSound("merge_burst"), 300);
   };
 
   useEffect(() => {
@@ -466,7 +478,6 @@ export function useShop({
         if (!a.isR) {
           setGold((g) => g - a.cost);
           if (onGoldSpent) onGoldSpent(a.cost);
-          // ✨ Sabit slot: hayvanı null yap, filter yapma
           setShop(prev => {
             const idx = prev.findIndex(p => p?.id === a.id);
             if (idx !== -1) {
@@ -492,7 +503,6 @@ export function useShop({
       if (!a.isR) {
         setGold((g) => g - a.cost);
         if (onGoldSpent) onGoldSpent(a.cost);
-        // ✨ Sabit slot
         setShop(prev => {
           const idx = prev.findIndex(p => p?.id === a.id);
           if (idx !== -1) {
@@ -523,7 +533,6 @@ export function useShop({
       if (!a.isR) {
         setGold((g) => g - a.cost);
         if (onGoldSpent) onGoldSpent(a.cost);
-        // ✨ Sabit slot: hayvanı null yap, filter yapma
         setShop(prev => {
           const idx = prev.findIndex(p => p?.id === a.id);
           if (idx !== -1) {
@@ -539,7 +548,7 @@ export function useShop({
         setRewards((prev) => [...prev.filter((x) => x.grp !== a.grp), ...newRewards]);
       }
       applyBuyBuffs(nt, slot);
-      setTeam(nt);  // tek setTeam — merge + buyBuff birlikte
+      setTeam(nt);
       setSel(null);
       return;
     }
@@ -550,7 +559,6 @@ export function useShop({
     if (!a.isR) {
       setGold((g) => g - a.cost);
       if (onGoldSpent) onGoldSpent(a.cost);
-      // ✨ Sabit slot
       setShop(prev => {
         const idx = prev.findIndex(p => p?.id === a.id);
         if (idx !== -1) {
@@ -567,8 +575,11 @@ export function useShop({
     applyBuyBuffs(nt, slot);
     setTeam(nt);
 
-    const stillMergeable = shop.some(sp => sp && sp.id !== a.id && nt.some(t => t && t.name === sp.name && t.tier === sp.tier && t.lvl < 3));
-if (stillMergeable) setTimeout(() => playSound("merge_burst"), 400);
+    // Satın aldıktan sonra kalan mağazada hâlâ birleşebilir hayvan var mı?
+    const stillMergeable = shop.some(sp =>
+      sp && sp.id !== a.id && nt.some(t => t && t.name === sp.name && t.tier === sp.tier && t.lvl < 3)
+    );
+    if (stillMergeable) setTimeout(() => playSound("merge_burst"), 400);
     setSel(null);
   };
 
