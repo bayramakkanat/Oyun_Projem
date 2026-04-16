@@ -19,6 +19,19 @@ import { useCleanup } from "../hooks/useCleanup";
 
 export const UIContext = createContext();
 
+// Geçerli hız değerleri — yeni set: 1.5, 2, 3
+const VALID_SPEEDS = [1.5, 2, 3];
+
+const resolveInitialSpeed = () => {
+  const stored = parseFloat(localStorage.getItem("petgame_battle_speed"));
+  if (!stored || isNaN(stored)) return 1.5; // Varsayılan artık 1.5x
+  // Eski 1x kaydı → 1.5x, eski 4x kaydı → 3x, diğerleri geçerliyse koru
+  if (stored === 1) return 1.5;
+  if (stored === 4) return 3;
+  if (VALID_SPEEDS.includes(stored)) return stored;
+  return 1.5;
+};
+
 export const UIProvider = ({ children }) => {
   // ─── Auth (AuthContext'ten) ──────────────────────────────────────────────
   const {
@@ -91,9 +104,8 @@ export const UIProvider = ({ children }) => {
   }, [gameMode, versusPhase, versusRoom?.code, versusRoom?.role, user?.uid, handleLogout]);
 
   // ─── Ref'ler ──────────────────────────────────────────────────────────────
-  const battleSpeedRef       = useRef(
-    parseFloat(localStorage.getItem("petgame_battle_speed")) || 1
-  );
+  // FIX: Varsayılan hız 1.5x. Eski 1x/4x kayıtları otomatik dönüştürülür.
+  const battleSpeedRef       = useRef(resolveInitialSpeed());
   const isPausedRef          = useRef(false);
   const achievementQueueRef  = useRef([]);
   const achievementShowingRef = useRef(false);
@@ -178,7 +190,6 @@ export const UIProvider = ({ children }) => {
     setStats((prev) => {
       if (prev.achievements.includes(id)) return prev;
       const next = { ...prev, achievements: [...prev.achievements, id] };
-      // saveStats artık async — setStats callback'i dışında fire-and-forget olarak çağırıyoruz
       saveStats(next, user?.uid).catch((err) => logError(err, "unlockAchievement:saveStats"));
       const def = ACHIEVEMENTS_DEF.find((a) => a.id === id);
       if (def) {
@@ -194,7 +205,6 @@ export const UIProvider = ({ children }) => {
   // ─── Oyun sonu istatistik güncellemesi ───────────────────────────────────
   const updateStatsOnEnd = useCallback((won, currentTurn, currentWins, currentLives) => {
     clearGameState();
-    // setStats'ı önce çalıştır, sonra saveStats'ı dışarıda fire-and-forget çağır
     let nextStats;
     setStats((prev) => {
       nextStats = {
@@ -210,7 +220,6 @@ export const UIProvider = ({ children }) => {
       }
       return nextStats;
     });
-    // async saveStats — callback dışında çağrılıyor, sıra garantisi için setTimeout(0)
     setTimeout(() => {
       if (nextStats) {
         saveStats(nextStats, user?.uid).catch((err) => logError(err, "updateStatsOnEnd:saveStats"));
@@ -226,7 +235,6 @@ export const UIProvider = ({ children }) => {
 
   // ─── Context value ────────────────────────────────────────────────────────
   const value = useMemo(() => ({
-    // UI state
     gameStarted, setGameStarted,
     menuView, setMenuView,
     soundEnabled, setSoundEnabled,
@@ -252,10 +260,8 @@ export const UIProvider = ({ children }) => {
     newTier, setNewTier,
     lastT, setLastT,
     newlyOpenedSlot, setNewlyOpenedSlot,
-    // Refs
     battleSpeedRef, isPausedRef,
     achievementQueueRef, achievementShowingRef,
-    // Utilities
     pwr, sellP, clampStat, triggerAnim,
     unlockAchievement, showNextAchievement, updateStatsOnEnd,
     user, displayName,
@@ -278,14 +284,12 @@ export const UIProvider = ({ children }) => {
     showCollection, showDebugPanel, isDebugBattle,
     gameMode, versusPhase, versusRoom, versusAutoJoin, difficultyLevel,
     anims, isPaused, newTier, lastT, newlyOpenedSlot,
-    // Auth
     user, displayName, stats,
     showAuthModal, authEmail, authPass, authMode,
     authUsername, authAvatar, showSettingsModal,
     settingsUsername, settingsAvatar,
-    // Stable callbacks
     pwr, sellP, clampStat, triggerAnim,
-   unlockAchievement, showNextAchievement, updateStatsOnEnd, handleLogoutWithCleanup,
+    unlockAchievement, showNextAchievement, updateStatsOnEnd, handleLogoutWithCleanup,
     friendsData,
   ]);
 

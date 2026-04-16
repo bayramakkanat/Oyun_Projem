@@ -20,6 +20,7 @@ import GlobalNotifications from "./GlobalNotifications";
 const DebugPanel = lazy(() => import("./DebugPanel"));
 import { playSound } from "../hooks/useSound";
 import { BOSSES, DIFFICULTY_CONFIGS } from "../data/gameData";
+import { shouldShowArenaIntro, incrementArenaIntroCount } from "../utils/localSave";
 
 export default function GameRouter() {
   const {
@@ -109,9 +110,21 @@ export default function GameRouter() {
     return (
       <>
         {notifications}
-        {/* FIX: Arena intro aktifken MenuScreen gizlenir — geçiş anında menü flash olmaz */}
+        {/* Arena intro aktifken MenuScreen gizlenir — geçişte flash olmaz */}
         {!showArenaIntro && (
-          <MenuScreen onArenaStart={() => setShowArenaIntro(true)} />
+          <MenuScreen
+            onArenaStart={() => {
+              // İlk 3 girişte intro göster, sonra doğrudan başlat
+              if (shouldShowArenaIntro()) {
+                setShowArenaIntro(true);
+              } else {
+                reset();
+                setGameStarted(true);
+                unlockAchievement("first_game");
+                playSound("shop_open");
+              }
+            }}
+          />
         )}
         {showDebugPanel && (
           <Suspense fallback={<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 text-white">Yükleniyor...</div>}>
@@ -133,6 +146,7 @@ export default function GameRouter() {
           <ArenaIntro
             playerName={displayName || user?.displayName || ""}
             onDone={() => {
+              incrementArenaIntroCount(); // Sayacı artır
               setShowArenaIntro(false);
               reset();
               setGameStarted(true);

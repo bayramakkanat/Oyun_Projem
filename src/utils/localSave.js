@@ -31,7 +31,6 @@ export function loadGameState() {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     const { _h, ...rest } = parsed;
-    // Hash kontrolü — uyuşmazsa kayıt geçersiz say ve sil
     if (_h) {
       const expected = makeHash(rest.turn, rest.gold, rest.lives);
       if (_h !== expected) {
@@ -64,13 +63,17 @@ export function unlockArena() {
   localStorage.setItem(ARENA_KEY, "1");
 }
 
-// ─── Arena intro (1 kez göster) ──────────────────────────────────────────────
-const ARENA_INTRO_KEY = "petgame_arena_intro_seen_v1";
+// ─── Arena intro — ilk 3 girişte göster, sonra gösterme ─────────────────────
+// Eski tek-seferlik key'i de kontrol ederek geriye dönük uyumluluk sağlanır.
+const ARENA_INTRO_COUNT_KEY = "petgame_arena_intro_count_v2";
+const ARENA_INTRO_MAX = 3;
 
-export function isArenaIntroSeen() {
-  return localStorage.getItem(ARENA_INTRO_KEY) === "1";
+export function shouldShowArenaIntro() {
+  const count = parseInt(localStorage.getItem(ARENA_INTRO_COUNT_KEY) || "0", 10);
+  return count < ARENA_INTRO_MAX;
 }
 
-export function markArenaIntroSeen() {
-  localStorage.setItem(ARENA_INTRO_KEY, "1");
+export function incrementArenaIntroCount() {
+  const count = parseInt(localStorage.getItem(ARENA_INTRO_COUNT_KEY) || "0", 10);
+  localStorage.setItem(ARENA_INTRO_COUNT_KEY, String(count + 1));
 }

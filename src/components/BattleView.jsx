@@ -79,7 +79,10 @@ export default function BattleView() {
         <div className="flex items-center gap-4">
          <div className="flex items-center mr-2">
             <div className="flex gap-1 items-center bg-black/40 border border-white/10 rounded-xl p-1 backdrop-blur-sm">
-             {[1, 2, 4].map((s) => (
+              {/* FIX: Hız seçenekleri 1/2/4 → 1.5/2/3 olarak güncellendi.
+                  Varsayılan normal hız 1.5x — animasyonlar daha net,
+                  maksimum 3x — beceri animasyonlarını yakalamak hâlâ mümkün. */}
+              {[1.5, 2, 3].map((s) => (
                 <button
                   key={s}
                   onClick={() => {
@@ -158,7 +161,6 @@ style={{
   animation: "neonPulse 2s ease-in-out infinite"
 }}
               >
-              
                  {user
   ? user.displayName || user.email.split("@")[0]
   : "TAKIMIN"}
