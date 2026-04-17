@@ -91,7 +91,7 @@ export const getDesc = (a, lvlOverride) => {
     return `Öldürünce: Düşmanın statlarının %${30 + 10 * m} oranında geri kazanır.`;
   if (a.ability === AB.FAINT_WAVE)
     return `Ölünce: Tüm düşmanlara ${9 * m} hasar verir`;
-    if (a.ability === AB.WEAKEN_STRONG)
+  if (a.ability === AB.WEAKEN_STRONG)
     return `Savaş başı: En güçlü düşmanın Atak ve Can değerlerini %${25 * m} azaltır`;
   if (a.ability === AB.KILL_HEAL_TEAM)
     return `Öldürünce: Takıma kalıcı olarak +${3 * m} Atak, +${3 * m} Can verir`;
@@ -119,12 +119,10 @@ export const getDesc = (a, lvlOverride) => {
     const debuff = m === 1 ? 3 : m === 2 ? 5 : 8;
     return `Ölünce: Tüm düşmanlara -${debuff} Atak, -${debuff} Can uygular`;
   }
+  // FIX: Kokarca mekanik değişti — artık saldıranın arkasındaki hayvana hasar veriyor
   if (a.ability === AB.HURT_REFLECT) {
-    const pct = m === 1 ? 50 : m === 2 ? 75 : 100;
-    return `Hasar alınca: Gelen hasarın %${pct}'ini saldırana geri verir.`;
+    const pct = m === 1 ? 33 : m === 2 ? 66 : 99;
+    return `Hasar alınca: Gelen hasarın %${pct}'ini saldıranın arkasındaki hayvana yansıtır.`;
   }
   return "";
 };
-
-
-

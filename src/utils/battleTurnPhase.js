@@ -87,7 +87,6 @@ export async function runBattleTurnPhase({
     return;
   }
 
-  // Hayalet savaş koruması: ön hayvanlar gerçekten var mı?
   if (!p[0] || p[0].curHp <= 0) { setIsBattleOver(true); return; }
   if (!e[0] || e[0].curHp <= 0) { setIsBattleOver(true); return; }
 
@@ -109,6 +108,8 @@ export async function runBattleTurnPhase({
   p[0].curHp -= dD;
   e[0].curHp -= aD;
 
+  // FIX: Hasar sayıları ekranına HP azalmadan önce göster (sadece floating text)
+  // syncBattleTeams burada ÇAĞRILMIYOR — önce hasar animasyonu başlasın
   setTimeout(() => {
     const aEl = document.querySelector(`[data-pet-id="${a.id}"]`);
     const dEl = document.querySelector(`[data-pet-id="${d.id}"]`);
@@ -135,6 +136,8 @@ export async function runBattleTurnPhase({
 
   triggerAnim(a.id, "damage");
   triggerAnim(d.id, "damage");
+  // FIX: HP güncellemesi hasar animasyonu tetiklendikten sonra yapılıyor
+  // Böylece "projektil uçarken HP zaten azalmış" sorunu ortadan kalkıyor
   syncBattleTeams(p, e);
   await delay(1400);
   if (isCancelled()) return;
@@ -196,12 +199,26 @@ export async function runBattleTurnPhase({
       await delay(600);
     }
   }
+
+  // ── KOKARCA (HURT_REFLECT) — yansıma hasarı saldıranın ARKASINDAKİ hayvana gider ──
+  // Gergedan çiğnemesine benzer: Kokarca'ya saldıran hayvanın hemen arkasındaki düşman zarar görür.
+  // Saldıran ön hayvan ise (e[0]) arkasındaki e[1]'e hasar gider.
+  // Eğer saldıranın arkası yoksa (tek hayvan kaldıysa) hasarı saldıranın kendisi alır.
   if (a.ability === AB.HURT_REFLECT && p[0].curHp > 0 && dD > 0 && p[0].id === a.id) {
     const pct = pwr(a) === 1 ? 0.33 : pwr(a) === 2 ? 0.66 : 0.99;
     const reflectDmg = Math.max(1, Math.floor(dD * pct));
-    e[0].curHp = Math.max(0, e[0].curHp - reflectDmg);
-    triggerAnim(e[0].id, "damage");
-    setLog((l) => [...l, `🪞 ${a.nick} -> ${e[0].nick} e ${reflectDmg} yansıma hasarı`]);
+    if (e.length > 1 && e[1].curHp > 0) {
+      // Ön düşmanın arkasındaki hedefe yansıt
+      e[1].curHp = Math.max(0, e[1].curHp - reflectDmg);
+      spawnProjectile(a.id, e[1].id, "hurt_dmg", null, true);
+      triggerAnim(e[1].id, "damage");
+      setLog((l) => [...l, `🪞 ${a.nick} -> ${e[0].nick}'in arkasındaki ${e[1].nick}'e ${reflectDmg} yansıma hasarı`]);
+    } else {
+      // Arkada kimse yoksa saldıranın kendisine
+      e[0].curHp = Math.max(0, e[0].curHp - reflectDmg);
+      triggerAnim(e[0].id, "damage");
+      setLog((l) => [...l, `🪞 ${a.nick} -> ${e[0].nick}'e ${reflectDmg} yansıma hasarı`]);
+    }
     await delay(500);
   }
   if (a.ability === AB.KILL_BUFF && e[0].curHp <= 0) {
@@ -229,9 +246,6 @@ export async function runBattleTurnPhase({
     setLog((l) => [...l, `🦭 ${a.nick} -> Takıma +${3 * pwr(a)}/+${3 * pwr(a)} KALICI`]);
     await delay(800);
   }
-  // FIX Kaplan: KILL_FEAR_ALL yalnızca Kaplan hayattaysa çalışır (p[0].curHp > 0).
-  // Önceki kodda p[0].id === a.id kontrolü vardı ama curHp kontrolü yoktu;
-  // bu yüzden Kaplan ölünce de tetikleniyordu.
   if (a.ability === AB.KILL_FEAR_ALL && e[0].curHp <= 0 && p[0].curHp > 0 && p[0].id === a.id) {
     const debuff = applyFearToTeam(e, pwr(a));
     e.forEach((enemy) => {
@@ -269,8 +283,6 @@ export async function runBattleTurnPhase({
     setLog((l) => [...l, `🦭 Düşman ${d.nick} -> Takıma +${3 * km}/+${3 * km} KALICI`]);
     await delay(800);
   }
-  // FIX Düşman Kaplanı: KILL_FEAR_ALL yalnızca düşman Kaplan hayattaysa çalışır (e[0].curHp > 0).
-  // Önceden bu kontrol hiç yoktu — düşman Kaplan ölse de debuff uygulanıyordu.
   if (d.ability === AB.KILL_FEAR_ALL && p[0].curHp <= 0 && e[0].curHp > 0) {
     const debuff = applyFearToTeam(p.filter((pet) => pet.curHp > 0), pwr(d), 1);
     setLog((l) => [...l, `😱 Düşman ${d.nick} → Oyuncu takımına -${debuff}/-${debuff} (korku efekti)`]);
@@ -293,12 +305,20 @@ export async function runBattleTurnPhase({
     setLog((l) => [...l, `🦬 Düşman ${d.nick} hasar aldı -> Düşman takımına +${3 * pwr(d)}/+${3 * pwr(d)} buff`]);
     await delay(500);
   }
+  // Düşman Kokarcası — yansıma arkadaki OYUNCU hayvanına gider
   if (d.ability === AB.HURT_REFLECT && e[0].curHp > 0 && aD > 0 && e[0].id === d.id) {
     const dpct = pwr(d) === 1 ? 0.33 : pwr(d) === 2 ? 0.66 : 0.99;
     const dreflectDmg = Math.max(1, Math.floor(aD * dpct));
-    p[0].curHp = Math.max(0, p[0].curHp - dreflectDmg);
-    triggerAnim(p[0].id, "damage");
-    setLog((l) => [...l, `🪞 Düşman ${d.nick} -> ${p[0].nick} e ${dreflectDmg} yansıma hasarı`]);
+    if (p.length > 1 && p[1].curHp > 0) {
+      p[1].curHp = Math.max(0, p[1].curHp - dreflectDmg);
+      spawnProjectile(d.id, p[1].id, "hurt_dmg", null, true);
+      triggerAnim(p[1].id, "damage");
+      setLog((l) => [...l, `🪞 Düşman ${d.nick} -> ${p[0].nick}'in arkasındaki ${p[1].nick}'e ${dreflectDmg} yansıma hasarı`]);
+    } else {
+      p[0].curHp = Math.max(0, p[0].curHp - dreflectDmg);
+      triggerAnim(p[0].id, "damage");
+      setLog((l) => [...l, `🪞 Düşman ${d.nick} -> ${p[0].nick}'e ${dreflectDmg} yansıma hasarı`]);
+    }
     await delay(500);
   }
   if (d.ability === AB.START_CHARGE && e[0].curHp > 0) {

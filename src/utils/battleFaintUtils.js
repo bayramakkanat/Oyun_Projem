@@ -1,12 +1,13 @@
 import { AB, ABILITY_MULTIPLIERS as AM } from "../data/gameData";
 import { applyTeamBuff, applyTeamDamage, applyTeamDebuff, getFaintWeakenAllDebuff, getTeamBuffAmount, getWaveDamage } from "./battleEffectUtils";
 
-export const applyFaintDamageEffect = ({ deadUnit, power, enemyTeam, logs, logPrefix = "", targetLabel = "", logSuffix = "" }) => {
+export const applyFaintDamageEffect = ({ deadUnit, power, enemyTeam, logs, logPrefix = "", targetLabel = "", logSuffix = "", onDamageDealt }) => {
   const damage = power * 2;
   enemyTeam.forEach((unit) => {
     unit.curHp -= damage;
   });
   logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${targetLabel} ${damage} hasar`);
+  if (onDamageDealt) onDamageDealt(enemyTeam, damage);
   return damage;
 };
 
@@ -75,7 +76,7 @@ export const applyFaintCopyEffect = ({ deadUnit, power, allyTeam, clampStat, log
   return true;
 };
 
-export const applyDodoTeamRetriggerEffect = ({ ability, sourceNick, power, allyTeam, enemyTeam, enemyLabel, clampStat, logs }) => {
+export const applyDodoTeamRetriggerEffect = ({ ability, sourceNick, power, allyTeam, enemyTeam, enemyLabel, clampStat, logs, onDamageDealt }) => {
   if (ability === AB.FAINT_RAGE || ability === AB.CHEETAH_FAINT) {
     const buff = getTeamBuffAmount(power);
     applyTeamBuff(allyTeam, buff, clampStat);
@@ -86,6 +87,7 @@ export const applyDodoTeamRetriggerEffect = ({ ability, sourceNick, power, allyT
     const damage = getWaveDamage(power);
     applyTeamDamage(enemyTeam, damage);
     logs.push(`🦤 Dodo → ${sourceNick} efekti tekrar! ${enemyLabel} ${damage} hasar`);
+    if (onDamageDealt) onDamageDealt(enemyTeam, damage);
     return true;
   }
   if (ability === AB.FAINT_WEAKEN_ALL) {
@@ -150,6 +152,7 @@ export const applyTeamWideFaintEffect = ({
   logs,
   teamBuffLabel = "takım",
   enemyLabel = "düşman takımı",
+  onDamageDealt,
 }) => {
   if (ability === AB.FAINT_RAGE) {
     const buff = getTeamBuffAmount(power);
@@ -169,6 +172,7 @@ export const applyTeamWideFaintEffect = ({
     const damage = getWaveDamage(power);
     applyTeamDamage(enemyTeam, damage);
     logs.push(`💀 ${sourceNick} → ${enemyLabel} ${damage} hasar`);
+    if (onDamageDealt) onDamageDealt(enemyTeam, damage);
     return true;
   }
   return false;

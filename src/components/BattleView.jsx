@@ -3,6 +3,16 @@ import PixiBattleScene from "./PixiBattleScene";
 import { BOSSES } from "../data/gameData";
 import { useGameContext } from "../context/GameContext";
 
+// Hız seçenekleri: görünen etiket → gerçek çarpan
+// 1x etiketi = 1.5x hız (eski 1x'ten daha akıcı)
+// 2x etiketi = 2.2x hız (1.5 ile 3 arasında belirgin fark)
+// 3x etiketi = 3x hız
+const SPEED_OPTIONS = [
+  { label: "1x", value: 1.5  },
+  { label: "2x", value: 2.2  },
+  { label: "3x", value: 3    },
+];
+
 export default function BattleView() {
   const {
     turn, gold, lives, wins, pT, eT, log, step, anims,
@@ -77,29 +87,26 @@ export default function BattleView() {
         )}
 
         <div className="flex items-center gap-4">
-         <div className="flex items-center mr-2">
+          <div className="flex items-center mr-2">
             <div className="flex gap-1 items-center bg-black/40 border border-white/10 rounded-xl p-1 backdrop-blur-sm">
-              {/* FIX: Hız seçenekleri 1/2/4 → 1.5/2/3 olarak güncellendi.
-                  Varsayılan normal hız 1.5x — animasyonlar daha net,
-                  maksimum 3x — beceri animasyonlarını yakalamak hâlâ mümkün. */}
-              {[1.5, 2, 3].map((s) => (
+              {SPEED_OPTIONS.map(({ label, value }) => (
                 <button
-                  key={s}
+                  key={label}
                   onClick={() => {
-                    battleSpeedRef.current = s;
-                    localStorage.setItem("petgame_battle_speed", s);
+                    battleSpeedRef.current = value;
+                    localStorage.setItem("petgame_battle_speed", value);
                   }}
                   className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-black transition-all ${
-                    battleSpeedRef.current === s
+                    battleSpeedRef.current === value
                       ? "bg-white text-black shadow-lg"
                       : "bg-white/10 text-gray-300 hover:bg-white/20"
                   }`}
                 >
-                  {s}x
+                  {label}
                 </button>
               ))}
               <div className="w-px h-6 bg-white/10"></div>
-             <button
+              <button
                 onClick={onPauseToggle}
                 className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-black transition-all ${
                   isPaused
@@ -117,17 +124,11 @@ export default function BattleView() {
 
       {/* Ana savaş alanı */}
       <div className="flex-1 flex flex-col justify-center items-center relative overflow-hidden min-h-0">
-        {/* Atmosfer 1: üst ışık hâlesi */}
         <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.28) 0%, transparent 100%)" }} />
-        {/* Atmosfer 2: merkez parlaklık */}
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 55%, rgba(139,92,246,0.18) 0%, transparent 70%)" }} />
-        {/* Atmosfer 3: oyuncu tarafi yesil sis */}
         <div className="absolute bottom-1/4 left-0 w-1/2 h-56 rounded-full blur-3xl pointer-events-none" style={{ background: "radial-gradient(ellipse at right, rgba(52,211,153,0.14) 0%, transparent 70%)", animation: "groundReflection 5s ease-in-out infinite" }} />
-        {/* Atmosfer 4: düşman tarafı kırmızı sis */}
         <div className="absolute bottom-1/4 right-0 w-1/2 h-56 rounded-full blur-3xl pointer-events-none" style={{ background: "radial-gradient(ellipse at left, rgba(239,68,68,0.13) 0%, transparent 70%)", animation: "groundReflection 5s ease-in-out infinite", animationDelay: "1.5s" }} />
-        {/* Zemin ışığı */}
         <div className="absolute bottom-0 inset-x-0 h-1/3 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(55,48,163,0.35), transparent)" }} />
-        {/* Zemin perspektif */}
         <div
           className="absolute bottom-0 w-[150%] h-[38%] pointer-events-none"
           style={{
@@ -138,7 +139,6 @@ export default function BattleView() {
             animation: "groundReflection 5s ease-in-out infinite",
           }}
         />
-        {/* Zemin grid çizgileri */}
         <div
           className="absolute bottom-0 w-[150%] h-[38%] opacity-15 pointer-events-none"
           style={{
@@ -148,31 +148,28 @@ export default function BattleView() {
           }}
         />
         <div className="relative z-10 flex flex-col items-center gap-2 w-full px-4 mt-24">
-          {/* Takım İsimleri */}
           <div className="w-full max-w-2xl flex justify-between px-16 mb-2">
             <div className="flex flex-col items-center gap-2">
               <span className="text-[11px] text-green-400 font-black uppercase tracking-widest glass-panel px-3 py-1 rounded-md" style={{ animation: "labelSlideDown 0.4s ease-out" }}>
-  Takımın
-</span>
+                Takımın
+              </span>
               <span
-               className="text-base font-black text-green-300 glass-panel-strong px-4 py-1.5 rounded-full border-2 border-green-400/80 shadow-lg shadow-green-500/30 uppercase tracking-wide hover-glow"
-style={{ 
-  textShadow: "0 0 10px rgba(74,222,128,0.8), 0 0 20px rgba(74,222,128,0.5)",
-  animation: "neonPulse 2s ease-in-out infinite"
-}}
+                className="text-base font-black text-green-300 glass-panel-strong px-4 py-1.5 rounded-full border-2 border-green-400/80 shadow-lg shadow-green-500/30 uppercase tracking-wide hover-glow"
+                style={{
+                  textShadow: "0 0 10px rgba(74,222,128,0.8), 0 0 20px rgba(74,222,128,0.5)",
+                  animation: "neonPulse 2s ease-in-out infinite"
+                }}
               >
-                 {user
-  ? user.displayName || user.email.split("@")[0]
-  : "TAKIMIN"}
+                {user ? user.displayName || user.email.split("@")[0] : "TAKIMIN"}
               </span>
             </div>
-           <div className="flex flex-col items-center gap-2">
-             <span className="text-[11px] text-red-400 font-black uppercase tracking-widest glass-panel px-3 py-1 rounded-md" style={{ animation: "labelSlideDown 0.4s ease-out" }}>
-  Rakip
-</span>
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[11px] text-red-400 font-black uppercase tracking-widest glass-panel px-3 py-1 rounded-md" style={{ animation: "labelSlideDown 0.4s ease-out" }}>
+                Rakip
+              </span>
               <span
                 className="text-base font-black text-red-300 glass-panel-strong px-4 py-1.5 rounded-full border-2 border-red-400/80 shadow-lg shadow-red-500/30 hover-glow"
-                style={{ 
+                style={{
                   textShadow: "0 0 10px rgba(248,113,113,0.8), 0 0 20px rgba(248,113,113,0.5)",
                   animation: "neonPulse 2s ease-in-out infinite",
                   animationDelay: "1s"
@@ -187,9 +184,8 @@ style={{
             </div>
           </div>
 
-          {/* Savaş Sahnesi */}
           <div className="flex flex-row items-center justify-center w-full max-w-7xl gap-4">
-               <PixiBattleScene pT={pT} eT={eT} anims={anims} step={step} turn={turn} battleSpeedRef={battleSpeedRef} />
+            <PixiBattleScene pT={pT} eT={eT} anims={anims} step={step} turn={turn} battleSpeedRef={battleSpeedRef} />
           </div>
         </div>
       </div>
@@ -206,47 +202,38 @@ style={{
         }}
       >
         <div className="flex justify-between items-center px-4 pt-1.5 pb-1">
-          <span className="text-xs text-purple-400 font-bold">
-            📜 Savaş Logları
-          </span>
+          <span className="text-xs text-purple-400 font-bold">📜 Savaş Logları</span>
           <span className="text-xs text-yellow-400 font-bold">TUR {turn}</span>
         </div>
         <div
           ref={logR}
-         className="mx-3 mb-2 bg-gray-900/80 rounded-xl p-2 overflow-y-auto font-mono border border-purple-800/30"
+          className="mx-3 mb-2 bg-gray-900/80 rounded-xl p-2 overflow-y-auto font-mono border border-purple-800/30"
           style={{ height: "calc(22vh - 36px)" }}
         >
-         {log.map((l, i) => {
-  const isVictory = l.includes("🎉 ZAFER");
-  const isDefeat  = l.includes("💀 Yenilgi") || l.includes("BOSS SAVAŞI");
-  let color = "text-gray-300";
-  if (isVictory)
-    color = "text-yellow-300 font-black text-base";
-  else if (isDefeat)
-    color = "text-red-400 font-black";
-  else if (l.includes("KALICI")) color = "text-purple-300 font-bold";
-  else if (l.includes("🦤 Dodo")) color = "text-orange-300 font-bold";
-  else if (
-    l.includes("hasar") ||
-    l.includes("Hasar") ||
-    l.includes("☠️") ||
-    l.includes("🌊")
-  )
-    color = "text-red-300";
-  else if (l.includes("+")) color = "text-green-300";
-  else if (l.includes("Düşman")) color = "text-orange-200 opacity-80";
-  return (
-    <div
-      key={i}
-      className={`${color} py-0.5 border-b border-gray-800/20 last:border-b-0 break-words whitespace-pre-wrap ${
-        isVictory ? "log-flash-victory" : isDefeat ? "log-flash-defeat" : ""
-      }`}
-      style={{ animation: isVictory || isDefeat ? "logEntryBig 0.4s ease-out" : "fadeIn 0.2s ease-out", wordBreak: "break-word", overflowWrap: "anywhere" }}
-    >
-      {l}
-    </div>
-  );
-})}
+          {log.map((l, i) => {
+            const isVictory = l.includes("🎉 ZAFER");
+            const isDefeat  = l.includes("💀 Yenilgi") || l.includes("BOSS SAVAŞI");
+            let color = "text-gray-300";
+            if (isVictory)         color = "text-yellow-300 font-black text-base";
+            else if (isDefeat)     color = "text-red-400 font-black";
+            else if (l.includes("KALICI")) color = "text-purple-300 font-bold";
+            else if (l.includes("🦤 Dodo")) color = "text-orange-300 font-bold";
+            else if (l.includes("hasar") || l.includes("Hasar") || l.includes("☠️") || l.includes("🌊"))
+              color = "text-red-300";
+            else if (l.includes("+")) color = "text-green-300";
+            else if (l.includes("Düşman")) color = "text-orange-200 opacity-80";
+            return (
+              <div
+                key={i}
+                className={`${color} py-0.5 border-b border-gray-800/20 last:border-b-0 break-words whitespace-pre-wrap ${
+                  isVictory ? "log-flash-victory" : isDefeat ? "log-flash-defeat" : ""
+                }`}
+                style={{ animation: isVictory || isDefeat ? "logEntryBig 0.4s ease-out" : "fadeIn 0.2s ease-out", wordBreak: "break-word", overflowWrap: "anywhere" }}
+              >
+                {l}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

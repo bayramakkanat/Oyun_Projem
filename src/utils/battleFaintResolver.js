@@ -28,9 +28,24 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
   const { pwr, clampStat, triggerAnim, spawnParticles, spawnProjectile, setTeam } = callbacks;
   const { pfx, allyLabel, enemyLabel, summonNick, summonFlip } = labels;
 
+  // 🐘 Fil (HURT_DMG) beceri tetikleyici — hasar alan takımda fil varsa rastgele düşmana vurur
   const m = pwr(d);
   const lg = [], sm = [];
   let gG = 0;
+
+  const makeElephantCallback = (damagedTeam, attackerTeam) => (hitUnits) => {
+    hitUnits.forEach((unit) => {
+      if (!unit || unit.ability !== AB.HURT_DMG || unit.curHp <= 0) return;
+      const aliveAttackers = attackerTeam.filter((x) => x.curHp > 0);
+      if (aliveAttackers.length === 0) return;
+      const target = aliveAttackers[Math.floor(Math.random() * aliveAttackers.length)];
+      const damage = 9 * pwr(unit);
+      target.curHp -= damage;
+      if (triggerAnim) { triggerAnim(unit.id, "ability"); triggerAnim(target.id, "damage"); }
+      if (spawnProjectile) spawnProjectile(unit.id, target.id, "hurt_dmg", null, true);
+      lg.push(`🐘 ${unit.nick} hasar aldı → ${target.nick}'e ${damage} hasar`);
+    });
+  };
 
   // ── FAINT_BUFF ─────────────────────────────────────────────────────────────
   if (d.ability === AB.FAINT_BUFF && al.length > 0) {
@@ -54,7 +69,7 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
 
   // ── FAINT_DMG ──────────────────────────────────────────────────────────────
   if (d.ability === AB.FAINT_DMG) {
-    applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: `☠️ ${pfx}`, targetLabel: `Tüm ${enemyLabel}a`, logSuffix: " -> " });
+    applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: `☠️ ${pfx}`, targetLabel: `Tüm ${enemyLabel}a`, logSuffix: " -> ", onDamageDealt: makeElephantCallback(en, al) });
     if (spawnProjectile) en.forEach((e, i) => setTimeout(() => spawnProjectile(d.id, e.id, AB.FAINT_DMG, null, false), i * 80));
   }
 
@@ -68,7 +83,7 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
   }
 
   // ── Takım çapı yetenekler (FAINT_RAGE, CHEETAH_FAINT, FAINT_WAVE) ─────────
-  applyTeamWideFaintEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, clampStat, logs: lg, teamBuffLabel: allyLabel, enemyLabel });
+  applyTeamWideFaintEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, clampStat, logs: lg, teamBuffLabel: allyLabel, enemyLabel, onDamageDealt: makeElephantCallback(en, al) });
   if (d.ability === AB.FAINT_WAVE && en.length > 0 && spawnProjectile) {
     en.forEach((e, i) => setTimeout(() => spawnProjectile(d.id, e.id, AB.FAINT_WAVE, null, true), i * 120));
   }
@@ -181,7 +196,7 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
         if (rIdx >= 0) { triggerAnim?.(al[rIdx]?.id, "buff"); spawnParticles?.(al[rIdx]?.id, "buff"); }
       }
       if (d.ability === AB.FAINT_DMG) {
-        applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, targetLabel: `Tüm ${enemyLabel}a`, logSuffix: " efekti tekrar! " });
+        applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, targetLabel: `Tüm ${enemyLabel}a`, logSuffix: " efekti tekrar! ", onDamageDealt: makeElephantCallback(en, al) });
       }
       if (d.ability === AB.FAINT_SHIELD) {
         applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, targetLabel: allyLabel, logSuffix: " efekti tekrar! " });
@@ -189,7 +204,7 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
       if (d.ability === AB.FAINT_COPY && al.length > 0) {
         applyFaintCopyEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, logSuffix: " efekti tekrar! " });
       }
-      applyDodoTeamRetriggerEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, enemyLabel, logs: lg, clampStat });
+      applyDodoTeamRetriggerEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, enemyLabel, logs: lg, clampStat, onDamageDealt: makeElephantCallback(en, al) });
       if (d.ability === AB.FAINT_SUMMON) {
         const extra = createFaintSummonUnit({ name: "🥚", nick: summonNick, power: m, img: "baby_crocodile.png", flip: summonFlip });
         applySummonBuffs([extra], al, lg, { triggerAnim, spawnParticles });

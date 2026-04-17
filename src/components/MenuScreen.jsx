@@ -13,7 +13,7 @@ import CollectionScreen from "./CollectionScreen";
 import TasksScreen from "./TasksScreen";
 import ProfileScreen from "./ProfileScreen";
 import FeedbackScreen from "./FeedbackScreen";
-import { hasSavedGame, loadGameState, isArenaUnlocked, isArenaIntroSeen } from "../utils/localSave";
+import { hasSavedGame, loadGameState, isArenaUnlocked, shouldShowArenaIntro } from "../utils/localSave";
 import { useGameContext } from "../context/GameContext";
 import { playSound } from "../hooks/useSound";
 
@@ -37,7 +37,7 @@ export default function MenuScreen({ onArenaStart }) {
     if (gameMode === "versus") {
       setVersusPhase("lobby");
     } else if (gameMode === "arena") {
-      if (!isArenaIntroSeen() && onArenaStart) {
+      if (shouldShowArenaIntro() && onArenaStart) {
         // İlk kez: sinematik intro göster
         onArenaStart();
       } else {

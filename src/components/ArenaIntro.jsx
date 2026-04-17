@@ -169,14 +169,14 @@ export default function ArenaIntro({ playerName, onDone }) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "clamp(6px, 2vh, 14px)",
-          marginBottom: phase === "info" ? "clamp(12px, 3vh, 24px)" : "0",
+          gap: "clamp(4px, 1.2vh, 10px)",
+          marginBottom: phase === "info" ? "clamp(8px, 2vh, 16px)" : "0",
           transition: "margin-bottom 0.5s ease",
         }}
       >
         <div
           style={{
-            fontSize: "clamp(64px, 16vw, 110px)",
+            fontSize: "clamp(48px, 11vw, 80px)",
             lineHeight: 1,
             transform: phase === "dark" ? "scale(0.2)" : "scale(1)",
             opacity: phase === "dark" ? 0 : 1,
@@ -204,7 +204,7 @@ export default function ArenaIntro({ playerName, onDone }) {
 
         <h1
           style={{
-            fontSize: "clamp(38px, 12vw, 88px)",
+            fontSize: "clamp(32px, 10vw, 72px)",
             fontWeight: 900,
             fontStyle: "italic",
             letterSpacing: "-0.02em",
@@ -271,14 +271,21 @@ export default function ArenaIntro({ playerName, onDone }) {
         </div>
       </div>
 
-      {/* Bilgi kartları — 5 kart, 3+2 grid */}
+      {/* Bilgi kartları + Buton — tek scroll container */}
       <div
         style={{
           width: "clamp(280px, 88vw, 620px)",
+          maxHeight: "calc(100vh - clamp(220px, 38vh, 320px))",
+          overflowY: "auto",
+          overflowX: "hidden",
           opacity: phase === "info" ? 1 : 0,
           transform: phase === "info" ? "translateY(0)" : "translateY(20px)",
           transition: "opacity 0.4s ease, transform 0.4s ease",
-          pointerEvents: "none",
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(6px, 1.5vw, 10px)",
+          paddingBottom: "clamp(16px, 3vh, 28px)",
+          scrollbarWidth: "none",
         }}
       >
         {/* İlk 4 kart — 2x2 */}
@@ -287,13 +294,13 @@ export default function ArenaIntro({ playerName, onDone }) {
             display: "grid",
             gridTemplateColumns: "repeat(2, 1fr)",
             gap: "clamp(6px, 1.5vw, 10px)",
-            marginBottom: "clamp(6px, 1.5vw, 10px)",
           }}
         >
           {infoCards.slice(0, 4).map((card, i) => (
             <InfoCard key={i} card={card} visible={visibleCards > i} />
           ))}
         </div>
+
         {/* 5. kart — tam genişlik */}
         <div
           style={{
@@ -327,46 +334,44 @@ export default function ArenaIntro({ playerName, onDone }) {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Alt buton */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "clamp(20px, 5vh, 40px)",
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "center",
-          opacity: phase === "info" && visibleCards >= 5 ? 1 : 0,
-          transform: phase === "info" && visibleCards >= 5 ? "translateY(0)" : "translateY(12px)",
-          transition: "opacity 0.5s ease, transform 0.5s ease",
-          pointerEvents: phase === "info" && visibleCards >= 5 ? "all" : "none",
-        }}
-      >
-        <button
-          onClick={() => {
-            setPhase("out");
-            setTimeout(() => onDone(), 500);
-          }}
+        {/* Buton — kartların hemen altında, akış içinde */}
+        <div
           style={{
-            padding: "clamp(12px,3vw,16px) clamp(28px,7vw,48px)",
-            fontSize: "clamp(13px,3vw,16px)",
-            fontWeight: 900,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: "#fff",
-            background: "linear-gradient(135deg, rgba(124,58,237,0.85) 0%, rgba(168,85,247,0.85) 100%)",
-            border: "1px solid rgba(167,139,250,0.6)",
-            borderRadius: "clamp(10px,2vw,14px)",
-            cursor: "pointer",
-            boxShadow: "0 0 24px rgba(124,58,237,0.5), 0 0 60px rgba(124,58,237,0.2)",
-            animation: "arenaEnterPulse 1.8s ease-in-out infinite",
-            fontFamily: "system-ui, -apple-system, sans-serif",
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "clamp(4px, 1vh, 8px)",
+            opacity: visibleCards >= 5 ? 1 : 0,
+            transform: visibleCards >= 5 ? "translateY(0)" : "translateY(12px)",
+            transition: "opacity 0.5s ease, transform 0.5s ease",
+            pointerEvents: visibleCards >= 5 ? "all" : "none",
           }}
         >
-          🏟️ &nbsp;Arenaya Gir &nbsp;»
-        </button>
+          <button
+            onClick={() => {
+              setPhase("out");
+              setTimeout(() => onDone(), 500);
+            }}
+            style={{
+              padding: "clamp(12px,3vw,16px) clamp(28px,7vw,48px)",
+              fontSize: "clamp(13px,3vw,16px)",
+              fontWeight: 900,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#fff",
+              background: "linear-gradient(135deg, rgba(124,58,237,0.85) 0%, rgba(168,85,247,0.85) 100%)",
+              border: "1px solid rgba(167,139,250,0.6)",
+              borderRadius: "clamp(10px,2vw,14px)",
+              cursor: "pointer",
+              boxShadow: "0 0 24px rgba(124,58,237,0.5), 0 0 60px rgba(124,58,237,0.2)",
+              animation: "arenaEnterPulse 1.8s ease-in-out infinite",
+              fontFamily: "system-ui, -apple-system, sans-serif",
+              width: "100%",
+            }}
+          >
+            🏟️ &nbsp;Arenaya Gir &nbsp;»
+          </button>
+        </div>
       </div>
 
       <style>{`

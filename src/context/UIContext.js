@@ -19,17 +19,22 @@ import { useCleanup } from "../hooks/useCleanup";
 
 export const UIContext = createContext();
 
-// Geçerli hız değerleri — yeni set: 1.5, 2, 3
-const VALID_SPEEDS = [1.5, 2, 3];
+// Hız etiket→değer eşleşmesi BattleView ile aynı tutulmalı
+// Etiket: 1x=1.5, 2x=2.2, 3x=3
+const VALID_SPEEDS = [1.5, 2.2, 3];
 
 const resolveInitialSpeed = () => {
   const stored = parseFloat(localStorage.getItem("petgame_battle_speed"));
-  if (!stored || isNaN(stored)) return 1.5; // Varsayılan artık 1.5x
-  // Eski 1x kaydı → 1.5x, eski 4x kaydı → 3x, diğerleri geçerliyse koru
-  if (stored === 1) return 1.5;
-  if (stored === 4) return 3;
+  if (!stored || isNaN(stored)) return 1.5;
+  // Eski değerleri yeni sete dönüştür
+  if (stored <= 1)   return 1.5;  // eski 1x → yeni 1x (1.5)
+  if (stored === 2)  return 2.2;  // eski 2x → yeni 2x (2.2)
+  if (stored >= 4)   return 3;    // eski 4x → yeni 3x
   if (VALID_SPEEDS.includes(stored)) return stored;
-  return 1.5;
+  // Yakın geçerli değeri bul
+  return VALID_SPEEDS.reduce((prev, curr) =>
+    Math.abs(curr - stored) < Math.abs(prev - stored) ? curr : prev
+  );
 };
 
 export const UIProvider = ({ children }) => {
@@ -104,7 +109,6 @@ export const UIProvider = ({ children }) => {
   }, [gameMode, versusPhase, versusRoom?.code, versusRoom?.role, user?.uid, handleLogout]);
 
   // ─── Ref'ler ──────────────────────────────────────────────────────────────
-  // FIX: Varsayılan hız 1.5x. Eski 1x/4x kayıtları otomatik dönüştürülür.
   const battleSpeedRef       = useRef(resolveInitialSpeed());
   const isPausedRef          = useRef(false);
   const achievementQueueRef  = useRef([]);

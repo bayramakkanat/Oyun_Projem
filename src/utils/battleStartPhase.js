@@ -1,5 +1,26 @@
 import { AB, ABILITY_MULTIPLIERS as AM } from "../data/gameData";
 
+// ─── Fil (HURT_DMG) beceri tetikleyici ────────────────────────────────────────
+// Hasar alan takımda fil varsa, sağ kalıyorsa ve henüz ölmemişse rastgele bir
+// düşmana 9 * güç kadar hasar verir. START fazındaki tüm dolaylı hasarlar için.
+function triggerElephantIfPresent({ damagedTeam, enemyTeam, pwr, triggerAnim, spawnProjectile, addBattleLog, syncBattleTeams, pp, ee }) {
+  damagedTeam.forEach((pet) => {
+    if (!pet || pet.ability !== AB.HURT_DMG || pet.curHp <= 0) return;
+    const aliveEnemies = enemyTeam.filter((x) => x.curHp > 0);
+    if (aliveEnemies.length === 0) return;
+    const target = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+    const targetInTeam = enemyTeam.find((x) => x.id === target.id);
+    if (!targetInTeam) return;
+    const damage = 9 * pwr(pet);
+    targetInTeam.curHp -= damage;
+    triggerAnim(pet.id, "ability");
+    triggerAnim(targetInTeam.id, "damage");
+    if (spawnProjectile) spawnProjectile(pet.id, targetInTeam.id, "hurt_dmg", null, true);
+    addBattleLog(`🐘 ${pet.nick} hasar aldı → ${targetInTeam.nick}'e ${damage} hasar`);
+    syncBattleTeams(pp, ee);
+  });
+}
+
 const selfBuffAbilities = [
   AB.START_BUFF, AB.START_TEAM_SHIELD, AB.START_ALL_PERM,
   AB.START_TRAMPLE, AB.START_CHARGE, AB.START_TANK,
@@ -216,6 +237,8 @@ export async function runBattleStartPhase({
       await delay(PROJ_FLY_MS);
       aliveTargets.forEach((x) => { x.curHp -= dmg; triggerAnim(x.id, "damage"); });
       syncBattleTeams(pp, ee);
+      // 🐘 Fil becerisi: hasar alan takımda fil varsa tetikle
+      triggerElephantIfPresent({ damagedTeam: targets, enemyTeam: isPlayer ? pp : ee, pwr, triggerAnim, spawnProjectile, addBattleLog, syncBattleTeams, pp, ee });
       await delay(500);
 
     } else if (a.ability === AB.START_FEAR) {
@@ -251,6 +274,8 @@ export async function runBattleStartPhase({
       finalTarget.curHp -= 5 * m;
       triggerAnim(finalTarget.id, "damage");
       syncBattleTeams(pp, ee);
+      // 🐘 Fil becerisi: hasar alan takımda fil varsa tetikle
+      triggerElephantIfPresent({ damagedTeam: isPlayer ? ee : pp, enemyTeam: isPlayer ? pp : ee, pwr, triggerAnim, spawnProjectile, addBattleLog, syncBattleTeams, pp, ee });
       await delay(500);
 
     } else if (a.ability === AB.START_MULTI_SNIPE) {
@@ -272,6 +297,8 @@ export async function runBattleStartPhase({
           currentT.curHp -= 10 * m;
           triggerAnim(currentT.id, "damage");
           syncBattleTeams(pp, ee);
+          // 🐘 Fil becerisi: hasar alan takımda fil varsa tetikle
+          triggerElephantIfPresent({ damagedTeam: isPlayer ? ee : pp, enemyTeam: isPlayer ? pp : ee, pwr, triggerAnim, spawnProjectile, addBattleLog, syncBattleTeams, pp, ee });
         }
         await delay(300);
       }
@@ -287,6 +314,8 @@ export async function runBattleStartPhase({
       t.curHp -= 2 * m;
       triggerAnim(t.id, "damage");
       syncBattleTeams(pp, ee);
+      // 🐘 Fil becerisi: hasar alan takımda fil varsa tetikle
+      triggerElephantIfPresent({ damagedTeam: isPlayer ? ee : pp, enemyTeam: isPlayer ? pp : ee, pwr, triggerAnim, spawnProjectile, addBattleLog, syncBattleTeams, pp, ee });
       await delay(500);
 
     } else if (a.ability === AB.START_POISON) {
