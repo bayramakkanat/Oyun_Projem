@@ -390,14 +390,14 @@ export function useShop({
         currentTeam.forEach((pet) => {
           if (pet && pet.ability === AB.BUY_DISCOUNT_NEXT) cost = Math.max(1, cost - pwr(pet));
         });
-        if (discountNext) {
-          currentTeam.forEach((pet) => {
-            if (pet && pet.ability === AB.SHOP_DISCOUNT) {
-              const pct = pwr(pet) === 1 ? 0.33 : pwr(pet) === 2 ? 0.66 : 0.99;
-              cost = Math.max(1, Math.floor(cost * (1 - pct)));
-            }
-          });
-        }
+        // YENİ — yaz
+if (discountNext) {
+  currentTeam.forEach((pet) => {
+    if (pet && pet.ability === AB.SHOP_DISCOUNT) {
+      cost = Math.max(1, cost - pwr(pet));
+    }
+  });
+}
         s.push({ ...a, id: Math.random(), lvl: 1, exp: 0, curHp: a.hp, frozen: false, cost });
       }
 

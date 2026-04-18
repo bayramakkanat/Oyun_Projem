@@ -67,7 +67,7 @@ export const getDesc = (a, lvlOverride) => {
   if (a.ability === AB.END_BUFF_AHEAD)
     return `Tur sonu: Öndeki 3 dosta kalıcı olarak +${m * 2} Atak, +${m * 2} Can verir`;
   if (a.ability === AB.BUY_DISCOUNT_NEXT)
-    return `Mağazada: Tüm hayvanlara ${m} altın indirim uygular`;
+    return `Takımdayken: Mağazadaki tüm hayvanlar ${m} altın indirimlidir`;
   if (a.ability === AB.END_SELF_BUFF)
     return `Tur sonu: Kalıcı olarak +${m * 4} Atak, +${m * 4} Can kazanır`;
   if (a.ability === AB.START_FEAR)
