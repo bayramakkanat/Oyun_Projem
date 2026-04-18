@@ -119,6 +119,11 @@ export const getDesc = (a, lvlOverride) => {
     const debuff = m === 1 ? 3 : m === 2 ? 5 : 8;
     return `Ölünce: Tüm düşmanlara -${debuff} Atak, -${debuff} Can uygular`;
   }
+  if (a.ability === AB.HURT_BUFFALO) {
+    const enemyDmg = AM.HURT_BUFFALO_ENEMY_DMG + (m - 1);
+    const allyDmg  = AM.HURT_BUFFALO_ALLY_DMG  + (m - 1);
+    return `Hasar alınca: Tüm düşmanlara ${enemyDmg} hasar verir, kendi takımına ${allyDmg} hasar verir.`;
+  }
   // FIX: Kokarca mekanik değişti — artık saldıranın arkasındaki hayvana hasar veriyor
   if (a.ability === AB.HURT_REFLECT) {
     const pct = m === 1 ? 33 : m === 2 ? 66 : 99;

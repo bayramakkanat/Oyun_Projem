@@ -221,6 +221,87 @@ export async function runBattleTurnPhase({
     }
     await delay(500);
   }
+  // ── BUFALO (HURT_BUFFALO) — hasar alınca hem düşmana hem kendi takımına hasar verir ──
+  // Lvl 1: düşmana 2, takıma 1 | Lvl 2: düşmana 3, takıma 2 | Lvl 3: düşmana 4, takıma 3
+  if (a.ability === AB.HURT_BUFFALO && p[0].curHp > 0 && dD > 0) {
+    const m = pwr(a);
+    const enemyDmg = AM.HURT_BUFFALO_ENEMY_DMG + (m - 1);
+    const allyDmg  = AM.HURT_BUFFALO_ALLY_DMG  + (m - 1);
+    // Düşman takımına hasar
+    if (e.length > 0) {
+      const aliveE = e.filter((x) => x.curHp > 0);
+      aliveE.forEach((x) => {
+        x.curHp = Math.max(0, x.curHp - enemyDmg);
+        triggerAnim(x.id, "damage");
+      });
+      setLog((l) => [...l, `🐃 ${a.nick} hasar aldı → Düşman takımına ${enemyDmg} hasar`]);
+    }
+    // Kendi takımına hasar (Buffalo hariç)
+    const aliveAllies = p.filter((x) => x.curHp > 0 && x.id !== a.id);
+    if (aliveAllies.length > 0) {
+      aliveAllies.forEach((x) => {
+        x.curHp = Math.max(0, x.curHp - allyDmg);
+        triggerAnim(x.id, "damage");
+      });
+      setLog((l) => [...l, `🐃 ${a.nick} → Kendi takımına ${allyDmg} hasar`]);
+    }
+    triggerAnim(a.id, "ability");
+    // Fil sinerjisi: kendi takımında Fil varsa, kendi takımı hasar alınca Fil tetiklenir
+    const fil = p.find((x) => x.curHp > 0 && x.ability === AB.HURT_DMG);
+    if (fil && e.length > 0) {
+      const aliveE = e.filter((x) => x.curHp > 0);
+      if (aliveE.length > 0) {
+        const filTarget = aliveE[Math.floor(Math.random() * aliveE.length)];
+        const filDmg = 9 * pwr(fil);
+        filTarget.curHp -= filDmg;
+        triggerAnim(fil.id, "ability");
+        triggerAnim(filTarget.id, "damage");
+        setLog((l) => [...l, `🐘 ${fil.nick} tetiklendi → ${filTarget.nick}'e ${filDmg} hasar`]);
+      }
+    }
+    syncBattleTeams(p, e);
+    await delay(600);
+  }
+  if (d.ability === AB.HURT_BUFFALO && e[0].curHp > 0 && aD > 0) {
+    const m = pwr(d);
+    const enemyDmg = AM.HURT_BUFFALO_ENEMY_DMG + (m - 1);
+    const allyDmg  = AM.HURT_BUFFALO_ALLY_DMG  + (m - 1);
+    // Oyuncu takımına hasar
+    if (p.length > 0) {
+      const aliveP = p.filter((x) => x.curHp > 0);
+      aliveP.forEach((x) => {
+        x.curHp = Math.max(0, x.curHp - enemyDmg);
+        triggerAnim(x.id, "damage");
+      });
+      setLog((l) => [...l, `🐃 Düşman ${d.nick} hasar aldı → Oyuncu takımına ${enemyDmg} hasar`]);
+    }
+    // Düşman takımına hasar (Buffalo hariç)
+    const aliveEAllies = e.filter((x) => x.curHp > 0 && x.id !== d.id);
+    if (aliveEAllies.length > 0) {
+      aliveEAllies.forEach((x) => {
+        x.curHp = Math.max(0, x.curHp - allyDmg);
+        triggerAnim(x.id, "damage");
+      });
+      setLog((l) => [...l, `🐃 Düşman ${d.nick} → Kendi takımına ${allyDmg} hasar`]);
+    }
+    triggerAnim(d.id, "ability");
+    // Fil sinerjisi: düşman takımında Fil varsa tetiklenir
+    const dFil = e.find((x) => x.curHp > 0 && x.ability === AB.HURT_DMG);
+    if (dFil && p.length > 0) {
+      const aliveP = p.filter((x) => x.curHp > 0);
+      if (aliveP.length > 0) {
+        const filTarget = aliveP[Math.floor(Math.random() * aliveP.length)];
+        const filDmg = 9 * pwr(dFil);
+        filTarget.curHp -= filDmg;
+        triggerAnim(dFil.id, "ability");
+        triggerAnim(filTarget.id, "damage");
+        setLog((l) => [...l, `🐘 Düşman ${dFil.nick} tetiklendi → ${filTarget.nick}'e ${filDmg} hasar`]);
+      }
+    }
+    syncBattleTeams(p, e);
+    await delay(600);
+  }
+
   if (a.ability === AB.KILL_BUFF && e[0].curHp <= 0) {
     p[0].atk = clampStat(p[0].atk + 3 * pwr(a));
     p[0].curHp = clampStat(p[0].curHp + 3 * pwr(a));
