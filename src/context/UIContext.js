@@ -127,8 +127,8 @@ export const UIProvider = ({ children }) => {
   useEffect(() => {
     [
       "/images/animals/phoenix.png",
-      "https://i.ibb.co/BVvZ1GnD/Erlik.png",
-      "https://i.ibb.co/MDrgjfTR/Asena-Canva.png",
+      "/images/animals/erlik.png",
+      "/images/animals/asena.png",
     ].forEach((src) => { const img = new Image(); img.src = src; });
   }, []);
 

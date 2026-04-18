@@ -60,7 +60,13 @@ service cloud.firestore {
     match /animal_stats/{nick} {
       allow read: if isLoggedIn();
       allow write: if isLoggedIn()
-                   && request.resource.data.keys().hasOnly(['used', 'wins']);
+                   && request.resource.data.keys().hasOnly(['used', 'wins'])
+                   && request.resource.data.used is int
+                   && request.resource.data.wins is int
+                   && request.resource.data.used >= 0
+                   && request.resource.data.wins >= 0
+                   && request.resource.data.used <= 1000000
+                   && request.resource.data.wins <= 1000000;
     }
 
     // ─── versus_rooms ─────────────────────────────────────────────────────────
@@ -75,12 +81,15 @@ service cloud.firestore {
                           && resource.data.guest.uid == request.auth.uid));
 
       allow create: if isLoggedIn()
-                    && request.resource.data.host.uid == request.auth.uid;
+                    && request.resource.data.host.uid == request.auth.uid
+                    && request.resource.data.status == "waiting"
+                    && request.resource.data.keys().hasAll(['host', 'status']);
 
       allow update: if isLoggedIn()
                     && (resource.data.host.uid == request.auth.uid
                         || (resource.data.guest != null
-                            && resource.data.guest.uid == request.auth.uid));
+                            && resource.data.guest.uid == request.auth.uid))
+                    && request.resource.data.host.uid == resource.data.host.uid;
 
       allow delete: if isLoggedIn()
                     && resource.data.host.uid == request.auth.uid;

@@ -92,7 +92,7 @@ export const ShopProvider = ({ children }) => {
       gameMode,
       difficultyLevel,
     });
-  }, [turn, gold, team, shop]);
+  }, [turn, gold, team, shop, gameStarted, gameMode, lives, wins, difficultyLevel]);
 
   // ─── Shop hook ────────────────────────────────────────────────────────────
   const { refresh, toggleFreeze, buy, mergeT, sell, swap } = useShop({
