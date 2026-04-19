@@ -24,6 +24,7 @@ export default function ShopView() {
   const [showRewards, setShowRewards] = useState(false);
   const [dragItem, setDragItem]       = useState(null);
   const [dragOver, setDragOver]       = useState(null);
+  const [dragTeamIdx, setDragTeamIdx] = useState(null); // takım içi sürükleme
   const [timeLeft, setTimeLeft] = useState(null);
   const [showVersusLockOverlay, setShowVersusLockOverlay] = useState(false);
 
@@ -309,9 +310,30 @@ export default function ShopView() {
 
               return a ? (
                 <div key={i} className="flex flex-col items-center"
-                onDragOver={(e) => { if (dragItem) { e.preventDefault(); setDragOver(i); } }}
+                onDragOver={(e) => {
+                  if (dragItem) { e.preventDefault(); setDragOver(i); return; }
+                  if (dragTeamIdx !== null && dragTeamIdx !== i) { e.preventDefault(); setDragOver(i); }
+                }}
                 onDragLeave={() => setDragOver(null)}
-                onDrop={(e) => { e.preventDefault(); if (dragItem) { buy(dragItem, i); setDragItem(null); setDragOver(null); } }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (dragItem) { buy(dragItem, i); setDragItem(null); setDragOver(null); return; }
+                  if (dragTeamIdx !== null && dragTeamIdx !== i) {
+                    const from = dragTeamIdx;
+                    const to = i;
+                    setTeam((prev) => {
+                      const next = [...prev];
+                      const moved = next.splice(from, 1)[0];
+                      next.splice(to, 0, moved);
+                      // Takım boyutunu koru
+                      while (next.length < prev.length) next.push(null);
+                      return next.slice(0, prev.length);
+                    });
+                    setSelI(null);
+                    setDragTeamIdx(null);
+                    setDragOver(null);
+                  }
+                }}
                 onClick={() => {
                   if (sel?.pendingTargetBuff) {
                     if (team[i] && i !== sel.sourceSlot) {
@@ -339,9 +361,17 @@ export default function ShopView() {
                   else if (selI !== null && selI !== i) { if (!mergeT(selI, i)) { const newTeam = [...team]; [newTeam[selI], newTeam[i]] = [newTeam[i], newTeam[selI]]; setTeam(newTeam); setSelI(null); } }
                   else setSelI(selI === i ? null : i);
                 }}>
-                  <div className={`relative group w-full flex justify-center ${sel?.pendingTargetBuff && i !== sel.sourceSlot ? "target-selectable" : ""}`}>
+                  <div
+                    draggable
+                    onDragStart={() => { setDragTeamIdx(i); setSel(null); setSelI(null); }}
+                    onDragEnd={() => { setDragTeamIdx(null); setDragOver(null); }}
+                    className={`relative group w-full flex justify-center cursor-grab active:cursor-grabbing transition-all duration-150 ${dragTeamIdx === i ? "opacity-40 scale-95" : ""} ${dragOver === i && dragTeamIdx !== null ? "ring-2 ring-green-400 ring-offset-1 ring-offset-transparent rounded-2xl scale-105" : ""} ${sel?.pendingTargetBuff && i !== sel.sourceSlot ? "target-selectable" : ""}`}
+                  >
                     <Card a={a} anim={anims[a.id]} selected={selI === i} onSell={() => sell(i)} showName={false} getDesc={getDesc} mirror={true} />
                     {selI === i && <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full border-2 border-black z-20 flex items-center justify-center text-[8px] font-black text-black">✓</div>}
+                    {dragTeamIdx !== null && dragTeamIdx !== i && dragOver === i && (
+                      <div className="absolute inset-0 rounded-2xl border-2 border-dashed border-green-400 bg-green-500/10 pointer-events-none z-10" />
+                    )}
                   </div>
                 </div>
               ) : (
