@@ -25,7 +25,7 @@ export const applyFaintBuffEffect = ({ deadUnit, power, allyTeam, clampStat, log
   const i = Math.floor(Math.random() * allyTeam.length);
   allyTeam[i].atk = clampStat(allyTeam[i].atk + power);
   allyTeam[i].curHp = clampStat(allyTeam[i].curHp + power);
-  logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick} e +${power}/+${power}`);
+  logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick}'e +${power}/+${power}`);
   return i;
 };
 
@@ -72,7 +72,7 @@ export const applyFaintCopyEffect = ({ deadUnit, power, allyTeam, clampStat, log
     allyTeam[i].atk = clampStat(allyTeam[i].atk + atkGain);
   }
   allyTeam[i].curHp = clampStat(allyTeam[i].curHp + hpGain);
-  logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick} e +${atkGain}/+${hpGain}${temporary ? " (geçici)" : ""}`);
+  logs.push(`${logPrefix}${deadUnit.nick}${logSuffix}${allyTeam[i].nick}'e +${atkGain}/+${hpGain}${temporary ? " (geçici)" : ""}`);
   return true;
 };
 
@@ -157,14 +157,12 @@ export const applyTeamWideFaintEffect = ({
   if (ability === AB.FAINT_RAGE) {
     const buff = getTeamBuffAmount(power);
     applyTeamBuff(allyTeam, buff, clampStat);
-    // FIX: ability string yerine Türkçe açıklama
     logs.push(`😡 ${sourceNick} öldü → ${teamBuffLabel} +${buff}/+${buff} (öfke)`);
     return true;
   }
   if (ability === AB.CHEETAH_FAINT) {
     const buff = getTeamBuffAmount(power);
     applyTeamBuff(allyTeam, buff, clampStat);
-    // FIX: ability string yerine Türkçe açıklama
     logs.push(`🐆 ${sourceNick} öldü → ${teamBuffLabel} +${buff}/+${buff} (hız patlaması)`);
     return true;
   }

@@ -69,13 +69,13 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
 
   // ── FAINT_DMG ──────────────────────────────────────────────────────────────
   if (d.ability === AB.FAINT_DMG) {
-    applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: `☠️ ${pfx}`, targetLabel: `Tüm ${enemyLabel}a`, logSuffix: " -> ", onDamageDealt: makeElephantCallback(en, al) });
+    applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: `☠️ ${pfx}`, targetLabel: `Tüm ${enemyLabel}`, logSuffix: " -> ", onDamageDealt: makeElephantCallback(en, al) });
     if (spawnProjectile) en.forEach((e, i) => setTimeout(() => spawnProjectile(d.id, e.id, AB.FAINT_DMG, null, false), i * 80));
   }
 
   // ── FAINT_SHIELD ───────────────────────────────────────────────────────────
   if (d.ability === AB.FAINT_SHIELD && al.length > 0) {
-    applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `🛡️ ${pfx}`, targetLabel: `Tüm ${allyLabel}a`, logSuffix: " -> " });
+    applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `🛡️ ${pfx}`, targetLabel: `Tüm ${allyLabel}`, logSuffix: " -> " });
     al.forEach((a, i) => setTimeout(() => {
       triggerAnim?.(a.id, "buff");
       spawnParticles?.(a.id, "shield");
@@ -83,7 +83,7 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
   }
 
   // ── Takım çapı yetenekler (FAINT_RAGE, CHEETAH_FAINT, FAINT_WAVE) ─────────
-  applyTeamWideFaintEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, clampStat, logs: lg, teamBuffLabel: allyLabel, enemyLabel, onDamageDealt: makeElephantCallback(en, al) });
+  applyTeamWideFaintEffect({ ability: d.ability, sourceNick: d.nick, power: m, allyTeam: al, enemyTeam: en, clampStat, logs: lg, teamBuffLabel: allyLabel, enemyLabel: enemyLabel, onDamageDealt: makeElephantCallback(en, al) });
   if (d.ability === AB.FAINT_WAVE && en.length > 0 && spawnProjectile) {
     en.forEach((e, i) => setTimeout(() => spawnProjectile(d.id, e.id, AB.FAINT_WAVE, null, true), i * 120));
   }
@@ -135,7 +135,7 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
       pet.atk   = clampStat(pet.atk   + 3 * m);
       pet.curHp = clampStat(pet.curHp + 3 * m);
     });
-    lg.push(`🦬 ${pfx}${d.nick} -> ${allyLabel}a +${3 * m}/+${3 * m}`);
+    lg.push(`🦬 ${pfx}${d.nick} -> ${allyLabel} +${3 * m}/+${3 * m}`);
   }
 
   // ── FAINT_SUMMON ───────────────────────────────────────────────────────────
@@ -196,10 +196,10 @@ function _resolveFaintCore(d, al, en, isP, killer, callbacks, labels) {
         if (rIdx >= 0) { triggerAnim?.(al[rIdx]?.id, "buff"); spawnParticles?.(al[rIdx]?.id, "buff"); }
       }
       if (d.ability === AB.FAINT_DMG) {
-        applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, targetLabel: `Tüm ${enemyLabel}a`, logSuffix: " efekti tekrar! ", onDamageDealt: makeElephantCallback(en, al) });
+        applyFaintDamageEffect({ deadUnit: d, power: m, enemyTeam: en, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, targetLabel: `Tüm ${enemyLabel}`, logSuffix: " efekti tekrar! ", onDamageDealt: makeElephantCallback(en, al) });
       }
       if (d.ability === AB.FAINT_SHIELD) {
-        applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, targetLabel: allyLabel, logSuffix: " efekti tekrar! " });
+        applyFaintShieldEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, targetLabel: `Tüm ${allyLabel}`, logSuffix: " efekti tekrar! " });
       }
       if (d.ability === AB.FAINT_COPY && al.length > 0) {
         applyFaintCopyEffect({ deadUnit: d, power: m, allyTeam: al, clampStat, logs: lg, logPrefix: `🦤 ${pfx}Dodo -> `, logSuffix: " efekti tekrar! " });
@@ -226,8 +226,8 @@ export function resolveFaint(d, al, en, isP, killer, callbacks) {
   d.isDead = true;
 
   const labels = isP
-    ? { pfx: "",        allyLabel: "oyuncu takımı", enemyLabel: "düşman takımı", summonNick: "Yavru",      summonFlip: false }
-    : { pfx: "Düşman ", allyLabel: "düşman takımı", enemyLabel: "oyuncu takımı", summonNick: "Düş.Yavru", summonFlip: false };
+    ? { pfx: "",        allyLabel: "oyuncu takımına", enemyLabel: "düşman takımına", summonNick: "Yavru",      summonFlip: false }
+    : { pfx: "Düşman ", allyLabel: "düşman takımına", enemyLabel: "oyuncu takımına", summonNick: "Düş.Yavru", summonFlip: false };
 
   return _resolveFaintCore(d, al, en, isP, killer, callbacks, labels);
 }
