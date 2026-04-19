@@ -80,6 +80,26 @@ export default function HUD({ reset }) {
           className="bg-gray-900/70 rounded-xl text-sm sm:text-base hover:bg-gray-700/80 transition-all border border-white/10 hover:border-white/30 w-[40px] h-[44px] sm:w-[48px] sm:h-[52px] flex items-center justify-center flex-shrink-0"
         >📖</button>
 
+        {/* Mod rozeti */}
+        {gameMode === "arena" && (
+          <div className="flex items-center gap-1 px-2 sm:px-3 h-[44px] sm:h-[52px] bg-gradient-to-r from-purple-900/80 to-violet-900/80 border border-purple-400/50 rounded-2xl shadow-[0_0_12px_rgba(139,92,246,0.35)]">
+            <span className="text-sm sm:text-base">🏟️</span>
+            <div className="flex flex-col leading-none">
+              <span className="text-[8px] sm:text-[9px] text-purple-300 font-black uppercase tracking-widest">MOD</span>
+              <span className="text-purple-100 font-black text-[10px] sm:text-xs">ARENA</span>
+            </div>
+          </div>
+        )}
+        {gameMode === "versus" && (
+          <div className="flex items-center gap-1 px-2 sm:px-3 h-[44px] sm:h-[52px] bg-gradient-to-r from-blue-900/80 to-cyan-900/80 border border-blue-400/50 rounded-2xl shadow-[0_0_12px_rgba(59,130,246,0.35)]">
+            <span className="text-sm sm:text-base">⚔️</span>
+            <div className="flex flex-col leading-none">
+              <span className="text-[8px] sm:text-[9px] text-blue-300 font-black uppercase tracking-widest">MOD</span>
+              <span className="text-blue-100 font-black text-[10px] sm:text-xs">VERSUS</span>
+            </div>
+          </div>
+        )}
+
         {/* Boss uyarısı */}
         {gameMode === "standard" && BOSSES[turn + 1] && (
           <div className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-red-900/80 to-orange-900/80 border border-red-500/60 rounded-2xl shadow-[0_0_12px_rgba(239,68,68,0.4)] animate-pulse">
