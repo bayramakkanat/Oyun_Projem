@@ -16,6 +16,7 @@ import FeedbackScreen from "./FeedbackScreen";
 import { hasSavedGame, loadGameState, isArenaUnlocked, shouldShowArenaIntro } from "../utils/localSave";
 import { useGameContext } from "../context/GameContext";
 import { playSound } from "../hooks/useSound";
+import { APP_FULL } from "../version";
 
 export default function MenuScreen({ onArenaStart }) {
   const { 
@@ -620,6 +621,9 @@ export default function MenuScreen({ onArenaStart }) {
         >
           💬 Geri Bildirim
         </button>
+        <span className="px-3 py-1.5 text-gray-600 text-[10px] font-mono tracking-widest select-none">
+          {APP_FULL}
+        </span>
       </div>
       {showSettingsModal && (
         <SettingsModal

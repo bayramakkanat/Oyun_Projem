@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   collection, doc, setDoc, getDoc, getDocs,
-  deleteDoc, onSnapshot, query, where,
+  deleteDoc, onSnapshot, query, where, orderBy, startAt, endAt,
   serverTimestamp
 } from "firebase/firestore";
 import { db } from "../firebase";
@@ -73,21 +73,25 @@ export function useFriends({ user, onChallengeAccepted }) {
     try {
       const searchTerm = username.toLowerCase().trim();
 
-      // Önce tam eşleşme dene
-      const snap = await getDocs(
-        query(collection(db, "usernames"), where("username", "==", searchTerm))
-      );
+      // Doküman ID'si kullanıcı adının kendisi olduğundan
+      // doğrudan doc referansı ile çekiyoruz — index gerekmez.
+      const exactDoc = await getDoc(doc(db, "usernames", searchTerm));
 
-      // Tam eşleşme yoksa prefix araması yap
-      const resultDoc = snap.empty
-        ? (await getDocs(
-            query(
-              collection(db, "usernames"),
-              where("username", ">=", searchTerm),
-              where("username", "<=", searchTerm + "\uf8ff")
-            )
-          )).docs[0]
-        : snap.docs[0];
+      // Tam eşleşme yoksa prefix araması: ID >= term && ID <= term + \uf8ff
+      // Bu sorgu doküman ID'si üzerinde çalıştığı için composite index gerekmez.
+      let resultDoc = exactDoc.exists() ? exactDoc : null;
+
+      if (!resultDoc) {
+        const prefixSnap = await getDocs(
+          query(
+            collection(db, "usernames"),
+            orderBy("__name__"),
+            startAt(searchTerm),
+            endAt(searchTerm + "\uf8ff")
+          )
+        );
+        if (!prefixSnap.empty) resultDoc = prefixSnap.docs[0];
+      }
 
       if (!resultDoc) {
         setSearchError("Kullanıcı bulunamadı.");
