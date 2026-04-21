@@ -10,7 +10,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { clearGameState } from "../utils/localSave";
+import { clearGameState, syncArenaUnlockFromFirebase } from "../utils/localSave";
 import { logError, safeNumber, saveStats } from "../utils/helpers";
 import { playSound } from "../hooks/useSound";
 import { ACHIEVEMENTS_DEF, MAX_STAT, WIN_TURN } from "../data/gameData";

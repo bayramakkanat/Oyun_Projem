@@ -20,7 +20,7 @@ import GlobalNotifications from "./GlobalNotifications";
 const DebugPanel = lazy(() => import("./DebugPanel"));
 import { playSound } from "../hooks/useSound";
 import { BOSSES, DIFFICULTY_CONFIGS } from "../data/gameData";
-import { shouldShowArenaIntro, incrementArenaIntroCount } from "../utils/localSave";
+import { shouldShowArenaIntro, incrementArenaIntroCount, isArenaUnlocked, unlockArena } from "../utils/localSave";
 
 export default function GameRouter() {
   const {
@@ -161,6 +161,8 @@ export default function GameRouter() {
 
   // zafer ekranı
   if (victory) {
+    const isFirstStandardWin = gameMode === "standard" && !isArenaUnlocked();
+    if (isFirstStandardWin) unlockArena(user?.uid);
     return (
       <VictoryScreen
         wins={wins}
@@ -171,6 +173,7 @@ export default function GameRouter() {
         onMenu={() => { reset(); setMenuView("main"); setGameStarted(false); }}
         gameMode={gameMode}
         onRematch={() => { reset(); setVersusPhase("lobby"); }}
+        isFirstStandardWin={isFirstStandardWin}
       />
     );
   }

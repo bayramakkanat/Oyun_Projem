@@ -53,14 +53,50 @@ export function hasSavedGame() {
 }
 
 // ─── Arena kilidi ────────────────────────────────────────────────────────────
+// Birincil kaynak: Firebase user_profiles/{uid}.arenaUnlocked
+// Yedek: localStorage (misafir kullanıcılar veya Firebase erişilemezse)
 const ARENA_KEY = "petgame_arena_unlocked";
 
 export function isArenaUnlocked() {
   return localStorage.getItem(ARENA_KEY) === "1";
 }
 
-export function unlockArena() {
+export function setArenaUnlockedLocal() {
   localStorage.setItem(ARENA_KEY, "1");
+}
+
+// Firebase'e Arena kilidini kaydet + localStorage'ı güncelle
+export async function unlockArena(uid) {
+  setArenaUnlockedLocal();
+  if (!uid) return;
+  try {
+    const { doc, setDoc, getFirestore } = await import("firebase/firestore");
+    const { getApp } = await import("firebase/app");
+    const db = getFirestore(getApp());
+    await setDoc(
+      doc(db, "user_profiles", uid),
+      { arenaUnlocked: true },
+      { merge: true }
+    );
+  } catch (e) {
+    console.error("Arena kilidi Firebase'e yazılamadı:", e);
+  }
+}
+
+// Kullanıcı girişinde Firebase'den Arena kilidini yükle
+export async function syncArenaUnlockFromFirebase(uid) {
+  if (!uid) return;
+  try {
+    const { doc, getDoc, getFirestore } = await import("firebase/firestore");
+    const { getApp } = await import("firebase/app");
+    const db = getFirestore(getApp());
+    const snap = await getDoc(doc(db, "user_profiles", uid));
+    if (snap.exists() && snap.data().arenaUnlocked === true) {
+      setArenaUnlockedLocal();
+    }
+  } catch (e) {
+    console.error("Arena kilidi Firebase'den okunamadı:", e);
+  }
 }
 
 // ─── Arena intro — ilk 3 girişte göster, sonra gösterme ─────────────────────

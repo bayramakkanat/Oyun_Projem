@@ -19,6 +19,7 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { logError, loadStats, setCollectionCache, initTasks } from "../utils/helpers";
+import { syncArenaUnlockFromFirebase } from "../utils/localSave";
 
 export function useAuth({
   authMode,
@@ -68,6 +69,8 @@ export function useAuth({
         } catch (err) {
           logError(err, "useAuth:loadAchievements");
         }
+        // Arena kilidini Firebase'den senkronize et
+        await syncArenaUnlockFromFirebase(u.uid);
       } else {
         setStats(loadStats(null));
         // Misafir kullanıcı için de görevleri initialize et
