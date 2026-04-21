@@ -439,7 +439,7 @@ export const TIERS = {
       img: "eagle.png",
       flip: true,
     },
-   { name: "🐃", nick: "Bufalo", atk: 4, hp: 8, cost: 5, ability: AB.HURT_BUFFALO, tier: 4, img: "buffalo.png", flip: true },
+   { name: "🐃", nick: "Bufalo", atk: 4, hp: 8, cost: 5, ability: AB.HURT_BUFFALO, tier: 4, img: "buffalo.png", flip: false },
     {
       name: "🦚",
       nick: "Tavuskuşu",
