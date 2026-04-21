@@ -71,13 +71,10 @@ export function useFriends({ user, onChallengeAccepted }) {
   setSearchError("");
   setSearchResult(null);
   try {
-    console.log("Auth durumu:", user?.uid, user?.email);
     const raw = username.trim();
     const withoutEmoji = raw.replace(/^\p{Emoji}\s*/u, "").trim();
     const searchTerm = withoutEmoji.toLowerCase();
-    console.log("getDoc öncesi, searchTerm:", searchTerm);
     const directDoc = await getDoc(doc(db, "usernames", searchTerm));
-    console.log("getDoc sonrası:", directDoc.exists());
     const resultDoc = directDoc.exists() ? directDoc : null;
 
     if (!resultDoc) {
@@ -94,7 +91,6 @@ export function useFriends({ user, onChallengeAccepted }) {
     const alreadyFriend = friends.some(f => f.uid === data.uid);
     setSearchResult({ ...data, alreadyFriend, requestSent: false });
   } catch (e) {
-    console.error("searchUser HATA:", e.code, e.message, e);
     setSearchError("Hata: " + e.message);
   } finally {
     setSearchLoading(false);
