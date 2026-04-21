@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   collection, doc, setDoc, getDoc, getDocs,
-  deleteDoc, onSnapshot, query, where, orderBy, startAt, endAt,
+  deleteDoc, onSnapshot,
   serverTimestamp
 } from "firebase/firestore";
 import { db } from "../firebase";
@@ -65,54 +65,41 @@ export function useFriends({ user, onChallengeAccepted }) {
   // DÜZELTME: Önceki versiyonda snap.empty kontrolü iki kez yazılmıştı;
   // ilk daldan erken return yapılmasına rağmen aynı kontrol tekrar ediyordu.
   // Şimdi akış tek bir yoldan ilerliyor: tam eşleşme → prefix arama → bulunamadı.
-  const searchUser = async (username) => {
-    if (!username.trim()) return;
-    setSearchLoading(true);
-    setSearchError("");
-    setSearchResult(null);
-    try {
-      const searchTerm = username.toLowerCase().trim();
+ const searchUser = async (username) => {
+  if (!username.trim()) return;
+  setSearchLoading(true);
+  setSearchError("");
+  setSearchResult(null);
+  try {
+    console.log("Auth durumu:", user?.uid, user?.email);
+    const raw = username.trim();
+    const withoutEmoji = raw.replace(/^\p{Emoji}\s*/u, "").trim();
+    const searchTerm = withoutEmoji.toLowerCase();
+    console.log("getDoc öncesi, searchTerm:", searchTerm);
+    const directDoc = await getDoc(doc(db, "usernames", searchTerm));
+    console.log("getDoc sonrası:", directDoc.exists());
+    const resultDoc = directDoc.exists() ? directDoc : null;
 
-      // Doküman ID'si kullanıcı adının kendisi olduğundan
-      // doğrudan doc referansı ile çekiyoruz — index gerekmez.
-      const exactDoc = await getDoc(doc(db, "usernames", searchTerm));
-
-      // Tam eşleşme yoksa prefix araması: ID >= term && ID <= term + \uf8ff
-      // Bu sorgu doküman ID'si üzerinde çalıştığı için composite index gerekmez.
-      let resultDoc = exactDoc.exists() ? exactDoc : null;
-
-      if (!resultDoc) {
-        const prefixSnap = await getDocs(
-          query(
-            collection(db, "usernames"),
-            orderBy("__name__"),
-            startAt(searchTerm),
-            endAt(searchTerm + "\uf8ff")
-          )
-        );
-        if (!prefixSnap.empty) resultDoc = prefixSnap.docs[0];
-      }
-
-      if (!resultDoc) {
-        setSearchError("Kullanıcı bulunamadı.");
-        return;
-      }
-
-      const data = resultDoc.data();
-      if (data.uid === user.uid) {
-        setSearchError("Kendinize istek gönderemezsiniz.");
-        return;
-      }
-
-      const alreadyFriend = friends.some(f => f.uid === data.uid);
-      const reqSnap = await getDoc(doc(db, "friend_requests", data.uid, "incoming", user.uid));
-      setSearchResult({ ...data, alreadyFriend, requestSent: reqSnap.exists() });
-    } catch (e) {
-      setSearchError("Hata: " + e.message);
-    } finally {
-      setSearchLoading(false);
+    if (!resultDoc) {
+      setSearchError("Kullanıcı bulunamadı.");
+      return;
     }
-  };
+
+    const data = resultDoc.data();
+    if (data.uid === user.uid) {
+      setSearchError("Kendinize istek gönderemezsiniz.");
+      return;
+    }
+
+    const alreadyFriend = friends.some(f => f.uid === data.uid);
+    setSearchResult({ ...data, alreadyFriend, requestSent: false });
+  } catch (e) {
+    console.error("searchUser HATA:", e.code, e.message, e);
+    setSearchError("Hata: " + e.message);
+  } finally {
+    setSearchLoading(false);
+  }
+};
 
   // ── Arkadaşlık isteği gönder ─────────────────────────────────────────────
   const sendFriendRequest = async (toUser) => {

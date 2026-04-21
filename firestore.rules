@@ -46,8 +46,10 @@ service cloud.firestore {
     }
 
     // ─── usernames ────────────────────────────────────────────────────────────
+    // read: tek doküman okuma (getDoc)
+    // list: koleksiyon sorgusu (getDocs + where) — arkadaş araması için gerekli
     match /usernames/{username} {
-      allow read: if true;
+      allow read, list: if true;
       allow create: if isLoggedIn()
                     && request.resource.data.uid == request.auth.uid;
       allow update: if isLoggedIn()
@@ -70,8 +72,6 @@ service cloud.firestore {
     }
 
     // ─── versus_rooms ─────────────────────────────────────────────────────────
-    // "waiting" odalar herkes tarafından okunabilir (lobi listesi için gerekli).
-    // Aktif oyun odaları yalnızca host ve guest tarafından okunabilir.
     match /versus_rooms/{code} {
       allow read: if isLoggedIn()
                   && (resource == null
@@ -96,8 +96,6 @@ service cloud.firestore {
     }
 
     // ─── friend_requests ─────────────────────────────────────────────────────
-    // Sadece sahibi kendi gelen isteklerini okuyabilir/silebilir.
-    // Giriş yapmış herhangi bir kullanıcı başkasına istek gönderebilir.
     match /friend_requests/{toUid}/incoming/{fromUid} {
       allow read, delete: if isOwner(toUid);
       allow create: if isLoggedIn()
@@ -105,15 +103,11 @@ service cloud.firestore {
     }
 
     // ─── friends ─────────────────────────────────────────────────────────────
-    // Her kullanıcı yalnızca kendi arkadaş listesini yönetebilir.
     match /friends/{uid}/list/{friendUid} {
       allow read, write: if isOwner(uid);
     }
 
     // ─── challenge_invites ────────────────────────────────────────────────────
-    // Davet sahibi kendi davetlerini okur/siler.
-    // Giriş yapmış herhangi bir kullanıcı davet gönderebilir ve
-    // kabul sırasında karşı tarafın davetini de silebilir.
     match /challenge_invites/{toUid}/invites/{fromUid} {
       allow read: if isOwner(toUid);
       allow create: if isLoggedIn()
@@ -123,7 +117,6 @@ service cloud.firestore {
     }
 
     // ─── feedback ─────────────────────────────────────────────────────────────
-    // Giriş yapmış kullanıcılar geri bildirim gönderebilir; okuma kapalı.
     match /feedback/{docId} {
       allow create: if isLoggedIn();
       allow read, update, delete: if false;

@@ -281,7 +281,7 @@ export default function ProfileScreen({ onClose, user, stats, onStartVersus, fri
                   value={searchInput}
                   onChange={e => { setSearchInput(e.target.value); setSearchResult(null); setSearchError(""); }}
                   onKeyDown={e => e.key === "Enter" && searchUser(searchInput)}
-                  placeholder="Kullanıcı adı ara..."
+                  placeholder="Kullanıcı adı yaz (ör: adem)..."
                   className="flex-1 bg-gray-800 border border-gray-600 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-purple-400 transition-all"
                 />
                 <button
