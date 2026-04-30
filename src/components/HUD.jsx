@@ -33,7 +33,7 @@ export default function HUD({ reset }) {
   }, [lives, gameMode]);
 
   return (
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-stretch gap-1.5 mb-3 px-1">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-stretch gap-1.5 mb-3 px-1 py-2 rounded-2xl" style={{ background: "rgba(10,12,35,0.55)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.07)" }}>
 
       {/* SOL / SATIR 1: Tur / Kademe / Rehber / Koleksiyon / Boss */}
       <div className="flex items-center gap-1.5 flex-wrap">

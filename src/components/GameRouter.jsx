@@ -232,7 +232,18 @@ export default function GameRouter() {
 
   // ana oyun ekranı
   return (
-    <div className="min-h-screen text-white p-2 flex flex-col justify-center overflow-x-hidden animated-bg">
+    <div
+      className="min-h-screen text-white p-2 flex flex-col justify-center overflow-x-hidden animated-bg"
+      style={{
+        backgroundImage: phase === "shop"
+          ? "url('/images/themes/shop_bg.png')"
+          : "url('/images/themes/battle_bg.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        transition: "background-image 0.5s ease-in-out",
+      }}
+    >
       {notifications}
       <StarField />
       {showDebugPanel && (

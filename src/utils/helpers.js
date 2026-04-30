@@ -129,8 +129,8 @@ export const getDefaultAnimalData = () => ({
 
 // ─── Günlük / Haftalık Görev Sistemi ─────────────────────────────────────────
 export const DAILY_TASKS_FIXED = [
-  { id: "daily_battles", label: "Bugün 3 savaşa gir",       target: 3, reward: 30, type: "battles" },
-  { id: "daily_wins",    label: "Bugün 3 galibiyet kazan",   target: 3, reward: 50, type: "wins"    },
+  { id: "daily_battles", label: "Arena'da 3 savaşa gir",       target: 3, reward: 30, type: "battles" },
+  { id: "daily_wins",    label: "Arena'da 3 galibiyet kazan",   target: 3, reward: 50, type: "wins"    },
 ];
 
 export const DAILY_TASKS_RANDOM = [

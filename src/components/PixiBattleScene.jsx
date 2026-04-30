@@ -155,11 +155,11 @@ useEffect(() => {
   }, [pT, eT, anims, step]);
 
   return (
-    <div className="w-full flex justify-center items-center py-6 min-h-[350px] overflow-visible perspective-[1000px]">
+    <div className="w-full flex justify-center items-end overflow-visible perspective-[1000px]">
       <div ref={cameraRef} className="flex flex-row items-center justify-center w-full gap-4 relative">
       
       {/* Oyuncu Takımı (SOL YARI) */}
-      <div className="flex items-center justify-start flex-nowrap flex-row-reverse min-h-[160px] pb-4 relative z-20 flex-1 min-w-0 overflow-visible pr-4 gap-1 sm:gap-2">
+      <div className="flex items-end justify-start flex-nowrap flex-row-reverse min-h-[160px] pb-0 relative z-20 flex-1 min-w-0 overflow-visible pr-4 gap-1 sm:gap-2">
         {pT.map((a, idx) => {
            return (
              <div key={a.id} className="flex flex-col items-center" style={{ zIndex: 50 - idx }}>
@@ -205,7 +205,7 @@ useEffect(() => {
 </div>
 
       {/* Düşman Takımı (SAĞ YARI) */}
-      <div className="flex items-center justify-start flex-nowrap min-h-[160px] pb-6 relative z-20 flex-1 min-w-0 overflow-visible pl-4 gap-1 sm:gap-2">
+      <div className="flex items-end justify-start flex-nowrap min-h-[160px] pb-0 relative z-20 flex-1 min-w-0 overflow-visible pl-4 gap-1 sm:gap-2">
         {eT.map((a, idx) => {
            return (
              <div key={a.id} className="flex flex-col items-center" style={{ zIndex: 50 - idx }}>

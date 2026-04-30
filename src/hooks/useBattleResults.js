@@ -97,8 +97,8 @@ export function useBattleResults({
         tasks.map((t) => {
           if (t.done) return t;
           let progress = t.progress;
-          if (t.type === "battles") progress += 1;
-          if (t.type === "wins" && won) progress += 1;
+          if (t.type === "battles" && mode === "arena") progress += 1;
+          if (t.type === "wins" && won && mode === "arena") progress += 1;
           if (t.type === "arena_wins" && won && mode === "arena") progress += 1;
           if (t.type === "tier1_wins" && won && updatedTeam.some((p) => p?.tier === 1)) progress += 1;
           if (t.type === "lvl2" && updatedTeam.some((p) => p?.lvl >= 2)) progress = Math.max(progress, 1);

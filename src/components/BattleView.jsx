@@ -33,7 +33,12 @@ export default function BattleView() {
   return (
     <div
       className="fixed inset-0 z-40 flex flex-col overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #1a1f4e 0%, #1e2460 30%, #1a1e55 60%, #161840 100%)" }}
+      style={{
+        backgroundImage: "url('/images/themes/battle_bg.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
     >
       {/* Üst bilgi barı */}
       <div
@@ -123,12 +128,12 @@ export default function BattleView() {
       </div>
 
       {/* Ana savaş alanı */}
-      <div className="flex-1 flex flex-col justify-center items-center relative overflow-hidden min-h-0">
-        <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.28) 0%, transparent 100%)" }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 55%, rgba(139,92,246,0.18) 0%, transparent 70%)" }} />
-        <div className="absolute bottom-1/4 left-0 w-1/2 h-56 rounded-full blur-3xl pointer-events-none" style={{ background: "radial-gradient(ellipse at right, rgba(52,211,153,0.14) 0%, transparent 70%)", animation: "groundReflection 5s ease-in-out infinite" }} />
-        <div className="absolute bottom-1/4 right-0 w-1/2 h-56 rounded-full blur-3xl pointer-events-none" style={{ background: "radial-gradient(ellipse at left, rgba(239,68,68,0.13) 0%, transparent 70%)", animation: "groundReflection 5s ease-in-out infinite", animationDelay: "1.5s" }} />
-        <div className="absolute bottom-0 inset-x-0 h-1/3 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(55,48,163,0.35), transparent)" }} />
+      <div className="flex-1 flex flex-col justify-end items-center relative overflow-hidden min-h-0">
+        <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.10) 0%, transparent 100%)" }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 55%, rgba(139,92,246,0.08) 0%, transparent 70%)" }} />
+        <div className="absolute bottom-1/4 left-0 w-1/2 h-56 rounded-full blur-3xl pointer-events-none" style={{ background: "radial-gradient(ellipse at right, rgba(52,211,153,0.06) 0%, transparent 70%)", animation: "groundReflection 5s ease-in-out infinite" }} />
+        <div className="absolute bottom-1/4 right-0 w-1/2 h-56 rounded-full blur-3xl pointer-events-none" style={{ background: "radial-gradient(ellipse at left, rgba(239,68,68,0.05) 0%, transparent 70%)", animation: "groundReflection 5s ease-in-out infinite", animationDelay: "1.5s" }} />
+        <div className="absolute bottom-0 inset-x-0 h-1/3 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(55,48,163,0.10), transparent)" }} />
         <div
           className="absolute bottom-0 w-[150%] h-[38%] pointer-events-none"
           style={{
@@ -147,18 +152,14 @@ export default function BattleView() {
             backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 44px, rgba(165,180,252,0.18) 44px, rgba(165,180,252,0.18) 45px), repeating-linear-gradient(90deg, transparent, transparent 70px, rgba(165,180,252,0.08) 70px, rgba(165,180,252,0.08) 71px)",
           }}
         />
-        <div className="relative z-10 flex flex-col items-center gap-2 w-full px-4 mt-24">
+        <div className="relative z-10 flex flex-col items-center gap-2 w-full px-4 pb-20">
           <div className="w-full max-w-2xl flex justify-between px-16 mb-2">
             <div className="flex flex-col items-center gap-2">
-              <span className="text-[11px] text-green-400 font-black uppercase tracking-widest glass-panel px-3 py-1 rounded-md" style={{ animation: "labelSlideDown 0.4s ease-out" }}>
+              <span className="text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-md bg-green-700/80 text-white" style={{ animation: "labelSlideDown 0.4s ease-out" }}>
                 Takımın
               </span>
               <span
-                className="text-base font-black text-green-300 glass-panel-strong px-4 py-1.5 rounded-full border-2 border-green-400/80 shadow-lg shadow-green-500/30 uppercase tracking-wide hover-glow"
-                style={{
-                  textShadow: "0 0 10px rgba(74,222,128,0.8), 0 0 20px rgba(74,222,128,0.5)",
-                  animation: "neonPulse 2s ease-in-out infinite"
-                }}
+                className="text-base font-black text-green-800 bg-green-100/90 px-4 py-1.5 rounded-full border-2 border-green-500/60 shadow-md uppercase tracking-wide"
               >
                 {user ? user.displayName || user.email.split("@")[0] : "TAKIMIN"}
               </span>
@@ -168,12 +169,7 @@ export default function BattleView() {
                 Rakip
               </span>
               <span
-                className="text-base font-black text-red-300 glass-panel-strong px-4 py-1.5 rounded-full border-2 border-red-400/80 shadow-lg shadow-red-500/30 hover-glow"
-                style={{
-                  textShadow: "0 0 10px rgba(248,113,113,0.8), 0 0 20px rgba(248,113,113,0.5)",
-                  animation: "neonPulse 2s ease-in-out infinite",
-                  animationDelay: "1s"
-                }}
+                className="text-base font-black text-red-800 bg-red-100/90 px-4 py-1.5 rounded-full border-2 border-red-500/60 shadow-md"
               >
                 {arenaOpponent
                   ? arenaOpponent.userName || "Rakip"
