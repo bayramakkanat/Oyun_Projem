@@ -10,7 +10,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { clearGameState, syncArenaUnlockFromFirebase } from "../utils/localSave";
+import { clearGameState } from "../utils/localSave";
 import { logError, safeNumber, saveStats } from "../utils/helpers";
 import { playSound } from "../hooks/useSound";
 import { ACHIEVEMENTS_DEF, MAX_STAT, WIN_TURN } from "../data/gameData";
@@ -52,6 +52,7 @@ export const UIProvider = ({ children }) => {
     settingsAvatar, setSettingsAvatar,
     displayName, setDisplayName,
     stats, setStats,
+    arenaUnlocked, setArenaUnlocked,
     handleGoogleLogin,
     handleEmailAuth,
     handleLogout,
@@ -269,6 +270,7 @@ export const UIProvider = ({ children }) => {
     pwr, sellP, clampStat, triggerAnim,
     unlockAchievement, showNextAchievement, updateStatsOnEnd,
     user, displayName,
+    arenaUnlocked, setArenaUnlocked,
     stats, setStats,
     showAuthModal, setShowAuthModal,
     authEmail, setAuthEmail,
@@ -288,7 +290,7 @@ export const UIProvider = ({ children }) => {
     showCollection, showDebugPanel, isDebugBattle,
     gameMode, versusPhase, versusRoom, versusAutoJoin, difficultyLevel,
     anims, isPaused, newTier, lastT, newlyOpenedSlot,
-    user, displayName, stats,
+    user, displayName, arenaUnlocked, stats,
     showAuthModal, authEmail, authPass, authMode,
     authUsername, authAvatar, showSettingsModal,
     settingsUsername, settingsAvatar,

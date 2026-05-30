@@ -19,7 +19,9 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { logError, loadStats, setCollectionCache, initTasks } from "../utils/helpers";
-import { syncArenaUnlockFromFirebase } from "../utils/localSave";
+import { isArenaUnlocked, syncArenaUnlockFromFirebase, unlockArena } from "../utils/localSave";
+
+const STANDARD_COMPLETION_ACHIEVEMENTS = ["champion", "perfect", "hard_champion", "easy_perfect"];
 
 export function useAuth({
   authMode,
@@ -34,14 +36,15 @@ export function useAuth({
   setStats,
   setDisplayName,
   setShowSettingsModal,
+  setArenaUnlocked,
 }) {
   const [authReady, setAuthReady] = useState(false);
 
   // ─── Firebase Auth gözlemcisi ─────────────────────────────────────────────
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
+      setAuthReady(false);
       setUser(u);
-      setAuthReady(true);
       if (u) {
         setShowAuthModal(false);
         const base = loadStats(u.uid);
@@ -57,7 +60,14 @@ export function useAuth({
           if (profileSnap.exists()) {
             const profileData    = profileSnap.data();
             const fbAchievements = profileData.achievements || [];
+            const completedStandard = fbAchievements.some((id) =>
+              STANDARD_COMPLETION_ACHIEVEMENTS.includes(id)
+            );
             setStats((prev) => ({ ...prev, achievements: fbAchievements }));
+            if (profileData.arenaUnlocked === true || completedStandard) {
+              await unlockArena(u.uid);
+              setArenaUnlocked(true);
+            }
             // Local cache'i güncelle (unlockAchievement kontrolü için)
             const { saveStats } = await import("../utils/helpers");
             await saveStats({ ...base, achievements: fbAchievements }, u.uid);
@@ -70,12 +80,15 @@ export function useAuth({
           logError(err, "useAuth:loadAchievements");
         }
         // Arena kilidini Firebase'den senkronize et
-        await syncArenaUnlockFromFirebase(u.uid);
+        const unlockedFromFirebase = await syncArenaUnlockFromFirebase(u.uid);
+        setArenaUnlocked(unlockedFromFirebase || isArenaUnlocked());
       } else {
         setStats(loadStats(null));
+        setArenaUnlocked(isArenaUnlocked());
         // Misafir kullanıcı için de görevleri initialize et
         initTasks(null);
       }
+      setAuthReady(true);
     });
     return () => unsub();
   }, []);

@@ -20,7 +20,7 @@ import GlobalNotifications from "./GlobalNotifications";
 const DebugPanel = lazy(() => import("./DebugPanel"));
 import { playSound } from "../hooks/useSound";
 import { BOSSES, DIFFICULTY_CONFIGS } from "../data/gameData";
-import { shouldShowArenaIntro, incrementArenaIntroCount, isArenaUnlocked, unlockArena } from "../utils/localSave";
+import { shouldShowArenaIntro, incrementArenaIntroCount, unlockArena } from "../utils/localSave";
 
 export default function GameRouter() {
   const {
@@ -43,6 +43,7 @@ export default function GameRouter() {
     showDebugPanel, setShowDebugPanel,
     lastError, setLastError,
     achievementPopup,
+    arenaUnlocked, setArenaUnlocked,
     soundEnabled, setSoundEnabled,
     user, displayName, stats,
     difficultyLevel, setDifficultyLevel,
@@ -63,6 +64,18 @@ export default function GameRouter() {
 
   const [versusIntroRoom, setVersusIntroRoom] = useState(null);
   const [showArenaIntro, setShowArenaIntro]   = useState(false);
+  const [arenaUnlockedThisWin, setArenaUnlockedThisWin] = useState(false);
+
+  useEffect(() => {
+    if (victory && gameMode === "standard" && !arenaUnlocked) {
+      setArenaUnlockedThisWin(true);
+      setArenaUnlocked(true);
+      unlockArena(user?.uid);
+    }
+    if (!victory) {
+      setArenaUnlockedThisWin(false);
+    }
+  }, [victory, gameMode, arenaUnlocked, setArenaUnlocked, user?.uid]);
 
   const notifications = (
     <GlobalNotifications
@@ -161,8 +174,7 @@ export default function GameRouter() {
 
   // zafer ekranı
   if (victory) {
-    const isFirstStandardWin = gameMode === "standard" && !isArenaUnlocked();
-    if (isFirstStandardWin) unlockArena(user?.uid);
+    const isFirstStandardWin = gameMode === "standard" && (!arenaUnlocked || arenaUnlockedThisWin);
     return (
       <VictoryScreen
         wins={wins}

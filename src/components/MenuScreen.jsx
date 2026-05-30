@@ -13,7 +13,7 @@ import CollectionScreen from "./CollectionScreen";
 import TasksScreen from "./TasksScreen";
 import ProfileScreen from "./ProfileScreen";
 import FeedbackScreen from "./FeedbackScreen";
-import { hasSavedGame, loadGameState, isArenaUnlocked, shouldShowArenaIntro } from "../utils/localSave";
+import { hasSavedGame, loadGameState, shouldShowArenaIntro } from "../utils/localSave";
 import { useGameContext } from "../context/GameContext";
 import { playSound } from "../hooks/useSound";
 import { APP_FULL } from "../version";
@@ -29,12 +29,13 @@ export default function MenuScreen({ onArenaStart }) {
     setSettingsUsername, settingsAvatar, setSettingsAvatar, 
     handleEmailAuth, handleGoogleLogin, handleLogout, handleUpdateProfile, 
     friendsData,
+    arenaUnlocked,
     setVersusPhase, reset, setGameStarted, unlockAchievement, 
     setVersusAutoJoin, restoreGame, setShowDebugPanel 
   } = useGameContext();
 
   const onStart = () => {
-    if (gameMode === "arena" && !isArenaUnlocked()) return;
+    if (gameMode === "arena" && !arenaUnlocked) return;
     if (gameMode === "versus") {
       setVersusPhase("lobby");
     } else if (gameMode === "arena") {
@@ -398,7 +399,7 @@ export default function MenuScreen({ onArenaStart }) {
               <div className="grid grid-cols-1 gap-3">
                 {Object.entries(GAME_MODES).map(([key, mode]) => {
                   const isLocked = mode.requiresAuth && !user;
-                  const isArenaLocked = key === "arena" && !isArenaUnlocked();
+                  const isArenaLocked = key === "arena" && !arenaUnlocked;
                   const isSelected = gameMode === key;
                   return (
                     <button

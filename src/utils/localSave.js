@@ -85,7 +85,7 @@ export async function unlockArena(uid) {
 
 // Kullanıcı girişinde Firebase'den Arena kilidini yükle
 export async function syncArenaUnlockFromFirebase(uid) {
-  if (!uid) return;
+  if (!uid) return false;
   try {
     const { doc, getDoc, getFirestore } = await import("firebase/firestore");
     const { getApp } = await import("firebase/app");
@@ -93,6 +93,7 @@ export async function syncArenaUnlockFromFirebase(uid) {
     const snap = await getDoc(doc(db, "user_profiles", uid));
     if (snap.exists() && snap.data().arenaUnlocked === true) {
       setArenaUnlockedLocal();
+      return true;
     }
   } catch (e) {
     console.error("Arena kilidi Firebase'den okunamadı:", e);

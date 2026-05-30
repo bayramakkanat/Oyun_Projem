@@ -1,4 +1,5 @@
 import { loadStats } from "../utils/helpers";
+import { isArenaUnlocked } from "../utils/localSave";
 import React, { createContext, useContext, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [settingsAvatar, setSettingsAvatar] = useState("🐺");
   const [displayName, setDisplayName] = useState("");
   const [stats, setStats] = useState(loadStats);
+  const [arenaUnlocked, setArenaUnlocked] = useState(isArenaUnlocked);
 
   const {
     authReady,
@@ -37,6 +39,7 @@ export const AuthProvider = ({ children }) => {
     setDisplayName,
     setShowSettingsModal,
     setStats,
+    setArenaUnlocked,
   });
 
   return (
@@ -54,6 +57,7 @@ export const AuthProvider = ({ children }) => {
       settingsAvatar, setSettingsAvatar,
       displayName, setDisplayName,
       stats, setStats,
+      arenaUnlocked, setArenaUnlocked,
       handleGoogleLogin,
       handleEmailAuth,
       handleLogout,
